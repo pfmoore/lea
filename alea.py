@@ -133,19 +133,20 @@ class Alea(Lea):
         return tuple(self._random(integral) for i in xrange(n))
 
     def randomSuite(self,n=None,sorted=False):
-        ''' if n=None, returns a tuple with all the values of the distribution,
+        ''' if n is None, returns a tuple with all the values of the distribution,
             in a random order respecting the probabilities
             (the higher count of a value, the most likely the value will be in the
              beginning of the sequence)
-            if n>0, then only n different values will be drawn
+            if n > 0, then only n different values will be drawn
             if sorted is True, then the returned tuple is sorted
         '''
         if n is None:
            n = len(self._vps)
         lea = self
         res = []
-        while n:
+        while n > 0:
             n -= 1
+            lea = lea.getAlea()
             x = lea.random()
             res.append(x)
             lea = lea.knowing(lea!=x)
