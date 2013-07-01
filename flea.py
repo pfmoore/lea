@@ -47,8 +47,10 @@ class Flea(Lea):
         return Flea(f,Clea(*args))
     
     def clone(self):
-        return Flea(self._f,self._cleaArgs)
-
+        flea = Flea(self._f,self._cleaArgs)
+        flea._alea = self._alea
+        return flea
+    
     def reset(self):
         Lea.reset(self)
         self._cleaArgs.reset()

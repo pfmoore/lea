@@ -28,6 +28,14 @@ from flea import Flea
 
 class Tlea(Lea):
 
+    '''
+    Tlea is a Lea subclass.
+    A Tlea instance represents a probability distribution obtained by applying a given 2-ary function
+    repeatedly on given Lea instancea, a given number of times. It allows to avoid tedious
+    typing or explcit loops; also, it makes the calculation faster by using a dichotomic algorithm.
+    '''
+    
+
     __slots__ = ('_op','_lea1','_nTimes')
 
     def __init__(self,op,lea1,nTimes=2):
@@ -38,6 +46,15 @@ class Tlea(Lea):
         if nTimes <= 0:
             raise Exception("Tlea requires that nTimes > 0")
 
+    def reset(self):
+        Lea.reset(self)
+        self._lea1.reset()
+
+    def clone(self):
+        tlea = Tlea(self._op,self._lea1,self._nTimes)
+        tlea._alea = self._alea
+        return tlea
+    
     def _genVPs(self,condLea,nTimes=None):
         if nTimes is None:
             nTimes = self._nTimes
@@ -53,10 +70,10 @@ class Tlea(Lea):
             return iter(tuple(self._lea1.genVPs(condLea)))
         # nTimes >= 2
         nTimes1 = nTimes / 2
-        alea = Tlea(self._op,self._lea1,nTimes1).getAlea(condLea)
+        alea = Tlea(self._op,self._lea1,nTimes1).getAlea()
         flea = Flea.build(self._op,(alea,alea.clone()))
         if nTimes%2 == 1:
-            # nTimes is odd : nTimes = 2*nTimes + 1
-            # operate one more lea1 on the current result 
+            # nTimes is odd : nTimes = 2*nTimes1 + 1
+            # operate with one more lea1 on the current result 
             flea = Flea.build(self._op,(flea,self._lea1))
-        return flea._genVPs(None)
+        return flea._genVPs(condLea)

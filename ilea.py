@@ -26,6 +26,12 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 from lea import Lea
 
 class Ilea(Lea):
+    
+    '''
+    Ilea is a Lea subclass defined.
+    An Ilea instance represents a distribution obtained by constraining a given
+    Lea instance by a given boolean condition.
+    '''
 
     __slots__ = ('_lea1','_condLea')
 
@@ -35,7 +41,9 @@ class Ilea(Lea):
         self._condLea = condLea
 
     def clone(self):
-        return Ilea(self._lea1,self._condLea)
+        ilea = Ilea(self._lea1,self._condLea)
+        ilea._alea = self._alea
+        return ilea
 
     def reset(self):
         Lea.reset(self)

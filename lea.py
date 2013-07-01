@@ -29,6 +29,7 @@ from math import log, sqrt
 
 
 class Lea(object):
+    
     '''
     Lea is an abstract class representing discrete probability distributions.
 
@@ -116,7 +117,7 @@ class Lea(object):
     repeatedly on given Lea instancea, a given number of times. It allows to avoid tedious
     typing or explcit loops; also, it makes the calculation faster by using a dichotomic algorithm.
 
-    An Ilea instance represents a distribution obtained by constraining a given Lea by
+    An Ilea instance represents a distribution obtained by constraining a given Lea instance by
     a given boolean condition.
 
     '''
@@ -403,10 +404,14 @@ class Lea(object):
         ''' 
         '''
         if self._val is not None:
+            # distribution already bound to a value
+            # if such binding is compatible with the given condition
+            # then it is returned as a certain distribution
             if condLea is None or condLea.isFeasible():
                 yield (self._val,1)
         else:
-            if self._alea is None:
+            # distribution not yet bound to a value
+            if condLea is not None or self._alea is None:
                 lea = self
             else:
                 lea = self._alea
@@ -416,8 +421,9 @@ class Lea(object):
                     if condLea is None or condLea.isFeasible():
                         yield (v,p)
                     self._val = None
-            finally:
+            except:
                 self.reset()
+                raise
 
     def isFeasible(self):
         ''' 
@@ -440,14 +446,15 @@ class Lea(object):
         '''
         return self.getAlea().__str__()
          
-    def getAlea(self,condLea=None):
+    def getAlea(self):
         ''' 
         '''
         if self._alea is None:
             try:
-                self._alea = Alea.fromValFreqs(*(self.genVPs(condLea)))
-            finally:
+                self._alea = Alea.fromValFreqs(*(tuple(self.genVPs(None))))
+            except:
                 self.reset()
+                raise
         return self._alea
 
     __repr__ = __str__

@@ -29,7 +29,11 @@ from operator import mul
 
 
 class Clea(Lea):
-    ''' cartesian product
+    '''
+    Clea is a Lea subclass.
+    A Clea instance is defined by a given sequence (L1,...Ln) of Lea instances; it represents
+    a probability distribution made up from the cartesian product L1 x ... x Ln; it associates
+    each (v1,...,vn) tuple with probability product P1(v1)...Pn(vn).
     '''
     
     __slots__ = ('_leaArgs',)
@@ -44,7 +48,9 @@ class Clea(Lea):
             leaArg.reset()
 
     def clone(self):
-        return Clea(*self._leaArgs)
+        clea = Clea(*self._leaArgs)
+        clea._alea = self._alea
+        return clea
 
     @staticmethod
     def prod(arg,gs):

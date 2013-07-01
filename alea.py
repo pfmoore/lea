@@ -28,14 +28,19 @@ from random import randrange
 from math import log
 
 class Alea(Lea):
+    
     '''
-        Lea with given distribution
+    Alea is a Lea subclass defined by a a given explicit distribution.
+    An Alea instance is defined by explicit value-probability pairs. Each probability is
+    defined as a positive "counter" integer, without upper limit. The actual
+    probability is calculated by dividing the counter by the sum of all counters.
     '''
 
     __slots__ = ('_vps','_count')
     
     def __init__(self,vps):
         Lea.__init__(self)
+        self._alea = self
         self._vps = tuple(vps)
         self._count = sum(p for (v,p) in self._vps)
 
