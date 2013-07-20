@@ -50,14 +50,22 @@ class Alea(Lea):
         if count == 0:
             raise Exception("No value")
         gcd = count
-        for v in probDict.itervalues():
-            if gcd == 1:
-                break
-            while gcd != v:
-                if gcd > v:
-                    gcd -= v
-                else:
-                    v -= gcd
+        impossibleValues = []
+        for (v,p) in probDict.iteritems():
+            if p < 0:
+                raise Exception("ERROR: negative probability")
+            if p == 0:
+                impossibleValues.append(v)
+            else:
+                if gcd == 1:
+                    break
+                while gcd != p:
+                    if gcd > p:
+                        gcd -= p
+                    else:
+                        p -= gcd
+        for impossibleValue in impossibleValues:
+            del probDict[impossibleValue]
         try:            
             return Alea(sorted((v,p/gcd) for (v,p) in probDict.iteritems()))
         except TypeError:
