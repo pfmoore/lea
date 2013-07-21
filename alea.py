@@ -157,7 +157,7 @@ class Alea(Lea):
             lea = lea.getAlea()
             x = lea.random()
             res.append(x)
-            lea = lea.knowing(lea!=x)
+            lea = lea.given(lea!=x)
         if sorted:
             res.sort()
         return tuple(res)
