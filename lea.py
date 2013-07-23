@@ -585,7 +585,12 @@ class Lea(object):
         ''' 
         '''
         return self.getAlea().__str__()
-         
+
+    def asPct(self,nbDecimals=1):
+        '''
+        '''
+        return self.getAlea().asPct(nbDecimals)
+    
     def getAlea(self):
         ''' 
         '''

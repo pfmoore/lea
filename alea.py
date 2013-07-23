@@ -96,6 +96,12 @@ class Alea(Lea):
         fmt = ("%%%ds : %%%dd" % (vm,pm)) + den
         return "\n".join(fmt%vp for vp in self._vps)
 
+    def asPct(self,nbDecimals=1):
+        vm = max(len(str(v)) for (v,p) in self._vps)
+        fmt = "%%%ds : %%%d.%df %%%%" % (vm,4+nbDecimals,nbDecimals)
+        count = float(self._count)
+        return "\n".join(fmt%(v,100.*p/count) for (v,p) in self._vps)
+
     def clone(self):
         return Alea(self._vps)
 
