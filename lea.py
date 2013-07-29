@@ -25,7 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 import operator
 from random import randrange
-from math import log, sqrt
+from math import log, sqrt, exp
 
 
 class Lea(object):
@@ -134,8 +134,27 @@ class Lea(object):
 
     def reset(self):
         ''' remove current binding
+            the method calls _reset() method implmented in Lea subclasses
         '''
         self._val = None
+        self._reset()
+         
+    def clone(self,cloneTable=None):
+        ''' return a deep copy of current Lea, without any binding;
+            if the lea tree contains multiple references to the same Lea instance,
+            then it is cloned only once and the references are copied in the cloned tree
+            (the cloneTable dictionary serves this purpose)
+            the method calls _clone() method implmented in Lea subclasses
+        '''
+        if cloneTable is None:
+            cloneTable = {}
+        clonedLea = cloneTable.get(self)
+        if clonedLea is None:
+            clonedLea = self._clone(cloneTable)
+            cloneTable[self] = clonedLea
+            if self._alea is not None:
+                clonedLea._alea = self._alea.clone(cloneTable)
+        return clonedLea
 
     @staticmethod
     def fromVals(*vals):
@@ -172,7 +191,27 @@ class Lea(object):
         ''' static method, returning an Alea instance representing a boolean
             distribution such that prob(True) = pNum/pDen
         '''
-        return Lea.fromValFreqs((True,pNum),(False,pDen-pNum))
+        return Alea.fromValFreqs((True,pNum),(False,pDen-pNum))
+
+    @staticmethod
+    def poisson(mean):
+        ''' static method, returning a Lea instance representing a 
+            Poisson probability distribution having the given mean
+        '''
+        from sys import maxint
+        valFreqs = []
+        p = exp(-mean)
+        v = 0
+        t = 0.
+        while True:
+            n = int(p*maxint)
+            if n <= 0:
+                break
+            valFreqs.append((v,n))
+            t += p
+            v += 1
+            p = (p*mean) / v
+        return Alea.fromValFreqs(*valFreqs)
 
     def withProb(self,condLea,pNum,pDen):
         ''' returns a new Alea instance from current distribution,
@@ -200,22 +239,6 @@ class Lea(object):
         # depending on the truth value of condLea on each value
         w2 = dict((cg,w[cg]*(m/ecg)) for (cg,ecg) in e.iteritems())
         return Alea.fromValFreqs(*((v,p*w2[condLea.isTrue()]) for (v,p) in self.genVPs(None)))
-
-    '''
-    a1 0   0       3/7  0    3      15     30     15
-    a2 0   0            0                         15
-    a3 2   2/5     4/7  2    4      20     40     16
-    a4 3   3/5          3                         24
-
-                                           70     70
-    70 = pDen *  n * nb0
-
-    n * pNum                  if T
-    nb0 * ni * (pDen-pNum)    if F
-
-
-    '''
-
 
     def withCondProb(self,condLea,givenCondLea,pNum,pDen):
         ''' returns a new Alea instance from current distribution,
@@ -311,8 +334,11 @@ class Lea(object):
         return Flea.build(f,(self,)+args)
 
     def asJoint(self,*attrNames):
-        return Olea(attrNames,self)
-              
+        return Olea(attrNames,self)  
+          
+    def draw(self,nbValues):
+        return Dlea(self,nbValues)
+      
     @staticmethod
     def coerce(value):
         ''' return a Lea instance corresponding the given value:
@@ -366,6 +392,18 @@ class Lea(object):
             if v1 == val:
                 p += p1
         return (p,count) 
+
+    def isAnyOf(self,*values):
+        ''' return a boolean probability distribution
+            indicating the probability that a value is any of the given values 
+        '''
+        return Flea.build(lambda v: v in values,(self,))
+
+    def isNoneOf(self,*values):
+        ''' return a boolean probability distribution
+            indicating the probability that a value is none of the given values 
+        '''
+        return Flea.build(lambda v: v not in values,(self,))
 
     def __call__(self,*args):
         ''' 
@@ -618,7 +656,7 @@ class Lea(object):
         '''
         return self.getAlea().random(n)
 
-    def randomSuite(self,n=None,sorted=False):
+    def randomDraw(self,n=None,sorted=False):
         ''' if n=None, returns a tuple with all the values of the distribution,
             in a random order respecting the probabilities
             (the higher count of a value, the most likely the value will be in the
@@ -626,7 +664,7 @@ class Lea(object):
             if n>0, then only n different values will be drawn
             if sorted is True, then the returned tuple is sorted
         '''
-        return self.getAlea().randomSuite(n,sorted)
+        return self.getAlea().randomDraw(n,sorted)
 
     def stdev(self):
         ''' returns the standard deviation of the distribution
@@ -652,6 +690,7 @@ class Lea(object):
 from alea import Alea
 from clea import Clea
 from tlea import Tlea
+from dlea import Dlea
 from ilea import Ilea
 from flea import Flea
 from olea import Olea

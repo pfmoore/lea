@@ -34,7 +34,6 @@ class Tlea(Lea):
     repeatedly on given Lea instancea, a given number of times. It allows to avoid tedious
     typing or explcit loops; also, it makes the calculation faster by using a dichotomic algorithm.
     '''
-    
 
     __slots__ = ('_op','_lea1','_nTimes')
 
@@ -46,14 +45,11 @@ class Tlea(Lea):
         if nTimes <= 0:
             raise Exception("Tlea requires that nTimes > 0")
 
-    def reset(self):
-        Lea.reset(self)
+    def _reset(self):
         self._lea1.reset()
 
-    def clone(self):
-        tlea = Tlea(self._op,self._lea1,self._nTimes)
-        tlea._alea = self._alea
-        return tlea
+    def _clone(self,cloneTable):
+        return Tlea(self._op,self._lea1.clone(cloneTable),self._nTimes)
     
     def _genVPs(self,condLea,nTimes=None):
         if nTimes is None:

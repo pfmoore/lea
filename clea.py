@@ -29,6 +29,7 @@ from operator import mul
 
 
 class Clea(Lea):
+    
     '''
     Clea is a Lea subclass.
     A Clea instance is defined by a given sequence (L1,...Ln) of Lea instances; it represents
@@ -42,15 +43,12 @@ class Clea(Lea):
         Lea.__init__(self)
         self._leaArgs = tuple(Lea.coerce(arg) for arg in args)
 
-    def reset(self):
-        Lea.reset(self)
+    def _reset(self):
         for leaArg in self._leaArgs:
             leaArg.reset()
 
-    def clone(self):
-        clea = Clea(*self._leaArgs)
-        clea._alea = self._alea
-        return clea
+    def _clone(self,cloneTable):
+        return Clea(*(leaArg.clone(cloneTable) for leaArg in self._leaArgs))
 
     @staticmethod
     def prod(arg,gs):

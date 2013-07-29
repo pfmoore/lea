@@ -28,7 +28,7 @@ from lea import Lea
 class Ilea(Lea):
     
     '''
-    Ilea is a Lea subclass defined.
+    Ilea is a Lea subclass.
     An Ilea instance represents a distribution obtained by constraining a given
     Lea instance by a given boolean condition.
     '''
@@ -40,16 +40,13 @@ class Ilea(Lea):
         self._lea1 = lea1
         self._condLea = condLea
 
-    def clone(self):
-        ilea = Ilea(self._lea1,self._condLea)
-        ilea._alea = self._alea
-        return ilea
-
-    def reset(self):
-        Lea.reset(self)
+    def _reset(self):
         self._lea1.reset()
         if self._condLea is not None:
             self._condLea.reset()
+
+    def _clone(self,cloneTable):
+        return Ilea(self._lea1.clone(cloneTable),self._condLea.clone(cloneTable))
 
     def _genVPs(self,condLea):
         if condLea is None:

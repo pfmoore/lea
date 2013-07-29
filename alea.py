@@ -48,7 +48,7 @@ class Alea(Lea):
     def fromValFreqsDict(probDict):
         count = sum(probDict.itervalues())
         if count == 0:
-            raise Exception("No value")
+            raise Exception("ERROR: no value")
         gcd = count
         impossibleValues = []
         for (v,p) in probDict.iteritems():
@@ -56,14 +56,11 @@ class Alea(Lea):
                 raise Exception("ERROR: negative probability")
             if p == 0:
                 impossibleValues.append(v)
-            else:
-                if gcd == 1:
-                    break
-                while gcd != p:
+            elif gcd > 1:
+                while p != 0:
                     if gcd > p:
-                        gcd -= p
-                    else:
-                        p -= gcd
+                        (gcd,p) = (p,gcd)
+                    p %= gcd
         for impossibleValue in impossibleValues:
             del probDict[impossibleValue]
         try:            
@@ -102,9 +99,12 @@ class Alea(Lea):
         count = float(self._count)
         return "\n".join(fmt%(v,100.*p/count) for (v,p) in self._vps)
 
-    def clone(self):
-        return Alea(self._vps)
+    def _reset(self):
+        pass
 
+    def _clone(self,cloneTable):
+        return Alea(self._vps)
+        
     def _genVPs(self,condLea):
         for vp in self._vps:
             #if condLea is None or condLea.isFeasible():
@@ -146,7 +146,7 @@ class Alea(Lea):
             return self._random(integral)
         return tuple(self._random(integral) for i in xrange(n))
 
-    def randomSuite(self,n=None,sorted=False):
+    def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
             in a random order respecting the probabilities
             (the higher count of a value, the most likely the value will be in the
@@ -181,10 +181,11 @@ class Alea(Lea):
                 res = p * (x-x0)
             else:
                 res += p * (x-x0)
-        try:
-            x0 += res / float(self._count)
-        except:
-            x0 += res / self._count
+        if res is not None:
+            try:
+                x0 += res / float(self._count)
+            except:
+                x0 += res / self._count
         return x0
    
     

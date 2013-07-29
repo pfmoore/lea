@@ -46,14 +46,11 @@ class Flea(Lea):
     def build(f,args):
         return Flea(f,Clea(*args))
     
-    def clone(self):
-        flea = Flea(self._f,self._cleaArgs)
-        flea._alea = self._alea
-        return flea
-    
-    def reset(self):
-        Lea.reset(self)
+    def _reset(self):
         self._cleaArgs.reset()
+
+    def _clone(self,cloneTable):
+        return Flea(self._f,self._cleaArgs.clone(cloneTable))    
 
     def _genVPs(self,condLea):
         f = self._f

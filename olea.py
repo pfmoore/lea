@@ -2,7 +2,9 @@ from itertools import izip
 from flea import Flea
 
 class Olea(Flea):
-    ''' joint distribution
+    
+    '''
+    joint distribution
     '''
 
     __slots__ = ('_lea1','_attrNames','_class')
@@ -15,10 +17,8 @@ class Olea(Flea):
         self._buildClass()
         Flea.__init__(self,self._class,lea1)
 
-    def clone(self):
-        olea = Olea(self.attrNames,self._cleaArgs)
-        olea._alea = self._alea
-        return olea
+    def _clone(self,cloneTable):
+        return Olea(self._attrNames,self._cleaArgs.clone(cloneTable))
 
     def _buildClass(self):
         classAttrDict = dict(('__maxLength'+attrName,0) for attrName in self._attrNames)
