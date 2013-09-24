@@ -31,9 +31,9 @@ from operator import mul
 class Clea(Lea):
     
     '''
-    Clea is a Lea subclass.
-    A Clea instance is defined by a given sequence (L1,...Ln) of Lea instances; it represents
-    a probability distribution made up from the cartesian product L1 x ... x Ln; it associates
+    Clea is a Lea subclass, which instance is defined by a given sequence (L1,...Ln)
+    of Lea instances; it represents a probability distribution made up from the
+    cartesian product L1 x ... x Ln; assuming independency of events, it associates
     each (v1,...,vn) tuple with probability product P1(v1)...Pn(vn).
     '''
     
@@ -51,16 +51,13 @@ class Clea(Lea):
         return Clea(*(leaArg.clone(cloneTable) for leaArg in self._leaArgs))
 
     @staticmethod
-    def prod(arg,gs):
+    def prod(gs):
         if len(gs) == 0:
             return iter(((),))
-        return (xs+(x,) for xs in Clea.prod(arg,gs[:-1]) for x in gs[-1](arg))
+        return (xs+(x,) for xs in Clea.prod(gs[:-1]) for x in gs[-1]())
 
-    def _genVPs(self,condLea):
-        ''' generate tuples
-        '''
-        for vps in Clea.prod(condLea,tuple(leaArg.genVPs for leaArg in self._leaArgs)):
-            if condLea is None or condLea.isFeasible():
-                v = tuple(v for (v,p) in vps)
-                p = reduce(mul,(p for (v,p) in vps),1)
-                yield (v,p)
+    def _genVPs(self):
+        for vps in Clea.prod(tuple(leaArg.genVPs for leaArg in self._leaArgs)):
+            v = tuple(v for (v,p) in vps)
+            p = reduce(mul,(p for (v,p) in vps),1)
+            yield (v,p)

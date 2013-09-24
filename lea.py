@@ -33,20 +33,24 @@ class Lea(object):
     '''
     Lea is an abstract class representing discrete probability distributions.
 
-    Each instance of Lea subclasses (called simply a "Lea instance" in the following)
+    Each instance of concrete Lea subclasses (called simply a "Lea instance" in the following)
     represents a discrete probability distribution, which associates each value of a set of
-    values to the probability that such value occurs.
+    values with the probability that such value occurs.
 
-    Distribution can be defined by enumerating values, their occurence counts
-    being translated in probabilities.
+    A Lea instance can be defined by a sequence of (value,weight), giving the probability weight 
+    of each value. Such probability weights are natural numbers. The actual probability of a
+    given value can be calculated by dividing a weight by the sum of all weights. 
+     
+    A Lea instance can be defined also by a sequence of values, their probability weight being 
+    their number of occurences in the sequence.
 
-    Distribution objects can be combined in arithmetic expressions resulting in new
-    distribution objects, with the following rules.
+    Lea instances can be combined in arithmetic expressions resulting in new Lea instances, by
+    obeying the following rules:
 
-    - Distribution objects can be added, subtracted, multiplied and divided together,
+    - Lea instances can be added, subtracted, multiplied and divided together,
     through +, -, *, / operators. The resulting dstribution's values and probabilities
     are determined by combination of operand's values with a sum weighted by probability
-    products (operation known as 'convolution', for the adition case).
+    products (the operation known as 'convolution', for the adition case).
 
     - Other supported binary arithmetic operators are power (**), modulo (%) and
     divmod function.
@@ -56,95 +60,89 @@ class Lea(object):
     - The Python's operator precedence rules, with the parenthesis overrules, are fully
     respected.
 
-    - Any object X, which is not a distribution object, involved as argument of an
-    expression containing a distribution object, is coerced to a distribution object
+    - Any object X, which is not a Lea instance, involved as argument of an
+    expression containing a Lea instance, is coerced to a Lea instance
     having X has sole value, with probabilty 1 (i.e. occurrence of X is certain).
 
-    - Distribution objects can be compared together, through ==, !=, <, <=, >, >= operators.
+    - Lea instances can be compared together, through ==, !=, <, <=, >, >= operators.
     The resulting distribution is a boolean distribution, giving probability of True result
-    and (complement) probability of False result.
+    and complementary probability of False result.
 
     - Boolean distributions can be combined together with AND, OR, XOR, through &, |, ^
     operators
 
-    - WARNING: the and, or, not, ~ operators shall not be used because they do not return
+    - WARNING: the Python's and, or, not, operators shall not be used because they do not return
     any sensible result. Replace:
            a and b    by    a & b
            a or b     by    a | b
-           not a      by    True ^ a
-           ~ a        by    True ^ a
-    Note that the "True ^ a"  expression could also be replaced by "a == False"
+           not a      by    ~ a
 
-    - WARNING: the augmented comparisons (a < b < c) shall not be used.; they do
+    - WARNING: in boolean expression invloving arithmetic comparisons, the parenthesis
+    shall be used, e.g. (a < b) & (b < c)
+
+    - WARNING: the augmented comparison (a < b < c) expression shall not be used.; it does
     not return any sensible result (reason: it has the same limtation as 'and' operator).
 
-    - Each occurence of a given variable referring to a distribution object in an expression
-    represents an independent random variable. For example, if d is a distribution
-    representing the throwing of one die, the expression 'd+d' is the distribution of
-    the sum of two thrown dice, although '2*d' is the distribution of one thrown die
-    multiplied by 2 (which is not the same). 
-
-    Distribution objects can be used to generate random values, respecting the given probabilities.
+    Lea instances can be used to generate random values, respecting the given probabilities.
             
-    There are four concrete subclasses to Lea, namely: Alea, Clea, Flea, Tlea and Ilea.
-    Here is an overview on these classes, with their relationships.
+    There are six concrete subclasses to Lea, namely: Alea, Clea, Plea, Flea, Tlea, Ilea, Olea and Dlea.
+    
+    Each subccass represents a special kind of discrete probability distribution, with its own data
+    or with references to other Lea instances to be combined together through a given operation.
+    Each subclass defines what are the (value,probability) pairs or how they can be generated. 
+    The Lea class acts as a facade, by providing different methods to instantiate these subclasses,
+    so it is usually not needed to instiantiate them explicitely. 
+    
+    Here is an overview on these subclasses, with their relationships.
 
-    An Alea instance is defined by explicit value-probability pairs. Each probability is
+    - An Alea instance is defined by explicit value-probability pairs. Each probability is
     defined as a positive "counter" integer, without upper limit. The actual
     probability is calculated by dividing the counter by the sum of all counters.
 
-    Instances of other Lea subclasses represent probability distributions obtained by transformation
-    of existing Lea instance(s), assuming that represented events are independent.
-    These form recursive tree structures having Alea instances as leaves.
-    These use lazy evaluation: actual value-probability pairs
-    are calculated only at the time they are required (e.g. display); then these
-    are cached in an Alea instance, instance attribute of Lea, to speed up next accesses. 
+    Instances of other Lea subclasses represent probability distributions obtained by
+    operations done on existing Lea instance(s), assuming that represented events are independent.
+    Any instance of such subclasses forms a tree structure, having other Lea instances as nodes
+    and Alea instances as leaves. These use lazy evaluation: actual value-probability pairs are
+    calculated only at the time they are required (e.g. display); then, these are cached in an
+    Alea instance, itself attribute of the Lea instance, to speed up next accesses.
+    
+    Here is a brief presentation of these subclasses: 
 
-    A Clea instance is defined by a given sequence (L1,...Ln) of Lea instances; it represents
-    a probability distribution made up from the cartesian product L1 x ... x Ln; it associates
-    each (v1,...,vn) tuple with probability product P1(v1)...Pn(vn).
-
-    A Flea instance represents a probability distribution obtained by applying a given n-ary function f on
-    arguments taking the values of a given sequence (L1,...Ln) of Lea instances. It is able
-    also to treat, in place of a single function f, a distribution having n-ary functions
-    as values. The function(s) and arguments are processed with a Clea instance to
-    perform the required cartesian product between functions and arguments.
-    As special cases, the arithmetic operators used on Lea instance are translated 
-    into Flea instances with the corresponding functions of Python operator module
-    (add, sub, mul, ...).
-
-    A Tlea instance represents a probability distribution obtained by applying a given 2-ary function
-    repeatedly on given Lea instancea, a given number of times. It allows to avoid tedious
-    typing or explcit loops; also, it makes the calculation faster by using a dichotomic algorithm.
-
-    An Ilea instance represents a distribution obtained by constraining a given Lea instance by
-    a given boolean condition.
+    - the Clea subclass provides the cartesian product of a given sequence of Lea instances;
+    - the Plea subclass provides the cartesian product of one Lea instance with itself, a given number of times;
+    - the Flea subclass applies a given function to a given sequence of Lea instances;
+    - the Tlea subclass applies a given 2-ary function, a given number of times, on a given Lea instance;
+    - the Ilea subclass filters the values of a given Lea instance by applying a given boolean condition;
+    - the Olea subclass builds a joint probability distribution from a Lea instance with tuples as values;
+    - the Dlea subclass performs a given number of draws without replacement on a given Lea instance.
 
     '''
 
     __slots__ = ('_val','_alea')
 
     def __init__(self):
-        ''' initialize Lea instance's attributes
+        ''' initializes Lea instance's attributes
         '''
-        # value temporarily bound to the instance, during operations
-        self._val = None
-        # alea instance acting as a cache when value-probability pairs have been calculated  
+        # value temporarily bound to the instance, during calculations (see genVPs method)
+        # note: self is used as a sentinel value to mean that the no value is currently bound 
+        # (None is not a good sentinel value since it prevents to be used as value in a distribution) 
+        self._val = self
+        # alea instance acting as a cache when actual value-probability pairs have been calculated  
         self._alea = None
 
     def reset(self):
-        ''' remove current binding
-            the method calls _reset() method implmented in Lea subclasses
+        ''' removes current value binding;
+            this calls _reset() method implemented in Lea subclasses
         '''
-        self._val = None
+        self._val = self
         self._reset()
          
     def clone(self,cloneTable=None):
-        ''' return a deep copy of current Lea, without any binding;
+        ''' returns a deep copy of current Lea, without any value binding;
             if the lea tree contains multiple references to the same Lea instance,
             then it is cloned only once and the references are copied in the cloned tree
-            (the cloneTable dictionary serves this purpose)
-            the method calls _clone() method implmented in Lea subclasses
+            (the cloneTable dictionary serves this purpose);
+            the method calls the _clone() method implemented in Lea subclasses
         '''
         if cloneTable is None:
             cloneTable = {}
@@ -158,28 +156,28 @@ class Lea(object):
 
     @staticmethod
     def fromVals(*vals):
-        ''' static method, returning an Alea instance representing a distribution
+        ''' static method, returns an Alea instance representing a distribution
             for the given sequence of values, so that each value occurrence is
             taken as equiprobable;
             if each value occurs exactly once, then the distribution is uniform,
-            i.e. the probability of each value is equal to 1 / #values
-            if no value is provided, then an exception is raised
+            i.e. the probability of each value is equal to 1 / #values;
+            if the sequence is empty, then an exception is raised
         '''
         return Alea.fromVals(*vals)
 
     @staticmethod
     def fromValFreqs(*valFreqs):
-        ''' static method, returning an Alea instance representing a distribution
-            for the given sequence of (val,freq) tuples, where freq is an integer number
+        ''' static method, returns an Alea instance representing a distribution
+            for the given sequence of (val,freq) tuples, where freq is a natural number
             so that each value is taken with the given frequency (or sum of 
-            frequencies of that value if it occurs multiple times)
+            frequencies of that value if it occurs multiple times);
             if the sequence is empty, then an exception is raised
         '''
         return Alea.fromValFreqs(*valFreqs)
     
     @staticmethod
     def fromValFreqsDict(probDict):
-        ''' static method, returning an Alea instance representing a distribution
+        ''' static method, returns an Alea instance representing a distribution
             for the given dictionary of {val:freq}, where freq is an integer number
             so that each value is taken with the given frequency
             if the sequence is empty, then an exception is raised
@@ -188,15 +186,15 @@ class Lea(object):
 
     @staticmethod
     def boolProb(pNum,pDen):
-        ''' static method, returning an Alea instance representing a boolean
-            distribution such that prob(True) = pNum/pDen
+        ''' static method, returns an Alea instance representing a boolean
+            distribution such that probabilty of True is pNum/pDen
         '''
         return Alea.fromValFreqs((True,pNum),(False,pDen-pNum))
 
     @staticmethod
     def poisson(mean):
-        ''' static method, returning a Lea instance representing a 
-            Poisson probability distribution having the given mean
+        ''' static method, returns a Alea instance representing a Poisson probability
+            distribution having the given mean
         '''
         from sys import maxint
         valFreqs = []
@@ -221,7 +219,7 @@ class Lea(object):
             raise Exception("ERROR; %d/%d is outside the probability range [0,1]"%(pNum,pDen))
         condLea = Lea.coerce(condLea)
         d = self.map(lambda v:condLea.isTrue()).getAlea()
-        e = dict(d.genVPs(None))
+        e = dict(d.genVPs())
         eT = e.get(True,0)
         eF = e.get(False,0)
         # new probabilities
@@ -238,13 +236,13 @@ class Lea(object):
         # factors to be applied on current probabilities
         # depending on the truth value of condLea on each value
         w2 = dict((cg,w[cg]*(m/ecg)) for (cg,ecg) in e.iteritems())
-        return Alea.fromValFreqs(*((v,p*w2[condLea.isTrue()]) for (v,p) in self.genVPs(None)))
+        return Alea.fromValFreqs(*((v,p*w2[condLea.isTrue()]) for (v,p) in self.genVPs()))
 
     def withCondProb(self,condLea,givenCondLea,pNum,pDen):
         ''' returns a new Alea instance from current distribution,
             such that pNum/pDen is the probability that condLea is true
             given that givenCondLea is True, under the constraint that
-            the returned sitsribution keeps prior probabilities of condLea
+            the returned distribution keeps prior probabilities of condLea
             and givenCondLea unchanged
         '''
         if not (0 <= pNum <= pDen):
@@ -254,7 +252,7 @@ class Lea(object):
         # max 2x2 distribution (True,True), (True,False), (False,True), (True,True)
         # prior joint probabilities, non null probability
         d = self.map(lambda v:(condLea.isTrue(),givenCondLea.isTrue())).getAlea()
-        e = dict(d.genVPs(None))
+        e = dict(d.genVPs())
         eTT = e.get((True,True),0)
         eFT = e.get((False,True),0)
         eTF = e.get((True,False),0)
@@ -299,13 +297,12 @@ class Lea(object):
         # factors to be applied on current probabilities
         # depending on the truth value of (condLea,givenCondLea) on each value
         w2 = dict((cg,w[cg]*(m/ecg)) for (cg,ecg) in e.iteritems())
-        return Alea.fromValFreqs(*((v,p*w2[(condLea.isTrue(),givenCondLea.isTrue())]) for (v,p) in self.genVPs(None)))
+        return Alea.fromValFreqs(*((v,p*w2[(condLea.isTrue(),givenCondLea.isTrue())]) for (v,p) in self.genVPs()))
     
     def given(self,info):
         ''' returns a new Ilea instance representing the current distribution
-            amended with the given info, which is either a boolean
-            or a Lea instance with boolean values
-            the values present in the returned distribution 
+            updated with the given info, which is either a boolean or a Lea instance
+            with boolean values; the values present in the returned distribution 
             are those and only those compatible with the given info
             The resulting (value,probability) pairs are calculated 
             when the returned Ilea instance is evaluated; if no value is found,
@@ -321,29 +318,43 @@ class Lea(object):
 
     def cprod(self,*args):
         ''' returns a new Clea instance, representing the cartesian product of all
-            arguments (coerced to Lea instances), including self. 
+            arguments (coerced to Lea instances), including self as first argument 
         '''
         return Clea(self,*args)
 
+    def cprodTimes(self,nTimes):
+        ''' returns a new Plea instance, representing the cartesian product of self
+            with itself, iterated nTimes
+        '''
+        return Plea(self,nTimes)
+
     def map(self,f,args=()):
         ''' returns a new Flea instance representing the distribution obtained
-            by applying the given function f, taking values of present distribution
-            as first argument and given args tuple as following arguments
+            by applying the given function f, taking values of current distribution
+            as first argument and given args tuple as following arguments;
             note: f can be also a Lea instance, with functions as values
         '''
         return Flea.build(f,(self,)+args)
 
     def asJoint(self,*attrNames):
-        return Olea(attrNames,self)  
+        ''' returns a new Olea instance representing a joint probability distribution
+            from the current distribution supposed to have n-tuples as values,
+            to be associated with the given n attribute names
+        '''
+        return Olea(attrNames,self)
           
     def draw(self,nbValues):
+        ''' returns a new Dlea instance representing a probability distribution of the
+            sequences of values obtained by the given number of draws without
+            replacement from the current distribution 
+        '''
         return Dlea(self,nbValues)
       
     @staticmethod
     def coerce(value):
-        ''' return a Lea instance corresponding the given value:
+        ''' static method, returns a Lea instance corresponding the given value:
             if the value is a Lea instance, then it is returned
-            otherwise an Alea instance is returned, with given value
+            otherwise, an Alea instance is returned, with given value
             as unique (certain) value
         '''
         if not isinstance(value,Lea):
@@ -352,7 +363,7 @@ class Lea(object):
 
     @staticmethod
     def gcd(a,b):
-        ''' static method returning the greatest common divisoe between the given
+        ''' static method, returns the greatest common divisor between the given
             integer arguments
         '''
         while a > 0:
@@ -360,8 +371,9 @@ class Lea(object):
         return b
             
     def p(self,val):
-        ''' returns a string representing the probability of the given value val,
-            as a reduced rational number, from 0 to 1
+        ''' returns a string of the form 'n/d' representing the probability of
+            the given value val, as a reduced rational number
+            if the probability is 0 or 1, then 'O' or '1' is returned, respectively
         '''
         (p,count) = self._p(val)
         gcd = Lea.gcd(p,count)
@@ -372,243 +384,326 @@ class Lea(object):
         return res
 
     def pf(self,val):
-        ''' returns the probability of the given value val,
-            as a floating point number, from 0. to 1.
+        ''' returns the probability of the given value val, as a floating point
+            number, from 0.0 to 1.0
         '''
         (p,count) = self._p(val)
         return float(p) / count
 
     def _p(self,val):
-        ''' returns the weight of the given value val,
-            as a natural number from 0 to N = sum of all weigths
-            such number divided by N gives the probability of val
+        ''' returns a tuple of natural numbers (p,s) where
+            s is the sum of the probability weights of all values 
+            p is the probability weight of the given value val,
+              as a natural number from 0 to s;
+            note: the probability of val is p/s but the ratio is not reduced
         '''
         if self._alea is not None:
             return self._alea._p(val)
         count = 0
         p = 0
-        for (v1,p1) in self.genVPs(None):
+        for (v1,p1) in self.genVPs():
             count += p1
             if v1 == val:
                 p += p1
-        return (p,count) 
+        return (p,count)
 
     def isAnyOf(self,*values):
-        ''' return a boolean probability distribution
+        ''' returns a boolean probability distribution
             indicating the probability that a value is any of the given values 
         '''
         return Flea.build(lambda v: v in values,(self,))
 
     def isNoneOf(self,*values):
-        ''' return a boolean probability distribution
+        ''' returns a boolean probability distribution
             indicating the probability that a value is none of the given values 
         '''
         return Flea.build(lambda v: v not in values,(self,))
 
     def __call__(self,*args):
-        ''' 
+        ''' returns a new Flea instance representing the probability distribution
+            of values returned by invoking functions of current distribution on 
+            given arguments (assuming that the values of current distribution are
+            functions);
+            called on evaluation of "self(*args)"
         '''
         return Flea.build(self,args)
     
     def __getattribute__(self,attrName):
-        ''' 
+        ''' returns the attribute with the given name in the current Lea instance;
+            if the attribute name is unknown as a Lea instance's attribute,
+            then returns a Flea instance that shall retrieve the attibute in the
+            values of current distribution; 
+            called on evaluation of "self.attrName"
         '''
         try:
             return object.__getattribute__(self,attrName)
         except AttributeError:
-            return self.buildLeaFromAttr(attrName)
-
-    def buildLeaFromAttr(self,attrName):
-        ''' 
-        '''
-        return Flea.build(getattr,(self,attrName,))
+            return Flea.build(getattr,(self,attrName,))
     
-    def __lt__(self, other):
-        ''' 
+    def __lt__(self,other):
+        ''' returns a Flea instance representing the boolean probability distribution
+            that the values of self are less than the values of other;
+            called on evaluation of "self < other"
         '''
         return Flea.build(operator.lt,(self,other))
 
-    def __le__(self, other):
-        ''' 
+    def __le__(self,other):
+        ''' returns a Flea instance representing the boolean probability distribution
+            that the values of self are less than or equal to the values of other;
+            called on evaluation of "self <= other"
         '''
         return Flea.build(operator.le,(self,other))
 
-    def __eq__(self, other):
-        ''' 
+    def __eq__(self,other):
+        ''' returns a Flea instance representing the boolean probability distribution
+            that the values of self are equal to the values of other;
+            called on evaluation of "self == other"
         '''
         return Flea.build(operator.eq,(self,other))
 
-    def __ne__(self, other):
-        ''' 
+    def __ne__(self,other):
+        ''' returns a Flea instance representing the boolean probability distribution
+            that the values of self are different from the values of other;
+            called on evaluation of "self != other"
+        
         '''
         return Flea.build(operator.ne,(self,other))
 
-    def __gt__(self, other):
-        ''' 
+    def __gt__(self,other):
+        ''' returns a Flea instance representing the boolean probability distribution
+            that the values of self are greater than the values of other;
+            called on evaluation of "self > other"
         '''
         return Flea.build(operator.gt,(self,other))
 
-    def __ge__(self, other):
-        ''' 
+    def __ge__(self,other):
+        ''' returns a Flea instance representing the boolean probability distribution
+            that the values of self are greater than or equal to the values of other;
+            called on evaluation of "self >= other"
         '''
         return Flea.build(operator.ge,(self,other))
     
     def __add__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the addition of the values of self with the values of other;
+            called on evaluation of "self + other"
         '''
         return Flea.build(operator.add,(self,other))
 
     def __radd__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the addition of the values of other with the values of self;
+            called on evaluation of "other + self"
         '''
         return Flea.build(operator.add,(other,self))
 
     def __sub__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the subtraction of the values of other from the values of self;
+            called on evaluation of "self - other"
         '''
         return Flea.build(operator.sub,(self,other))
 
     def __rsub__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the subtraction of the values of self from the values of other;
+            called on evaluation of "other - self"
         '''
         return Flea.build(operator.sub,(other,self))
 
+    def __pos__(self):
+        ''' returns a Flea instance representing the probability distribution
+            resulting from applying the unary positive operator on the values of self;
+            called on evaluation of "+self"
+        '''
+        return Flea.build(operator.pos,(self,))
+
     def __neg__(self):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from negating the values of self;
+            called on evaluation of "-self"
         '''
         return Flea.build(operator.neg,(self,))
 
     def __mul__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the multiplication of the values of self by the values of other;
+            called on evaluation of "self * other"
         '''
         return Flea.build(operator.mul,(self,other))
 
     def __rmul__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the multiplication of the values of other by the values of self;
+            called on evaluation of "other * self"
         '''
         return Flea.build(operator.mul,(other,self))
 
     def __pow__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the powering the values of self with the values of other;
+            called on evaluation of "self ** other"
         '''
         return Flea.build(operator.pow,(self,other))
 
     def __rpow__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the powering the values of other with the values of self;
+            called on evaluation of "other ** self"
         '''
         return Flea.build(operator.pow,(other,self))
 
     def __div__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the division of the values of self by the values of other;
+            called on evaluation of "self / other"
         '''
         return Flea.build(operator.div,(self,other))
 
     def __rdiv__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the division of the values of other by the values of self;
+            called on evaluation of "other / self"
         '''
         return Flea.build(operator.div,(other,self))
 
     def __mod__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the modulus of the values of self with the values of other;
+            called on evaluation of "self % other"
         '''
         return Flea.build(operator.mod,(self,other))
 
     def __rmod__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the modulus of the values of other with the values of self;
+            called on evaluation of "other % self"
         '''
         return Flea.build(operator.mod,(other,self))
 
     def __divmod__(self,other):
+        ''' returns a Flea instance representing the probability distribution
+            resulting from applying the function divmod on the values of self and the values of other;
+            called on evaluation of "divmod(self,other)"
+        '''
         return Flea.build(divmod,(self,other))
 
     def __rdivmod__(self,other):
+        ''' returns a Flea instance representing the probability distribution
+            resulting from applying the function divmod on the values of other and the values of self;
+            called on evaluation of "divmod(other,self)"
+        '''
         return Flea.build(divmod,(other,self))
 
     def __floordiv__(self,other):
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the integer division of the values of self by the values of other;
+            called on evaluation of "self // other"
+        '''
         return Flea.build(operator.floordiv,(self,other))
     
     def __rfloordiv__(self,other):
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the integer division of the values of other by the values of self;
+            called on evaluation of "other // self"
+        '''
         return Flea.build(operator.floordiv,(other,self))
 
     def __abs__(self):
-        ''' 
+        ''' returns a Flea instance representing the probability distribution
+            resulting from applying the abs function on the values of self;
+            called on evaluation of "abs(self)"
         '''
         return Flea.build(abs,(self,))
     
-    #NOK : shall return a float : verify that there is one unique value or else raise exception 
-    def __float__(self):
-        return Flea.build(float,(self,))
-
-    def __complex__(self):
-        return Flea.build(complex,(self,))
-
     def __and__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the boolean probability distribution
+            resulting from the locical AND between the values of self and the values of other;
+            called on evaluation of "self & other"
         '''
         return Flea.build(operator.and_,(self,other))
 
     def __rand__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the boolean probability distribution
+            resulting from the locical AND between the values of other and the values of self;
+            called on evaluation of "other & self"
         '''
         return Flea.build(operator.and_,(other,self))
 
     def __or__(self,other):
-        ''' 
+        ''' returns a Flea instance representing the boolean probability distribution
+            resulting from the locical OR between the values of self and the values of other;
+            called on evaluation of "self | other"
         '''
         return Flea.build(operator.or_,(self,other))
 
     def __ror__(self,other):
-        ''' 
-
+        ''' returns a Flea instance representing the boolean probability distribution
+            resulting from the locical OR between the values of other and the values of self;
+            called on evaluation of "other | self"
         '''
         return Flea.build(operator.or_,(other,self))
 
+    def __xor__(self,other):
+        ''' returns a Flea instance representing the boolean probability distribution
+            resulting from the locical XOR between the values of self and the values of other;
+            called on evaluation of "self ^ other"
+        '''
+        return Flea.build(operator.xor,(self,other))
+
     def __invert__(self):
-        ''' 
+        ''' returns a Flea instance representing the boolean probability distribution
+            resulting from the locical NOT of the values self;
+            called on evaluation of "~self"
         '''
         return Flea.build(operator.not_,(self,))
 
-    def genVPs(self,condLea):
-        ''' 
+    def genVPs(self):
+        ''' generates tuple (v,p) where v is a value of the current probability distribution
+            and p is the associated probability weight (integer > 0);
+            before yielding a value v, this value is bound to the current instance;
+            then, if the current calculation requires to get again values on the current
+            instance, then the bound value is yielded with probability 1;
+            the value is unbound as soon as the execution is resumed after the yield;
+            the method calls the _genVPs method implemented in Lea subclasses;
         '''
-        if self._val is not None:
+        if self._val is not self:
             # distribution already bound to a value
-            # if such binding is compatible with the given condition
-            # then it is returned as a certain distribution
-            if condLea is None or condLea.isFeasible():
-                yield (self._val,1)
+            # it is yielded as a certain distribution (unique yield)
+            yield (self._val,1)
         else:
             # distribution not yet bound to a value
-            if condLea is not None or self._alea is None:
-                lea = self
-            else:
-                lea = self._alea
             try:
-                for (v,p) in lea._genVPs(condLea):
+                # browse all (v,p) tuples 
+                for (v,p) in self._genVPs():
+                    # bind value v
                     self._val = v
-                    if condLea is None or condLea.isFeasible():
-                        yield (v,p)
-                    self._val = None
+                    # yield the value with probability weight
+                    # if an object calls the genVPs on the same instance before resuming
+                    # the present generator, then the present instance is bound to v  
+                    yield (v,p)
+                    # unbind value v
+                    self._val = self
             except:
+                # an exception occurred, the current genVPs generator(s) are aborted
+                # and any bound value shall be unbound
                 self.reset()
                 raise
-
+        
     def isTrue(self):
+        ''' returns True iff the value True has probability 1;
+            returns False otherwise
+        '''
         (p,count) = self._p(True)
         return p > 0 and p == count
 
-    '''
     def isFeasible(self):
-        (p,count) = self._p(True)
-        return p > 0
-    '''
-
-    def isFeasible(self):
-        ''' 
+        ''' returns True iff the value True has a non-null probability;
+            returns False otherwise;
+            raise exception if some value are not booleans
         '''
         res = False
-        for (v,p) in self.genVPs(None):
-            # TODO: review this !!!!
+        for (v,p) in self.genVPs():
             if res is False:
                 if not isinstance(v,bool):
                     res = v
@@ -616,79 +711,106 @@ class Lea(object):
                     # true or maybe true
                     res = True
         if not isinstance(res,bool):    
-            raise Exception("condition evaluated as a %s although a boolean is expected"%type(res))    
+            raise Exception("ERROR: condition evaluated as a %s although a boolean is expected"%type(res))    
         return res
-    
+        
     def __str__(self):
-        ''' 
+        ''' returns, after evaluation of the distribution, a string representation of it;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value  with its
+            respective probability expressed as a rational number "n/d" or "0" or "1";
+            if an order relationship is defined on values, then the values ares sorted by 
+            increasing order; otherwise, an arbitrary order is used;            
+            called on evalution of "str(self)" and "repr(self)"
         '''
         return self.getAlea().__str__()
 
+    __repr__ = __str__
+
     def asPct(self,nbDecimals=1):
-        '''
+        ''' returns, after evaluation of the distribution, a string representation of it;
+            it is thes ame as __str__ method , but the the probabilities are displayed as percentage
+            values, with the given number of decimals (default = 1)
         '''
         return self.getAlea().asPct(nbDecimals)
     
     def getAlea(self):
-        ''' 
+        ''' returns an Alea instance representing the distribution after it has been evaluated;
+            the evaluation occurs only for the first call; for successive calls, a cached
+            Alea instance is returned, which is faster. 
         '''
         if self._alea is None:
             try:
-                self._alea = Alea.fromValFreqs(*(tuple(self.genVPs(None))))
+                self._alea = Alea.fromValFreqs(*(tuple(self.genVPs())))
             except:
                 self.reset()
                 raise
         return self._alea
 
-    __repr__ = __str__
-
     def integral(self):
-        ''' returns a tuple with couples (x,p)
-            giving the count p of having value <= x,
-            if an order is not defined on values,
-            then an arbitrary order is defined
+        ''' returns, after evaluation of the distribution, a tuple with couples (x,p) giving the
+            probability weight p of having a value less than or equal to x;
+            if an order relationship is defined on values, then the tuples follows the incresing
+            order of x; otherwise, an arbitrary order is used
         '''
         return self.getAlea().integral()
         
     def random(self,n=None):
-        ''' if n is None, returns a random value with the probability given by the distribution
-            otherwise returns a tuple of n such random values
+        ''' evaluates the distribution, then, 
+            if n is None, returns a random value with the probability given by the distribution
+            otherwise, returns a tuple of n such random values
         '''
         return self.getAlea().random(n)
 
     def randomDraw(self,n=None,sorted=False):
-        ''' if n=None, returns a tuple with all the values of the distribution,
-            in a random order respecting the probabilities
-            (the higher count of a value, the most likely the value will be in the
-             beginning of the sequence)
-            if n>0, then only n different values will be drawn
+        ''' evaluates the distribution, then,
+            if n=None, then returns a tuple with all the values of the distribution, in a random order
+                       respecting the probabilities (the higher count of a value, the most likely
+                       the value will be in the beginning of the sequence)
+            if n>0, then returns only n different drawn values
             if sorted is True, then the returned tuple is sorted
         '''
         return self.getAlea().randomDraw(n,sorted)
 
     def stdev(self):
-        ''' returns the standard deviation of the distribution
-            provided that values can be multiplied by probabilities and added
+        ''' returns, after evaluation of the distribution, the standard deviation of the distribution
+            requires that the requirements of the variance() method are met
         '''      
         return sqrt(self.variance())
 
     def mean(self):
-        ''' 
+        ''' returns, after evaluation of the distribution, the mean value of the probability
+            distribution, which is the probability weighted sum of the values;
+            requires that
+            1 - the values can be subtracted together,
+            2 - the differences of values can be multiplied by floating-point numbers,
+            3 - the differences of values multiplied by floating-point numbers can be
+                added to the values;
+            if any of these conditions is not met, then the result depends of the
+            value class implementation (likely, raised exception)
         '''
         return self.getAlea().mean()
 
     def variance(self):
-        ''' 
+        ''' returns, after evaluation of the distribution, the variance of the probability
+            distribution;
+            requires that
+            1 - the requirements of the mean() method are met,
+            2 - the values can be subtracted to the mean value,
+            3 - the differences between values and the mean value can be squared;
+            if any of these conditions is not met, then the result depends of the
+            value implementation (likely, raised exception)
         '''
         return self.getAlea().variance()
 
     def entropy(self):
-        ''' 
+        ''' returns, after evaluation of the distribution, the entropy of the distribution
         '''
         return self.getAlea().entropy()
 
 from alea import Alea
 from clea import Clea
+from plea import Plea
 from tlea import Tlea
 from dlea import Dlea
 from ilea import Ilea

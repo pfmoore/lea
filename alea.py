@@ -30,10 +30,10 @@ from math import log
 class Alea(Lea):
     
     '''
-    Alea is a Lea subclass defined by a a given explicit distribution.
-    An Alea instance is defined by explicit value-probability pairs. Each probability is
-    defined as a positive "counter" integer, without upper limit. The actual
-    probability is calculated by dividing the counter by the sum of all counters.
+    Alea is a Lea subclass, which instance is defined by explicit probability distribution data.
+    An Alea instance is defined by given value-probability pairs. Each probability is
+    defined as a positive "counter" or "weight" integer, without upper limit. The actual
+    probabilities are calculated by dividing the counters by the sum of all counters.
     '''
 
     __slots__ = ('_vps','_count')
@@ -105,9 +105,8 @@ class Alea(Lea):
     def _clone(self,cloneTable):
         return Alea(self._vps)
         
-    def _genVPs(self,condLea):
+    def _genVPs(self):
         for vp in self._vps:
-            #if condLea is None or condLea.isFeasible():
             yield vp
 
     def _p(self,val):
@@ -117,10 +116,10 @@ class Alea(Lea):
         return (0,self._count)
 
     def integral(self):
-        ''' returns a tuple with couples (x,p)
-            giving the count p of having value <= x,
-            if an order is not defined on values,
-            then an arbitrary order is defined
+        ''' returns a tuple with couples (x,p) giving the probability weight p of having a value
+            less than or equal to x;
+            if an order relationship is defined on values, then the tuples follows the increasing
+            order of x; otherwise, an arbitrary order is used
         '''
         res = []
         f = 0.0
@@ -169,8 +168,15 @@ class Alea(Lea):
         return tuple(res)
 
     def mean(self):
-        ''' returns the mean value of the distribution
-            provided that values can be multiplied by probabilities and subtracted
+        ''' returns the mean value of the probability distribution, which is the
+            probability weighted sum of the values;
+            requires that
+            1 - the values can be subtracted together,
+            2 - the differences of values can be multiplied by floating-point numbers,
+            3 - the differences of values multiplied by floating-point numbers can be
+                added to the values;
+            if any of these conditions is not met, then the result depends of the
+            value class implementation (likely, raised exception)
         '''
         res = None
         x0 = None
@@ -188,17 +194,20 @@ class Alea(Lea):
                 x0 += res / self._count
         return x0
    
-    
     def variance(self):
-        ''' returns the variance of the distribution
-            provided that values can be multiplied by probabilities and added
+        ''' returns the variance of the probability distribution;
+            requires that
+            1 - the requirements of the mean() method are met,
+            2 - the values can be subtracted to the mean value,
+            3 - the differences between values and the mean value can be squared;
+            if any of these conditions is not met, then the result depends of the
+            value implementation (likely, raised exception)
         '''
         res = 0
         m = self.mean()
         for (v,p) in self._vps:
             res += p*(v-m)**2
-        return float(res) / self._count    
-
+        return res / float(self._count)    
 
     def entropy(self):
         ''' returns the entropy of the distribution

@@ -4,7 +4,11 @@ from flea import Flea
 class Olea(Flea):
     
     '''
-    joint distribution
+    Olea is a Flea subclass, which instance represents a joint probability distribution.
+    An Olea instance is built from a sequence of n given attribute names and a given Lea
+    instance with n-tuples as values; the Olea instance carries an inner "data" class built
+    from the given attribute names and each value of the Olea instance is an instance
+    of this class.
     '''
 
     __slots__ = ('_lea1','_attrNames','_class')
@@ -24,7 +28,6 @@ class Olea(Flea):
         classAttrDict = dict(('__maxLength'+attrName,0) for attrName in self._attrNames)
         classAttrDict['__slots__'] = tuple(self._attrNames)
         self._class = type('',(_TemplateClass,),classAttrDict)
-
 
 
 class _TemplateClass(object):

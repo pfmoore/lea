@@ -1,7 +1,7 @@
 '''
 --------------------------------------------------------------------------------
 
-    tlea.py
+    plea.py
 
 --------------------------------------------------------------------------------
 Copyright 2013 Pierre Denis
@@ -24,23 +24,23 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
-from flea import Flea
+#from flea import Flea
+#from operator import add
 
-class Tlea(Lea):
+class Plea(Lea):
 
     '''
-    Tlea is a Lea subclass, which instance represents a probability distribution obtained by applying
-    a given 2-ary function repeatedly on given Lea instancea, a given number of times. It allows to
-    avoid tedious typing or explcit loops; also, it makes the calculation faster by using a dichotomic
-    algorithm.
+    Plea is a Lea subclass, which instance represents a probability distribution obtained by making 
+    a cartesian product of given Lea instancea with itself, a given number of times. Each value is 
+    a tuple having the given number as size.
     '''
 
-    __slots__ = ('_op','_lea1','_nTimes')
+    __slots__ = ('_lea1','_lea1Tuple','_nTimes')
 
-    def __init__(self,op,lea1,nTimes=2):
+    def __init__(self,lea1,nTimes=2):
         Lea.__init__(self)
-        self._op = op
         self._lea1 = lea1
+        self._lea1Tuple = lea1.map(lambda v: (v,))
         self._nTimes = nTimes
         if nTimes <= 0:
             raise Exception("ERROR: requires a strictly positive integer")
@@ -49,20 +49,22 @@ class Tlea(Lea):
         self._lea1.reset()
 
     def _clone(self,cloneTable):
-        return Tlea(self._op,self._lea1.clone(cloneTable),self._nTimes)
+        return Plea(self._lea1.clone(cloneTable),self._nTimes)
     
     def _genVPs(self,nTimes=None):
         if nTimes is None:
             nTimes = self._nTimes
         if nTimes == 1:
-            return self._lea1._genVPs()
+            return self._lea1Tuple._genVPs()
         # nTimes >= 2 : use dichotomic algorithm
         nTimes1 = nTimes / 2
-        tlea = Tlea(self._op,self._lea1,nTimes1)
-        alea = tlea.getAlea()
-        flea = Flea.build(self._op,(alea,alea.clone()))
+        plea = Plea(self._lea1,nTimes1)
+        alea = plea.getAlea()
+        #flea = Flea.build(add,(alea,alea.clone()))
+        flea = alea + alea.clone()
         if nTimes%2 == 1:
             # nTimes is odd : nTimes = 2*nTimes1 + 1
             # operate with one more lea1 on the current result 
-            flea = Flea.build(self._op,(flea,self._lea1))
+            #flea = Flea.build(add,(flea,self._lea1Tuple))
+            flea += self._lea1Tuple
         return flea._genVPs()

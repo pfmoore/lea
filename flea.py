@@ -27,12 +27,12 @@ from lea import Lea
 from clea import Clea
 
 class Flea(Lea):
+    
     '''
-        Function Lea, obtained by a function applied on a given sequence of arguments
-        The arguments are coerced to Lea instances.
-        Any instance forms a tree structure, where the leaves must be Alea instances
-        The function shall be applied on all elements of cartesian product of arguments
-        Lazy
+    Flea is a Lea subclass, which instance is defined by a function applied on a given sequence
+    of arguments. The arguments are coerced to Lea instances. The function is applied on all elements
+    of cartesian product of all arguments (see Clea class). This results in a new probability
+    distribution for all the values returned by the function.
     '''
     
     __slots__ = ('_f','_cleaArgs')
@@ -52,12 +52,12 @@ class Flea(Lea):
     def _clone(self,cloneTable):
         return Flea(self._f,self._cleaArgs.clone(cloneTable))    
 
-    def _genVPs(self,condLea):
+    def _genVPs(self):
         f = self._f
         if isinstance(f,Lea):
-            for ((f,args),p) in Clea(f,self._cleaArgs)._genVPs(condLea):
-                yield (f(*args),p)            
+            for ((f2,args),p) in Clea(f,self._cleaArgs)._genVPs():
+                yield (f2(*args),p)            
         else:
-            for (args,p) in self._cleaArgs._genVPs(condLea):
+            for (args,p) in self._cleaArgs._genVPs():
                 yield (f(*args),p)
 

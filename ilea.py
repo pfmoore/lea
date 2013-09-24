@@ -28,9 +28,8 @@ from lea import Lea
 class Ilea(Lea):
     
     '''
-    Ilea is a Lea subclass.
-    An Ilea instance represents a distribution obtained by constraining a given
-    Lea instance by a given boolean condition.
+    Ilea is a Lea subclass, which instance represents a probability distribution obtained
+    by filtering the values of a given Lea instance by a given boolean condition.
     '''
 
     __slots__ = ('_lea1','_condLea')
@@ -48,11 +47,14 @@ class Ilea(Lea):
     def _clone(self,cloneTable):
         return Ilea(self._lea1.clone(cloneTable),self._condLea.clone(cloneTable))
 
-    def _genVPs(self,condLea):
-        if condLea is None:
-            condLea = self._condLea
-        elif self._condLea is not None:            
-            condLea &= self._condLea
-        for (v,p) in self._lea1.genVPs(condLea):
-            if condLea is None or condLea.isFeasible():
-                yield (v,p)
+    def _genVPs(self):
+        for (cv,cp) in self._condLea.genVPs():
+            if cv is True:
+                # the condition is true, for some binding of variables
+                # yield value-probability pairs of _lea1, given this binding
+                for (v,p) in self._lea1.genVPs():
+                    yield (v,cp*p)
+            elif cv is False:
+                pass
+            else:
+                raise Exception("ERROR: boolean expression expected")

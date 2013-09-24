@@ -28,33 +28,35 @@ from lea import Lea
 class Dlea(Lea):
     
     '''
-    Draw distribution 
+    Dlea is a Lea subclass, which instance represents a probability distribution of the
+    sequences of values obtained by a given number of draws without replacement from a
+    given Lea instance.
     '''
     
     __slots__ = ('_lea1','_nbValues')
 
     def __init__(self,lea1,nbValues):
         if nbValues <= 0:
-            raise Exception("nbValues must be strictly positive")
+            raise Exception("ERROR: the given number of values must be strictly positive")
         Lea.__init__(self)
         self._lea1 = lea1
         self._nbValues = nbValues
-	
+
     def _reset(self):
         self._lea1.reset()
 
     def _clone(self,cloneTable):
         return Dlea(self._lea1.clone(cloneTable),self._nbValues)
     
-    def _genVPs(self,condLea,nbValues=None):
+    def _genVPs(self,nbValues=None):
         if nbValues is None:
             nbValues = self._nbValues
         if nbValues == 1:
-            for (v,p) in self._lea1.genVPs(condLea):
+            for (v,p) in self._lea1.genVPs():
                 yield ((v,),p)
         else:     
-            for (v,p) in self._lea1._genVPs(None):
+            for (v,p) in self._lea1._genVPs():
                 lea2 = self._lea1.clone()
                 dlea = Dlea(lea2.given(lea2!=v).getAlea(),nbValues-1)
-                for (vt,pt) in dlea._genVPs(condLea):
+                for (vt,pt) in dlea._genVPs():
                     yield ((v,)+vt,p*pt)
