@@ -118,7 +118,11 @@ class Lea(object):
 
     '''
 
+    class Error(Exception):
+        pass
+
     __slots__ = ('_val','_alea')
+
 
     def __init__(self):
         ''' initializes Lea instance's attributes
@@ -216,7 +220,7 @@ class Lea(object):
             such that pNum/pDen is the probability that condLea is true
         '''
         if not (0 <= pNum <= pDen):
-            raise Exception("ERROR; %d/%d is outside the probability range [0,1]"%(pNum,pDen))
+            raise Lea.Error("%d/%d is outside the probability range [0,1]"%(pNum,pDen))
         condLea = Lea.coerce(condLea)
         d = self.map(lambda v:condLea.isTrue()).getAlea()
         e = dict(d.genVPs())
@@ -227,9 +231,9 @@ class Lea(object):
         nF = pDen - pNum
         # feasibility checks
         if eT == 0 and nT > 0:
-            raise Exception("ERROR: unfeasible: probability shall remain 0")
+            raise Lea.Error("unfeasible: probability shall remain 0")
         if eF == 0 and nF > 0:
-            raise Exception("ERROR: unfeasible: probability shall remain 1")
+            raise Lea.Error("unfeasible: probability shall remain 1")
         w = { True  : nT,
               False : nF }
         m = reduce(operator.mul,e.itervalues(),1)
@@ -246,7 +250,7 @@ class Lea(object):
             and givenCondLea unchanged
         '''
         if not (0 <= pNum <= pDen):
-            raise Exception("ERROR; %d/%d is outside the probability range [0,1]"%(pNum,pDen))
+            raise Lea.Error("%d/%d is outside the probability range [0,1]"%(pNum,pDen))
         condLea = Lea.coerce(condLea)
         givenCondLea = Lea.coerce(givenCondLea)
         # max 2x2 distribution (True,True), (True,False), (False,True), (True,True)
@@ -267,16 +271,16 @@ class Lea(object):
         nFF = nCondLeaFalse*pDen - nFT
         # feasibility checks
         if eTT == 0 and nTT > 0:
-            raise Exception("ERROR: unfeasible: probability shall remain 0")
+            raise Lea.Error("unfeasible: probability shall remain 0")
         if eFT == 0 and nFT > 0:
-            raise Exception("ERROR: unfeasible: probability shall remain 1")
+            raise Lea.Error("unfeasible: probability shall remain 1")
         if eTF == 0 and nTF > 0:
-            raise Exception("ERROR: unfeasible: probability shall remain %d/%d"%(nCondLeaTrue,nGivenCondLeaTrue)) 
+            raise Lea.Error("unfeasible: probability shall remain %d/%d"%(nCondLeaTrue,nGivenCondLeaTrue)) 
         if eFF == 0 and nFF > 0:
-            msg = "ERROR: unfeasible"
+            msg = "unfeasible"
             if nGivenCondLeaTrue >= nCondLeaTrue:
                 msg += ": probability shall remain %d/%d"%(nGivenCondLeaTrue-nCondLeaTrue,nGivenCondLeaTrue)
-            raise Exception(msg) 
+            raise Lea.Error(msg)
         if nTF < 0 or nFF < 0:
             pDenMin = nGivenCondLeaTrue
             pNumMin = max(0,nGivenCondLeaTrue-nCondLeaFalse)
@@ -288,7 +292,7 @@ class Lea(object):
             pDenMin /= gMin 
             pNumMax /= gMax 
             pDenMax /= gMax
-            raise Exception("ERROR: unfeasible: probability shall be in the range [%d/%d,%d/%d]"%(pNumMin,pDenMin,pNumMax,pDenMax))
+            raise Lea.Error("unfeasible: probability shall be in the range [%d/%d,%d/%d]"%(pNumMin,pDenMin,pNumMax,pDenMax))
         w = { (True  , True ) : nTT,
               (True  , False) : nTF,
               (False , True ) : nFT,
@@ -621,42 +625,90 @@ class Lea(object):
             resulting from the locical AND between the values of self and the values of other;
             called on evaluation of "self & other"
         '''
-        return Flea.build(operator.and_,(self,other))
+        #return Flea.build(operator.and_,(self,other))
+        return Flea.build(Lea._safeAnd,(self,other))
 
     def __rand__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical AND between the values of other and the values of self;
             called on evaluation of "other & self"
         '''
-        return Flea.build(operator.and_,(other,self))
+        return Flea.build(Lea._safeAnd,(other,self))
 
     def __or__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical OR between the values of self and the values of other;
             called on evaluation of "self | other"
         '''
-        return Flea.build(operator.or_,(self,other))
+        return Flea.build(Lea._safeOr,(self,other))
 
     def __ror__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical OR between the values of other and the values of self;
             called on evaluation of "other | self"
         '''
-        return Flea.build(operator.or_,(other,self))
+        return Flea.build(Lea._safeOr,(other,self))
 
     def __xor__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical XOR between the values of self and the values of other;
             called on evaluation of "self ^ other"
         '''
-        return Flea.build(operator.xor,(self,other))
+        return Flea.build(Lea._safeXor,(self,other))
 
     def __invert__(self):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical NOT of the values self;
             called on evaluation of "~self"
         '''
-        return Flea.build(operator.not_,(self,))
+        return Flea.build(Lea._safeNot,(self,))
+
+    def __nonzero__(self):
+        ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
+            called on evaluation of "bool(self)"
+        '''
+        raise Lea.Error("Lea instance cannot be evaluated as a boolean (maybe due to a lack of parentheses)")
+
+    @staticmethod
+    def _checkBooleans(opMsg,*vals):
+        ''' static method, raise an exception if any of vals arguments is not boolean;
+           the exception messsage refers to the name of a logical operation given in the opMsg argument
+        '''
+        for val in vals:
+            if not isinstance(val,bool):
+                raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%opMsg) 
+
+    @staticmethod
+    def _safeAnd(a,b):
+        ''' static method, returns a boolean, which is the logical AND of the given boolean arguments; 
+            raises an exception if any of arguments is not boolean
+        '''
+        Lea._checkBooleans('AND',a,b)
+        return operator.and_(a,b)
+
+    @staticmethod
+    def _safeOr(a,b):
+        ''' static method, returns a boolean, which is the logical OR of the given boolean arguments; 
+            raises an exception if any of arguments is not boolean
+        '''
+        Lea._checkBooleans('OR',a,b)
+        return operator.or_(a,b)
+
+    @staticmethod
+    def _safeXor(a,b):
+        ''' static method, returns a boolean, which is the logical XOR of the given boolean arguments; 
+            raises an exception if any of arguments is not boolean
+        '''
+        Lea._checkBooleans('XOR',a,b)
+        return operator.xor(a,b)
+
+    @staticmethod
+    def _safeNot(a):
+        ''' static method, returns a boolean, which is the logical NOT of the given boolean argument; 
+            raises an exception if the argument is not boolean
+        '''
+        Lea._checkBooleans('NOT',a)
+        return operator.not_(a)
 
     def genVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
@@ -664,7 +716,9 @@ class Lea(object):
             before yielding a value v, this value is bound to the current instance;
             then, if the current calculation requires to get again values on the current
             instance, then the bound value is yielded with probability 1;
-            the value is unbound as soon as the execution is resumed after the yield;
+            the instance is rebound to a new value at each iteration, as soon as the execution
+            is resumed after the yield;
+            it is unbound at the end;
             the method calls the _genVPs method implemented in Lea subclasses;
         '''
         if self._val is not self:
@@ -682,8 +736,8 @@ class Lea(object):
                     # if an object calls the genVPs on the same instance before resuming
                     # the present generator, then the present instance is bound to v  
                     yield (v,p)
-                    # unbind value v
-                    self._val = self
+                # unbind value v
+                self._val = self
             except:
                 # an exception occurred, the current genVPs generator(s) are aborted
                 # and any bound value shall be unbound
@@ -700,7 +754,7 @@ class Lea(object):
     def isFeasible(self):
         ''' returns True iff the value True has a non-null probability;
             returns False otherwise;
-            raise exception if some value are not booleans
+            raises exception if some value are not booleans
         '''
         res = False
         for (v,p) in self.genVPs():
@@ -711,7 +765,7 @@ class Lea(object):
                     # true or maybe true
                     res = True
         if not isinstance(res,bool):    
-            raise Exception("ERROR: condition evaluated as a %s although a boolean is expected"%type(res))    
+            raise Lea.Error(" condition evaluated as a %s although a boolean is expected"%type(res))    
         return res
         
     def __str__(self):

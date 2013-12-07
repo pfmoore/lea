@@ -37,7 +37,7 @@ class Dlea(Lea):
 
     def __init__(self,lea1,nbValues):
         if nbValues <= 0:
-            raise Exception("ERROR: the given number of values must be strictly positive")
+            raise Lea.Error("draw method requires a strictly positive integer")
         Lea.__init__(self)
         self._lea1 = lea1
         self._nbValues = nbValues

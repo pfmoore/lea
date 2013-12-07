@@ -43,7 +43,7 @@ class Tlea(Lea):
         self._lea1 = lea1
         self._nTimes = nTimes
         if nTimes <= 0:
-            raise Exception("ERROR: requires a strictly positive integer")
+            raise Lea.Error("times method requires a strictly positive integer")
 
     def _reset(self):
         self._lea1.reset()

@@ -43,7 +43,7 @@ class Plea(Lea):
         self._lea1Tuple = lea1.map(lambda v: (v,))
         self._nTimes = nTimes
         if nTimes <= 0:
-            raise Exception("ERROR: requires a strictly positive integer")
+            raise Lea.Error("cprodTimes method requires a strictly positive integer")
 
     def _reset(self):
         self._lea1.reset()

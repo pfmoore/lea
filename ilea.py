@@ -57,4 +57,4 @@ class Ilea(Lea):
             elif cv is False:
                 pass
             else:
-                raise Exception("ERROR: boolean expression expected")
+                raise Lea.Error("boolean expression expected")

@@ -48,12 +48,12 @@ class Alea(Lea):
     def fromValFreqsDict(probDict):
         count = sum(probDict.itervalues())
         if count == 0:
-            raise Exception("ERROR: no value")
+            raise Lea.Error("impossible to build a probability distribution with no value")
         gcd = count
         impossibleValues = []
         for (v,p) in probDict.iteritems():
             if p < 0:
-                raise Exception("ERROR: negative probability")
+                raise Lea.Error("negative probability")
             if p == 0:
                 impossibleValues.append(v)
             elif gcd > 1:
