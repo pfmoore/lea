@@ -25,9 +25,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from lea import Lea
 
-from operator import mul
-
-
 class Clea(Lea):
     
     '''
@@ -59,5 +56,7 @@ class Clea(Lea):
     def _genVPs(self):
         for vps in Clea.prod(tuple(leaArg.genVPs for leaArg in self._leaArgs)):
             v = tuple(v for (v,p) in vps)
-            p = reduce(mul,(p for (v,p) in vps),1)
+            p = 1
+            for (v1,p1) in vps:
+                p *= p1
             yield (v,p)

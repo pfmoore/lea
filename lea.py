@@ -236,10 +236,12 @@ class Lea(object):
             raise Lea.Error("unfeasible: probability shall remain 1")
         w = { True  : nT,
               False : nF }
-        m = reduce(operator.mul,e.itervalues(),1)
+        m = 1
+        for r in e.values():
+            m *= r      
         # factors to be applied on current probabilities
         # depending on the truth value of condLea on each value
-        w2 = dict((cg,w[cg]*(m/ecg)) for (cg,ecg) in e.iteritems())
+        w2 = dict((cg,w[cg]*(m//ecg)) for (cg,ecg) in e.items())
         return Alea.fromValFreqs(*((v,p*w2[condLea.isTrue()]) for (v,p) in self.genVPs()))
 
     def withCondProb(self,condLea,givenCondLea,pNum,pDen):
@@ -288,19 +290,21 @@ class Lea(object):
             pNumMax = min(pDenMax,nCondLeaTrue)
             gMin = Lea.gcd(pNumMin,pDenMin)
             gMax = Lea.gcd(pNumMax,pDenMax)
-            pNumMin /= gMin 
-            pDenMin /= gMin 
-            pNumMax /= gMax 
-            pDenMax /= gMax
+            pNumMin //= gMin 
+            pDenMin //= gMin 
+            pNumMax //= gMax 
+            pDenMax //= gMax
             raise Lea.Error("unfeasible: probability shall be in the range [%d/%d,%d/%d]"%(pNumMin,pDenMin,pNumMax,pDenMax))
         w = { (True  , True ) : nTT,
               (True  , False) : nTF,
               (False , True ) : nFT,
               (False , False) : nFF }
-        m = reduce(operator.mul,e.itervalues(),1)
+        m = 1
+        for r in e.values():
+            m *= r      
         # factors to be applied on current probabilities
         # depending on the truth value of (condLea,givenCondLea) on each value
-        w2 = dict((cg,w[cg]*(m/ecg)) for (cg,ecg) in e.iteritems())
+        w2 = dict((cg,w[cg]*(m//ecg)) for (cg,ecg) in e.items())
         return Alea.fromValFreqs(*((v,p*w2[(condLea.isTrue(),givenCondLea.isTrue())]) for (v,p) in self.genVPs()))
     
     def given(self,info):
@@ -381,7 +385,7 @@ class Lea(object):
         '''
         (p,count) = self._p(val)
         gcd = Lea.gcd(p,count)
-        res = '%d' % (p/gcd)
+        res = '%d' % (p//gcd)
         count /= gcd
         if count > 1:
             res += '/%d' % count
@@ -465,11 +469,13 @@ class Lea(object):
         '''
         return Flea.build(operator.eq,(self,other))
 
+    def __hash__(self):
+        return id(self)
+
     def __ne__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             that the values of self are different from the values of other;
             called on evaluation of "self != other"
-        
         '''
         return Flea.build(operator.ne,(self,other))
 
@@ -557,19 +563,37 @@ class Lea(object):
         '''
         return Flea.build(operator.pow,(other,self))
 
-    def __div__(self,other):
+    def __truediv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the division of the values of self by the values of other;
             called on evaluation of "self / other"
         '''
-        return Flea.build(operator.div,(self,other))
+        return Flea.build(operator.truediv,(self,other))
 
-    def __rdiv__(self,other):
+    def __rtruediv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the division of the values of other by the values of self;
             called on evaluation of "other / self"
         '''
-        return Flea.build(operator.div,(other,self))
+        return Flea.build(operator.truediv,(other,self))
+
+    def __floordiv__(self,other):
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the floor division of the values of self by the values of other;
+            called on evaluation of "self // other"
+        '''
+        return Flea.build(operator.floordiv,(self,other))
+
+    def __rfloordiv__(self,other):
+        ''' returns a Flea instance representing the probability distribution
+            resulting from the floor division of the values of other by the values of self;
+            called on evaluation of "other // self"
+        '''
+        return Flea.build(operator.floordiv,(other,self))
+
+    # Python 2 compatibility
+    __div__ = __truediv__
+    __rdiv__ = __rtruediv__
 
     def __mod__(self,other):
         ''' returns a Flea instance representing the probability distribution
@@ -625,7 +649,6 @@ class Lea(object):
             resulting from the locical AND between the values of self and the values of other;
             called on evaluation of "self & other"
         '''
-        #return Flea.build(operator.and_,(self,other))
         return Flea.build(Lea._safeAnd,(self,other))
 
     def __rand__(self,other):
@@ -672,7 +695,7 @@ class Lea(object):
     @staticmethod
     def _checkBooleans(opMsg,*vals):
         ''' static method, raise an exception if any of vals arguments is not boolean;
-           the exception messsage refers to the name of a logical operation given in the opMsg argument
+            the exception messsage refers to the name of a logical operation given in the opMsg argument
         '''
         for val in vals:
             if not isinstance(val,bool):

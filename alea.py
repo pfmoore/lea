@@ -46,12 +46,12 @@ class Alea(Lea):
 
     @staticmethod
     def fromValFreqsDict(probDict):
-        count = sum(probDict.itervalues())
+        count = sum(probDict.values())
         if count == 0:
             raise Lea.Error("impossible to build a probability distribution with no value")
         gcd = count
         impossibleValues = []
-        for (v,p) in probDict.iteritems():
+        for (v,p) in probDict.items():
             if p < 0:
                 raise Lea.Error("negative probability")
             if p == 0:
@@ -64,10 +64,10 @@ class Alea(Lea):
         for impossibleValue in impossibleValues:
             del probDict[impossibleValue]
         try:            
-            return Alea(sorted((v,p/gcd) for (v,p) in probDict.iteritems()))
+            return Alea(sorted((v,p//gcd) for (v,p) in probDict.items()))
         except TypeError:
             # no ordering relationship on values (e.g. complex numbers)
-            return Alea((v,p/gcd) for (v,p) in probDict.iteritems())
+            return Alea((v,p//gcd) for (v,p) in probDict.items())
             
     @staticmethod
     def fromVals(*values):
@@ -188,10 +188,7 @@ class Alea(Lea):
             else:
                 res += p * (x-x0)
         if res is not None:
-            try:
-                x0 += res / float(self._count)
-            except:
-                x0 += res / self._count
+            x0 += res / float(self._count)
         return x0
    
     def variance(self):

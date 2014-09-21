@@ -57,7 +57,7 @@ class Tlea(Lea):
         if nTimes == 1:
             return self._lea1._genVPs()
         # nTimes >= 2 : use dichotomic algorithm
-        nTimes1 = nTimes / 2
+        nTimes1 = nTimes // 2
         tlea = Tlea(self._op,self._lea1,nTimes1)
         alea = tlea.getAlea()
         flea = Flea.build(self._op,(alea,alea.clone()))

@@ -24,8 +24,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
-#from flea import Flea
-#from operator import add
 
 class Plea(Lea):
 
@@ -57,10 +55,9 @@ class Plea(Lea):
         if nTimes == 1:
             return self._lea1Tuple._genVPs()
         # nTimes >= 2 : use dichotomic algorithm
-        nTimes1 = nTimes / 2
+        nTimes1 = nTimes // 2
         plea = Plea(self._lea1,nTimes1)
         alea = plea.getAlea()
-        #flea = Flea.build(add,(alea,alea.clone()))
         flea = alea + alea.clone()
         if nTimes%2 == 1:
             # nTimes is odd : nTimes = 2*nTimes1 + 1

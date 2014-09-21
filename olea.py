@@ -1,4 +1,28 @@
-from itertools import izip
+'''
+--------------------------------------------------------------------------------
+
+    olea.py
+
+--------------------------------------------------------------------------------
+Copyright 2013 Pierre Denis
+
+This file is part of Lea.
+
+Lea is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Lea is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Lea.  If not, see <http://www.gnu.org/licenses/>.
+--------------------------------------------------------------------------------
+'''
+
 from flea import Flea
 
 class Olea(Flea):
@@ -35,7 +59,7 @@ class _TemplateClass(object):
     def __init__(self,*args):
         object.__init__(self)
         aClass = self.__class__
-        for (attrName,arg) in izip(aClass.__slots__,args):
+        for (attrName,arg) in zip(aClass.__slots__,args):
             setattr(self,attrName,arg)
             length = len(str(arg))
             maxLengthAttrName = '__maxLength' + attrName
@@ -51,10 +75,15 @@ class _TemplateClass(object):
     def __hash__(self):
         return hash(tuple(getattr(self,attrName) for attrName in self.__class__.__slots__))
     
+    def __lt__(self, other):
+        return _TemplateClass.__cmp__(self,other) == -1
+
+    # Python 2 compatibility    
     def __cmp__(self,other):
         for attrName in self.__class__.__slots__:
-            res = cmp(getattr(self,attrName),getattr(other,attrName))
+            v1 = getattr(self,attrName)
+            v2 = getattr(other,attrName)
+            res = (v1 > v2) - (v1 < v2)
             if res != 0:
                 break
         return res
-        
