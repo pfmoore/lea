@@ -143,7 +143,7 @@ class Alea(Lea):
         integral = self.integral()
         if n is None:
             return self._random(integral)
-        return tuple(self._random(integral) for i in xrange(n))
+        return tuple(self._random(integral) for i in range(n))
 
     def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,

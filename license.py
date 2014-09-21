@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-VER = "1.3"
+VER = "1.3.1"
 
 licenseText = '''\
 Lea %s Copyright (C) 2013  Pierre Denis
