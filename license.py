@@ -26,8 +26,9 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 VER = "2.0.0-beta.1"
 
 licenseText = '''\
-Lea %s Copyright (C) 2013, 2014  Pierre Denis
+Lea %s Copyright (C) 2013, 2014, 2015 Pierre Denis
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.
-For more details, see COPYING and COPYING.LESSER files.''' % VER
+For more details, see COPYING and COPYING.LESSER files.
+*** This is a BETA version! Please report bugs/requests to pie.denis@skynet.be ***''' % VER
 
