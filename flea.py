@@ -4,7 +4,7 @@
     flea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013 Pierre Denis
+Copyright 2013, 2014 Pierre Denis
 
 This file is part of Lea.
 
@@ -55,9 +55,9 @@ class Flea(Lea):
     def _genVPs(self):
         f = self._f
         if isinstance(f,Lea):
-            for ((f2,args),p) in Clea(f,self._cleaArgs)._genVPs():
+            for ((f2,args),p) in Clea(f,self._cleaArgs).genVPs():
                 yield (f2(*args),p)            
         else:
-            for (args,p) in self._cleaArgs._genVPs():
+            for (args,p) in self._cleaArgs.genVPs():
                 yield (f(*args),p)
 

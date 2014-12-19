@@ -1,7 +1,7 @@
 '''
 --------------------------------------------------------------------------------
 
-    dlea.py
+    clea.py
 
 --------------------------------------------------------------------------------
 Copyright 2013, 2014 Pierre Denis
@@ -24,39 +24,35 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
+from prob_fraction import ProbFraction
+from toolbox import calcLCM
 
-class Dlea(Lea):
+class Mlea(Lea):
     
     '''
-    Dlea is a Lea subclass, which instance represents a probability distribution of the
-    sequences of values obtained by a given number of draws without replacement from a
-    given Lea instance.
+    Mlea is a Lea subclass, which instance is defined by a given sequence (L1,...Ln)
+    of Lea instances; it represents a probability distribution made up by merging
+    L1,...,Ln together,i.e. P(v) = (P1(v) + ... + Pn(v)) / n
+    where Pi(v) is the probability of value v in Li 
     '''
     
-    __slots__ = ('_lea1','_nbValues')
+    __slots__ = ('_leaArgs','_factors')
 
-    def __init__(self,lea1,nbValues):
-        if nbValues <= 0:
-            raise Lea.Error("draw method requires a strictly positive integer")
+    def __init__(self,*args):
         Lea.__init__(self)
-        self._lea1 = lea1
-        self._nbValues = nbValues
+        self._leaArgs = tuple(Lea.coerce(arg) for arg in args)
+        counts = tuple(leaArg.getAlea()._count for leaArg in self._leaArgs) 
+        lcm = calcLCM(counts)
+        self._factors = tuple(lcm//count for count in counts)        
 
     def _reset(self):
-        self._lea1.reset()
+        for leaArg in self._leaArgs:
+            leaArg.reset()
 
     def _clone(self,cloneTable):
-        return Dlea(self._lea1.clone(cloneTable),self._nbValues)
-    
-    def _genVPs(self,nbValues=None):
-        if nbValues is None:
-            nbValues = self._nbValues
-        if nbValues == 1:
-            for (v,p) in self._lea1.genVPs():
-                yield ((v,),p)
-        else:     
-            for (v,p) in self._lea1.genVPs():
-                lea2 = self._lea1.clone()
-                dlea = Dlea(lea2.given(lea2!=v).getAlea(),nbValues-1)
-                for (vt,pt) in dlea.genVPs():
-                    yield ((v,)+vt,p*pt)
+        return Mlea(*(leaArg.clone(cloneTable) for leaArg in self._leaArgs))
+
+    def _genVPs(self):
+        for (leaArg,factor) in zip(self._leaArgs,self._factors):
+            for (v,p) in leaArg.genVPs():
+                yield (v,p*factor)

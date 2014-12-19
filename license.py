@@ -4,7 +4,7 @@
     license.py
 
 --------------------------------------------------------------------------------
-Copyright 2013 Pierre Denis
+Copyright 2013, 2014 Pierre Denis
 
 This file is part of Lea.
 
@@ -23,12 +23,11 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-VER = "1.3.1"
+VER = "2.0.0-alpha.1"
 
 licenseText = '''\
-Lea %s Copyright (C) 2013  Pierre Denis
+Lea %s Copyright (C) 2013, 2014  Pierre Denis
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.
 For more details, see COPYING and COPYING.LESSER files.''' % VER
 
-print(licenseText)

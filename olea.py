@@ -4,7 +4,7 @@
     olea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013 Pierre Denis
+Copyright 2013, 2014 Pierre Denis
 
 This file is part of Lea.
 
@@ -68,16 +68,21 @@ class _TemplateClass(object):
                 aClass.__templateStr = "<%s>" % ', '.join("%s=%%%ds"%(attrName,getattr(aClass,'__maxLength'+attrName)) for attrName in aClass.__slots__)
 
     def __str__(self):
-        aClass = self.__class__
-        return aClass.__templateStr % tuple(getattr(self,attrName) for attrName in aClass.__slots__)
+        return self.__class__.__templateStr % self._cmpkey()
     __repr__ = __str__
+    
+    def _cmpkey(self):
+        return tuple(getattr(self,attrName) for attrName in self.__class__.__slots__)
 
     def __hash__(self):
-        return hash(tuple(getattr(self,attrName) for attrName in self.__class__.__slots__))
-    
-    def __lt__(self, other):
-        return _TemplateClass.__cmp__(self,other) == -1
+        return hash(self._cmpkey())
 
+    def __eq__(self, other):
+        return self._cmpkey() == other._cmpkey()
+
+    def __lt__(self, other):
+        return self._cmpkey() < other._cmpkey()
+    
     # Python 2 compatibility    
     def __cmp__(self,other):
         for attrName in self.__class__.__slots__:

@@ -4,7 +4,7 @@
     tlea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013 Pierre Denis
+Copyright 2013, 2014 Pierre Denis
 
 This file is part of Lea.
 
@@ -54,15 +54,17 @@ class Tlea(Lea):
     def _genVPs(self,nTimes=None):
         if nTimes is None:
             nTimes = self._nTimes
+        lea1 = self._lea1.getAleaClone()
         if nTimes == 1:
-            return self._lea1._genVPs()
+            return lea1.genVPs()
         # nTimes >= 2 : use dichotomic algorithm
         nTimes1 = nTimes // 2
-        tlea = Tlea(self._op,self._lea1,nTimes1)
+        tlea = Tlea(self._op,lea1,nTimes1)
         alea = tlea.getAlea()
+        # alea = tlea
         flea = Flea.build(self._op,(alea,alea.clone()))
         if nTimes%2 == 1:
             # nTimes is odd : nTimes = 2*nTimes1 + 1
             # operate with one more lea1 on the current result 
             flea = Flea.build(self._op,(flea,self._lea1))
-        return flea._genVPs()
+        return flea.genVPs()

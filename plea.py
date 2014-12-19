@@ -4,7 +4,7 @@
     plea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013 Pierre Denis
+Copyright 2013, 2014 Pierre Denis
 
 This file is part of Lea.
 
@@ -53,7 +53,7 @@ class Plea(Lea):
         if nTimes is None:
             nTimes = self._nTimes
         if nTimes == 1:
-            return self._lea1Tuple._genVPs()
+            return self._lea1Tuple.genVPs()
         # nTimes >= 2 : use dichotomic algorithm
         nTimes1 = nTimes // 2
         plea = Plea(self._lea1,nTimes1)
@@ -64,4 +64,4 @@ class Plea(Lea):
             # operate with one more lea1 on the current result 
             #flea = Flea.build(add,(flea,self._lea1Tuple))
             flea += self._lea1Tuple
-        return flea._genVPs()
+        return flea.genVPs()

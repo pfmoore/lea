@@ -4,7 +4,7 @@
     clea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013 Pierre Denis
+Copyright 2013, 2014 Pierre Denis
 
 This file is part of Lea.
 
@@ -24,6 +24,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
+from toolbox import calcLCM
+
 
 class Clea(Lea):
     
@@ -34,7 +36,7 @@ class Clea(Lea):
     each (v1,...,vn) tuple with probability product P1(v1)...Pn(vn).
     '''
     
-    __slots__ = ('_leaArgs',)
+    __slots__ = ('_leaArgs',)#,'_factors')
 
     def __init__(self,*args):
         Lea.__init__(self)
@@ -50,8 +52,11 @@ class Clea(Lea):
     @staticmethod
     def prod(gs):
         if len(gs) == 0:
-            return iter(((),))
-        return (xs+(x,) for xs in Clea.prod(gs[:-1]) for x in gs[-1]())
+            yield ()
+        else:
+            for xs in Clea.prod(gs[:-1]):
+                for x in gs[-1]():
+                    yield xs + (x,)
 
     def _genVPs(self):
         for vps in Clea.prod(tuple(leaArg.genVPs for leaArg in self._leaArgs)):
@@ -60,3 +65,4 @@ class Clea(Lea):
             for (v1,p1) in vps:
                 p *= p1
             yield (v,p)
+
