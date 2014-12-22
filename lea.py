@@ -503,7 +503,7 @@ class Lea(object):
         '''
         if val is None:
             count = self.getAlea()._count
-            return tuple(p/count for (v,p) in self.vps())
+            return tuple(float(p)/count for (v,p) in self.vps())
         (p,count) = self._p(val)
         return float(p) / count
         
