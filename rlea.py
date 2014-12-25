@@ -29,10 +29,10 @@ from alea import Alea
 class Rlea(Lea):
     
     '''
-    Rlea is a Lea subclass, which instance is defined by a .
+    Rlea is a Lea subclass, which instance has other Lea instances as values.
     '''
     
-    __slots__ = ('_f','_leaOfLeas','_factors')
+    __slots__ = ('_leaOfLeas','_factors')
 
     def __init__(self,leaOfLeas):
         Lea.__init__(self)
