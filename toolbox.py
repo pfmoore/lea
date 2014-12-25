@@ -54,6 +54,11 @@ def log2(x):
     '''
     return log(x)/LOG2
 
+def makeTuple(v):
+    ''' returns a tuple with v as unique element
+    '''    
+    return (v,)
+
 # standard input function
 try:
     # Python 2.x

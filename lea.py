@@ -28,7 +28,7 @@ from random import randrange
 from itertools import islice
 from math import log
 from prob_fraction import ProbFraction
-from toolbox import calcGCD, log2
+from toolbox import calcGCD, log2, makeTuple
 
 class Lea(object):
     
@@ -95,7 +95,7 @@ class Lea(object):
     Each subclass defines what are the (value,probability) pairs or how they can be generated (see
     _genVPs method implemented in each Lea subclass, which is called by Lea.genVPs method). 
     The Lea class acts as a facade, by providing different methods to instantiate these subclasses,
-    so it is usually not needed to instiantiate them explicitely. 
+    so it is usually not needed to instantiate them explicitely. 
     
     Here is an overview on these subclasses, with their relationships.
 
@@ -161,7 +161,7 @@ class Lea(object):
          
     def clone(self,cloneTable=None):
         ''' returns a deep copy of current Lea, without any value binding;
-            if the lea tree contains multiple references to the same Lea instance,
+            if the Lea tree contains multiple references to the same Lea instance,
             then it is cloned only once and the references are copied in the cloned tree
             (the cloneTable dictionary serves this purpose);
             the method calls the _clone() method implemented in Lea subclasses
@@ -370,6 +370,12 @@ class Lea(object):
             operated n times with itself, through the given binary operator
         '''
         return Tlea(op,self,n)
+
+    def timesTuple(self,n):
+        ''' returns a new Tlea instance with tuples of length n, containing
+            the cartesian product of self with itslef repeated n times
+        '''
+        return self.map(makeTuple).times(n)
 
     def cprod(self,*args):
         ''' returns a new Clea instance, representing the cartesian product of all
