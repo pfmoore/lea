@@ -39,7 +39,7 @@ class Alea(Lea):
     probabilities are calculated by dividing the counters by the sum of all counters.
     '''
 
-    __slots__ = ('_vps','_count','_optIntegral')
+    __slots__ = ('_vps','_count','_integral','_invIntegral','_optIntegral')
     
     def __init__(self,vps):
         ''' initializes Alea instance's attributes
@@ -48,6 +48,8 @@ class Alea(Lea):
         self._alea = self
         self._vps = tuple(vps)
         self._count = sum(p for (v,p) in self._vps)
+        self._integral = None
+        self._invIntegral = None
         self._optIntegral = None
 
     # constructor methods
@@ -222,8 +224,6 @@ class Alea(Lea):
         
     def _genVPs(self):
         return iter(self._vps)
-        #for vp in self._vps:
-        #    yield vp
 
     def _p(self,val):
         for (v,p) in self._vps:
@@ -231,53 +231,77 @@ class Alea(Lea):
                 return (p,self._count)
         return (0,self._count)
 
-    def integral(self,optimized=False):
-        ''' returns a tuple with couples (x,p) giving the probability weight p of having a value
-            less than or equal to x;
-            if an order relationship is defined on values, then the tuples follows the increasing
-            order of x; otherwise, an arbitrary order is used
+    def integral(self):
+        ''' returns a tuple with couples (x,p) giving the probability weight p that self <= x ;
+            the sequence follows the order defined on values (if an order relationship is defined
+            on values, then the tuples follows their increasing order; otherwise, an arbitrary
+            order is used, fixed from call to call
+            Note : the returned value is cached
         '''
-        integralTuple = self._optIntegral
-        if self._optIntegral is None or not optimized:
+        if self._integral is None:
             integralList = []
-            f = 0
-            if optimized:
-                vps = sorted(self._vps,key=operator.itemgetter(1),reverse=True)
-            else:
-                vps = self._vps
-            for (v,p) in vps:
-                f += p
-                integralList.append((v,f))
-            integralTuple = tuple(integralList)
-            if optimized:
-                self._optIntegral = integralTuple
-        return integralTuple
+            pSum = 0
+            for (v,p) in self._vps:
+                pSum += p
+                integralList.append((v,pSum))
+            self._integral = tuple(integralList)
+        return self._integral
+        
+    def invIntegral(self):
+        ''' returns a tuple with couples (x,p) giving the probability weight p that self >= x ;
+            the sequence follows the order defined on values (if an order relationship is defined
+            on values, then the tuples follows their increasing order; otherwise, an arbitrary
+            order is used, fixed from call to call
+            Note : the returned value is cached
+        '''
+        if self._invIntegral is None:
+            invIntegralList = []
+            pSum = self._count
+            for (v,p) in self._vps:
+                invIntegralList.append((v,pSum))
+                pSum -= p
+            self._invIntegral = tuple(invIntegralList)
+        return self._invIntegral
+        
+    def optIntegral(self):
+        ''' returns a tuple with couples (x,p) giving the probability weight p that self equals x 
+            or precedes it in the sequence of values with decreasing probabilities (i.e. the first
+            couples (x,p) are those having the most likely x)
+            Note : this method is used vs integral method to speed up generation of random values
+            Note : the returned value is cached
+        '''        
+        if self._optIntegral is None:
+            optIntegralList = []
+            pSum = 0
+            for (v,p) in sorted(self._vps,key=operator.itemgetter(1),reverse=True):
+                pSum += p
+                optIntegralList.append((v,pSum))
+            self._optIntegral = tuple(optIntegralList)
+        return self._optIntegral
 
     def _randomVal(self,integral):
+        ''' returns a random value among the values of self, according to the probabilities
+            given in given integral (see optIntegral method)
+        '''
         r = randrange(self._count)
         f0 = 0
         for (x,f1) in integral:
             if f0 <= r < f1:
-                return(x)
+                return x
             f0 = f1
-    '''
-    def random(self,n=None):
-        '' if n is None, returns a random value with the probability given by the distribution
-            otherwise returns a tuple of n such random values
-        ''
-        integral = self.integral()
-        if n is None:
-            return self._random(integral)
-        return tuple(self._random(integral) for i in range(n))
-    '''
 
     def randomVal(self):
-        return self._randomVal(self.integral(True))
+        ''' returns a random value among the values of self, according to their probabilities
+        '''
+        return self._randomVal(self.optIntegral())
 
     def randomIter(self):
-        integral = self.integral(True)
+        ''' generates an infinite sequence of random values among the values of self,
+            according to their probabilities
+        '''
+        optIntegral = self.optIntegral()
         while True:
-            yield self._randomVal(integral)
+            yield self._randomVal(optIntegral)
 
     def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,

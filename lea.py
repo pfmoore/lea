@@ -24,11 +24,11 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import operator
-from random import randrange
 from itertools import islice
 from math import log
+from collections import defaultdict
 from prob_fraction import ProbFraction
-from toolbox import calcGCD, log2, makeTuple
+from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax
 
 class Lea(object):
     
@@ -632,7 +632,111 @@ class Lea(object):
         except AttributeError:
             # return new Lea made up of attributes of inner values
             return Flea.build(getattr,(self,attrName))
-    
+
+    def _pIntegral(self,val):
+        ''' returns, as an integer, the probability weight that self <= val
+            note that it is not required that val is in the support of self
+        '''
+        cp = 0
+        for (v,p) in self.integral():
+            if val < v:
+                break
+            cp = p
+        return cp
+
+    def _pInvIntegral(self,val):
+        ''' returns, as an integer, the probability weight that self >= val
+            note that it is not required that val is in the support of self
+        '''
+        for (v,p) in self.invIntegral():
+            if val <= v:
+                return p
+        return 0
+
+    @staticmethod
+    def fastMax(*args):
+        ''' returns a new Alea instance giving the probabilities to have the maximum
+            value of each combination of the given args;
+            if some elements of args are not Lea instance, then these are coerced
+            to a Lea instance with probability 1;
+            the method uses an efficient algorithm (linear complexity), which is
+            due to Nicky van Foreest; for explanations, see
+            http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html
+            Note: unlike most of Lea methods, the distribution returned by Lea.fastMax
+            loses any dependency with given args; this could be important if some args
+            appear in the same expression as Lea.max(...) but outside it, e.g.
+            conditional probability expressions; this limitation can be avoided by
+            using the Lea.max method; however, this last method can be
+            prohibitively slower (exponential complexity)
+        '''
+        leaArgs = tuple(Lea.coerce(arg) for arg in args)
+        if len(leaArgs) == 1:
+            return leaArgs[0]
+        if len(leaArgs) == 2:
+            (leaArg1,leaArg2) = leaArgs
+            valFreqsDict = defaultdict(int)
+            for (v,p) in leaArg1.genVPs():
+                valFreqsDict[v] = p * leaArg2._pIntegral(v)
+            for (v,p) in leaArg2.genVPs():
+                valFreqsDict[v] += (leaArg1._pIntegral(v)-leaArg1._p(v)[0]) * p
+            return Lea.fromValFreqsDict(valFreqsDict)
+        return Lea.fastMax(leaArgs[0],Lea.fastMax(*leaArgs[1:]))
+
+    @staticmethod
+    def fastMin(*args):
+        ''' returns a new Alea instance giving the probabilities to have the minimum
+            value of each combination of the given args;
+            if some elements of args are not Lea instances, then these are coerced
+            to a Lea instance with probability 1;
+            the method uses an efficient algorithm (linear complexity), which is
+            due to Nicky van Foreest; for explanations, see
+            http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html
+            Note: unlike most of Lea methods, the distribution returned by Lea.fastMin
+            loses any dependency with given args; this could be important if some args
+            appear in the same expression as Lea.min(...) but outside it, e.g.
+            conditional probability expressions; this limitation can be avoided by
+            using the Lea.min method; however, this last method can be prohibitively
+            slower (exponential complexity)
+        '''
+        leaArgs = tuple(Lea.coerce(arg) for arg in args)
+        if len(leaArgs) == 1:
+            return leaArgs[0]
+        if len(leaArgs) == 2:
+            (leaArg1,leaArg2) = leaArgs
+            valFreqsDict = defaultdict(int)
+            for (v,p) in leaArg1.genVPs():
+                valFreqsDict[v] = p * leaArg2._pInvIntegral(v)
+            for (v,p) in leaArg2.genVPs():
+                valFreqsDict[v] += (leaArg1._pInvIntegral(v)-leaArg1._p(v)[0]) * p
+            return Lea.fromValFreqsDict(valFreqsDict)
+        return Lea.fastMin(leaArgs[0],Lea.fastMin(*leaArgs[1:]))
+
+    @staticmethod
+    def max(*args):
+        ''' returns a new Flea instance giving the probabilities to have the maximum
+            value of each combination of the given args;
+            if some elements of args are not Lea instances, then these are coerced
+            to a Lea instance with probability 1;
+            the returned distribution keeps dependencies with args but the 
+            calculation could be prohibitively slow (exponential complexity);
+            for a more efficient implemetation, assuming that dependencies are not
+            needed, see Lea.fastMax method
+        '''
+        return Flea.build(easyMax,args)
+
+    @staticmethod
+    def min(*args):
+        ''' returns a new Flea instance giving the probabilities to have the minimum
+            value of each combination of the given args;
+            if some elements of args are not Lea instances, then these are coerced
+            to a Lea instance with probability 1;
+            the returned distribution keeps dependencies with args but the 
+            calculation could be prohibitively slow (exponential complexity);
+            for a more efficient implemetation, assuming that dependencies are not
+            needed, see Lea.fastMin method
+        '''
+        return Flea.build(easyMin,args)
+
     def __lt__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             that the values of self are less than the values of other;
@@ -1005,13 +1109,15 @@ class Lea(object):
     
     def getAlea(self):
         ''' returns an Alea instance representing the distribution after it has been evaluated;
-            the evaluation occurs only for the first call; for successive calls, a cached
-            Alea instance is returned, which is faster. 
+            Note : the returned value is cached (the evaluation occurs only for the first call,
+            for successive calls, a cached Alea instance is returned, which is faster) 
         '''
         if self._alea is None:
             try:
                 self._alea = Alea.fromValFreqs(*(tuple(self.genVPs())))
             except:
+                # in case of exception, remove any pending binding which could distort 
+                # forthcoming calculations
                 self.reset()
                 raise
         return self._alea
@@ -1022,18 +1128,30 @@ class Lea(object):
         '''
         return self.getAlea()
         
-    def integral(self,optimized=False):
-        ''' returns, after evaluation of the distribution, a tuple with couples (x,p) giving the
-            probability weight p of having a value less than or equal to x;
-            if an order relationship is defined on values, then the tuples follows the incresing
-            order of x; otherwise, an arbitrary order is used
+    def integral(self):
+        ''' evaluates the distribution, then,
+            returns a tuple with couples (x,p) giving the probability weight p that self <= x ;
+            the sequence follows the order defined on values (if an order relationship is defined
+            on values, then the tuples follows their increasing order; otherwise, an arbitrary
+            order is used, fixed from call to call
+            Note : the returned value is cached
         '''
-        return self.getAlea().integral(optimized)
-
+        return self.getAlea().integral()
+        
+    def invIntegral(self):
+        ''' evaluates the distribution, then,
+            returns a tuple with couples (x,p) giving the probability weight p that self >= x ;
+            the sequence follows the order defined on values (if an order relationship is defined
+            on values, then the tuples follows their increasing order; otherwise, an arbitrary
+            order is used, fixed from call to call
+            Note : the returned value is cached
+        '''
+        return self.getAlea().invIntegral()
+        
     def randomIter(self):
         ''' evaluates the distribution, then,
-            returns an infinite iterator yielding random values with the probability given by
-            the distribution
+            generates an infinite sequence of random values among the values of self,
+            according to their probabilities
         '''
         return self.getAlea().randomIter()
         
@@ -1042,7 +1160,6 @@ class Lea(object):
             if n is None, returns a random value with the probability given by the distribution
             otherwise, returns a tuple of n such random values
         '''
-        #return self.getAlea().random(n)
         if n is None:
             return self.getAlea().randomVal()
         return tuple(islice(self.randomIter(),n))

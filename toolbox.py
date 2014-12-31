@@ -58,6 +58,22 @@ def makeTuple(v):
     ''' returns a tuple with v as unique element
     '''    
     return (v,)
+    
+def easyMin(*args):
+    ''' returns the minimum element of given args
+        Note: if only one arg, it is returned (unlike Python's min function)
+    '''
+    if len(args) == 1:
+        return args[0]
+    return min(args)
+
+def easyMax(*args):
+    ''' returns the maximum element of given args
+        Note: if only one arg, it is returned (unlike Python's max function)
+    '''
+    if len(args) == 1:
+        return args[0]
+    return max(args)
 
 # standard input function
 try:
