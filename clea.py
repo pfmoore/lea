@@ -36,7 +36,7 @@ class Clea(Lea):
     each (v1,...,vn) tuple with probability product P1(v1)...Pn(vn).
     '''
     
-    __slots__ = ('_leaArgs',)#,'_factors')
+    __slots__ = ('_leaArgs',)
 
     def __init__(self,*args):
         Lea.__init__(self)
