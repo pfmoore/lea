@@ -124,7 +124,7 @@ or&nbsp;with&nbsp;references&nbsp;to&nbsp;other&nbsp;<a href="#Lea">Lea</a>&nbsp
 Each&nbsp;subclass&nbsp;defines&nbsp;what&nbsp;are&nbsp;the&nbsp;(value,probability)&nbsp;pairs&nbsp;or&nbsp;how&nbsp;they&nbsp;can&nbsp;be&nbsp;generated&nbsp;(see<br>
 _genVPs&nbsp;method&nbsp;implemented&nbsp;in&nbsp;each&nbsp;<a href="#Lea">Lea</a>&nbsp;subclass,&nbsp;which&nbsp;is&nbsp;called&nbsp;by&nbsp;<a href="#Lea">Lea</a>.genVPs&nbsp;method).&nbsp;<br>
 The&nbsp;<a href="#Lea">Lea</a>&nbsp;class&nbsp;acts&nbsp;as&nbsp;a&nbsp;facade,&nbsp;by&nbsp;providing&nbsp;different&nbsp;methods&nbsp;to&nbsp;instantiate&nbsp;these&nbsp;subclasses,<br>
-so&nbsp;it&nbsp;is&nbsp;usually&nbsp;not&nbsp;needed&nbsp;to&nbsp;instiantiate&nbsp;them&nbsp;explicitely.&nbsp;<br>
+so&nbsp;it&nbsp;is&nbsp;usually&nbsp;not&nbsp;needed&nbsp;to&nbsp;instantiate&nbsp;them&nbsp;explicitely.&nbsp;<br>
 &nbsp;<br>
 Here&nbsp;is&nbsp;an&nbsp;overview&nbsp;on&nbsp;these&nbsp;subclasses,&nbsp;with&nbsp;their&nbsp;relationships.<br>
 &nbsp;<br>
@@ -340,7 +340,7 @@ in&nbsp;the&nbsp;same&nbsp;order&nbsp;as&nbsp;defined&nbsp;on&nbsp;values&nbsp;(
 ordered&nbsp;sequence);&nbsp;the&nbsp;last&nbsp;probability&nbsp;is&nbsp;always&nbsp;1.0</tt></dd></dl>
 
 <dl><dt><a name="Lea-clone"><strong>clone</strong></a>(self, cloneTable<font color="#909090">=None</font>)</dt><dd><tt>returns&nbsp;a&nbsp;deep&nbsp;copy&nbsp;of&nbsp;current&nbsp;<a href="#Lea">Lea</a>,&nbsp;without&nbsp;any&nbsp;value&nbsp;binding;<br>
-if&nbsp;the&nbsp;lea&nbsp;tree&nbsp;contains&nbsp;multiple&nbsp;references&nbsp;to&nbsp;the&nbsp;same&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,<br>
+if&nbsp;the&nbsp;<a href="#Lea">Lea</a>&nbsp;tree&nbsp;contains&nbsp;multiple&nbsp;references&nbsp;to&nbsp;the&nbsp;same&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,<br>
 then&nbsp;it&nbsp;is&nbsp;cloned&nbsp;only&nbsp;once&nbsp;and&nbsp;the&nbsp;references&nbsp;are&nbsp;copied&nbsp;in&nbsp;the&nbsp;cloned&nbsp;tree<br>
 (the&nbsp;cloneTable&nbsp;dictionary&nbsp;serves&nbsp;this&nbsp;purpose);<br>
 the&nbsp;method&nbsp;calls&nbsp;the&nbsp;_clone()&nbsp;method&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>&nbsp;subclasses</tt></dd></dl>
@@ -374,8 +374,8 @@ it&nbsp;is&nbsp;unbound&nbsp;at&nbsp;the&nbsp;end;<br>
 the&nbsp;method&nbsp;calls&nbsp;the&nbsp;_genVPs&nbsp;method&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>&nbsp;subclasses;</tt></dd></dl>
 
 <dl><dt><a name="Lea-getAlea"><strong>getAlea</strong></a>(self)</dt><dd><tt>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;after&nbsp;it&nbsp;has&nbsp;been&nbsp;evaluated;<br>
-the&nbsp;evaluation&nbsp;occurs&nbsp;only&nbsp;for&nbsp;the&nbsp;first&nbsp;call;&nbsp;for&nbsp;successive&nbsp;calls,&nbsp;a&nbsp;cached<br>
-Alea&nbsp;instance&nbsp;is&nbsp;returned,&nbsp;which&nbsp;is&nbsp;faster.</tt></dd></dl>
+Note&nbsp;:&nbsp;the&nbsp;returned&nbsp;value&nbsp;is&nbsp;cached&nbsp;(the&nbsp;evaluation&nbsp;occurs&nbsp;only&nbsp;for&nbsp;the&nbsp;first&nbsp;call,<br>
+for&nbsp;successive&nbsp;calls,&nbsp;a&nbsp;cached&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned,&nbsp;which&nbsp;is&nbsp;faster)</tt></dd></dl>
 
 <dl><dt><a name="Lea-getAleaClone"><strong>getAleaClone</strong></a>(self)</dt><dd><tt>same&nbsp;as&nbsp;getAlea&nbsp;method,&nbsp;excepting&nbsp;if&nbsp;applied&nbsp;on&nbsp;an&nbsp;Alea&nbsp;instance:<br>
 in&nbsp;this&nbsp;case,&nbsp;a&nbsp;clone&nbsp;of&nbsp;the&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned&nbsp;(insead&nbsp;of&nbsp;itself)</tt></dd></dl>
@@ -398,10 +398,19 @@ raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;self&nbsp;is&nbsp;certainly&nbsp;fals
 expressed&nbsp;in&nbsp;bits<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;given&nbsp;val&nbsp;is&nbsp;impossible</tt></dd></dl>
 
-<dl><dt><a name="Lea-integral"><strong>integral</strong></a>(self, optimized<font color="#909090">=False</font>)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;distribution,&nbsp;a&nbsp;tuple&nbsp;with&nbsp;couples&nbsp;(x,p)&nbsp;giving&nbsp;the<br>
-probability&nbsp;weight&nbsp;p&nbsp;of&nbsp;having&nbsp;a&nbsp;value&nbsp;less&nbsp;than&nbsp;or&nbsp;equal&nbsp;to&nbsp;x;<br>
-if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined&nbsp;on&nbsp;values,&nbsp;then&nbsp;the&nbsp;tuples&nbsp;follows&nbsp;the&nbsp;incresing<br>
-order&nbsp;of&nbsp;x;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used</tt></dd></dl>
+<dl><dt><a name="Lea-integral"><strong>integral</strong></a>(self)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
+returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;couples&nbsp;(x,p)&nbsp;giving&nbsp;the&nbsp;probability&nbsp;weight&nbsp;p&nbsp;that&nbsp;self&nbsp;&lt;=&nbsp;x&nbsp;;<br>
+the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values&nbsp;(if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined<br>
+on&nbsp;values,&nbsp;then&nbsp;the&nbsp;tuples&nbsp;follows&nbsp;their&nbsp;increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary<br>
+order&nbsp;is&nbsp;used,&nbsp;fixed&nbsp;from&nbsp;call&nbsp;to&nbsp;call<br>
+Note&nbsp;:&nbsp;the&nbsp;returned&nbsp;value&nbsp;is&nbsp;cached</tt></dd></dl>
+
+<dl><dt><a name="Lea-invIntegral"><strong>invIntegral</strong></a>(self)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
+returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;couples&nbsp;(x,p)&nbsp;giving&nbsp;the&nbsp;probability&nbsp;weight&nbsp;p&nbsp;that&nbsp;self&nbsp;&gt;=&nbsp;x&nbsp;;<br>
+the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values&nbsp;(if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined<br>
+on&nbsp;values,&nbsp;then&nbsp;the&nbsp;tuples&nbsp;follows&nbsp;their&nbsp;increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary<br>
+order&nbsp;is&nbsp;used,&nbsp;fixed&nbsp;from&nbsp;call&nbsp;to&nbsp;call<br>
+Note&nbsp;:&nbsp;the&nbsp;returned&nbsp;value&nbsp;is&nbsp;cached</tt></dd></dl>
 
 <dl><dt><a name="Lea-isAnyOf"><strong>isAnyOf</strong></a>(self, *values)</dt><dd><tt>returns&nbsp;a&nbsp;boolean&nbsp;probability&nbsp;distribution<br>
 indicating&nbsp;the&nbsp;probability&nbsp;that&nbsp;a&nbsp;value&nbsp;is&nbsp;any&nbsp;of&nbsp;the&nbsp;values&nbsp;passed&nbsp;as&nbsp;arguments</tt></dd></dl>
@@ -464,8 +473,8 @@ if&nbsp;n&nbsp;&gt;&nbsp;0,&nbsp;&nbsp;then&nbsp;returns&nbsp;only&nbsp;n&nbsp;d
 if&nbsp;sorted&nbsp;is&nbsp;True,&nbsp;then&nbsp;the&nbsp;returned&nbsp;tuple&nbsp;is&nbsp;sorted</tt></dd></dl>
 
 <dl><dt><a name="Lea-randomIter"><strong>randomIter</strong></a>(self)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
-returns&nbsp;an&nbsp;infinite&nbsp;iterator&nbsp;yielding&nbsp;random&nbsp;values&nbsp;with&nbsp;the&nbsp;probability&nbsp;given&nbsp;by<br>
-the&nbsp;distribution</tt></dd></dl>
+generates&nbsp;an&nbsp;infinite&nbsp;sequence&nbsp;of&nbsp;random&nbsp;values&nbsp;among&nbsp;the&nbsp;values&nbsp;of&nbsp;self,<br>
+according&nbsp;to&nbsp;their&nbsp;probabilities</tt></dd></dl>
 
 <dl><dt><a name="Lea-reset"><strong>reset</strong></a>(self)</dt><dd><tt>removes&nbsp;current&nbsp;value&nbsp;binding;<br>
 this&nbsp;calls&nbsp;_reset()&nbsp;method&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>&nbsp;subclasses</tt></dd></dl>
@@ -485,6 +494,9 @@ is&nbsp;self</tt></dd></dl>
 
 <dl><dt><a name="Lea-times"><strong>times</strong></a>(self, n, op<font color="#909090">=&lt;built-in function add&gt;</font>)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Tlea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;current&nbsp;distribution<br>
 operated&nbsp;n&nbsp;times&nbsp;with&nbsp;itself,&nbsp;through&nbsp;the&nbsp;given&nbsp;binary&nbsp;operator</tt></dd></dl>
+
+<dl><dt><a name="Lea-timesTuple"><strong>timesTuple</strong></a>(self, n)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Tlea&nbsp;instance&nbsp;with&nbsp;tuples&nbsp;of&nbsp;length&nbsp;n,&nbsp;containing<br>
+the&nbsp;cartesian&nbsp;product&nbsp;of&nbsp;self&nbsp;with&nbsp;itslef&nbsp;repeated&nbsp;n&nbsp;times</tt></dd></dl>
 
 <dl><dt><a name="Lea-vals"><strong>vals</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;values&nbsp;of&nbsp;self<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;increasing&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
@@ -532,6 +544,34 @@ if&nbsp;the&nbsp;value&nbsp;is&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,
 otherwise,&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned,&nbsp;with&nbsp;given&nbsp;value<br>
 as&nbsp;unique&nbsp;(certain)&nbsp;value</tt></dd></dl>
 
+<dl><dt><a name="Lea-fastMax"><strong>fastMax</strong></a>(*args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have&nbsp;the&nbsp;maximum<br>
+value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
+if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
+to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
+the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
+due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
+<a href="http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html</a><br>
+Note:&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;by&nbsp;<a href="#Lea">Lea</a>.fastMax<br>
+loses&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
+appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.<a href="#Lea-max">max</a>(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
+conditional&nbsp;probability&nbsp;expressions;&nbsp;this&nbsp;limitation&nbsp;can&nbsp;be&nbsp;avoided&nbsp;by<br>
+using&nbsp;the&nbsp;<a href="#Lea">Lea</a>.max&nbsp;method;&nbsp;however,&nbsp;this&nbsp;last&nbsp;method&nbsp;can&nbsp;be<br>
+prohibitively&nbsp;slower&nbsp;(exponential&nbsp;complexity)</tt></dd></dl>
+
+<dl><dt><a name="Lea-fastMin"><strong>fastMin</strong></a>(*args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have&nbsp;the&nbsp;minimum<br>
+value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
+if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
+to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
+the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
+due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
+<a href="http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html</a><br>
+Note:&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;by&nbsp;<a href="#Lea">Lea</a>.fastMin<br>
+loses&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
+appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.<a href="#Lea-min">min</a>(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
+conditional&nbsp;probability&nbsp;expressions;&nbsp;this&nbsp;limitation&nbsp;can&nbsp;be&nbsp;avoided&nbsp;by<br>
+using&nbsp;the&nbsp;<a href="#Lea">Lea</a>.min&nbsp;method;&nbsp;however,&nbsp;this&nbsp;last&nbsp;method&nbsp;can&nbsp;be&nbsp;prohibitively<br>
+slower&nbsp;(exponential&nbsp;complexity)</tt></dd></dl>
+
 <dl><dt><a name="Lea-fromSeq"><strong>fromSeq</strong></a>(sequence)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;distribution<br>
 for&nbsp;the&nbsp;given&nbsp;sequence&nbsp;of&nbsp;values&nbsp;(e.g.&nbsp;a&nbsp;list,&nbsp;tuple,&nbsp;iterator,...),<br>
 so&nbsp;that&nbsp;each&nbsp;value&nbsp;occurrence&nbsp;is&nbsp;taken&nbsp;as&nbsp;equiprobable;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -566,6 +606,24 @@ occurrence&nbsp;is&nbsp;taken&nbsp;as&nbsp;equiprobable;<br>
 if&nbsp;each&nbsp;value&nbsp;occurs&nbsp;exactly&nbsp;once,&nbsp;then&nbsp;the&nbsp;distribution&nbsp;is&nbsp;uniform,<br>
 i.e.&nbsp;the&nbsp;probability&nbsp;of&nbsp;each&nbsp;value&nbsp;is&nbsp;equal&nbsp;to&nbsp;1&nbsp;/&nbsp;#values;<br>
 if&nbsp;the&nbsp;sequence&nbsp;is&nbsp;empty,&nbsp;then&nbsp;an&nbsp;exception&nbsp;is&nbsp;raised</tt></dd></dl>
+
+<dl><dt><a name="Lea-max"><strong>max</strong></a>(*args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have&nbsp;the&nbsp;maximum<br>
+value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
+if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
+to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
+the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;dependencies&nbsp;with&nbsp;args&nbsp;but&nbsp;the&nbsp;<br>
+calculation&nbsp;could&nbsp;be&nbsp;prohibitively&nbsp;slow&nbsp;(exponential&nbsp;complexity);<br>
+for&nbsp;a&nbsp;more&nbsp;efficient&nbsp;implemetation,&nbsp;assuming&nbsp;that&nbsp;dependencies&nbsp;are&nbsp;not<br>
+needed,&nbsp;see&nbsp;<a href="#Lea">Lea</a>.fastMax&nbsp;method</tt></dd></dl>
+
+<dl><dt><a name="Lea-min"><strong>min</strong></a>(*args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have&nbsp;the&nbsp;minimum<br>
+value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
+if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
+to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
+the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;dependencies&nbsp;with&nbsp;args&nbsp;but&nbsp;the&nbsp;<br>
+calculation&nbsp;could&nbsp;be&nbsp;prohibitively&nbsp;slow&nbsp;(exponential&nbsp;complexity);<br>
+for&nbsp;a&nbsp;more&nbsp;efficient&nbsp;implemetation,&nbsp;assuming&nbsp;that&nbsp;dependencies&nbsp;are&nbsp;not<br>
+needed,&nbsp;see&nbsp;<a href="#Lea">Lea</a>.fastMin&nbsp;method</tt></dd></dl>
 
 <dl><dt><a name="Lea-poisson"><strong>poisson</strong></a>(mean)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;Poisson&nbsp;probability<br>
 distribution&nbsp;having&nbsp;the&nbsp;given&nbsp;mean;&nbsp;the&nbsp;distribution&nbsp;is&nbsp;approximated&nbsp;by<br>
