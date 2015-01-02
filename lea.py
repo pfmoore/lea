@@ -26,7 +26,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 import operator
 from itertools import islice
 from math import log
-from collections import defaultdict
 from prob_fraction import ProbFraction
 from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax
 
@@ -633,32 +632,12 @@ class Lea(object):
             # return new Lea made up of attributes of inner values
             return Flea.build(getattr,(self,attrName))
 
-    def _pIntegral(self,val):
-        ''' returns, as an integer, the probability weight that self <= val
-            note that it is not required that val is in the support of self
-        '''
-        cp = 0
-        for (v,p) in self.integral():
-            if val < v:
-                break
-            cp = p
-        return cp
-
-    def _pInvIntegral(self,val):
-        ''' returns, as an integer, the probability weight that self >= val
-            note that it is not required that val is in the support of self
-        '''
-        for (v,p) in self.invIntegral():
-            if val <= v:
-                return p
-        return 0
-
     @staticmethod
     def fastMax(*args):
         ''' returns a new Alea instance giving the probabilities to have the maximum
             value of each combination of the given args;
             if some elements of args are not Lea instance, then these are coerced
-            to a Lea instance with probability 1;
+            to an Lea instance with probability 1;
             the method uses an efficient algorithm (linear complexity), which is
             due to Nicky van Foreest; for explanations, see
             http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html
@@ -669,25 +648,15 @@ class Lea(object):
             using the Lea.max method; however, this last method can be
             prohibitively slower (exponential complexity)
         '''
-        leaArgs = tuple(Lea.coerce(arg) for arg in args)
-        if len(leaArgs) == 1:
-            return leaArgs[0]
-        if len(leaArgs) == 2:
-            (leaArg1,leaArg2) = leaArgs
-            valFreqsDict = defaultdict(int)
-            for (v,p) in leaArg1.genVPs():
-                valFreqsDict[v] = p * leaArg2._pIntegral(v)
-            for (v,p) in leaArg2.genVPs():
-                valFreqsDict[v] += (leaArg1._pIntegral(v)-leaArg1._p(v)[0]) * p
-            return Lea.fromValFreqsDict(valFreqsDict)
-        return Lea.fastMax(leaArgs[0],Lea.fastMax(*leaArgs[1:]))
-
+        aleaArgs = tuple(Lea.coerce(arg).getAlea() for arg in args)
+        return Alea.fastExtremum(Alea.pIntegral,*aleaArgs)
+    
     @staticmethod
     def fastMin(*args):
         ''' returns a new Alea instance giving the probabilities to have the minimum
             value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
-            to a Lea instance with probability 1;
+            to an Alea instance with probability 1;
             the method uses an efficient algorithm (linear complexity), which is
             due to Nicky van Foreest; for explanations, see
             http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html
@@ -698,19 +667,9 @@ class Lea(object):
             using the Lea.min method; however, this last method can be prohibitively
             slower (exponential complexity)
         '''
-        leaArgs = tuple(Lea.coerce(arg) for arg in args)
-        if len(leaArgs) == 1:
-            return leaArgs[0]
-        if len(leaArgs) == 2:
-            (leaArg1,leaArg2) = leaArgs
-            valFreqsDict = defaultdict(int)
-            for (v,p) in leaArg1.genVPs():
-                valFreqsDict[v] = p * leaArg2._pInvIntegral(v)
-            for (v,p) in leaArg2.genVPs():
-                valFreqsDict[v] += (leaArg1._pInvIntegral(v)-leaArg1._p(v)[0]) * p
-            return Lea.fromValFreqsDict(valFreqsDict)
-        return Lea.fastMin(leaArgs[0],Lea.fastMin(*leaArgs[1:]))
-
+        aleaArgs = tuple(Lea.coerce(arg).getAlea() for arg in args)
+        return Alea.fastExtremum(Alea.pInvIntegral,*aleaArgs)
+        
     @staticmethod
     def max(*args):
         ''' returns a new Flea instance giving the probabilities to have the maximum
