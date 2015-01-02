@@ -446,7 +446,7 @@ class Lea(object):
             as unique (certain) value
         '''
         if not isinstance(value,Lea):
-            value = Alea(((value,1),))
+            return Alea(((value,1),))
         return value
 
     def equiv(self,other):

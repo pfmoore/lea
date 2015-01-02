@@ -27,6 +27,7 @@ from lea import Lea
 from prob_fraction import ProbFraction
 from random import randrange
 from math import log, sqrt, exp
+from collections import defaultdict
 from toolbox import LOG2
 import operator
 
@@ -324,6 +325,48 @@ class Alea(Lea):
         if sorted:
             res.sort()
         return tuple(res)
+
+    def pIntegral(self,val):
+        ''' returns, as an integer, the probability weight that self <= val
+            note that it is not required that val is in the support of self
+        '''
+        cp = 0
+        for (v,p) in self.integral():
+            if val < v:
+                break
+            cp = p
+        return cp
+
+    def pInvIntegral(self,val):
+        ''' returns, as an integer, the probability weight that self >= val
+            note that it is not required that val is in the support of self
+        '''
+        for (v,p) in self.invIntegral():
+            if val <= v:
+                return p
+        return 0
+
+    @staticmethod
+    def fastExtremum(integralFunc,*aleaArgs):
+        ''' returns a new Alea instance giving the probabilities to have the extremum
+            value (min or max) of each combination of the given Alea args;
+            integralFunc is the integral function that determines whether max or min is
+            used : respectively, Alea.pIntegral or Alea.pInvIntegral;
+            the method uses an efficient algorithm (linear complexity), which is
+            due to Nicky van Foreest; for explanations, see
+            http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html
+        '''
+        if len(aleaArgs) == 1:
+            return aleaArgs[0]
+        if len(aleaArgs) == 2:
+            (aleaArg1,aleaArg2) = aleaArgs
+            valFreqsDict = defaultdict(int)
+            for (v,p) in aleaArg1.genVPs():
+                valFreqsDict[v] = p * integralFunc(aleaArg2,v)
+            for (v,p) in aleaArg2.genVPs():
+                valFreqsDict[v] += (integralFunc(aleaArg1,v)-aleaArg1._p(v)[0]) * p
+            return Lea.fromValFreqsDict(valFreqsDict)
+        return Alea.fastExtremum(integralFunc,aleaArgs[0],Alea.fastExtremum(integralFunc,*aleaArgs[1:]))
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
 
