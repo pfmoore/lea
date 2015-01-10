@@ -30,7 +30,7 @@ from itertools import islice, tee
 
 class Chain(object):
     '''
-    A Chain instance represents a Markov chain, with a given set of states and
+    A Chain instance represents a Markov chain, with a given set of states
     and given probabilities of transition from state to state.    
     '''
 
@@ -46,8 +46,7 @@ class Chain(object):
         self._stateObjs = tuple(stateObj for (stateObj,nextStateLea) in nextStateLeaPerState)
         self._stateAleaDict = dict((stateObj,StateAlea(Lea.coerce(stateObj),self)) for stateObj in self._stateObjs)
         self._state = StateAlea(Lea.fromVals(*self._stateObjs),self)
-        iterNextStateData = ( (self._state==stateObj, nextStateLea)
-                              for (stateObj,nextStateLea) in nextStateLeaPerState)
+        iterNextStateData = ((self._state==stateObj,nextStateLea) for (stateObj,nextStateLea) in nextStateLeaPerState)
         self._nextStateBlea = Blea.build(*iterNextStateData)
 
     @staticmethod
