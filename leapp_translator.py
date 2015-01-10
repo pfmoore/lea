@@ -30,7 +30,7 @@ from prob_fraction import ProbFraction
 IDENTIFIER_CHARACTERS = string.ascii_letters + string.digits + '_'
 LITERAL_CHARACTERS = IDENTIFIER_CHARACTERS + '#'
 STRING_SEPARATORS = ('"',"'")
-PRINT_SUFFIXES = '%/.' + string.whitespace
+PRINT_SUFFIXES = '%/.-' + string.whitespace
 
 CONTINUATION_LINE_CHARS2 = ','
 
@@ -114,7 +114,7 @@ class LeappTranslator(object):
         tailTarget = ''
         if lenSourceFragment >= 1 and sourceFragment[0] == ':':
             # print statement
-            if len(sourceFragment) <= 2:
+            if len(sourceFragment) <= 1:
                 # empty
                 return "print('')"
             prefixLength = 1
@@ -123,13 +123,20 @@ class LeappTranslator(object):
             if secondChar in PRINT_SUFFIXES:
                 printTypeCode = secondChar
                 prefixLength += 1
+            if len(sourceFragment) >= 3:
+                thirdChar = sourceFragment[2]
+                if thirdChar == '-':
+                    printTypeCode += '-'
+                    prefixLength += 1
             sourceFragment = sourceFragment[prefixLength:]
             headTarget = 'print(('
-            tailTarget = ''     
+            tailTarget = ''
             if printTypeCode == '.':
                 tailTarget += ').asFloat())'
             elif printTypeCode == '%':
                 tailTarget += ').asPct())'
+            elif '-' in printTypeCode:
+                tailTarget = '%s).asString("%s"))' % (tailTarget,printTypeCode)
             else:
                 tailTarget += '))'
         return headTarget + LeappTranslator.getTarget0b(sourceFragment) + tailTarget  
@@ -236,10 +243,8 @@ class LeappTranslator(object):
                                  for ((valStr,probWeightString),probWeight) in zip(distributionItems,probWeights))
             return 'Lea.fromValFreqs(%s)' % newDictExpression
         # dictionary variable: expand items
-        #return 'Lea.fromValFreqsDict(%s)' % dictExpression
         return 'Alea.fromValFreqsDictGen(%s)' % dictExpression
         
-
     @staticmethod
     def treatCPTExpression(cptExpression):
         if '->' in cptExpression:

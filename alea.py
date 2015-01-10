@@ -187,36 +187,94 @@ class Alea(Lea):
             p = (p*mean) / v
         return Alea.fromValFreqs(*valFreqs)
 
+    def asString(self,kind='/',nbDecimals=6,histoSize=100):
+        ''' returns a string representation of probability distribution self;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability in a format depending of given kind, which is string among
+            '/', '.', '%', '-', '/-', '.-', '%-'; 
+            the probabilities are displayed as
+            - if kind[0] is '/' : rational numbers "n/d" or "0" or "1"
+            - if kind[0] is '.' : decimals with given nbDecimals digits
+            - if kind[0] is '%' : percentage decimals with given nbDecimals digits
+            - if kind[0] is '-' : histogram bar made up of repeated '-', such that
+                                  a bar length of histoSize represents a probability 1 
+            if kind[1] is '-', the histogram bars with '-' are appended after 
+                               numerical representation of probabilities
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used
+        '''
+        if kind not in ('/', '.', '%', '-', '/-', '.-', '%-'):
+            raise Lea.Error("invalid display format '%s'"%kind)
+        valueStrings = tuple(str(v) for (v,p) in self._vps)
+        ps = tuple(p for (v,p) in self._vps)
+        vm = max(len(v) for v in valueStrings)
+        linesIter = (v.rjust(vm)+' : ' for v in valueStrings)
+        probRepresentation = kind[0]
+        withHisto = kind[-1] == '-'
+        if probRepresentation == '/':
+            pStrings = tuple(str(p) for p in ps)
+            pm = len(str(max(p for p in ps)))
+            if self._count == 1:
+                den = ''
+            else:
+                den = '/%d' % self._count
+            linesIter = (line+pString.rjust(pm)+den for (line,pString) in zip(linesIter,pStrings))
+        else:
+            c = float(self._count)    
+            if probRepresentation == '.':
+                fmt = "%%s%%.%df" % nbDecimals
+                linesIter = (fmt%(line,p/c) for (line,p) in zip(linesIter,ps))
+            elif probRepresentation == '%':
+                fmt = "%%s%%%d.%df %%%%" % (4+nbDecimals,nbDecimals)
+                linesIter = (fmt%(line,100.*p/c) for (line,p) in zip(linesIter,ps))    
+        if withHisto:
+            c = float(self._count)    
+            linesIter = (line+' '+int(0.5+(p/c)*histoSize)*'-' for (line,p) in zip(linesIter,ps))
+        return '\n'.join(linesIter)
+
     def __str__(self):
         ''' returns a string representation of probability distribution self;
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value  with its
-            respective probability expressed as a rational number "n/d" or "0" or "1";
+            probability expressed as a rational number "n/d" or "0" or "1";
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
             called on evalution of "str(self)" and "repr(self)"
         '''
-        vm = max(len(str(v)) for (v,p) in self._vps)
-        pm = len(str(max(p for (v,p) in self._vps)))
-        if self._count == 1:
-            den = ''
-        else:
-            den = '/%d' % self._count
-        fmt = ("%%%ds : %%%dd" % (vm,pm)) + den
-        return "\n".join(fmt%vp for vp in self._vps)
-
+        return self.asString()
+          
     def asFloat(self,nbDecimals=6):
-        vm = max(len(str(v)) for (v,p) in self._vps)
-        fmt = "%%%ds : %%.%df" % (vm,nbDecimals)
-        count = float(self._count)
-        return "\n".join(fmt%(v,p/count) for (v,p) in self._vps)
+        ''' returns a string representation of probability distribution self;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability expressed as decimal with given nbDecimals digits;
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used;
+        '''
+        return self.asString('.',nbDecimals)
         
     def asPct(self,nbDecimals=1):
-        vm = max(len(str(v)) for (v,p) in self._vps)
-        fmt = "%%%ds : %%%d.%df %%%%" % (vm,4+nbDecimals,nbDecimals)
-        count = float(self._count)
-        return "\n".join(fmt%(v,100.*p/count) for (v,p) in self._vps)
+        ''' returns a string representation of probability distribution self;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability expressed as percentage with given nbDecimals digits;
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used;
+        '''
+        return self.asString('%',nbDecimals)
 
+    def histo(self,size=100):
+        ''' returns a string representation of probability distribution self;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability expressed as a histogram bar made up of repeated '-',
+            such that a bar length of given size represents a probability 1
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used;
+        '''
+        return self.asString('-',histoSize=size)
+        
     def _reset(self):
         pass
 

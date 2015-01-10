@@ -1038,34 +1038,75 @@ class Lea(object):
         if not isinstance(res,bool):    
             raise Lea.Error("condition evaluated as a %s although a boolean is expected"%type(res))    
         return res
-        
+
+    def asString(self,kind='/',nbDecimals=6,chartSize=100):
+        ''' returns, after evaluation of the probability distribution self, a string
+            representation of it;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability in a format depending of given kind, which is string among
+            '/', '.', '%', '-', '/-', '.-', '%-'; 
+            the probabilities are displayed as
+            - if kind[0] is '/' : rational numbers "n/d" or "0" or "1"
+            - if kind[0] is '.' : decimals with given nbDecimals digits
+            - if kind[0] is '%' : percentage decimals with given nbDecimals digits
+            - if kind[0] is '-' : histogram bar made up of repeated '-', such that
+                                  a bar length of histoSize represents a probability 1 
+            if kind[1] is '-', the histogram bars with '-' are appended after 
+                               numerical representation of probabilities
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used
+        '''        
+        return self.getAlea().asString(kind,nbDecimals,chartSize)
+
     def __str__(self):
-        ''' returns, after evaluation of the distribution, a string representation of it;
+        ''' returns, after evaluation of the probability distribution self, a string
+            representation of it;
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value  with its
-            respective probability expressed as a rational number "n/d" or "0" or "1";
+            probability expressed as a rational number "n/d" or "0" or "1";
             if an order relationship is defined on values, then the values are sorted by 
-            increasing order; otherwise, an arbitrary order is used;            
+            increasing order; otherwise, an arbitrary order is used;
             called on evalution of "str(self)" and "repr(self)"
-        '''
+        '''        
         return self.getAlea().__str__()
 
     __repr__ = __str__
 
     def asFloat(self,nbDecimals=6):
-        ''' returns, after evaluation of the distribution, a string representation of it;
-            it is the same as __str__ method , but the the probabilities are floating-point
-            numbers, with the given number of decimals (default = 6)
+        ''' returns, after evaluation of the probability distribution self, a string
+            representation of it;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability expressed as decimal with given nbDecimals digits;
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used;
         '''
         return self.getAlea().asFloat(nbDecimals)
 
     def asPct(self,nbDecimals=1):
-        ''' returns, after evaluation of the distribution, a string representation of it;
-            it is the same as __str__ method , but the the probabilities are displayed as percentage
-            values, with the given number of decimals (default = 1)
+        ''' returns, after evaluation of the probability distribution self, a string
+            representation of it;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability expressed as percentage with given nbDecimals digits;
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used;
         '''
         return self.getAlea().asPct(nbDecimals)
     
+    def histo(self,size=100):
+        ''' returns, after evaluation of the probability distribution self, a string
+            representation of it;
+            it contains one line per distinct value, separated by a newline character;
+            each line contains the string representation of a value with its
+            probability expressed as a histogram bar made up of repeated '-',
+            such that a bar length of given size represents a probability 1
+            if an order relationship is defined on values, then the values are sorted by 
+            increasing order; otherwise, an arbitrary order is used;
+        '''
+        return self.getAlea().histo(size)
+
     def getAlea(self):
         ''' returns an Alea instance representing the distribution after it has been evaluated;
             Note : the returned value is cached (the evaluation occurs only for the first call,
