@@ -40,7 +40,7 @@ class Alea(Lea):
     probabilities are calculated by dividing the counters by the sum of all counters.
     '''
 
-    __slots__ = ('_vps','_count','_integral','_invIntegral','_optIntegral')
+    __slots__ = ('_vps','_count','_cumul','_invCumul','_optCumul')
     
     def __init__(self,vps):
         ''' initializes Alea instance's attributes
@@ -49,9 +49,9 @@ class Alea(Lea):
         self._alea = self
         self._vps = tuple(vps)
         self._count = sum(p for (v,p) in self._vps)
-        self._integral = None
-        self._invIntegral = None
-        self._optIntegral = None
+        self._cumul = None
+        self._invCumul = None
+        self._optCumul = None
 
     # constructor methods
     # -------------------
@@ -290,61 +290,61 @@ class Alea(Lea):
                 return (p,self._count)
         return (0,self._count)
 
-    def integral(self):
+    def cumul(self):
         ''' returns a tuple with couples (x,p) giving the probability weight p that self <= x ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
             Note : the returned value is cached
         '''
-        if self._integral is None:
-            integralList = []
+        if self._cumul is None:
+            cumulList = []
             pSum = 0
             for (v,p) in self._vps:
                 pSum += p
-                integralList.append((v,pSum))
-            self._integral = tuple(integralList)
-        return self._integral
+                cumulList.append((v,pSum))
+            self._cumul = tuple(cumulList)
+        return self._cumul
         
-    def invIntegral(self):
+    def invCumul(self):
         ''' returns a tuple with couples (x,p) giving the probability weight p that self >= x ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
             Note : the returned value is cached
         '''
-        if self._invIntegral is None:
-            invIntegralList = []
+        if self._invCumul is None:
+            invCumulList = []
             pSum = self._count
             for (v,p) in self._vps:
-                invIntegralList.append((v,pSum))
+                invCumulList.append((v,pSum))
                 pSum -= p
-            self._invIntegral = tuple(invIntegralList)
-        return self._invIntegral
+            self._invCumul = tuple(invCumulList)
+        return self._invCumul
         
-    def optIntegral(self):
+    def optCumul(self):
         ''' returns a tuple with couples (x,p) giving the probability weight p that self equals x 
             or precedes it in the sequence of values with decreasing probabilities (i.e. the first
             couples (x,p) are those having the most likely x)
-            Note : this method is used vs integral method to speed up generation of random values
+            Note : this method is used vs cumul method to speed up generation of random values
             Note : the returned value is cached
         '''        
-        if self._optIntegral is None:
-            optIntegralList = []
+        if self._optCumul is None:
+            optCumulList = []
             pSum = 0
             for (v,p) in sorted(self._vps,key=operator.itemgetter(1),reverse=True):
                 pSum += p
-                optIntegralList.append((v,pSum))
-            self._optIntegral = tuple(optIntegralList)
-        return self._optIntegral
+                optCumulList.append((v,pSum))
+            self._optCumul = tuple(optCumulList)
+        return self._optCumul
 
-    def _randomVal(self,integral):
+    def _randomVal(self,cumul):
         ''' returns a random value among the values of self, according to the probabilities
-            given in given integral (see optIntegral method)
+            given in given cumul (see optCumul method)
         '''
         r = randrange(self._count)
         f0 = 0
-        for (x,f1) in integral:
+        for (x,f1) in cumul:
             if f0 <= r < f1:
                 return x
             f0 = f1
@@ -352,15 +352,15 @@ class Alea(Lea):
     def randomVal(self):
         ''' returns a random value among the values of self, according to their probabilities
         '''
-        return self._randomVal(self.optIntegral())
+        return self._randomVal(self.optCumul())
 
     def randomIter(self):
         ''' generates an infinite sequence of random values among the values of self,
             according to their probabilities
         '''
-        optIntegral = self.optIntegral()
+        optCumul = self.optCumul()
         while True:
-            yield self._randomVal(optIntegral)
+            yield self._randomVal(optCumul)
 
     def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
@@ -384,32 +384,32 @@ class Alea(Lea):
             res.sort()
         return tuple(res)
 
-    def pIntegral(self,val):
+    def pCumul(self,val):
         ''' returns, as an integer, the probability weight that self <= val
             note that it is not required that val is in the support of self
         '''
         cp = 0
-        for (v,p) in self.integral():
+        for (v,p) in self.cumul():
             if val < v:
                 break
             cp = p
         return cp
 
-    def pInvIntegral(self,val):
+    def pInvCumul(self,val):
         ''' returns, as an integer, the probability weight that self >= val
             note that it is not required that val is in the support of self
         '''
-        for (v,p) in self.invIntegral():
+        for (v,p) in self.invCumul():
             if val <= v:
                 return p
         return 0
 
     @staticmethod
-    def fastExtremum(integralFunc,*aleaArgs):
+    def fastExtremum(cumulFunc,*aleaArgs):
         ''' returns a new Alea instance giving the probabilities to have the extremum
             value (min or max) of each combination of the given Alea args;
-            integralFunc is the integral function that determines whether max or min is
-            used : respectively, Alea.pIntegral or Alea.pInvIntegral;
+            cumulFunc is the cumul function that determines whether max or min is
+            used : respectively, Alea.pCumul or Alea.pInvCumul;
             the method uses an efficient algorithm (linear complexity), which is
             due to Nicky van Foreest; for explanations, see
             http://nicky.vanforeest.com/scheduling/cpm/stochasticMakespan.html
@@ -420,11 +420,11 @@ class Alea(Lea):
             (aleaArg1,aleaArg2) = aleaArgs
             valFreqsDict = defaultdict(int)
             for (v,p) in aleaArg1.genVPs():
-                valFreqsDict[v] = p * integralFunc(aleaArg2,v)
+                valFreqsDict[v] = p * cumulFunc(aleaArg2,v)
             for (v,p) in aleaArg2.genVPs():
-                valFreqsDict[v] += (integralFunc(aleaArg1,v)-aleaArg1._p(v)[0]) * p
+                valFreqsDict[v] += (cumulFunc(aleaArg1,v)-aleaArg1._p(v)[0]) * p
             return Lea.fromValFreqsDict(valFreqsDict)
-        return Alea.fastExtremum(integralFunc,aleaArgs[0],Alea.fastExtremum(integralFunc,*aleaArgs[1:]))
+        return Alea.fastExtremum(cumulFunc,aleaArgs[0],Alea.fastExtremum(cumulFunc,*aleaArgs[1:]))
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
 

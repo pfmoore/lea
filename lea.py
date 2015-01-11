@@ -522,10 +522,10 @@ class Lea(object):
         '''
         count = self.getAlea()._count
         if val is None:
-            return tuple(float(p)/count for (v,p) in self.integral())
+            return tuple(float(p)/count for (v,p) in self.cumul())
         else:
             cp = 0.0
-            for (v,p) in self.integral():
+            for (v,p) in self.cumul():
                 if val < v:
                     break 
                 cp = p
@@ -649,7 +649,7 @@ class Lea(object):
             prohibitively slower (exponential complexity)
         '''
         aleaArgs = tuple(Lea.coerce(arg).getAlea() for arg in args)
-        return Alea.fastExtremum(Alea.pIntegral,*aleaArgs)
+        return Alea.fastExtremum(Alea.pCumul,*aleaArgs)
     
     @staticmethod
     def fastMin(*args):
@@ -668,7 +668,7 @@ class Lea(object):
             slower (exponential complexity)
         '''
         aleaArgs = tuple(Lea.coerce(arg).getAlea() for arg in args)
-        return Alea.fastExtremum(Alea.pInvIntegral,*aleaArgs)
+        return Alea.fastExtremum(Alea.pInvCumul,*aleaArgs)
         
     @staticmethod
     def max(*args):
@@ -1128,7 +1128,7 @@ class Lea(object):
         '''
         return self.getAlea()
         
-    def integral(self):
+    def cumul(self):
         ''' evaluates the distribution, then,
             returns a tuple with couples (x,p) giving the probability weight p that self <= x ;
             the sequence follows the order defined on values (if an order relationship is defined
@@ -1136,9 +1136,9 @@ class Lea(object):
             order is used, fixed from call to call
             Note : the returned value is cached
         '''
-        return self.getAlea().integral()
+        return self.getAlea().cumul()
         
-    def invIntegral(self):
+    def invCumul(self):
         ''' evaluates the distribution, then,
             returns a tuple with couples (x,p) giving the probability weight p that self >= x ;
             the sequence follows the order defined on values (if an order relationship is defined
@@ -1146,7 +1146,7 @@ class Lea(object):
             order is used, fixed from call to call
             Note : the returned value is cached
         '''
-        return self.getAlea().invIntegral()
+        return self.getAlea().invCumul()
         
     def randomIter(self):
         ''' evaluates the distribution, then,
