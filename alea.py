@@ -435,9 +435,11 @@ class Alea(Lea):
             probability weighted sum of the values;
             requires that
             1 - the values can be subtracted together,
-            2 - the differences of values can be multiplied by floating-point numbers,
-            3 - the differences of values multiplied by floating-point numbers can be
-                added to the values;
+            2 - the differences of values can be multiplied by integers,
+            3 - the differences of values multiplied by integers can be
+                added to the values,
+            4 - the sum of values calculated in 3 can be divided by a float
+                or an integer;
             if any of these conditions is not met, then the result depends of the
             value class implementation (likely, raised exception)
             WARNING: this method is called without parentheses
@@ -452,7 +454,12 @@ class Alea(Lea):
             else:
                 res += p * (x-x0)
         if res is not None:
-            x0 += res / float(self._count)
+            try:
+                x0 += res / float(self._count)
+            except:
+                # if the / operator is not supported with float as denominator
+                # e.g. datetime.timedelta in Python 2.x 
+                x0 += res / self._count    
         return x0
    
     def var(self):
