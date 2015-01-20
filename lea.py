@@ -475,7 +475,7 @@ class Lea(object):
         '''
         if val is None:
             count = self.getAlea()._count
-            return tuple(ProbFraction(p,count) for (v,p) in self.vps())
+            return tuple(ProbFraction(p,count) for p in self.ps())
         return ProbFraction(*self._p(val))
  
     def vps(self):
@@ -483,7 +483,7 @@ class Lea(object):
             and p is the associated probability weight (integer > 0);
             the sequence follows the order defined on values
         '''
-        return self.getAlea()._vps
+        return self.getAlea()._genVPs()
 
     def vals(self):
         ''' returns a tuple with values of self
@@ -491,12 +491,20 @@ class Lea(object):
             if order is undefined (e.g. complex numbers), then the order is
             arbitrary but fixed from call to call
         '''
-        return tuple(v for (v,p) in self.vps())
+        return self.getAlea()._vs
 
+    def ps(self):
+        ''' returns a tuple with probability weights (integer > 0) of self
+            the sequence follows the increasing order defined on values
+            if order is undefined (e.g. complex numbers), then the order is
+            arbitrary but fixed from call to call
+        '''
+        return self.getAlea()._ps
+        
     def support(self):
         ''' same as vals method
         '''
-        return tuple(v for (v,p) in self.vps())
+        return self.vals()
               
     def pmf(self,val=None):
         ''' probability mass function
@@ -507,10 +515,10 @@ class Lea(object):
             ordered sequence)
         '''
         if val is None:
-            count = self.getAlea()._count
-            return tuple(float(p)/count for (v,p) in self.vps())
+            count = float(self.getAlea()._count)
+            return tuple(p/count for p in self.ps())
         (p,count) = self._p(val)
-        return float(p) / count
+        return p / float(count)
         
     def cdf(self,val=None):
         ''' cumulative distribution function
@@ -520,16 +528,10 @@ class Lea(object):
             in the same order as defined on values (call vals method to get this 
             ordered sequence); the last probability is always 1.0 
         '''
-        count = self.getAlea()._count
+        count = float(self.getAlea()._count)
         if val is None:
-            return tuple(float(p)/count for (v,p) in self.cumul())
-        else:
-            cp = 0.0
-            for (v,p) in self.cumul():
-                if val < v:
-                    break 
-                cp = p
-            return float(cp) / count
+            return tuple(p/count for p in self.cumul()[1:])
+        return self.getAlea().pCumul(val)/count
 
     def _p(self,val):
         ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
@@ -1130,7 +1132,7 @@ class Lea(object):
         
     def cumul(self):
         ''' evaluates the distribution, then,
-            returns a tuple with couples (x,p) giving the probability weight p that self <= x ;
+            returns a tuple with probability weights p that self <= value ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
@@ -1140,7 +1142,7 @@ class Lea(object):
         
     def invCumul(self):
         ''' evaluates the distribution, then,
-            returns a tuple with couples (x,p) giving the probability weight p that self >= x ;
+            returns a tuple with the probability weights p that self >= value ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call

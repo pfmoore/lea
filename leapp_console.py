@@ -33,7 +33,7 @@ CONTINUATION_LINE_CHARS = '(,:\\'
 
 from leapp_translator import LeappTranslator
 import license
-from toolbox import inputFunc
+from toolbox import input
 
 import traceback
 
@@ -82,7 +82,7 @@ class LeappConsole(object):
         readLines = []
         prompt = self.prompt1
         while True:
-            readLine = inputFunc(prompt).rstrip()
+            readLine = input(prompt).rstrip()
             if len(readLine) == 0:
                 break
             lastChar = readLine[-1]

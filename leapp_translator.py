@@ -25,6 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 import string
 from prob_fraction import ProbFraction
+from toolbox import zip
 
 # leapp internal configuration parameters, language-dependant
 IDENTIFIER_CHARACTERS = string.ascii_letters + string.digits + '_'

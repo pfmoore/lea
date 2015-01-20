@@ -25,7 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from lea import Lea
 from prob_fraction import ProbFraction
-from toolbox import calcLCM
+from toolbox import calcLCM, zip
 
 class Mlea(Lea):
     

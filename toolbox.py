@@ -28,6 +28,8 @@ The module toolbox provides general functions and constants needed by Lea classe
 '''
 
 from math import log
+from functools import wraps
+import sys
 
 def calcGCD(a,b):
     ''' returns the greatest common divisor between the given integer arguments
@@ -75,10 +77,37 @@ def easyMax(*args):
         return args[0]
     return max(args)
 
-# standard input function
-try:
+# Python 2 / 3 dependencies
+# standard input function and zip as iterator
+if sys.version_info.major == 2:
     # Python 2.x
-    inputFunc = raw_input
-except NameError:
+    input = raw_input
+    from itertools import izip as zip
+    def next(it):
+        return it.next()
+else:
     # Python 3.x
-    inputFunc = input
+    input = input
+    zip = zip
+    next = next
+
+def memoize(f):
+   ''' returns a memoized version of the given instance method f;
+       requires that the instance has a _cachesByFunc attribute
+       referring to a dictionary;
+       can be used as a decorator
+       note: not usable on functions and static methods
+   '''
+   @wraps(f)
+   def wrapper(self,*args):
+       cache = self._cachesByFunc.get(f)
+       if cache is None:
+           # first call to self.f(...) -> build a new cache for f
+           cache = self._cachesByFunc[f] = {}
+       if args in cache:
+           # first call to self.f(*args) -> returns the cached result
+           return cache[args]
+       # first call to self.f(*args) -> put self.f(*args) in the cache    
+       res = cache[args] = f(self,*args)
+       return res
+   return wrapper

@@ -25,7 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 import license
 from leapp_translator import LeappTranslator
-from toolbox import inputFunc
+from toolbox import input
 
 PY_FILE_HEADER = '''
 # ----------------------------------------------------------------------------- 
@@ -79,7 +79,7 @@ class LeappCompiler(object):
         if force or not os.path.exists(pythonFilename):
             canWrite = True
         else:
-            res = inputFunc("overwrite %s (y/n)? "%pythonFilename)
+            res = input("overwrite %s (y/n)? "%pythonFilename)
             canWrite = res.strip().lower() == 'y'
         if canWrite:         
             pMultilineStatement = PY_FILE_HEADER%(pythonFilename,license.VER,leaFilename) + pMultilineStatement

@@ -26,9 +26,10 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 from lea import Lea
 from prob_fraction import ProbFraction
 from random import randrange
+from bisect import bisect_left, bisect_right
 from math import log, sqrt, exp
 from collections import defaultdict
-from toolbox import LOG2
+from toolbox import LOG2, memoize, zip, next
 import operator
 
 class Alea(Lea):
@@ -40,18 +41,18 @@ class Alea(Lea):
     probabilities are calculated by dividing the counters by the sum of all counters.
     '''
 
-    __slots__ = ('_vps','_count','_cumul','_invCumul','_optCumul')
+    __slots__ = ('_vs','_ps','_count','_cumul','_invCumul','_cachesByFunc')
     
     def __init__(self,vps):
         ''' initializes Alea instance's attributes
         '''
         Lea.__init__(self)
         self._alea = self
-        self._vps = tuple(vps)
-        self._count = sum(p for (v,p) in self._vps)
+        (self._vs,self._ps) = zip(*vps)
+        self._count = sum(self._ps)
         self._cumul = None
         self._invCumul = None
-        self._optCumul = None
+        self._cachesByFunc = {}
 
     # constructor methods
     # -------------------
@@ -206,8 +207,8 @@ class Alea(Lea):
         '''
         if kind not in ('/', '.', '%', '-', '/-', '.-', '%-'):
             raise Lea.Error("invalid display format '%s'"%kind)
-        valueStrings = tuple(str(v) for (v,p) in self._vps)
-        ps = tuple(p for (v,p) in self._vps)
+        valueStrings = tuple(str(v) for v in self._vs)
+        ps = tuple(p for p in self._ps)
         vm = max(len(v) for v in valueStrings)
         linesIter = (v.rjust(vm)+' : ' for v in valueStrings)
         probRepresentation = kind[0]
@@ -279,36 +280,39 @@ class Alea(Lea):
         pass
 
     def _clone(self,cloneTable):
-        return Alea(self._vps)
+        return Alea(self._genVPs())
         
     def _genVPs(self):
-        return iter(self._vps)
-
+        return zip(self._vs,self._ps)
+        
     def _p(self,val):
-        for (v,p) in self._vps:
+        for (v,p) in self._genVPs():
             if v == val:
                 return (p,self._count)
         return (0,self._count)
 
     def cumul(self):
-        ''' returns a tuple with couples (x,p) giving the probability weight p that self <= x ;
-            the sequence follows the order defined on values (if an order relationship is defined
+        ''' returns a tuple with the probability weights p that self <= value ;
+            there is one element more than number of values; the first element is 0, then
+            the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
             Note : the returned value is cached
         '''
         if self._cumul is None:
-            cumulList = []
+            cumulList = [0]
             pSum = 0
-            for (v,p) in self._vps:
+            for p in self._ps:
                 pSum += p
-                cumulList.append((v,pSum))
+                cumulList.append(pSum)
             self._cumul = tuple(cumulList)
         return self._cumul
         
+        
     def invCumul(self):
-        ''' returns a tuple with couples (x,p) giving the probability weight p that self >= x ;
-            the sequence follows the order defined on values (if an order relationship is defined
+        ''' returns a tuple with the probability weights p that self >= value ;
+            there is one element more than number of values; the first element is 0, then
+            the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
             Note : the returned value is cached
@@ -316,52 +320,28 @@ class Alea(Lea):
         if self._invCumul is None:
             invCumulList = []
             pSum = self._count
-            for (v,p) in self._vps:
-                invCumulList.append((v,pSum))
+            for p in self._ps:
+                invCumulList.append(pSum)
                 pSum -= p
+            invCumulList.append(0)
             self._invCumul = tuple(invCumulList)
         return self._invCumul
-        
-    def optCumul(self):
-        ''' returns a tuple with couples (x,p) giving the probability weight p that self equals x 
-            or precedes it in the sequence of values with decreasing probabilities (i.e. the first
-            couples (x,p) are those having the most likely x)
-            Note : this method is used vs cumul method to speed up generation of random values
-            Note : the returned value is cached
-        '''        
-        if self._optCumul is None:
-            optCumulList = []
-            pSum = 0
-            for (v,p) in sorted(self._vps,key=operator.itemgetter(1),reverse=True):
-                pSum += p
-                optCumulList.append((v,pSum))
-            self._optCumul = tuple(optCumulList)
-        return self._optCumul
-
-    def _randomVal(self,cumul):
-        ''' returns a random value among the values of self, according to the probabilities
-            given in given cumul (see optCumul method)
-        '''
-        r = randrange(self._count)
-        f0 = 0
-        for (x,f1) in cumul:
-            if f0 <= r < f1:
-                return x
-            f0 = f1
-
+            
     def randomVal(self):
         ''' returns a random value among the values of self, according to their probabilities
         '''
-        return self._randomVal(self.optCumul())
-
+        return next(self.randomIter())
+        
     def randomIter(self):
         ''' generates an infinite sequence of random values among the values of self,
             according to their probabilities
         '''
-        optCumul = self.optCumul()
+        count = self._count
+        probs = self.cumul()[1:]
+        vals = self._vs
         while True:
-            yield self._randomVal(optCumul)
-
+            yield vals[bisect_right(probs,randrange(count))]    
+        
     def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
             in a random order respecting the probabilities
@@ -371,38 +351,40 @@ class Alea(Lea):
             if sorted is True, then the returned tuple is sorted
         '''
         if n is None:
-           n = len(self._vps)
-        lea = self
+           n = len(self._vs)
+        elif n < 0:
+            raise Lea.Error("randomDraw method requires a positive integer")    
+        if n == 0:
+            return ()
+        lea1 = self
         res = []
-        while n > 0:
-            n -= 1
-            lea = lea.getAlea()
-            x = lea.random()
+        while True:
+            lea1 = lea1.getAlea()
+            x = lea1.random()
             res.append(x)
-            lea = lea.given(lea!=x)
+            n -= 1
+            if n == 0:
+                break
+            lea1 = lea1.given(lea1!=x)
         if sorted:
             res.sort()
         return tuple(res)
 
+    @memoize
     def pCumul(self,val):
         ''' returns, as an integer, the probability weight that self <= val
             note that it is not required that val is in the support of self
         '''
-        cp = 0
-        for (v,p) in self.cumul():
-            if val < v:
-                break
-            cp = p
-        return cp
+        probs = self.cumul()
+        return probs[bisect_right(self._vs,val)] 
 
+    @memoize
     def pInvCumul(self,val):
         ''' returns, as an integer, the probability weight that self >= val
             note that it is not required that val is in the support of self
         '''
-        for (v,p) in self.invCumul():
-            if val <= v:
-                return p
-        return 0
+        probs = self.invCumul()
+        return probs[bisect_left(self._vs,val)] 
 
     @staticmethod
     def fastExtremum(cumulFunc,*aleaArgs):
@@ -446,7 +428,7 @@ class Alea(Lea):
         '''
         res = None
         x0 = None
-        for (x,p) in self._vps:
+        for (x,p) in self._genVPs():
             if x0 is None:
                 x0 = x
             elif res is None:
@@ -474,7 +456,7 @@ class Alea(Lea):
         '''
         res = 0
         m = self.mean
-        for (v,p) in self._vps:
+        for (v,p) in self._genVPs():
             res += p*(v-m)**2
         return res / float(self._count)    
 
@@ -491,7 +473,7 @@ class Alea(Lea):
         '''
         res = 0
         count = float(self._count)
-        for (v,p) in self._vps:
+        for (v,p) in self._genVPs():
             if p > 0:
                p /= count
                res -= p*log(p)
