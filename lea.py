@@ -4,7 +4,7 @@
     lea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014 Pierre Denis
+Copyright 2013, 2014, 2015 Pierre Denis
 
 This file is part of Lea.
 
@@ -63,7 +63,7 @@ class Lea(object):
 
     - Any object X, which is not a Lea instance, involved as argument of an
     expression containing a Lea instance, is coerced to a Lea instance
-    having X has sole value, with probabilty 1 (i.e. occurrence of X is certain).
+    having X has sole value, with probability 1 (i.e. occurrence of X is certain).
 
     - Lea instances can be compared together, through ==, !=, <, <=, >, >= operators.
     The resulting distribution is a boolean distribution, giving probability of True result
@@ -237,7 +237,7 @@ class Lea(object):
     @staticmethod
     def boolProb(pNum,pDen=None):
         ''' static method, returns an Alea instance representing a boolean
-            distribution such that probabilty of True is pNum/pDen
+            distribution such that probability of True is pNum/pDen
             if pDen is None, then pNum expresses the probability as a Fraction
         '''
         if pDen is None:
@@ -248,13 +248,43 @@ class Lea(object):
         return Alea.fromValFreqs((True,pNum),(False,pDen-pNum))
 
     @staticmethod
-    def poisson(mean):
+    def bernoulli(pNum,pDen=None):
+        ''' static method, returns an Alea instance representing a bernoulli
+            distribution giving 1 with probability pNum/pDen and 0 with
+            complementary probability;
+            if pDen is None, then pNum expresses the probability as a Fraction
+        '''
+        if pDen is None:
+            # pNum is expected to be a Fraction
+            pDen = pNum.denominator
+            pNum = pNum.numerator
+        ProbFraction(pNum,pDen).check()
+        return Alea.fromValFreqs((1,pNum),(0,pDen-pNum))
+
+    @staticmethod
+    def binom(n,pNum,pDen=None):
+        ''' static method, returns an Alea instance representing a binomial
+            distribution giving the number of successes among a number n of 
+            independent experiments, each having probability pNum/pDen of success;  
+            if pDen is None, then pNum expresses the probability as a Fraction
+        '''
+        return Lea.bernoulli(pNum,pDen).times(n)
+
+    @staticmethod
+    def poisson(mean,precision=1e-20):
         ''' static method, returns an Alea instance representing a Poisson probability
             distribution having the given mean; the distribution is approximated by
-            the finite set of values that have non-null probability float representation
-            (i.e. high values with too small probabilities are dropped)
+            the finite set of values that have probability > precision (= 1e-20 by default)
+            (i.e. low/high values with too small probabilities are dropped)
         '''
-        return Alea.poisson(mean)
+        return Alea.poisson(mean,precision)
+
+    @staticmethod
+    def interval(fromVal,toVal):
+        ''' static method, returns an Alea instance representing a uniform probability
+            distribution, for all the integers in the interval [fromVal,toVal]
+        '''
+        return Lea.fromVals(*range(fromVal,toVal+1))
 
 
     # constructor methods

@@ -4,7 +4,7 @@
     alea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014 Pierre Denis
+Copyright 2013, 2014, 2015 Pierre Denis
 
 This file is part of Lea.
 
@@ -31,6 +31,8 @@ from math import log, sqrt, exp
 from collections import defaultdict
 from toolbox import LOG2, memoize, zip, next
 import operator
+import sys
+
 
 class Alea(Lea):
     
@@ -166,23 +168,19 @@ class Alea(Lea):
         return Alea._fromValFreqs(valueFreqs,False)
 
     @staticmethod
-    def poisson(mean):
+    def poisson(mean,precision):
         ''' static method, returns an Alea instance representing a Poisson probability
             distribution having the given mean; the distribution is approximated by
-            the finite set of values that have non-null probability float representation
-            (i.e. high values with too small probabilities are dropped)
+            the finite set of values that have probability > precision
+            (i.e. low/high values with too small probabilities are dropped)
         '''
-        # TODO: improve implementation
-        from sys import maxsize
+        precFactor = 0.5 / precision
         valFreqs = []
         p = exp(-mean)
         v = 0
         t = 0.
-        while True:
-            n = int(p*maxsize)
-            if n <= 0:
-                break
-            valFreqs.append((v,n))
+        while p > 0.0:
+            valFreqs.append((v,int(0.5+p*precFactor)))
             t += p
             v += 1
             p = (p*mean) / v
@@ -208,7 +206,7 @@ class Alea(Lea):
         if kind not in ('/', '.', '%', '-', '/-', '.-', '%-'):
             raise Lea.Error("invalid display format '%s'"%kind)
         valueStrings = tuple(str(v) for v in self._vs)
-        ps = tuple(p for p in self._ps)
+        ps = self._ps
         vm = max(len(v) for v in valueStrings)
         linesIter = (v.rjust(vm)+' : ' for v in valueStrings)
         probRepresentation = kind[0]
