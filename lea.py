@@ -290,35 +290,21 @@ class Lea(object):
     # constructor methods
     # -------------------
 
-    def withProb(self,condLea,pNum,pDen):
+    def withProb(self,condLea,pNum,pDen=None):
         ''' returns a new Alea instance from current distribution,
             such that pNum/pDen is the probability that condLea is true
+            if pDen is None, then pNum expresses the probability as a Fraction
         '''
-        if not (0 <= pNum <= pDen):
-            raise Lea.Error("%d/%d is outside the probability range [0,1]"%(pNum,pDen))
-        condLea = Lea.coerce(condLea)
-        d = self.map(lambda v:condLea.isTrue()).getAlea()
-        e = dict(d.genVPs())
-        eT = e.get(True,0)
-        eF = e.get(False,0)
-        # new probabilities
-        nT = pNum
-        nF = pDen - pNum
-        # feasibility checks
-        if eT == 0 and nT > 0:
-            raise Lea.Error("unfeasible: probability shall remain 0")
-        if eF == 0 and nF > 0:
-            raise Lea.Error("unfeasible: probability shall remain 1")
-        w = { True  : nT,
-              False : nF }
-        m = 1
-        for r in e.values():
-            m *= r      
-        # factors to be applied on current probabilities
-        # depending on the truth value of condLea on each value
-        w2 = dict((cg,w[cg]*(m//ecg)) for (cg,ecg) in e.items())
-        return Alea.fromValFreqs(*((v,p*w2[condLea.isTrue()]) for (v,p) in self.genVPs()))
-
+        curCondLea = Lea.coerce(condLea)
+        reqCondLea = Lea.boolProb(pNum,pDen)
+        if reqCondLea.isTrue():
+            lea1 = self.given(curCondLea)
+        elif not reqCondLea.isFeasible():
+            lea1 = self.given(~curCondLea)
+        else:    
+            lea1 = Blea.build((reqCondLea,self.given(curCondLea)),(None,self.given(~curCondLea)))
+        return lea1.getAlea()
+        
     def withCondProb(self,condLea,givenCondLea,pNum,pDen):
         ''' [DEPRECATED: use Lea.revisedWithCPT instead]
             returns a new Alea instance from current distribution,
