@@ -43,8 +43,8 @@ class Rlea(Lea):
             pcount *= count
         self._factors = dict((lea_,pcount//count) for (lea_,count) in leaCounts)
          
-    def _reset(self):
-        self._leaOfLeas.reset()
+    def _getLeaChildren(self):
+        return (self._leaOfLeas,)
 
     def _clone(self,cloneTable):
         return Rlea(self._leaOfLeas.clone(cloneTable))    

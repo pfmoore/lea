@@ -273,9 +273,16 @@ class Alea(Lea):
             increasing order; otherwise, an arbitrary order is used;
         '''
         return self.asString('-',histoSize=size)
-        
-    def _reset(self):
-        pass
+                
+    def getAleaLeavesSet(self):
+        ''' returns a set containing all the Alea leaves in the tree having the root self
+            in the present case of Alea instance, it returns the singleton set with self as element
+        '''
+        return frozenset((self,))        
+     
+    def _getLeaChildren(self):
+        # Alea instance has no children
+        return ()
 
     def _clone(self,cloneTable):
         return Alea(self._genVPs())

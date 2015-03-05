@@ -151,12 +151,19 @@ class Lea(object):
         '''
         return '%s#%s'%(self.__class__.__name__,id(self))
 
-    def reset(self):
-        ''' removes current value binding;
-            this calls _reset() method implemented in Lea subclasses
+    def getAleaLeavesSet(self):
+        ''' returns a set containing all the Alea leaves in the tree having the root self
+            this calls _getLeaChildren() method implemented in Lea subclasses
         '''
+        return frozenset(aleaLeaf for leaChild in self._getLeaChildren() for aleaLeaf in leaChild.getAleaLeavesSet())
+
+    def reset(self):
+        ''' removes current value binding (to be use only in case of brutal halt of genVPs());
+            this calls _getLeaChildren() method implemented in Lea subclasses
+         '''
         self._val = self
-        self._reset()
+        for leaChild in self._getLeaChildren():
+            leaChild.reset()
          
     def clone(self,cloneTable=None):
         ''' returns a deep copy of current Lea, without any value binding;
@@ -472,14 +479,14 @@ class Lea(object):
         '''
         other = Lea.coerce(other)
         # set(...) is used to avoid any dependency on the order of values
-        res = set(self.vps()) == set(other.vps())
+        res = frozenset(self.vps()) == frozenset(other.vps())
         if not res:
             # the previous test assumed that the instances have the same denominator
             # this is not the case if one of them has been created with fromValFreqsNR method
             # make an 'advanced' test, by insuring that both instances have the same denominator
             s = Alea.fromValFreqs(*self.vps())
             o = Alea.fromValFreqs(*other.vps())
-            res = set(s.vps()) == set(o.vps()) 
+            res = frozenset(s.vps()) == frozenset(o.vps()) 
         return res
 
     def p(self,val=None):

@@ -45,9 +45,8 @@ class Mlea(Lea):
         lcm = calcLCM(counts)
         self._factors = tuple(lcm//count for count in counts)        
 
-    def _reset(self):
-        for leaArg in self._leaArgs:
-            leaArg.reset()
+    def _getLeaChildren(self):
+        return self._leaArgs
 
     def _clone(self,cloneTable):
         return Mlea(*(leaArg.clone(cloneTable) for leaArg in self._leaArgs))

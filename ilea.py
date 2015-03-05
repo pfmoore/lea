@@ -35,20 +35,18 @@ class Ilea(Lea):
     a given distibution <Vi,p(Vi|C)>, assuming that a given condition C is verified (see Blea class).
     '''
 
-    __slots__ = ('_lea1','_condLea') #,'_lcm')
+    __slots__ = ('_lea1','_condLea')
 
-    def __init__(self,lea1,condLea):
+    def __init__(self,lea1,condLea):     
         if not condLea.isFeasible():
             raise Lea.Error("conditional probability with unfeasible condition")
         Lea.__init__(self)
         self._lea1 = lea1
         self._condLea = condLea
 
-    def _reset(self):
-        self._lea1.reset()
-        if self._condLea is not None:
-            self._condLea.reset()
-
+    def _getLeaChildren(self):
+        return (self._lea1,self._condLea)
+    
     def _clone(self,cloneTable):
         return Ilea(self._lea1.clone(cloneTable),self._condLea.clone(cloneTable))
         
@@ -66,7 +64,9 @@ class Ilea(Lea):
 
     def getCount(self):
         prevCount = None
+        #s = 0
         for (cv,cp) in self._condLea.genVPs():
+            #s += cp
             if cv is True:
                 # the condition is true, for some binding of variables
                 count = sum(p for (v,p) in self._lea1.genVPs())
@@ -77,4 +77,4 @@ class Ilea(Lea):
                 pass
             else:
                 raise Lea.Error("boolean expression expected")
-        return count
+        return count  # *s

@@ -42,10 +42,9 @@ class Clea(Lea):
         Lea.__init__(self)
         self._leaArgs = tuple(Lea.coerce(arg) for arg in args)
 
-    def _reset(self):
-        for leaArg in self._leaArgs:
-            leaArg.reset()
-
+    def _getLeaChildren(self):
+        return self._leaArgs
+    
     def _clone(self,cloneTable):
         return Clea(*(leaArg.clone(cloneTable) for leaArg in self._leaArgs))
 

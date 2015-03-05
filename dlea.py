@@ -42,8 +42,8 @@ class Dlea(Lea):
         self._lea1 = lea1
         self._nbValues = nbValues
 
-    def _reset(self):
-        self._lea1.reset()
+    def _getLeaChildren(self):
+        return (self._lea1,)
 
     def _clone(self,cloneTable):
         return Dlea(self._lea1.clone(cloneTable),self._nbValues)

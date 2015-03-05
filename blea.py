@@ -87,13 +87,16 @@ class Blea(Lea):
         # check that conditions are disjoint
         for (condLea1,condLea2) in Blea.__genPairs(condLeas):
             if (condLea1&condLea2).isFeasible():
-                raise Lea.Error("clause conditions are not disjoint")        
-        orCondsLea = Lea.false
+                raise Lea.Error("clause conditions are not disjoint")
+        orCondsLea = None
         for condLea in condLeas:
             # check that all conditions are feasible        
             if not condLea.isFeasible():
                 raise Lea.Error("some clause condition is not feasible")
-            orCondsLea |= condLea            
+            if orCondsLea is None:
+                orCondsLea = condLea
+            else:       
+                orCondsLea |= condLea
         isClauseSetComplete = orCondsLea.isTrue()
         if priorLea is not None:
             # prior distribution: determine elseClauseResult
@@ -129,16 +132,31 @@ class Blea(Lea):
                 # TODO? : assume a uniform prior distribution ? ... which values ? 
                 raise Lea.Error("incomplete clause set requires 'other' clause or prior probabilities")
         if elseClauseResult is not None:
-            normClauseLeas += ((~orCondsLea,Lea.coerce(elseClauseResult)),)  
-        return Blea(*(Ilea(resultLea,condLea) for (condLea,resultLea) in normClauseLeas))
+            elseCondLea = ~orCondsLea
+            normClauseLeas += ((elseCondLea,Lea.coerce(elseClauseResult)),)
+            # note that orCondsLea is NOT extended with rCondsLea |= elseCondLea
+            # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true  
+        # the following treatment is needed only in case of context-specific independence
+        # which occurs if at least one given conditions miss variable(s) present in other conditions
+        # and if such missing variables have multiple values (e.g. not values coerced to Lea)  
+        aleaLeavesSet = frozenset(aleaLeaf for aleaLeaf in orCondsLea.getAleaLeavesSet() if aleaLeaf._count > 1)
+        ileas = []
+        for (condLea,resultLea) in normClauseLeas:
+            missingAleaLeavesSet = aleaLeavesSet - condLea.getAleaLeavesSet()
+            for missingAleaLeaf in missingAleaLeavesSet:
+                # the current given condition misses variable(s) present in other conditions
+                # add dummy condition(s) with missing variable(s), always true,
+                # just to have the right balance of probability weights
+                condLea &= (missingAleaLeaf==missingAleaLeaf)
+            ileas.append(Ilea(resultLea,condLea))
+        return Blea(*ileas)    
     
-    def _reset(self):
-        for iLea in self._iLeas:
-            iLea.reset()
-        
+    def _getLeaChildren(self):
+        return self._iLeas
+    
     def _clone(self,cloneTable):
         return Blea(*(iLea.clone(cloneTable) for iLea in self._iLeas))
-        
+
     def _genVPs(self):
         for (iLea,f) in zip(self._iLeas,self._factors):
             for (v,p) in iLea.genVPs():

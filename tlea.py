@@ -45,8 +45,8 @@ class Tlea(Lea):
         if nTimes <= 0:
             raise Lea.Error("times method requires a strictly positive integer")
 
-    def _reset(self):
-        self._lea1.reset()
+    def _getLeaChildren(self):
+        return (self._lea1,)
 
     def _clone(self,cloneTable):
         return Tlea(self._op,self._lea1.clone(cloneTable),self._nTimes)
