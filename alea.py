@@ -415,7 +415,7 @@ class Alea(Lea):
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
 
-    indicatorMethodNames = ('mean','var','std','entropy','information')
+    indicatorMethodNames = ('mean','var','std','mode','entropy','information')
 
     def mean(self):
         ''' returns the mean value of the probability distribution, which is the
@@ -466,14 +466,21 @@ class Alea(Lea):
         return res / float(self._count)    
 
     def std(self):
-        ''' returns a float number representing the standard deviation of the distribution
+        ''' returns a float number representing the standard deviation of the probability distribution
             requires that the requirements of the variance() method are met
             WARNING: this method is called without parentheses
         '''      
         return sqrt(self.var)
-        
+ 
+    def mode(self):
+        ''' returns a tuple with the value(s) of the probability distribution having the highest probability 
+            WARNING: this method is called without parentheses
+        '''
+        maxP = max(self._ps)
+        return tuple(v for (v,p) in self._genVPs() if p == maxP)
+            
     def entropy(self):
-        ''' returns a float number representing the entropy of the distribution
+        ''' returns a float number representing the entropy of the probability  distribution
             WARNING: this method is called without parentheses
         '''
         res = 0
