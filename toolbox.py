@@ -78,18 +78,44 @@ def easyMax(*args):
     return max(args)
 
 # Python 2 / 3 dependencies
-# standard input function and zip as iterator
+# the following redefines / rebinds the following objects in Python2: 
+#  input
+#  zip
+#  next
+#  dict
+#  defaultdict
+# these shall be imported by all modules that uses such names
+
+# standard input function, zip and dictionary methods as iterators
+from collections import defaultdict
 if sys.version_info.major == 2:
     # Python 2.x
+    # the goal of this part is to mimic a Python3 env in a Python2 env
+    # rename raw_input method
     input = raw_input
+    # zip as iterator shall be imported
     from itertools import izip as zip
+    # next method shall be accessible as function
     def next(it):
         return it.next()
+    # the dictionary classes shall have keys, values, items methods
+    # wich are iterators; note that dictionaries must be created
+    # with dict() instead of {}
+    class dict(dict):
+        keys = dict.iterkeys
+        values = dict.itervalues
+        items = dict.iteritems
+    class defaultdict(defaultdict):
+        keys = defaultdict.iterkeys
+        values = defaultdict.itervalues
+        items = defaultdict.iteritems
 else:
     # Python 3.x
+    # the following trick is needed to be able to import the names
     input = input
     zip = zip
     next = next
+    dict = dict
 
 def memoize(f):
    ''' returns a memoized version of the given instance method f;
@@ -103,7 +129,7 @@ def memoize(f):
        cache = self._cachesByFunc.get(f)
        if cache is None:
            # first call to self.f(...) -> build a new cache for f
-           cache = self._cachesByFunc[f] = {}
+           cache = self._cachesByFunc[f] = dict()
        if args in cache:
            # first call to self.f(*args) -> returns the cached result
            return cache[args]

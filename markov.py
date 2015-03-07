@@ -26,7 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 from lea import Lea 
 from alea import Alea 
 from blea import Blea
-from toolbox import zip
+from toolbox import zip, dict
 from itertools import islice, tee
 
 class Chain(object):
@@ -72,7 +72,7 @@ class Chain(object):
         (fromStateObjIter,toStateObjIter) = tee(stateObjSeq);
         for _ in toStateObjIter:
             break
-        nextStateObjsDict = {}
+        nextStateObjsDict = dict()
         for (fromStateObj,toStateObj) in zip(fromStateObjIter,toStateObjIter):
             nextStateObjs = nextStateObjsDict.get(fromStateObj)
             if nextStateObjs is None:

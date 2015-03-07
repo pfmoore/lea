@@ -173,7 +173,7 @@ class Lea(object):
             the method calls the _clone() method implemented in Lea subclasses
         '''
         if cloneTable is None:
-            cloneTable = {}
+            cloneTable = dict()
         clonedLea = cloneTable.get(self)
         if clonedLea is None:
             clonedLea = self._clone(cloneTable)

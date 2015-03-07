@@ -25,6 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from lea import Lea
 from alea import Alea
+from toolbox import dict
 
 class Rlea(Lea):
     

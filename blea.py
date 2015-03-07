@@ -27,7 +27,7 @@ from lea import Lea
 from ilea import Ilea
 from mlea import Mlea
 from prob_fraction import ProbFraction
-from toolbox import calcLCM, zip
+from toolbox import calcLCM, zip, dict
 
 from itertools import chain
             

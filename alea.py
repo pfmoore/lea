@@ -28,8 +28,7 @@ from prob_fraction import ProbFraction
 from random import randrange
 from bisect import bisect_left, bisect_right
 from math import log, sqrt, exp
-from collections import defaultdict
-from toolbox import LOG2, memoize, zip, next
+from toolbox import LOG2, memoize, zip, next, dict, defaultdict
 import operator
 import sys
 
@@ -54,7 +53,7 @@ class Alea(Lea):
         self._count = sum(self._ps)
         self._cumul = None
         self._invCumul = None
-        self._cachesByFunc = {}
+        self._cachesByFunc = dict()
 
     # constructor methods
     # -------------------
@@ -126,7 +125,7 @@ class Alea(Lea):
             i.e. the probability of each value is equal to 1 / #values;
             if the sequence is empty, then an exception is raised
         '''
-        probDict = {}
+        probDict = dict()
         for value in values:
             probDict[value] = probDict.get(value,0) + 1
         return Alea.fromValFreqsDict(probDict)
@@ -141,7 +140,7 @@ class Alea(Lea):
             their GCD
             if the sequence is empty, then an exception is raised
         '''        
-        probDict = {}
+        probDict = dict()
         for (value,freq) in valueFreqs:
             probDict[value] = probDict.get(value,0) + freq
         return Alea.fromValFreqsDict(probDict,reducing)

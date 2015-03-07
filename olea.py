@@ -24,7 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from flea import Flea
-from toolbox import zip
+from toolbox import zip, dict
 
 
 class Olea(Flea):
