@@ -4,7 +4,7 @@
     setup.py
 
 --------------------------------------------------------------------------------
-Copyright 2013 Pierre Denis
+Copyright 2013, 2014, 2015 Pierre Denis
 
 This file is part of Lea.
 
@@ -34,7 +34,7 @@ setup( name = 'lea',
        author_email = 'pie.denis@skynet.be',
        url = 'http://code.google.com/p/lea/',
        license = 'LGPL',
-       keywords = ['probability', 'discrete', 'distribution'],
+       keywords = ['probability', 'discrete', 'distribution', 'probabilistic programming'],
        py_modules = [ 'lea',
                       'alea',
                       'blea',
