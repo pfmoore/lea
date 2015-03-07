@@ -122,6 +122,9 @@ class Lea(object):
     - The Rlea subclass manages Lea instances containing other Lea instances as values
     - The Blea subclass defines CPT providing Lea instances corresponding to given conditions
 
+    WARNING: The following methods are called without parentheses:
+                         mean, var, std, mode, entropy, information
+             These are applicable on any Lea instance; these are documented in the Alea class
     '''
 
     class Error(Exception):
@@ -646,6 +649,10 @@ class Lea(object):
             then returns a Flea instance that shall retrieve the attibute in the
             values of current distribution; 
             called on evaluation of "self.attrName"
+            WARNING: the following methods are called without parentheses:
+                         mean, var, std, mode, entropy, information
+                     these are applicable on any Lea instance
+                     and these are documented in the Alea class
         '''
         try:
             if attrName in Alea.indicatorMethodNames:

@@ -150,7 +150,11 @@ Here&nbsp;is&nbsp;a&nbsp;brief&nbsp;presentation&nbsp;of&nbsp;these&nbsp;subclas
 -&nbsp;the&nbsp;Dlea&nbsp;subclass&nbsp;performs&nbsp;a&nbsp;given&nbsp;number&nbsp;of&nbsp;draws&nbsp;without&nbsp;replacement&nbsp;on&nbsp;a&nbsp;given&nbsp;<a href="#Lea">Lea</a>&nbsp;instance.<br>
 -&nbsp;the&nbsp;Mlea&nbsp;subclass&nbsp;merges&nbsp;several&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;together<br>
 -&nbsp;The&nbsp;Rlea&nbsp;subclass&nbsp;manages&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;containing&nbsp;other&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;as&nbsp;values<br>
--&nbsp;The&nbsp;Blea&nbsp;subclass&nbsp;defines&nbsp;CPT&nbsp;providing&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;corresponding&nbsp;to&nbsp;given&nbsp;conditions<br>&nbsp;</tt></td></tr>
+-&nbsp;The&nbsp;Blea&nbsp;subclass&nbsp;defines&nbsp;CPT&nbsp;providing&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;corresponding&nbsp;to&nbsp;given&nbsp;conditions<br>
+&nbsp;<br>
+WARNING:&nbsp;The&nbsp;following&nbsp;methods&nbsp;are&nbsp;called&nbsp;without&nbsp;parentheses:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mean,&nbsp;var,&nbsp;std,&nbsp;mode,&nbsp;entropy,&nbsp;information<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;These&nbsp;are&nbsp;applicable&nbsp;on&nbsp;any&nbsp;<a href="#Lea">Lea</a>&nbsp;instance;&nbsp;these&nbsp;are&nbsp;documented&nbsp;in&nbsp;the&nbsp;Alea&nbsp;class<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="Lea-__abs__"><strong>__abs__</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;probability&nbsp;distribution<br>
@@ -195,7 +199,11 @@ is&nbsp;evaluated&nbsp;and&nbsp;the&nbsp;indicator&nbsp;method&nbsp;is&nbsp;call
 if&nbsp;the&nbsp;attribute&nbsp;name&nbsp;is&nbsp;unknown&nbsp;as&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance's&nbsp;attribute,<br>
 then&nbsp;returns&nbsp;a&nbsp;Flea&nbsp;instance&nbsp;that&nbsp;shall&nbsp;retrieve&nbsp;the&nbsp;attibute&nbsp;in&nbsp;the<br>
 values&nbsp;of&nbsp;current&nbsp;distribution;&nbsp;<br>
-called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"self.<strong>attrName</strong>"</tt></dd></dl>
+called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"self.<strong>attrName</strong>"<br>
+WARNING:&nbsp;the&nbsp;following&nbsp;methods&nbsp;are&nbsp;called&nbsp;without&nbsp;parentheses:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mean,&nbsp;var,&nbsp;std,&nbsp;mode,&nbsp;entropy,&nbsp;information<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;these&nbsp;are&nbsp;applicable&nbsp;on&nbsp;any&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;these&nbsp;are&nbsp;documented&nbsp;in&nbsp;the&nbsp;Alea&nbsp;class</tt></dd></dl>
 
 <dl><dt><a name="Lea-__getitem__"><strong>__getitem__</strong></a>(self, index)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;probability&nbsp;distribution<br>
 obtained&nbsp;by&nbsp;indexing&nbsp;or&nbsp;slicing&nbsp;each&nbsp;value&nbsp;with&nbsp;index<br>
@@ -413,6 +421,9 @@ for&nbsp;successive&nbsp;calls,&nbsp;a&nbsp;cached&nbsp;Alea&nbsp;instance&nbsp;
 <dl><dt><a name="Lea-getAleaClone"><strong>getAleaClone</strong></a>(self)</dt><dd><tt>same&nbsp;as&nbsp;getAlea&nbsp;method,&nbsp;excepting&nbsp;if&nbsp;applied&nbsp;on&nbsp;an&nbsp;Alea&nbsp;instance:<br>
 in&nbsp;this&nbsp;case,&nbsp;a&nbsp;clone&nbsp;of&nbsp;the&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned&nbsp;(insead&nbsp;of&nbsp;itself)</tt></dd></dl>
 
+<dl><dt><a name="Lea-getAleaLeavesSet"><strong>getAleaLeavesSet</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;set&nbsp;containing&nbsp;all&nbsp;the&nbsp;Alea&nbsp;leaves&nbsp;in&nbsp;the&nbsp;tree&nbsp;having&nbsp;the&nbsp;root&nbsp;self<br>
+this&nbsp;calls&nbsp;_getLeaChildren()&nbsp;method&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>&nbsp;subclasses</tt></dd></dl>
+
 <dl><dt><a name="Lea-given"><strong>given</strong></a>(self, info)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Ilea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;current&nbsp;distribution<br>
 updated&nbsp;with&nbsp;the&nbsp;given&nbsp;info,&nbsp;which&nbsp;is&nbsp;either&nbsp;a&nbsp;boolean&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
 with&nbsp;boolean&nbsp;values;&nbsp;the&nbsp;values&nbsp;present&nbsp;in&nbsp;the&nbsp;returned&nbsp;distribution&nbsp;<br>
@@ -516,8 +527,8 @@ if&nbsp;sorted&nbsp;is&nbsp;True,&nbsp;then&nbsp;the&nbsp;returned&nbsp;tuple&nb
 generates&nbsp;an&nbsp;infinite&nbsp;sequence&nbsp;of&nbsp;random&nbsp;values&nbsp;among&nbsp;the&nbsp;values&nbsp;of&nbsp;self,<br>
 according&nbsp;to&nbsp;their&nbsp;probabilities</tt></dd></dl>
 
-<dl><dt><a name="Lea-reset"><strong>reset</strong></a>(self)</dt><dd><tt>removes&nbsp;current&nbsp;value&nbsp;binding;<br>
-this&nbsp;calls&nbsp;_reset()&nbsp;method&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>&nbsp;subclasses</tt></dd></dl>
+<dl><dt><a name="Lea-reset"><strong>reset</strong></a>(self)</dt><dd><tt>removes&nbsp;current&nbsp;value&nbsp;binding&nbsp;(to&nbsp;be&nbsp;use&nbsp;only&nbsp;in&nbsp;case&nbsp;of&nbsp;brutal&nbsp;halt&nbsp;of&nbsp;<a href="#Lea-genVPs">genVPs</a>());<br>
+this&nbsp;calls&nbsp;_getLeaChildren()&nbsp;method&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>&nbsp;subclasses</tt></dd></dl>
 
 <dl><dt><a name="Lea-revisedWithCPT"><strong>revisedWithCPT</strong></a>(self, *clauses)</dt><dd><tt>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional&nbsp;probability&nbsp;table<br>
 (e.g.&nbsp;a&nbsp;node&nbsp;in&nbsp;a&nbsp;Bayes&nbsp;network)&nbsp;from&nbsp;the&nbsp;given&nbsp;clauses;<br>
@@ -554,8 +565,9 @@ given&nbsp;that&nbsp;givenCondLea&nbsp;is&nbsp;True,&nbsp;under&nbsp;the&nbsp;co
 the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;prior&nbsp;probabilities&nbsp;of&nbsp;condLea<br>
 and&nbsp;givenCondLea&nbsp;unchanged</tt></dd></dl>
 
-<dl><dt><a name="Lea-withProb"><strong>withProb</strong></a>(self, condLea, pNum, pDen)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;from&nbsp;current&nbsp;distribution,<br>
-such&nbsp;that&nbsp;pNum/pDen&nbsp;is&nbsp;the&nbsp;probability&nbsp;that&nbsp;condLea&nbsp;is&nbsp;true</tt></dd></dl>
+<dl><dt><a name="Lea-withProb"><strong>withProb</strong></a>(self, condLea, pNum, pDen<font color="#909090">=None</font>)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;from&nbsp;current&nbsp;distribution,<br>
+such&nbsp;that&nbsp;pNum/pDen&nbsp;is&nbsp;the&nbsp;probability&nbsp;that&nbsp;condLea&nbsp;is&nbsp;true<br>
+if&nbsp;pDen&nbsp;is&nbsp;None,&nbsp;then&nbsp;pNum&nbsp;expresses&nbsp;the&nbsp;probability&nbsp;as&nbsp;a&nbsp;Fraction</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
