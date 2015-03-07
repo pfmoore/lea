@@ -4,7 +4,7 @@
     rlea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014 Pierre Denis
+Copyright 2013, 2014, 2015 Pierre Denis
 
 This file is part of Lea.
 
