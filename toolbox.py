@@ -77,6 +77,23 @@ def easyMax(*args):
         return args[0]
     return max(args)
 
+def genPairs(seq):
+    ''' generates as tuples all the pairs from the elements of given sequence seq
+    '''
+    tuple1 = tuple(seq)
+    length = len(tuple1)
+    if length < 2:
+        return
+    if length == 2:
+        yield tuple1
+    else:
+        head = tuple1[0]
+        tail = tuple1[1:]
+        for a in tail:
+            yield (head,a)
+        for pair in genPairs(tail):
+            yield pair
+                
 # Python 2 / 3 dependencies
 # the following redefines / rebinds the following objects in Python2: 
 #  input

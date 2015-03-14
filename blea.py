@@ -4,7 +4,7 @@
     blea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014 Pierre Denis
+Copyright 2013, 2014, 2015 Pierre Denis
 
 This file is part of Lea.
 
@@ -28,7 +28,7 @@ from clea import Clea
 from mlea import Mlea
 from ilea import Ilea
 from prob_fraction import ProbFraction
-from toolbox import dict
+from toolbox import dict, genPairs
 
 from itertools import chain
             
@@ -57,22 +57,6 @@ class Blea(Lea):
                                            for aleaLeaf in ilea.getAleaLeavesSet() \
                                            if aleaLeaf._count > 1                  )
         self._ctxClea = Clea(*aleaLeavesSet)
-        
-    @staticmethod
-    def __genPairs(seq):
-        tuple1 = tuple(seq)
-        length = len(tuple1)
-        if length < 2:
-            return
-        if length == 2:
-            yield tuple1
-        else:
-            head = tuple1[0]
-            tail = tuple1[1:]
-            for a in tail:
-                yield (head,a)
-            for pair in Blea.__genPairs(tail):
-                yield pair
 
     @staticmethod
     def build(*clauses,**kwargs):
@@ -91,7 +75,7 @@ class Blea(Lea):
         normClauseLeas = tuple((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
         condLeas = tuple(condLea for (condLea,resultLea) in normClauseLeas)
         # check that conditions are disjoint
-        for (condLea1,condLea2) in Blea.__genPairs(condLeas):
+        for (condLea1,condLea2) in genPairs(condLeas):
             if (condLea1&condLea2).isFeasible():
                 raise Lea.Error("clause conditions are not disjoint")
         orCondsLea = None
