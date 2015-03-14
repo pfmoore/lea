@@ -24,7 +24,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
-from toolbox import calcLCM
 
 class Ilea(Lea):
     
@@ -61,20 +60,3 @@ class Ilea(Lea):
                 pass
             else:
                 raise Lea.Error("boolean expression expected")
-
-    def getCount(self):
-        prevCount = None
-        #s = 0
-        for (cv,cp) in self._condLea.genVPs():
-            #s += cp
-            if cv is True:
-                # the condition is true, for some binding of variables
-                count = sum(p for (v,p) in self._lea1.genVPs())
-                if prevCount is not None and count != prevCount:
-                    raise Lea.Error("inconsistent conditional probability counts")
-                prevCount = count    
-            elif cv is False:
-                pass
-            else:
-                raise Lea.Error("boolean expression expected")
-        return count  # *s

@@ -24,10 +24,11 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
-from ilea import Ilea
+from clea import Clea
 from mlea import Mlea
+from ilea import Ilea
 from prob_fraction import ProbFraction
-from toolbox import calcLCM, zip, dict
+from toolbox import dict
 
 from itertools import chain
             
@@ -43,15 +44,20 @@ class Blea(Lea):
      ANDing all conditions pairwise shall give "certain false" distributions
     '''
     
-    __slots__ = ('_iLeas','_factors')
+    __slots__ = ('_iLeas','_ctxClea')
     
     def __init__(self,*iLeas):
         Lea.__init__(self)
-        self._iLeas = iLeas
-        counts = tuple(iLea.getCount() for iLea in iLeas)
-        lcm = calcLCM(counts)
-        self._factors = tuple(lcm//count for count in counts)
-
+        self._iLeas = tuple(iLeas)
+        # the following treatment is needed only if some clauses miss variables present 
+        # in other clauses (e.g. CPT with context-specific independence)
+        # a rebalancing is needed if there are such missing variables and if these admit multiple
+        # values (total probability weight > 1)
+        aleaLeavesSet = frozenset(aleaLeaf for ilea in iLeas                       \
+                                           for aleaLeaf in ilea.getAleaLeavesSet() \
+                                           if aleaLeaf._count > 1                  )
+        self._ctxClea = Clea(*aleaLeavesSet)
+        
     @staticmethod
     def __genPairs(seq):
         tuple1 = tuple(seq)
@@ -135,29 +141,17 @@ class Blea(Lea):
             elseCondLea = ~orCondsLea
             normClauseLeas += ((elseCondLea,Lea.coerce(elseClauseResult)),)
             # note that orCondsLea is NOT extended with rCondsLea |= elseCondLea
-            # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true  
-        # the following treatment is needed only in case of context-specific independence
-        # which occurs if at least one given conditions miss variable(s) present in other conditions
-        # and if such missing variables have multiple values (e.g. not values coerced to Lea)  
-        aleaLeavesSet = frozenset(aleaLeaf for aleaLeaf in orCondsLea.getAleaLeavesSet() if aleaLeaf._count > 1)
-        ileas = []
-        for (condLea,resultLea) in normClauseLeas:
-            missingAleaLeavesSet = aleaLeavesSet - condLea.getAleaLeavesSet()
-            for missingAleaLeaf in missingAleaLeavesSet:
-                # the current given condition misses variable(s) present in other conditions
-                # add dummy condition(s) with missing variable(s), always true,
-                # just to have the right balance of probability weights
-                condLea &= (missingAleaLeaf==missingAleaLeaf)
-            ileas.append(Ilea(resultLea,condLea))
-        return Blea(*ileas)    
+            # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true
+        return Blea(*(Ilea(resultLea,condLea) for (condLea,resultLea) in normClauseLeas))    
     
     def _getLeaChildren(self):
-        return self._iLeas
+        return self._iLeas + (self._ctxClea,)
     
     def _clone(self,cloneTable):
         return Blea(*(iLea.clone(cloneTable) for iLea in self._iLeas))
 
     def _genVPs(self):
-        for (iLea,f) in zip(self._iLeas,self._factors):
+        for iLea in self._iLeas:
             for (v,p) in iLea.genVPs():
-                yield (v,f*p)
+                for (_,p2) in self._ctxClea:
+                    yield (v,p*p2)
