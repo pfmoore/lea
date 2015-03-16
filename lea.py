@@ -588,6 +588,16 @@ class Lea(object):
         return Blea.build(*(aCPTDict.items()),priorLea=priorLea)
 
     @staticmethod
+    def if_(condLea,thenLea,elseLea):
+        ''' returns an instance of Blea representing the conditional probability table
+            giving thenLea  if condLea is true
+                   elseLea  otherwise
+            this is a convenience method equivalent to 
+              Lea.buildCPT((condLea,thenLea),(None,elseLea))
+        '''
+        return Blea.build((condLea,thenLea),(None,elseLea))
+        
+    @staticmethod
     def buildCPT(*clauses,**kwargs):
         ''' returns an instance of Blea representing the conditional probability table
             (e.g. a node in a Bayes network) from the given clauses;
