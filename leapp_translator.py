@@ -207,6 +207,10 @@ class LeappTranslator(object):
         levelBrackets = 0
         parts = []
         chars = []
+        chars2 = []
+        lenSep = len(sep)
+        nbMatchChars = 0
+        sepC = sep[0]
         for c in fragment:
             if c == '(':
                 levelParentheses += 1
@@ -220,10 +224,21 @@ class LeappTranslator(object):
                 levelBrackets += 1
             elif c == ']':
                 levelBrackets -= 1
-            if c == sep and levelParentheses+levelBraces+levelBrackets == 0 :
-                parts.append(''.join(chars))
-                chars = []
-            else:    
+            if c == sepC and levelParentheses+levelBraces+levelBrackets == 0:
+                chars2.append(c)
+                nbMatchChars += 1
+                if nbMatchChars == lenSep:
+                    parts.append(''.join(chars))
+                    del chars[:]
+                    del chars2[:]
+                    nbMatchChars = 0
+                sepC = sep[nbMatchChars]
+            else:
+                if nbMatchChars > 0:
+                    nbMatchChars = 0
+                    chars += chars2
+                    del chars2[:] 
+                    sepC = sep[0]    
                 chars.append(c)
             if levelParentheses<0 or levelBraces<0 or levelBrackets<0:
                 raise LeappTranslator.Error('missing opening delimiter')
@@ -237,7 +252,7 @@ class LeappTranslator(object):
     def treatProbWeightExpression(dictExpression):        
         if ':' in dictExpression:
             # dictionary literal: enclose it in brackets
-            distributionItems = tuple(item.split(':') for item in LeappTranslator.smartSplit(dictExpression,','))
+            distributionItems = tuple(LeappTranslator.smartSplit(item,':') for item in LeappTranslator.smartSplit(dictExpression,','))
             probFractions = tuple(ProbFraction(probWeightString) for (valStr,probWeightString) in distributionItems)
             probWeights = ProbFraction.getProbWeights(probFractions)
             newDictExpression = ','.join('(%s,%d)'%(LeappTranslator.getTarget(valStr),probWeight) \
@@ -254,7 +269,7 @@ class LeappTranslator(object):
                 if condExpr.strip() == '_':
                     return None
                 return condExpr    
-            cptItems = tuple(item.split('->') for item in LeappTranslator.smartSplit(cptExpression,','))
+            cptItems = tuple(LeappTranslator.smartSplit(item,'->') for item in LeappTranslator.smartSplit(cptExpression,','))
             newCPTExpression = ','.join('(%s,%s)'%(f(condExpr),distribExpr) for (condExpr,distribExpr) in cptItems)
             return newCPTExpression
         return cptExpression
