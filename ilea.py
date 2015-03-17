@@ -36,9 +36,7 @@ class Ilea(Lea):
 
     __slots__ = ('_lea1','_condLea')
 
-    def __init__(self,lea1,condLea):     
-        if not condLea.isFeasible():
-            raise Lea.Error("conditional probability with unfeasible condition")
+    def __init__(self,lea1,condLea):
         Lea.__init__(self)
         self._lea1 = lea1
         self._condLea = condLea

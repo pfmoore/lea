@@ -30,6 +30,7 @@ from ilea import Ilea
 from prob_fraction import ProbFraction
 from toolbox import dict, genPairs
 
+from operator import or_
 from itertools import chain
             
 class Blea(Lea):
@@ -78,15 +79,8 @@ class Blea(Lea):
         for (condLea1,condLea2) in genPairs(condLeas):
             if (condLea1&condLea2).isFeasible():
                 raise Lea.Error("clause conditions are not disjoint")
-        orCondsLea = None
-        for condLea in condLeas:
-            # check that all conditions are feasible        
-            if not condLea.isFeasible():
-                raise Lea.Error("some clause condition is not feasible")
-            if orCondsLea is None:
-                orCondsLea = condLea
-            else:       
-                orCondsLea |= condLea
+        # build the OR of all given conditions
+        orCondsLea = Lea.reduce(or_,condLeas)
         isClauseSetComplete = orCondsLea.isTrue()
         if priorLea is not None:
             # prior distribution: determine elseClauseResult
@@ -113,10 +107,7 @@ class Blea(Lea):
                      raise Lea.Error("prior probability of '%s' is %s, outside the range [ %s , %s ]"%(value,priorPFraction,lowerPFraction,upperPFraction))
                  vps.append((value,p))
             elseClauseResult = Lea.fromValFreqs(*vps)
-        elif elseClauseResult is not None:
-            if isClauseSetComplete:
-                raise Lea.Error("forbidden to define 'other' clause for complete clause set")
-        else:
+        elif elseClauseResult is None:
             # check that clause set is complete
             if not isClauseSetComplete:
                 # TODO? : assume a uniform prior distribution ? ... which values ? 
