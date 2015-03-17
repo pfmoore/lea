@@ -9,7 +9,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>alea</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:alea.py">alea.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/admin/Documents/lea2/alea.py">/Users/admin/Documents/lea2/alea.py</a></font></td></tr></table>
     <p><tt>--------------------------------------------------------------------------------<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;alea.py<br>
@@ -662,6 +662,12 @@ if&nbsp;the&nbsp;sequence&nbsp;is&nbsp;empty,&nbsp;then&nbsp;an&nbsp;exception&n
 <dl><dt><a name="Alea-fromValFreqsDictArgs"><strong>fromValFreqsDictArgs</strong></a>(**probDict)</dt><dd><tt>static&nbsp;method,&nbsp;same&nbsp;as&nbsp;fromValFreqsDict,&nbsp;excepting&nbsp;that&nbsp;the&nbsp;dictionary<br>
 is&nbsp;passed&nbsp;in&nbsp;a&nbsp;**kwargs&nbsp;style</tt></dd></dl>
 
+<dl><dt><a name="Alea-if_"><strong>if_</strong></a>(condLea, thenLea, elseLea)</dt><dd><tt>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional&nbsp;probability&nbsp;table<br>
+giving&nbsp;thenLea&nbsp;&nbsp;if&nbsp;condLea&nbsp;is&nbsp;true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elseLea&nbsp;&nbsp;otherwise<br>
+this&nbsp;is&nbsp;a&nbsp;convenience&nbsp;method&nbsp;equivalent&nbsp;to&nbsp;<br>
+&nbsp;&nbsp;<a href="lea.html#Lea">Lea</a>.<a href="#Alea-buildCPT">buildCPT</a>((condLea,thenLea),(None,elseLea))</tt></dd></dl>
+
 <dl><dt><a name="Alea-interval"><strong>interval</strong></a>(fromVal, toVal)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;<a href="#Alea">Alea</a>&nbsp;instance&nbsp;representing&nbsp;a&nbsp;uniform&nbsp;probability<br>
 distribution,&nbsp;for&nbsp;all&nbsp;the&nbsp;integers&nbsp;in&nbsp;the&nbsp;interval&nbsp;[fromVal,toVal]</tt></dd></dl>
 
@@ -682,6 +688,11 @@ the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;dependencies&nbsp;with&nbsp;
 calculation&nbsp;could&nbsp;be&nbsp;prohibitively&nbsp;slow&nbsp;(exponential&nbsp;complexity);<br>
 for&nbsp;a&nbsp;more&nbsp;efficient&nbsp;implemetation,&nbsp;assuming&nbsp;that&nbsp;dependencies&nbsp;are&nbsp;not<br>
 needed,&nbsp;see&nbsp;<a href="lea.html#Lea">Lea</a>.fastMin&nbsp;method</tt></dd></dl>
+
+<dl><dt><a name="Alea-reduce"><strong>reduce</strong></a>(op, args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;that&nbsp;join&nbsp;the&nbsp;given&nbsp;args&nbsp;with&nbsp;the&nbsp;given<br>
+function&nbsp;op,&nbsp;from&nbsp;left&nbsp;to&nbsp;right;<br>
+requires&nbsp;that&nbsp;op&nbsp;is&nbsp;a&nbsp;2-ary&nbsp;function,&nbsp;accepting&nbsp;self's&nbsp;values&nbsp;as&nbsp;arguments;<br>
+requires&nbsp;that&nbsp;args&nbsp;contains&nbsp;at&nbsp;least&nbsp;one&nbsp;element</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="lea.html#Lea">lea.Lea</a>:<br>
