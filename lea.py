@@ -414,6 +414,19 @@ class Lea(object):
         '''
         return Plea(self,nTimes)
 
+    @staticmethod
+    def reduce(op,args):
+        ''' returns a new Flea instance that join the given args with the given
+            function op, from left to right;
+            requires that op is a 2-ary function, accepting self's values as arguments;
+            requires that args contains at least one element
+        '''
+        argsIter = iter(args)
+        res = next(argsIter)
+        for arg in argsIter:
+            res = Flea.build(op,(res,arg))
+        return res
+
     def merge(self,*leaArgs):
         ''' returns a new Mlea instance, representing the merge of given leaArgs, i.e.
                   P(v) = (P1(v) + ... + Pn(v)) / n
