@@ -155,8 +155,9 @@ class Lea(object):
         return '%s#%s'%(self.__class__.__name__,id(self))
 
     def getAleaLeavesSet(self):
-        ''' returns a set containing all the Alea leaves in the tree having the root self
-            this calls _getLeaChildren() method implemented in Lea subclasses
+        ''' returns a set containing all the Alea leaves in the tree having the root self;
+            this calls _getLeaChildren() method implemented in Lea subclasses;
+            this method is overloaded in Alea subclass to stop the recursion
         '''
         return frozenset(aleaLeaf for leaChild in self._getLeaChildren() for aleaLeaf in leaChild.getAleaLeavesSet())
 

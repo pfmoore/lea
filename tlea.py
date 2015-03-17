@@ -30,7 +30,7 @@ class Tlea(Lea):
 
     '''
     Tlea is a Lea subclass, which instance represents a probability distribution obtained by applying
-    a given 2-ary function repeatedly on given Lea instancea, a given number of times. It allows to
+    a given 2-ary function repeatedly on given Lea instances, a given number of times. It allows to
     avoid tedious typing or explcit loops; also, it makes the calculation faster by using a dichotomic
     algorithm.
     '''
