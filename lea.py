@@ -162,7 +162,7 @@ class Lea(object):
         return frozenset(aleaLeaf for leaChild in self._getLeaChildren() for aleaLeaf in leaChild.getAleaLeavesSet())
 
     def reset(self):
-        ''' removes current value binding (to be use only in case of brutal halt of genVPs());
+        ''' removes current value binding (to be used only in case of brutal halt of genVPs());
             this calls _getLeaChildren() method implemented in Lea subclasses
          '''
         self._val = self
@@ -519,7 +519,7 @@ class Lea(object):
         return ProbFraction(*self._p(val))
  
     def vps(self):
-        ''' returns a tuple with tuples (v,p) where v is a value of self
+        ''' generates tuples (v,p) where v is a value of self
             and p is the associated probability weight (integer > 0);
             the sequence follows the order defined on values
         '''
