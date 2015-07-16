@@ -313,7 +313,7 @@ class Lea(object):
         elif not reqCondLea.isFeasible():
             lea1 = self.given(~curCondLea)
         else:    
-            lea1 = Blea.build((reqCondLea,self.given(curCondLea)),(None,self.given(~curCondLea)))
+            lea1 = Blea.if_(reqCondLea,self.given(curCondLea).getAlea(),self.given(~curCondLea).getAlea())
         return lea1.getAlea()
         
     def withCondProb(self,condLea,givenCondLea,pNum,pDen):
