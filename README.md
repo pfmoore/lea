@@ -1,21 +1,16 @@
-# README #
-
 ![Lea2_logo.png](https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png)
 
-# Lea - Discrete probability distributions in Python
+# Lea - Discrete probability distributions in Python #
 
 _Welcome in Lea!_
-
 
 ---
 
 **NEW**: 17 July 2015 - [Lea 2.1.2](https://pypi.python.org/pypi/lea) is there (bug fix of `withProb` method)!
 
-See a [presentation of Lea (pdf)](http://lea.googlecode.com/hg/images/Lea_FOSDEM15.pdf) done at  [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31<sup>st</sup> January 2015
-
+See a [presentation of Lea (pdf)](http://lea.googlecode.com/hg/images/Lea_FOSDEM15.pdf) done at  [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015
 
 ---
-
 
 ## What is Lea?
 
