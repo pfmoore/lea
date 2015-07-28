@@ -129,14 +129,14 @@ Here are the main features of Lea :
   * runs on Python 2 or 3
   * open-source project, LGPL license
 
-<sup>(</sup>`*`<sup>)</sup> The "_probabilistic programming_" nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](LeappPPLHelloWorld.md).
+<sup>(</sup>`*`<sup>)</sup> The "_probabilistic programming_" nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
 
 ---
 
 
-To learn more, read the [Lea tutorial - Leapp flavor](LeappTutorial.md) or the [Lea tutorial - Python flavor](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0).
+To learn more, read the [Lea tutorial - Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0) or the [Lea tutorial - Python flavor](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0).
 
-For installation instructions, see [Installation](Installation.md).
+For installation instructions, see [Installation](Installation).
 
 
 ---
