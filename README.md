@@ -134,7 +134,7 @@ Here are the main features of Lea :
 ---
 
 
-To learn more, read the [Lea tutorial - Leapp flavor](LeappTutorial.md) or the [Lea tutorial - Python flavor](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial).
+To learn more, read the [Lea tutorial - Leapp flavor](LeappTutorial.md) or the [Lea tutorial - Python flavor](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0).
 
 For installation instructions, see [Installation](Installation.md).
 
