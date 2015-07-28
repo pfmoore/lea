@@ -1,6 +1,6 @@
-# Lea - Discrete probability distributions in Python #![Lea2_logo.png]
+# Lea - Discrete probability distributions in Python #
 
-(https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png)
+![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png)
 
 _Welcome in Lea!_
 
