@@ -86,7 +86,7 @@ Lea provides a large set of operations that allow you to model complex stochasti
 
 As of version 2, the Lea package includes a small probabilistic programming language (PPL) called _Leapp_. It provides concise syntax to make use of Lea as easy as possible, … especially for non-Python programmers! Here are some above Python statements revamped in Leapp (`lea>` is the prompt!):
 
-**`[`Leapp`]`**
+**[Leapp]**
 ```
 lea> die = ?(1,2,3,4,5,6)
 lea> flip = ?{'head': 67%, 'tail': 33%}
@@ -124,15 +124,14 @@ Here are the main features of Lea :
   * conditional probabilities
   * Bayesian networks
   * Markov chains (basic)
-  * _Leapp_, a light PPL (probabilistic programming language) <sup>(</sup>`*`<sup>)</sup>
+  * _Leapp_, a light PPL (probabilistic programming language) `*`
   * comprehensive tutorials (Wiki)
   * runs on Python 2 or 3
   * open-source project, LGPL license
 
-<sup>(</sup>`*`<sup>)</sup> The "_probabilistic programming_" nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
+`*` The "_probabilistic programming_" nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
 
 ---
-
 
 To learn more, read the [Lea tutorial - Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0) or the [Lea tutorial - Python flavor](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0).
 
