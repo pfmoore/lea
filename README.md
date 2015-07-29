@@ -8,7 +8,7 @@ _Welcome in Lea!_
 
 **NEW**: 17 July 2015 - [Lea 2.1.2](https://pypi.python.org/pypi/lea) is there (bug fix of `withProb` method)!
 
-See a [presentation of Lea (pdf)](http://lea.googlecode.com/hg/images/Lea_FOSDEM15.pdf) done at  [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015
+See a [presentation of Lea (pdf)](https://bitbucket.org/piedenis/lea/raw/5efd5fe01d059000585bfdc5d7b3693cc8942626/images/Lea_FOSDEM15.pdf) done at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015
 
 ---
 
