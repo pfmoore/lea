@@ -8,8 +8,6 @@ _Welcome in Lea!_
 
 **NEW**: 17 July 2015 - [Lea 2.1.2](https://pypi.python.org/pypi/lea) is there (bug fix of `withProb` method)!
 
-See a [presentation of Lea (pdf)](https://bitbucket.org/piedenis/lea/raw/5efd5fe01d059000585bfdc5d7b3693cc8942626/images/Lea_FOSDEM15.pdf) done at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015
-
 ---
 
 ## What is Lea?
@@ -110,6 +108,8 @@ Do you notice the syntax _leap_ compared to Python statements?
 
 Note that Leapp is not a true programming language. It is just a thin "syntactic sugar" layer on top of Python / Lea. The good news is that you can use standard Python syntax and put Leapp expressions as needed (or the opposite!) ; your favorite Python modules can be used as usual.
 
+The "_probabilistic programming_" nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
+
 ## Lea features
 
 Here are the main features of Lea :
@@ -124,16 +124,17 @@ Here are the main features of Lea :
   * conditional probabilities
   * Bayesian networks
   * Markov chains (basic)
-  * _Leapp_, a light PPL (probabilistic programming language) `*`
+  * _Leapp_, a light PPL (probabilistic programming language)
   * comprehensive tutorials (Wiki)
   * runs on Python 2 or 3
   * open-source project, LGPL license
 
-`*` The "_probabilistic programming_" nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
-
 ---
 
 To learn more, read the [Lea tutorial - Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0) or the [Lea tutorial - Python flavor](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0).
+
+See a [presentation of Lea (pdf)](https://bitbucket.org/piedenis/lea/raw/5efd5fe01d059000585bfdc5d7b3693cc8942626/images/Lea_FOSDEM15.pdf) done at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015
+
 
 For installation instructions, see [Installation](Installation).
 
