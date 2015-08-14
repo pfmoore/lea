@@ -136,7 +136,7 @@ To learn more, read the [Lea tutorial - Leapp flavor](https://bitbucket.org/pied
 See a [presentation of Lea (pdf)](https://bitbucket.org/piedenis/lea/raw/5efd5fe01d059000585bfdc5d7b3693cc8942626/images/Lea_FOSDEM15.pdf) done at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015
 
 
-For installation instructions, see [Installation](Installation).
+For installation instructions, see [Installation](https://bitbucket.org/piedenis/lea/wiki/Installation).
 
 
 ---
