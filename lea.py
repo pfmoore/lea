@@ -379,18 +379,19 @@ class Lea(object):
         # depending on the truth value of (condLea,givenCondLea) on each value
         w2 = dict((cg,w[cg]*(m//ecg)) for (cg,ecg) in e.items())
         return Alea.fromValFreqs(*((v,p*w2[(condLea.isTrue(),givenCondLea.isTrue())]) for (v,p) in self.genVPs()))
-    
-    def given(self,info):
+
+    def given(self,*evidences):
         ''' returns a new Ilea instance representing the current distribution
-            updated with the given info, which is either a boolean or a Lea instance
-            with boolean values; the values present in the returned distribution 
-            are those and only those compatible with the given info
-            The resulting (value,probability) pairs are calculated 
-            when the returned Ilea instance is evaluated; if no value is found,
+            updated with the given evidences, which are each either a boolean or
+            a Lea instance with boolean values; the values present in the returned
+            distribution are those and only those compatible with the given AND of
+            evidences;
+            the resulting (value,probability) pairs are calculated when the
+            returned Ilea instance is evaluated; if no value is found,
             then an exception is raised
         '''
-        return Ilea(self,Lea.coerce(info))
-
+        return Ilea(self,(Lea.coerce(evidence) for evidence in evidences))    
+    
     def times(self,n,op=operator.add):
         ''' returns a new Tlea instance representing the current distribution
             operated n times with itself, through the given binary operator
