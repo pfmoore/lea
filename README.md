@@ -6,7 +6,7 @@ _Welcome in Lea!_
 
 ---
 
-**NEW**: 17 July 2015 - [Lea 2.1.2](https://pypi.python.org/pypi/lea) is there (bug fix of `withProb` method)!
+**NEW!** Saturday October 24, 2015: ["Probabilistic programming with Lea"](http://lanyrd.com/2015/pyconie/sdrkdr/) presentation at [PyCon Ireland 2015](http://python.ie/pycon-2015/). Save the date!
 
 ---
 
