@@ -4,9 +4,11 @@
 
 _Welcome in Lea!_
 
+See [Installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installation).
+
 ---
 
-**NEW!** Saturday October 24, 2015: ["Probabilistic programming with Lea"](http://lanyrd.com/2015/pyconie/sdrkdr/) presentation at [PyCon Ireland 2015](http://python.ie/pycon-2015/). Save the date!
+**COMING SOON!** Saturday October 24, 2015: ["Probabilistic programming with Lea"](http://lanyrd.com/2015/pyconie/sdrkdr/) presentation at [PyCon Ireland 2015](http://python.ie/pycon-2015/). Save the date!
 
 ---
 
@@ -131,12 +133,11 @@ Here are the main features of Lea :
 
 ---
 
-To learn more, read the [Lea tutorial - Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0) or the [Lea tutorial - Python flavor](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0).
+See [Installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installation).
 
-See a [presentation of Lea (pdf)](https://bitbucket.org/piedenis/lea/raw/5efd5fe01d059000585bfdc5d7b3693cc8942626/images/Lea_FOSDEM15.pdf) done at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015
+To learn more, read the [Lea tutorial](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0), which uses pure Python; this tutorial exists also in [Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0).
 
-
-For installation instructions, see [Installation](https://bitbucket.org/piedenis/lea/wiki/Installation).
+You can find more materials on [Lea Wiki](https://bitbucket.org/piedenis/lea/wiki). See also a [presentation of Lea (pdf)](https://bitbucket.org/piedenis/lea/raw/5efd5fe01d059000585bfdc5d7b3693cc8942626/images/Lea_FOSDEM15.pdf) done at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015.
 
 
 ---
