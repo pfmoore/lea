@@ -65,3 +65,6 @@ class Clea(Lea):
                 p *= p1
             yield (v,p)
 
+    def _genOneRandomMC(self):
+        for v in Clea.prod(tuple(leaArg.genOneRandomMC for leaArg in self._leaArgs)):
+            yield v

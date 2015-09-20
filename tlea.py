@@ -68,3 +68,11 @@ class Tlea(Lea):
             # operate with one more lea1 on the current result 
             flea = Flea.build(self._op,(flea,self._lea1))
         return flea.genVPs()
+
+    def _genOneRandomMC(self):
+        for v in self._lea1.genOneRandomMC():
+            pass
+        for _ in range(self._nTimes-1):
+            for v2 in self._lea1.genOneRandomMC():
+                v = self._op(v,v2)
+        yield v

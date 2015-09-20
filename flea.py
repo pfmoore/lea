@@ -61,3 +61,11 @@ class Flea(Lea):
             for (args,p) in self._cleaArgs.genVPs():
                 yield (f(*args),p)
 
+    def _genOneRandomMC(self):
+        f = self._f
+        if isinstance(f,Lea):
+            for (f2,args) in Clea(f,self._cleaArgs).genOneRandomMC():
+                yield f2(*args)            
+        else:
+            for args in self._cleaArgs.genOneRandomMC():
+                yield f(*args)

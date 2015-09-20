@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
+from toolbox import makeTuple
 
 class Plea(Lea):
 
@@ -38,7 +39,7 @@ class Plea(Lea):
     def __init__(self,lea1,nTimes=2):
         Lea.__init__(self)
         self._lea1 = lea1
-        self._lea1Tuple = lea1.map(lambda v: (v,))
+        self._lea1Tuple = lea1.map(makeTuple)
         self._nTimes = nTimes
         if nTimes <= 0:
             raise Lea.Error("cprodTimes method requires a strictly positive integer")
@@ -62,6 +63,8 @@ class Plea(Lea):
         if nTimes%2 == 1:
             # nTimes is odd : nTimes = 2*nTimes1 + 1
             # operate with one more lea1 on the current result 
-            #flea = Flea.build(add,(flea,self._lea1Tuple))
             flea += self._lea1Tuple
         return flea.genVPs()
+
+    def _genOneRandomMC(self):
+        yield tuple(v for _ in range(self._nTimes) for v in self._lea1.genOneRandomMC())
