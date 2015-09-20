@@ -93,8 +93,8 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimateMC method)
 
-    There are ten concrete subclasses to Lea, namely: Alea, Clea, Plea, Flea, Tlea, Ilea, Olea,
-     Mlea, Rlea and Blea.
+    There are nine concrete subclasses to Lea, namely: Alea, Clea, Plea, Flea, Tlea, Ilea, Olea,
+    Rlea and Blea.
     
     Each subccass represents a special kind of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -124,7 +124,6 @@ class Lea(object):
     - the Tlea subclass applies a given 2-ary function, a given number of times, on a given Lea instance
     - the Ilea subclass filters the values of a given Lea instance by applying a given boolean condition
     - the Olea subclass builds a joint probability distribution from a Lea instance with tuples as values
-    - the Mlea subclass merges several Lea instances together
     - The Rlea subclass manages Lea instances containing other Lea instances as values
     - The Blea subclass defines CPT providing Lea instances corresponding to given conditions
 
@@ -446,12 +445,14 @@ class Lea(object):
         return res
 
     def merge(self,*leaArgs):
-        ''' returns a new Mlea instance, representing the merge of given leaArgs, i.e.
+        ''' returns a new Blea instance, representing the merge of self and given leaArgs, i.e.
                   P(v) = (P1(v) + ... + Pn(v)) / n
             where P(v)  is the probability of value v in the merge result 
-                  Pi(v) is the probability of value v in leaArgs[i]
+                  Pi(v) is the probability of value v in ((self,)+leaArgs)[i]
         '''
-        return Mlea(self,*leaArgs)
+        leas = (self,) + leaArgs
+        lea = Lea.fromSeq(range(len(leas)))
+        return Blea(*(Ilea(leaArg,(lea==i,)) for (i,leaArg) in enumerate(leas)))
     
     def map(self,f,args=()):
         ''' returns a new Flea instance representing the distribution obtained
@@ -1348,7 +1349,6 @@ from ilea import Ilea
 from flea import Flea
 from olea import Olea
 from rlea import Rlea
-from mlea import Mlea
 from blea import Blea
 
 # Lea constants representing certain values

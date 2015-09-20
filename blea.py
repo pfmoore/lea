@@ -25,11 +25,9 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from lea import Lea
 from clea import Clea
-from mlea import Mlea
 from ilea import Ilea
 from prob_fraction import ProbFraction
 from toolbox import dict, genPairs
-
 from operator import or_
 from itertools import chain
             
@@ -91,7 +89,7 @@ class Blea(Lea):
             pFalse = count - pTrue
             priorAleaDict = dict(priorLea.getAlea().genVPs())
             priorAleaCount = sum(priorAleaDict.values())
-            normAleaDict = dict(Mlea(*(resultLea for (condLea,resultLea) in normClauseLeas)).getAlea().genVPs())
+            normAleaDict = dict(Lea.fromSeq(resultLea for (condLea,resultLea) in normClauseLeas).flat().getAlea().genVPs())
             normAleaCount = sum(normAleaDict.values())
             valuesSet = frozenset(chain(priorAleaDict.keys(),normAleaDict.keys()))
             vps = []
