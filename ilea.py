@@ -78,3 +78,23 @@ class Ilea(Lea):
             # yield value-probability pairs of _lea1, given this binding
             for (v,p) in self._lea1.genVPs():
                 yield (v,cp*p)
+
+    def _genOneRandomMC(self):
+        for cv in self._condLea.genOneRandomMC():
+            if cv is True:
+                for v in self._lea1.genOneRandomMC():
+                    yield v
+            elif cv is False:
+                raise Lea._FailedRandomMC()
+            else:
+                raise Lea.Error("boolean expression expected")
+
+    def genOneRandomMCNoExc(self):
+        for cv in self._condLea.genOneRandomMC():
+            if cv is True:
+                for v in self._lea1.genOneRandomMC():
+                    yield v
+            elif cv is False:
+                yield self
+            else:
+                raise Lea.Error("boolean expression expected")

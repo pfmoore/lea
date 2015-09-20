@@ -290,6 +290,12 @@ class Alea(Lea):
         return zip(self._vs,self._ps)
         
     def _p(self,val):
+        ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
+            where
+            s is the sum of the probability weights of all values 
+            p is the probability weight of the given value val (from 0 to s)
+            note: the ratio p/s is not reduced
+        '''
         for (v,p) in self._genVPs():
             if v == val:
                 return (p,self._count)
@@ -373,6 +379,9 @@ class Alea(Lea):
         if sorted:
             res.sort()
         return tuple(res)
+
+    def _genOneRandomMC(self):
+        yield self.randomVal()
 
     @memoize
     def pCumul(self,val):

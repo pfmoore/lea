@@ -27,7 +27,7 @@ import operator
 from itertools import islice
 from math import log
 from prob_fraction import ProbFraction
-from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax
+from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, dict
 
 class Lea(object):
     
@@ -49,7 +49,7 @@ class Lea(object):
     obeying the following rules:
 
     - Lea instances can be added, subtracted, multiplied and divided together,
-    through +, -, *, / operators. The resulting distribution's values and probabilities
+    through +, -, *, /, // operators. The resulting distribution's values and probabilities
     are determined by combination of operand's values with a sum weighted by probability
     products (the operation known as 'convolution', for the adition case).
 
@@ -72,20 +72,27 @@ class Lea(object):
     - Boolean distributions can be combined together with AND, OR, XOR, through &, |, ^
     operators, respectively.
 
-    - WARNING: the Python's and, or, not, operators shall not be used because they do not return
+    WARNING: the Python's and, or, not, operators shall NOT be used because they do not return
     any sensible result. Replace:
            a and b    by    a & b
            a or b     by    a | b
            not a      by    ~ a
 
-    - WARNING: in boolean expression involving arithmetic comparisons, the parenthesis
+    WARNING: in boolean expression involving arithmetic comparisons, the parenthesis
     shall be used, e.g. (a < b) & (b < c)
 
-    - WARNING: the augmented comparison (a < b < c) expression shall not be used.; it does
-    not return any sensible result (reason: it has the same limtation as 'and' operator).
+    WARNING: the augmented comparison (a < b < c) expression shall NOT be used.; it does
+    not return any sensible result (reason: it has the same limitation as 'and' operator).
 
     Lea instances can be used to generate random values, respecting the given probabilities.
-            
+    There are two methods for this purpose:
+    - random:   calculates the exact probabiliy distribution, then takes random values 
+    - randomMC: takes random values from atomic probabiliy distribution, then makes the 
+                required calculations (Monte-Carlo algorithm)
+    The randomMC is suited for complex distributions, when calculation of exact probability
+    distribution is intractable. This could be used to provide an estimation of the probability
+    distribution (see estimateMC method)
+
     There are ten concrete subclasses to Lea, namely: Alea, Clea, Plea, Flea, Tlea, Ilea, Olea,
      Dlea, Mlea, Rlea and Blea.
     
@@ -122,6 +129,9 @@ class Lea(object):
     - The Rlea subclass manages Lea instances containing other Lea instances as values
     - The Blea subclass defines CPT providing Lea instances corresponding to given conditions
 
+    Lea uses the 'template method' design pattern: the Lea base abstract class calls the following methods,
+    which are implemented in each Lea subclass: _clone, _getLeaChildren, _genVPs and _genOneRandomMC 
+
     WARNING: The following methods are called without parentheses:
                          mean, var, std, mode, entropy, information
              These are applicable on any Lea instance; these are documented in the Alea class
@@ -129,6 +139,12 @@ class Lea(object):
 
     class Error(Exception):
         ''' exception representing any violation of requirements of Lea methods  
+        '''
+        pass
+        
+    class _FailedRandomMC(Exception):
+        ''' internal exception representing a failure to get a set of random values that
+            satisfy a given condition in a given number of trials (see '...MC' methods) 
         '''
         pass
 
@@ -162,7 +178,8 @@ class Lea(object):
         return frozenset(aleaLeaf for leaChild in self._getLeaChildren() for aleaLeaf in leaChild.getAleaLeavesSet())
 
     def reset(self):
-        ''' removes current value binding (to be used only in case of brutal halt of genVPs());
+        ''' [DEPRECATED: shall not be useful anymore, since unbinding is done in 'finally:' clauses]
+            removes current value binding (to be used only in case of brutal halt of genVPs());
             this calls _getLeaChildren() method implemented in Lea subclasses
          '''
         self._val = self
@@ -464,14 +481,14 @@ class Lea(object):
             to be associated with the given n attribute names
         '''
         return Olea(attrNames,self)
-          
+
     def draw(self,nbValues):
         ''' returns a new Dlea instance representing a probability distribution of the
             sequences of values obtained by the given number of draws without
             replacement from the current distribution 
         '''
         return Dlea(self,nbValues)
-        
+
     def flat(self):
         ''' assuming that self's values are themselves Lea instances,
             returns a new Rlea instance representing a probability distribution of
@@ -1064,14 +1081,81 @@ class Lea(object):
                     # if an object calls the genVPs on the same instance before resuming
                     # the present generator, then the present instance is bound to v  
                     yield (v,p)
-                # unbind value v
+            finally:
+                # unbind value v, at the end or if an exception has been raised
                 self._val = self
-            except:
-                # an exception occurred, the current genVPs generator(s) are aborted
-                # and any bound value shall be unbound
-                self.reset()
-                raise
+
+    def genOneRandomMC(self):
+        ''' generates one random value from the current probability distribution,
+            without precalculating the exact probability distribution (as done in 'random' method)
+        '''
+        if self._val is not self:
+            yield self._val
+        else:
+            try:
+                for v in self._genOneRandomMC():
+                    self._val = v
+                    yield v
+            finally:
+                # unbind value v, at the end or if an exception has been raised
+                self._val = self
+                
+    def genRandomMC(self,n,nbTries=None):
+        ''' generates n random value from the current probability distribution,
+            without precalculating the exact probability distribution (as done in 'random' method);
+            nbTries, if not None, defines the maximum number of trials in case of a random value
+            is incompatible with a condition; this happens only if the current Lea instance
+            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'buildCPT' methods;
+            WARNING: if nbTries is None, any infeasible condition shall cause an infinite loop
+        '''
+        for _ in range(n):
+            remainingNbTries = 1 if nbTries is None else nbTries
+            v = self
+            while remainingNbTries > 0:
+                try:
+                    for v in self.genOneRandomMC():
+                        yield v
+                    remainingNbTries = 0
+                except Lea._FailedRandomMC:
+                    if nbTries is not None:
+                        remainingNbTries -= 1        
+            if v is self:
+                raise Lea.Error("impossible to validate given condition(s), after %d random trials"%nbTries) 
         
+    def randomMC(self,n=None,nbTries=None):
+        ''' if n is None, returns a random value with the probability given by the distribution
+            without precalculating the exact probability distribution (as done in 'random' method);
+            otherwise, returns a tuple of n such random values;
+            nbTries, if not None, defines the maximum number of trials in case of a random value
+            is incompatible with a condition; this happens only if the current Lea instance
+            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'buildCPT' methods;
+            WARNING: if nbTries is None, any infeasible condition shall cause an infinite loop
+        '''
+        n1 = 1 if n is None else n
+        randomMCTuple = tuple(self.genRandomMC(n1,nbTries))
+        if n is None:
+            return randomMCTuple[0]
+        return randomMCTuple
+        
+    def estimateMC(self,n,nbTries=None): 
+        ''' returns an Alea instance, which is an estimation of the current distribution from a sample
+            of n random values; this is a true Monte-Carlo algorithm, which does not precalculate the
+            exact probability distribution (as done in 'random' method); 
+            the method is suited for complex distributions, when calculation of exact probability
+            distribution is intractable; the larger the value of n, the better the returned estimation;
+            nbTries, if not None, defines the maximum number of trials in case of a random value
+            is incompatible with a condition; this happens only if the current Lea instance
+            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'buildCPT' methods;
+            WARNING: if nbTries is None, any infeasible condition shall cause an infinite loop
+        '''
+        return Lea.fromSeq(self.randomMC(n,nbTries))
+    
+    def nbCases(self):
+        ''' returns the number of atomic cases evaluated to build the exact probability distribution;
+            this provides a measure of the complexity of the probability distribution 
+        '''
+        return sum(1 for vp in self.genVPs())
+    
     def isTrue(self):
         ''' returns True iff the value True has probability 1;
             returns False otherwise
@@ -1170,13 +1254,7 @@ class Lea(object):
             for successive calls, a cached Alea instance is returned, which is faster) 
         '''
         if self._alea is None:
-            try:
-                self._alea = Alea.fromValFreqs(*(tuple(self.genVPs())))
-            except:
-                # in case of exception, remove any pending binding which could distort 
-                # forthcoming calculations
-                self.reset()
-                raise
+            self._alea = Alea.fromValFreqs(*(tuple(self.genVPs())))
         return self._alea
 
     def getAleaClone(self):

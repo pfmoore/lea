@@ -45,16 +45,16 @@ class Blea(Lea):
      ANDing all conditions pairwise shall give "certain false" distributions
     '''
     
-    __slots__ = ('_iLeas','_ctxClea')
+    __slots__ = ('_ileas','_ctxClea')
     
-    def __init__(self,*iLeas):
+    def __init__(self,*ileas):
         Lea.__init__(self)
-        self._iLeas = tuple(iLeas)
+        self._ileas = tuple(ileas)
         # the following treatment is needed only if some clauses miss variables present 
         # in other clauses (e.g. CPT with context-specific independence)
         # a rebalancing is needed if there are such missing variables and if these admit multiple
         # values (total probability weight > 1)
-        aleaLeavesSet = frozenset(aleaLeaf for ilea in iLeas                       \
+        aleaLeavesSet = frozenset(aleaLeaf for ilea in ileas                       \
                                            for aleaLeaf in ilea.getAleaLeavesSet() \
                                            if aleaLeaf._count > 1                  )
         self._ctxClea = Clea(*aleaLeavesSet)
@@ -118,15 +118,39 @@ class Blea(Lea):
             # note that orCondsLea is NOT extended with rCondsLea |= elseCondLea
             # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true
         return Blea(*(Ilea(resultLea,(condLea,)) for (condLea,resultLea) in normClauseLeas))    
-    
+
     def _getLeaChildren(self):
-        return self._iLeas + (self._ctxClea,)
+        return self._ileas + (self._ctxClea,)
     
     def _clone(self,cloneTable):
-        return Blea(*(iLea.clone(cloneTable) for iLea in self._iLeas))
+        return Blea(*(iLea.clone(cloneTable) for iLea in self._ileas))
 
     def _genVPs(self):
-        for iLea in self._iLeas:
+        for iLea in self._ileas:
             for (v,p) in iLea.genVPs():
                 for (_,p2) in self._ctxClea:
                     yield (v,p*p2)
+
+    def _genOneRandomMC(self):
+        for v in Blea.genOneRandomMCRec(self._ileas):
+            if v is not self._ileas:
+                yield v
+        if v is self._ileas:
+            raise Lea._FailedRandomMC()
+
+    @staticmethod
+    def genOneRandomMCRec(ileas):
+        ilea0 = ileas[0]
+        for v in ilea0.genOneRandomMCNoExc():
+            if v is ilea0:
+                if len(ileas) == 1:
+                    yield ileas
+                else:
+                    ileasTail = ileas[1:]
+                    for v2 in Blea.genOneRandomMCRec(ileasTail):
+                        if v2 is ileasTail:
+                            yield ileas
+                        else:    
+                            yield v2
+            else:
+                yield v

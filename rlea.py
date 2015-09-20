@@ -56,3 +56,8 @@ class Rlea(Lea):
             p1 *= factor
             for (v,p2) in lea1.genVPs():
                 yield (v,p1*p2)
+
+    def _genOneRandomMC(self):
+        for leaArg in self._leaOfLeas.genRandomMC():
+            for v in leaArg.genRandomMC():
+                yield v
