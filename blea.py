@@ -117,7 +117,7 @@ class Blea(Lea):
             normClauseLeas += ((elseCondLea,Lea.coerce(elseClauseResult)),)
             # note that orCondsLea is NOT extended with rCondsLea |= elseCondLea
             # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true
-        return Blea(*(Ilea(resultLea,condLea) for (condLea,resultLea) in normClauseLeas))    
+        return Blea(*(Ilea(resultLea,(condLea,)) for (condLea,resultLea) in normClauseLeas))    
     
     def _getLeaChildren(self):
         return self._iLeas + (self._ctxClea,)
