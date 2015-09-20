@@ -94,7 +94,7 @@ class Lea(object):
     distribution (see estimateMC method)
 
     There are ten concrete subclasses to Lea, namely: Alea, Clea, Plea, Flea, Tlea, Ilea, Olea,
-     Dlea, Mlea, Rlea and Blea.
+     Mlea, Rlea and Blea.
     
     Each subccass represents a special kind of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -118,13 +118,12 @@ class Lea(object):
     
     Here is a brief presentation of these subclasses: 
 
-    - the Clea subclass provides the cartesian product of a given sequence of Lea instances;
-    - the Plea subclass provides the cartesian product of one Lea instance with itself, a given number of times;
-    - the Flea subclass applies a given function to a given sequence of Lea instances;
-    - the Tlea subclass applies a given 2-ary function, a given number of times, on a given Lea instance;
-    - the Ilea subclass filters the values of a given Lea instance by applying a given boolean condition;
-    - the Olea subclass builds a joint probability distribution from a Lea instance with tuples as values;
-    - the Dlea subclass performs a given number of draws without replacement on a given Lea instance.
+    - the Clea subclass provides the cartesian product of a given sequence of Lea instances
+    - the Plea subclass provides the cartesian product of one Lea instance with itself, a given number of times
+    - the Flea subclass applies a given function to a given sequence of Lea instances
+    - the Tlea subclass applies a given 2-ary function, a given number of times, on a given Lea instance
+    - the Ilea subclass filters the values of a given Lea instance by applying a given boolean condition
+    - the Olea subclass builds a joint probability distribution from a Lea instance with tuples as values
     - the Mlea subclass merges several Lea instances together
     - The Rlea subclass manages Lea instances containing other Lea instances as values
     - The Blea subclass defines CPT providing Lea instances corresponding to given conditions
@@ -483,11 +482,18 @@ class Lea(object):
         return Olea(attrNames,self)
 
     def draw(self,nbValues):
-        ''' returns a new Dlea instance representing a probability distribution of the
+        ''' returns a new Lea instance representing a probability distribution of the
             sequences of values obtained by the given number of draws without
-            replacement from the current distribution 
+            replacement from the current distribution
+            Note: if nbValues = 1, then a Flea instance is returned,
+                  otherwise a Blea instance is returned 
         '''
-        return Dlea(self,nbValues)
+        if nbValues <= 0:
+            raise Lea.Error("draw method requires a strictly positive integer")
+        if nbValues == 1:
+            return self.map(makeTuple)
+        vps = tuple(self.genVPs())
+        return Blea(*(Ilea((v,)+Alea.fromValFreqs(*((v2,p2) for (v2,p2) in vps if v2 is not v)).draw(nbValues-1),(self==v,)) for (v,p) in vps))
 
     def flat(self):
         ''' assuming that self's values are themselves Lea instances,
@@ -1338,7 +1344,6 @@ from alea import Alea
 from clea import Clea
 from plea import Plea
 from tlea import Tlea
-from dlea import Dlea
 from ilea import Ilea
 from flea import Flea
 from olea import Olea
