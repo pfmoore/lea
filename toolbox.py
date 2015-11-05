@@ -28,7 +28,7 @@ The module toolbox provides general functions and constants needed by Lea classe
 '''
 
 from math import log
-from functools import wraps
+from functools import wraps, cmp_to_key
 import sys
 
 def calcGCD(a,b):
@@ -107,6 +107,9 @@ def genPairs(seq):
 from collections import defaultdict
 if sys.version_info.major == 2:
     # Python 2.x
+    # the following trick is needed to be able to import the 2.x 'sorted' func unchanged 
+    sorted = sorted
+    cmp = cmp
     # the goal of this part is to mimic a Python3 env in a Python2 env
     # rename raw_input method
     input = raw_input
@@ -127,12 +130,19 @@ if sys.version_info.major == 2:
         values = defaultdict.itervalues
         items = defaultdict.iteritems
 else:
-    # Python 3.x
+    # Python 3.x    
     # the following trick is needed to be able to import the names
     input = input
     zip = zip
     next = next
     dict = dict
+    # the goal of this part is to mimic a Python2 env in a Python3 env
+    def cmp(a,b):
+        return ((a > b) - (a < b))
+    sorted3 = sorted
+    def sorted(iterable,cmpFunc):
+        keyFunc = None if cmpFunc is None else cmp_to_key(cmpFunc)
+        return sorted3(iterable,key=keyFunc)
 
 def memoize(f):
    ''' returns a memoized version of the given instance method f;

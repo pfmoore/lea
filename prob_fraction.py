@@ -75,7 +75,20 @@ class ProbFraction(Fraction):
         if not isinstance(value,ProbFraction):
             value = ProbFraction(value)
         return value
-        
+
+    @staticmethod
+    def build(pNum,pDen=None):
+        ''' static method, returns a ProbFraction instance representing the probability pNum/pDen
+            if pDen is None, then pNum expresses the probability as a Fraction
+        '''
+        if pDen is None:
+            # pNum is expected to be a Fraction
+            pDen = pNum.denominator
+            pNum = pNum.numerator
+        pf = ProbFraction(pNum,pDen)
+        pf.check()
+        return pf
+                
     def __coerceFunc(f):
         ''' internal utility function
             returns a function returning a ProbFraction

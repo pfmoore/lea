@@ -25,10 +25,11 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from lea import Lea
 from prob_fraction import ProbFraction
+
 from random import randrange
 from bisect import bisect_left, bisect_right
 from math import log, sqrt, exp
-from toolbox import LOG2, memoize, zip, next, dict, defaultdict
+from toolbox import LOG2, memoize, zip, next, dict, defaultdict, sorted
 import operator
 import sys
 
@@ -79,6 +80,11 @@ class Alea(Lea):
         return Alea.fromValFreqsDict(dict(zip(probDict.keys(),probWeights)))
     
     @staticmethod
+    def __cmpVal(vp1,vp2):
+        ((v1,p1),(v2,p2)) = (vp1,vp2)
+        return Interval.cmpForSort(v1,v2)
+
+    @staticmethod
     def fromValFreqsDict(probDict,reducing=True):
         ''' static method, returns an Alea instance representing a distribution
             for the given probDict dictionary of {val:prob}, where prob is an integer number
@@ -90,31 +96,76 @@ class Alea(Lea):
         count = sum(probDict.values())
         if count == 0:
             raise Lea.Error("impossible to build a probability distribution with no value")
-        gcd = count
-        impossibleValues = []
         # check probabilities, remove null probabilities and calculate GCD
+        impossibleValues = []
+        noInterval = True
         for (v,p) in probDict.items():
             if p < 0:
                 raise Lea.Error("negative probability")
             if p == 0:
                 impossibleValues.append(v)
-            elif reducing and gcd > 1:
-                while p != 0:
-                    if gcd > p:
-                        (gcd,p) = (p,gcd)
-                    p %= gcd
+            elif noInterval and isinstance(v,Interval):
+                noInterval = False
         for impossibleValue in impossibleValues:
             del probDict[impossibleValue]
-        vpsIter = probDict.items()
-        if reducing:
-            vpsIter = ((v,p//gcd) for (v,p) in vpsIter)
-        vps = list(vpsIter)
-        try:            
-            vps.sort()
+        #vps = list(vpsIter)
+        vps = tuple(probDict.items())
+        cmpVal = None if noInterval else Alea.__cmpVal
+        try:
+            vps = sorted(vps,cmpVal)
+            if not noInterval:
+                vps = Alea.mergeIntervals(vps)
         except:
+            #raise
             # no ordering relationship on values (e.g. complex numbers)
-            pass
+            if not noInterval:
+                raise Lea.Error("cannot mix intervals with values lacking an ordering relationship")
+        gcd = count
+        if reducing:
+            for (v,p) in vps:
+                if gcd > 1:
+                    while p != 0:
+                        if gcd > p:
+                            (gcd,p) = (p,gcd)
+                        p %= gcd
+            if gcd > 1:      
+                vps = ((v,p//gcd) for (v,p) in vps)
         return Alea(vps)
+
+    @staticmethod
+    def mergeIntervals(vps):
+        ''' requires that values are sorted
+        '''
+        print ("mergeIntervals ", vps)
+        mvps = []
+        lastIntervalV = None
+        for (v,p) in vps:
+            vIsInterval = isinstance(v,Interval)
+            if lastIntervalV is None:
+                if vIsInterval:                             
+                    (lastIntervalV,lastIntervalP) = (v,p)
+                    if len(mvps) > 0:
+                        (v0,p0) = mvps[-1]
+                        if v.intersects(v0):
+                            mvps.pop(-1)
+                            lastIntervalP += p0
+                else:
+                    mvps.append((v,p))
+            else:
+                if lastIntervalV.intersects(v):
+                    if vIsInterval:
+                        lastIntervalV = lastIntervalV.merge(v)
+                    lastIntervalP += p
+                else:
+                    mvps.append((lastIntervalV,lastIntervalP))
+                    if vIsInterval:
+                        (lastIntervalV,lastIntervalP) = (v,p)
+                    else:
+                        mvps.append((v,p))
+                        lastIntervalV = None
+        if lastIntervalV is not None:
+            mvps.append((lastIntervalV,lastIntervalP))
+        return mvps
             
     @staticmethod
     def fromVals(*values):
@@ -199,7 +250,7 @@ class Alea(Lea):
                                   a bar length of histoSize represents a probability 1 
             if kind[1] is '-', the histogram bars with '-' are appended after 
                                numerical representation of probabilities
-            if an order relationship is defined on values, then the values are sorted by 
+            if an order relationship is defined on values, then the values are Interval by 
             increasing order; otherwise, an arbitrary order is used
         '''
         if kind not in ('/', '.', '%', '-', '/-', '.-', '%-'):
@@ -236,7 +287,7 @@ class Alea(Lea):
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value  with its
             probability expressed as a rational number "n/d" or "0" or "1";
-            if an order relationship is defined on values, then the values are sorted by 
+            if an order relationship is defined on values, then the values are Interval by 
             increasing order; otherwise, an arbitrary order is used;
             called on evalution of "str(self)" and "repr(self)"
         '''
@@ -247,7 +298,7 @@ class Alea(Lea):
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value with its
             probability expressed as decimal with given nbDecimals digits;
-            if an order relationship is defined on values, then the values are sorted by 
+            if an order relationship is defined on values, then the values are Interval by 
             increasing order; otherwise, an arbitrary order is used;
         '''
         return self.asString('.',nbDecimals)
@@ -312,7 +363,6 @@ class Alea(Lea):
             self._cumul = tuple(cumulList)
         return self._cumul
         
-        
     def invCumul(self):
         ''' returns a tuple with the probability weights p that self >= value ;
             there is one element more than number of values; the first element is 0, then
@@ -346,13 +396,13 @@ class Alea(Lea):
         while True:
             yield vals[bisect_right(probs,randrange(count))]    
         
-    def randomDraw(self,n=None,sorted=False):
+    def randomDraw(self,n=None,ordered=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
             in a random order respecting the probabilities
             (the higher count of a value, the most likely the value will be in the
              beginning of the sequence)
             if n > 0, then only n different values will be drawn
-            if sorted is True, then the returned tuple is sorted
+            if ordered is True, then the returned tuple is sorted
         '''
         if n is None:
            n = len(self._vs)
@@ -370,7 +420,7 @@ class Alea(Lea):
             if n == 0:
                 break
             lea1 = lea1.given(lea1!=x)
-        if sorted:
+        if ordered:
             res.sort()
         return tuple(res)
 
@@ -489,3 +539,5 @@ class Alea(Lea):
                p /= count
                res -= p*log(p)
         return res / LOG2
+        
+from interval import Interval

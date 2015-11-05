@@ -251,12 +251,8 @@ class Lea(object):
             distribution such that probability of True is pNum/pDen
             if pDen is None, then pNum expresses the probability as a Fraction
         '''
-        if pDen is None:
-            # pNum is expected to be a Fraction
-            pDen = pNum.denominator
-            pNum = pNum.numerator
-        ProbFraction(pNum,pDen).check()
-        return Alea.fromValFreqs((True,pNum),(False,pDen-pNum))
+        pf = ProbFraction.build(pNum,pDen)
+        return Alea.fromValFreqs((True,pf.numerator),(False,pf.denominator-pf.numerator))
 
     @staticmethod
     def bernoulli(pNum,pDen=None):
@@ -265,12 +261,8 @@ class Lea(object):
             complementary probability;
             if pDen is None, then pNum expresses the probability as a Fraction
         '''
-        if pDen is None:
-            # pNum is expected to be a Fraction
-            pDen = pNum.denominator
-            pNum = pNum.numerator
-        ProbFraction(pNum,pDen).check()
-        return Alea.fromValFreqs((1,pNum),(0,pDen-pNum))
+        pf = ProbFraction.build(pNum,pDen)
+        return Alea.fromValFreqs((1,pf.numerator),(0,pf.denominator-pf.numerator))
 
     @staticmethod
     def binom(n,pNum,pDen=None):
@@ -1266,6 +1258,8 @@ from olea import Olea
 from rlea import Rlea
 from mlea import Mlea
 from blea import Blea
+
+from interval import Interval
 
 # Lea constants representing certain values
 Lea.true  = Alea(((True ,1),))
