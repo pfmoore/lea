@@ -54,7 +54,7 @@ class Plea(Lea):
         if nTimes is None:
             nTimes = self._nTimes
         if nTimes == 1:
-            return self._lea1Tuple.genVPs()
+            return self._lea1Tuple._genVPs()
         # nTimes >= 2 : use dichotomic algorithm
         nTimes1 = nTimes // 2
         plea = Plea(self._lea1,nTimes1)
@@ -64,7 +64,7 @@ class Plea(Lea):
             # nTimes is odd : nTimes = 2*nTimes1 + 1
             # operate with one more lea1 on the current result 
             flea += self._lea1Tuple
-        return flea.genVPs()
+        return flea._genVPs()
 
     def _genOneRandomMC(self):
-        yield tuple(v for _ in range(self._nTimes) for v in self._lea1.genOneRandomMC())
+        yield tuple(v for _ in range(self._nTimes) for v in self._lea1._genOneRandomMC())

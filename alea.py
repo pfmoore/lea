@@ -40,17 +40,23 @@ class Alea(Lea):
     An Alea instance is defined by given value-probability pairs. Each probability is
     defined as a positive "counter" or "weight" integer, without upper limit. The actual
     probabilities are calculated by dividing the counters by the sum of all counters.
+    Values having null probability counters are dropped.
     '''
 
-    __slots__ = ('_vs','_ps','_count','_cumul','_invCumul','_cachesByFunc')
+    __slots__ = ('_vs','_ps','_count','_val','_cumul','_invCumul','_cachesByFunc')
     
     def __init__(self,vps):
         ''' initializes Alea instance's attributes
         '''
         Lea.__init__(self)
+        # for an Alea instance, the alea cache is itself
         self._alea = self
         (self._vs,self._ps) = zip(*vps)
         self._count = sum(self._ps)
+        # _val is the value temporarily bound to the instance, during evaluation (see _genVPs method)
+        # note: self is used as a sentinel value to express that no value is currently bound; Python's
+        #  None is not a good sentinel value since it prevents using None as value in a distribution 
+        self._val = self
         self._cumul = None
         self._invCumul = None
         self._cachesByFunc = dict()
@@ -115,7 +121,7 @@ class Alea(Lea):
             # no ordering relationship on values (e.g. complex numbers)
             pass
         return Alea(vps)
-            
+
     @staticmethod
     def fromVals(*values):
         ''' static method, returns an Alea instance representing a distribution
@@ -284,10 +290,67 @@ class Alea(Lea):
         return ()
 
     def _clone(self,cloneTable):
-        return Alea(self._genVPs())
-        
+        return Alea(zip(self._vs,self._ps))
+      
     def _genVPs(self):
-        return zip(self._vs,self._ps)
+        ''' generates tuple (v,p) where v is a value of the current probability distribution
+            and p is the associated probability weight (integer > 0);
+            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            a given expression, then same value will be yielded at each occurrence; 
+            "Statues" algorithm: 
+            before yielding a value v, this value v is bound to the current instance;
+            then, if the current calculation requires to get again values on the current
+            instance, then the bound value is yielded with probability 1;
+            the instance is rebound to a new value at each iteration, as soon as the execution
+            is resumed after the yield;
+            it is unbound at the end;
+            the method calls the _genVPs method implemented in Lea subclasses;
+        '''
+        if self._val is not self:
+            # distribution already bound to a value because genVPs has been called already on self
+            # it is yielded as a certain distribution (unique yield)
+            yield (self._val,1)
+        else:
+            # distribution not yet bound to a value
+            try:
+                # browse all (v,p) tuples 
+                for (v,p) in zip(self._vs,self._ps):
+                    # bind value v: this is important if an object calls genVPs on the same instance
+                    # before resuming the present generator (see above)
+                    self._val = v
+                    # yield the bound value v with probability weight p
+                    yield (v,p)
+            finally:
+                # unbind value v, after all values have been bound or if an exception has been raised
+                self._val = self
+         
+    def _genOneRandomMC(self):
+        ''' generates one random value from the current probability distribution,
+            WITHOUT precalculating the exact probability distribution (contrarily to 'random' method);
+            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            a given expression, then same value will be yielded at each occurrence; 
+            before yielding the random value v, this value v is bound to the current instance;
+            then, if the current calculation requires to get again a random value on the current
+            instance, then the bound value is yielded;
+            the instance is rebound to a new value at each iteration, as soon as the execution
+            is resumed after the yield;
+            the instance is unbound at the end;
+            the method calls the _genOneRandomMC method implemented in Lea subclasses;
+        '''
+        if self._val is not self:
+            # distribution already bound to a value, because genOneRandomMC has been called already on self 
+            # yield the bound value, in order to be consistent
+            yield self._val
+        else:
+            try:
+                # bind value v: this is important if an object calls genOneRandomMC on the same 
+                # instance before resuming the present generator (see above)
+                self._val = self.randomVal()
+                # yield the bound value v
+                yield self._val
+            finally:
+                # unbind value, after the random value has been bound or if an exception has been raised
+                self._val = self
         
     def _p(self,val):
         ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
@@ -317,7 +380,6 @@ class Alea(Lea):
                 cumulList.append(pSum)
             self._cumul = tuple(cumulList)
         return self._cumul
-        
         
     def invCumul(self):
         ''' returns a tuple with the probability weights p that self >= value ;
@@ -379,10 +441,7 @@ class Alea(Lea):
         if sorted:
             res.sort()
         return tuple(res)
-
-    def _genOneRandomMC(self):
-        yield self.randomVal()
-
+    
     @memoize
     def pCumul(self,val):
         ''' returns, as an integer, the probability weight that self <= val
@@ -414,9 +473,9 @@ class Alea(Lea):
         if len(aleaArgs) == 2:
             (aleaArg1,aleaArg2) = aleaArgs
             valFreqsDict = defaultdict(int)
-            for (v,p) in aleaArg1.genVPs():
+            for (v,p) in aleaArg1._genVPs():
                 valFreqsDict[v] = p * cumulFunc(aleaArg2,v)
-            for (v,p) in aleaArg2.genVPs():
+            for (v,p) in aleaArg2._genVPs():
                 valFreqsDict[v] += (cumulFunc(aleaArg1,v)-aleaArg1._p(v)[0]) * p
             return Lea.fromValFreqsDict(valFreqsDict)
         return Alea.fastExtremum(cumulFunc,aleaArgs[0],Alea.fastExtremum(cumulFunc,*aleaArgs[1:]))

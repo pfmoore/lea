@@ -56,7 +56,7 @@ class Tlea(Lea):
             nTimes = self._nTimes
         lea1 = self._lea1.getAleaClone()
         if nTimes == 1:
-            return lea1.genVPs()
+            return lea1._genVPs()
         # nTimes >= 2 : use dichotomic algorithm
         nTimes1 = nTimes // 2
         tlea = Tlea(self._op,lea1,nTimes1)
@@ -67,12 +67,12 @@ class Tlea(Lea):
             # nTimes is odd : nTimes = 2*nTimes1 + 1
             # operate with one more lea1 on the current result 
             flea = Flea.build(self._op,(flea,self._lea1))
-        return flea.genVPs()
+        return flea._genVPs()
 
     def _genOneRandomMC(self):
-        for v in self._lea1.genOneRandomMC():
+        for v in self._lea1._genOneRandomMC():
             pass
         for _ in range(self._nTimes-1):
-            for v2 in self._lea1.genOneRandomMC():
+            for v2 in self._lea1._genOneRandomMC():
                 v = self._op(v,v2)
         yield v

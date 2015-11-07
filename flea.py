@@ -55,17 +55,17 @@ class Flea(Lea):
     def _genVPs(self):
         f = self._f
         if isinstance(f,Lea):
-            for ((f2,args),p) in Clea(f,self._cleaArgs).genVPs():
+            for ((f2,args),p) in Clea(f,self._cleaArgs)._genVPs():
                 yield (f2(*args),p)            
         else:
-            for (args,p) in self._cleaArgs.genVPs():
+            for (args,p) in self._cleaArgs._genVPs():
                 yield (f(*args),p)
 
     def _genOneRandomMC(self):
         f = self._f
         if isinstance(f,Lea):
-            for (f2,args) in Clea(f,self._cleaArgs).genOneRandomMC():
+            for (f2,args) in Clea(f,self._cleaArgs)._genOneRandomMC():
                 yield f2(*args)            
         else:
-            for args in self._cleaArgs.genOneRandomMC():
+            for args in self._cleaArgs._genOneRandomMC():
                 yield f(*args)

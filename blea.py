@@ -42,7 +42,7 @@ class Blea(Lea):
      ORing  all conditions shall give a "certain true" distribution
      ANDing all conditions pairwise shall give "certain false" distributions
     '''
-    
+
     __slots__ = ('_ileas','_ctxClea','_condClea')
     
     def __init__(self,*ileas):
@@ -81,7 +81,7 @@ class Blea(Lea):
         normClauseLeas = tuple((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
         condLeas = tuple(condLea for (condLea,resultLea) in normClauseLeas)
         # check that conditions are disjoint
-        if any(v.count(True) > 1 for (v,_) in Clea(*condLeas).genVPs()):
+        if any(v.count(True) > 1 for (v,_) in Clea(*condLeas)._genVPs()):
             raise Lea.Error("clause conditions are not disjoint")        
         # build the OR of all given conditions
         orCondsLea = Lea.reduce(or_,condLeas)
@@ -93,9 +93,9 @@ class Blea(Lea):
                 raise Lea.Error("forbidden to define prior probabilities for complete clause set")
             (pTrue,count) = orCondsLea._p(True)
             pFalse = count - pTrue
-            priorAleaDict = dict(priorLea.getAlea().genVPs())
+            priorAleaDict = dict(priorLea.getAlea()._genVPs())
             priorAleaCount = sum(priorAleaDict.values())
-            normAleaDict = dict(Lea.fromSeq(resultLea for (condLea,resultLea) in normClauseLeas).flat().getAlea().genVPs())
+            normAleaDict = dict(Lea.fromSeq(resultLea for (condLea,resultLea) in normClauseLeas).flat().getAlea()._genVPs())
             normAleaCount = sum(normAleaDict.values())
             valuesSet = frozenset(chain(priorAleaDict.keys(),normAleaDict.keys()))
             vps = []
@@ -131,17 +131,17 @@ class Blea(Lea):
 
     def _genVPs(self):
         for iLea in self._ileas:
-            for (v,p) in iLea.genVPs():
+            for (v,p) in iLea._genVPs():
                 for (_,p2) in self._ctxClea:
                     yield (v,p*p2)
 
     def _genOneRandomMC(self):
         # the first for loop binds a random value on each Alea instances refered in CPT conditions
-        for _ in self._condClea.genOneRandomMC():
+        for _ in self._condClea._genOneRandomMC():
             # here, there will be at most one ilea having condition that evaluates to True,
             # regarding the random binding that has been made 
             for iLea in self._ileas:
-                for v in iLea.genOneRandomMCNoExc():
+                for v in iLea._genOneRandomMCNoExc():
                     if v is not iLea:
                         # the current ilea is the one having the condition that evaluates to True
                         yield v

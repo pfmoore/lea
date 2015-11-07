@@ -51,13 +51,13 @@ class Rlea(Lea):
         return Rlea(self._leaOfLeas.clone(cloneTable))    
 
     def _genVPs(self):
-        for (lea1,p1) in self._leaOfLeas.genVPs():
+        for (lea1,p1) in self._leaOfLeas._genVPs():
             factor = self._factors[lea1]
             p1 *= factor
-            for (v,p2) in lea1.genVPs():
+            for (v,p2) in lea1._genVPs():
                 yield (v,p1*p2)
 
     def _genOneRandomMC(self):
-        for leaArg in self._leaOfLeas.genRandomMC():
-            for v in leaArg.genRandomMC():
+        for leaArg in self._leaOfLeas._genOneRandomMC():
+            for v in leaArg._genOneRandomMC():
                 yield v
