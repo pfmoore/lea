@@ -43,19 +43,26 @@ class Blea(Lea):
      ANDing all conditions pairwise shall give "certain false" distributions
     '''
     
-    __slots__ = ('_ileas','_ctxClea')
+    __slots__ = ('_ileas','_ctxClea','_condClea')
     
     def __init__(self,*ileas):
         Lea.__init__(self)
         self._ileas = tuple(ileas)
         # the following treatment is needed only if some clauses miss variables present 
         # in other clauses (e.g. CPT with context-specific independence)
-        # a rebalancing is needed if there are such missing variables and if these admit multiple
-        # values (total probability weight > 1)
+        # a rebalancing is needed if there are such missing variables and if these admit
+        # multiple possible values (total probability weight > 1)
+        # _ctxClea is a cartesian product of all Alea leaves present in CPT and having
+        # multiple possible values
         aleaLeavesSet = frozenset(aleaLeaf for ilea in ileas                       \
                                            for aleaLeaf in ilea.getAleaLeavesSet() \
                                            if aleaLeaf._count > 1                  )
         self._ctxClea = Clea(*aleaLeavesSet)
+        # _condAlea is a cartesian product of all Alea leaves present in CPT conditions;
+        # it is needed only by _genOneRandomMC method
+        condAleaLeavesSet = frozenset(aleaLeaf for ilea in ileas                                   \
+                                               for aleaLeaf in ilea._condLeas[0].getAleaLeavesSet())
+        self._condClea = Clea(*condAleaLeavesSet)
 
     @staticmethod
     def build(*clauses,**kwargs):
@@ -74,9 +81,8 @@ class Blea(Lea):
         normClauseLeas = tuple((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
         condLeas = tuple(condLea for (condLea,resultLea) in normClauseLeas)
         # check that conditions are disjoint
-        for (condLea1,condLea2) in genPairs(condLeas):
-            if (condLea1&condLea2).isFeasible():
-                raise Lea.Error("clause conditions are not disjoint")
+        if any(v.count(True) > 1 for (v,_) in Clea(*condLeas).genVPs()):
+            raise Lea.Error("clause conditions are not disjoint")        
         # build the OR of all given conditions
         orCondsLea = Lea.reduce(or_,condLeas)
         isClauseSetComplete = orCondsLea.isTrue()
@@ -130,25 +136,12 @@ class Blea(Lea):
                     yield (v,p*p2)
 
     def _genOneRandomMC(self):
-        for v in Blea.genOneRandomMCRec(self._ileas):
-            if v is not self._ileas:
-                yield v
-        if v is self._ileas:
-            raise Lea._FailedRandomMC()
-
-    @staticmethod
-    def genOneRandomMCRec(ileas):
-        ilea0 = ileas[0]
-        for v in ilea0.genOneRandomMCNoExc():
-            if v is ilea0:
-                if len(ileas) == 1:
-                    yield ileas
-                else:
-                    ileasTail = ileas[1:]
-                    for v2 in Blea.genOneRandomMCRec(ileasTail):
-                        if v2 is ileasTail:
-                            yield ileas
-                        else:    
-                            yield v2
-            else:
-                yield v
+        # the first for loop binds a random value on each Alea instances refered in CPT conditions
+        for _ in self._condClea.genOneRandomMC():
+            # here, there will be at most one ilea having condition that evaluates to True,
+            # regarding the random binding that has been made 
+            for iLea in self._ileas:
+                for v in iLea.genOneRandomMCNoExc():
+                    if v is not iLea:
+                        # the current ilea is the one having the condition that evaluates to True
+                        yield v

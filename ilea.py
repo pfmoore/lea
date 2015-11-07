@@ -57,12 +57,10 @@ class Ilea(Lea):
             # empty condition: evaluated as True (seed of recursion)
             yield 1
         else:
-            condLea0 = condLeas[0]
-            condLeaT = condLeas[1:]
-            for (cv0,p0) in condLea0.genVPs():
+            for (cv0,p0) in condLeas[0].genVPs():
                 if cv0 is True:
                     # the first condition is true, for some binding of variables
-                    for p1 in Ilea._genTrueP(condLeaT):
+                    for p1 in Ilea._genTrueP(condLeas[1:]):
                         # the full condition is true, for some binding of variables
                         yield p0*p1
                 elif cv0 is False:
@@ -79,22 +77,30 @@ class Ilea(Lea):
             for (v,p) in self._lea1.genVPs():
                 yield (v,cp*p)
 
+    def _genOneRandomTrueCond(self,condLeas,withException):
+        if len(condLeas) == 0:
+            # empty condition: evaluated as True (seed of recursion)
+            yield None
+        else:
+            for cv in condLeas[0].genOneRandomMC():
+                if cv is True:
+                    for v in self._genOneRandomTrueCond(condLeas[1:],withException):
+                        yield v
+                elif cv is False:
+                    if withException:
+                        raise Lea._FailedRandomMC()
+                    yield self
+                else:
+                    raise Lea.Error("boolean expression expected")
+
     def _genOneRandomMC(self):
-        for cv in self._condLea.genOneRandomMC():
-            if cv is True:
-                for v in self._lea1.genOneRandomMC():
-                    yield v
-            elif cv is False:
-                raise Lea._FailedRandomMC()
-            else:
-                raise Lea.Error("boolean expression expected")
+        for _ in self._genOneRandomTrueCond(self._condLeas,True):
+            for v in self._lea1.genOneRandomMC():
+                yield v
 
     def genOneRandomMCNoExc(self):
-        for cv in self._condLea.genOneRandomMC():
-            if cv is True:
+        for u in self._genOneRandomTrueCond(self._condLeas,False):
+            if u is not self: 
                 for v in self._lea1.genOneRandomMC():
                     yield v
-            elif cv is False:
-                yield self
-            else:
-                raise Lea.Error("boolean expression expected")
+
