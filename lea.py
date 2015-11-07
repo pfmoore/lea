@@ -1065,7 +1065,9 @@ class Lea(object):
     def genVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability weight (integer > 0);
-            before yielding a value v, this value is bound to the current instance;
+            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            a given expression, then same value will be yielded at each occurrence; 
+            before yielding a value v, this value v is bound to the current instance;
             then, if the current calculation requires to get again values on the current
             instance, then the bound value is yielded with probability 1;
             the instance is rebound to a new value at each iteration, as soon as the execution
@@ -1074,7 +1076,7 @@ class Lea(object):
             the method calls the _genVPs method implemented in Lea subclasses;
         '''
         if self._val is not self:
-            # distribution already bound to a value
+            # distribution already bound to a value because genVPs has been called already on self
             # it is yielded as a certain distribution (unique yield)
             yield (self._val,1)
         else:
@@ -1082,35 +1084,49 @@ class Lea(object):
             try:
                 # browse all (v,p) tuples 
                 for (v,p) in self._genVPs():
-                    # bind value v
+                    # bind value v: this is important if an object calls genVPs on the same instance
+                    # before resuming the present generator (see above)
                     self._val = v
-                    # yield the value with probability weight
-                    # if an object calls the genVPs on the same instance before resuming
-                    # the present generator, then the present instance is bound to v  
+                    # yield the bound value v with probability weight p
                     yield (v,p)
             finally:
-                # unbind value v, at the end or if an exception has been raised
+                # unbind value v, after all values have been bound or if an exception has been raised
                 self._val = self
 
     def genOneRandomMC(self):
         ''' generates one random value from the current probability distribution,
-            without precalculating the exact probability distribution (as done in 'random' method)
+            WITHOUT precalculating the exact probability distribution (contrarily to 'random' method);
+            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            a given expression, then same value will be yielded at each occurrence; 
+            before yielding the random value v, this value v is bound to the current instance;
+            then, if the current calculation requires to get again a random value on the current
+            instance, then the bound value is yielded;
+            the instance is rebound to a new value at each iteration, as soon as the execution
+            is resumed after the yield;
+            the instance is unbound at the end;
+            the method calls the _genOneRandomMC method implemented in Lea subclasses;
         '''
         if self._val is not self:
+            # distribution already bound to a value, because genOneRandomMC has been called already on self 
+            # yield the bound value, in order to be consistent
             yield self._val
         else:
             try:
+                # note that the following loop has ONLY ONE iteration
                 for v in self._genOneRandomMC():
+                    # bind value v: this is important if an object calls genOneRandomMC on the same 
+                    # instance before resuming the present generator (see above)
                     self._val = v
+                    # yield the bound value v
                     yield v
             finally:
-                # unbind value v, at the end or if an exception has been raised
+                # unbind value, after the random value has been bound or if an exception has been raised
                 self._val = self
                 
     def genRandomMC(self,n,nbTries=None):
         ''' generates n random value from the current probability distribution,
-            without precalculating the exact probability distribution (as done in 'random' method);
-            nbTries, if not None, defines the maximum number of trials in case of a random value
+            without precalculating the exact probability distribution (contrarily to 'random' method);
+            nbTries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'buildCPT' methods;
             WARNING: if nbTries is None, any infeasible condition shall cause an infinite loop
@@ -1131,9 +1147,9 @@ class Lea(object):
         
     def randomMC(self,n=None,nbTries=None):
         ''' if n is None, returns a random value with the probability given by the distribution
-            without precalculating the exact probability distribution (as done in 'random' method);
+            without precalculating the exact probability distribution (contrarily to 'random' method);
             otherwise, returns a tuple of n such random values;
-            nbTries, if not None, defines the maximum number of trials in case of a random value
+            nbTries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'buildCPT' methods;
             WARNING: if nbTries is None, any infeasible condition shall cause an infinite loop
@@ -1147,10 +1163,10 @@ class Lea(object):
     def estimateMC(self,n,nbTries=None): 
         ''' returns an Alea instance, which is an estimation of the current distribution from a sample
             of n random values; this is a true Monte-Carlo algorithm, which does not precalculate the
-            exact probability distribution (as done in 'random' method); 
+            exact probability distribution (contrarily to 'random' method); 
             the method is suited for complex distributions, when calculation of exact probability
             distribution is intractable; the larger the value of n, the better the returned estimation;
-            nbTries, if not None, defines the maximum number of trials in case of a random value
+            nbTries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'buildCPT' methods;
             WARNING: if nbTries is None, any infeasible condition shall cause an infinite loop
