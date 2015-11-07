@@ -26,6 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 import operator
 from itertools import islice
 from math import log
+from collections import namedtuple
 from prob_fraction import ProbFraction
 from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, dict
 
@@ -86,8 +87,8 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimateMC method).
 
-    There are nine concrete subclasses to Lea, namely:
-      Alea, Clea, Plea, Flea, Tlea, Ilea, Olea, Rlea and Blea.
+    There are eight concrete subclasses to Lea, namely:
+      Alea, Clea, Plea, Flea, Tlea, Ilea, Rlea and Blea.
     
     Each subclass represents a "definition" of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -116,7 +117,6 @@ class Lea(object):
     - Flea applies a given function to a given sequence of Lea instances
     - Tlea applies a given 2-ary function, a given number of times, on a given Lea instance
     - Ilea filters the values of a given Lea instance according to a given Lea instance representing a boolean condition (conditional probabilities)
-    - Olea builds a joint probability distribution from a Lea instance with tuples as values
     - Rlea embeds Lea instances as values of a parent Lea instance 
     - Blea defines CPT, providing Lea instances corresponding to given conditions (used for bayesian networks)
 
@@ -461,11 +461,12 @@ class Lea(object):
         return self.map(lambda v: tuple(f(e,*args) for e in v))
 
     def asJoint(self,*attrNames):
-        ''' returns a new Olea instance representing a joint probability distribution
+        ''' returns a new Alea instance representing a joint probability distribution
             from the current distribution supposed to have n-tuples as values,
             to be associated with the given n attribute names
         '''
-        return Olea(attrNames,self)
+        NTClass = namedtuple('_',attrNames)
+        return self.map(lambda aTuple: NTClass(*aTuple)).getAlea()
 
     def draw(self,nbValues):
         ''' returns a new Lea instance representing a probability distribution of the
@@ -1326,7 +1327,6 @@ from plea import Plea
 from tlea import Tlea
 from ilea import Ilea
 from flea import Flea
-from olea import Olea
 from rlea import Rlea
 from blea import Blea
 
