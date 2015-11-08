@@ -48,21 +48,17 @@ class Blea(Lea):
     def __init__(self,*ileas):
         Lea.__init__(self)
         self._ileas = tuple(ileas)
-        # the following treatment is needed only if some clauses miss variables present 
-        # in other clauses (e.g. CPT with context-specific independence)
-        # a rebalancing is needed if there are such missing variables and if these admit
-        # multiple possible values (total probability weight > 1)
+        # _condLea is used only by _genOneRandomMC method
+        self._condClea = None
         # _ctxClea is a cartesian product of all Alea leaves present in CPT and having
-        # multiple possible values
+        # multiple possible values; it is needed only if some clauses miss variables
+        # present in other clauses (e.g. CPT with context-specific independence); a
+        # rebalancing is needed if there are such missing variables and if these admit
+        # multiple possible values (total probability weight > 1)
         aleaLeavesSet = frozenset(aleaLeaf for ilea in ileas                       \
                                            for aleaLeaf in ilea.getAleaLeavesSet() \
                                            if aleaLeaf._count > 1                  )
         self._ctxClea = Clea(*aleaLeavesSet)
-        # _condAlea is a cartesian product of all Alea leaves present in CPT conditions;
-        # it is needed only by _genOneRandomMC method
-        condAleaLeavesSet = frozenset(aleaLeaf for ilea in ileas                                   \
-                                               for aleaLeaf in ilea._condLeas[0].getAleaLeavesSet())
-        self._condClea = Clea(*condAleaLeavesSet)
 
     @staticmethod
     def build(*clauses,**kwargs):
@@ -136,6 +132,11 @@ class Blea(Lea):
                     yield (v,p*p2)
 
     def _genOneRandomMC(self):
+        if self._condClea is None:
+            # _condAlea is a cartesian product of all Alea leaves present in CPT conditions;
+            condAleaLeavesSet = frozenset(aleaLeaf for ilea in self._ileas                             \
+                                                   for aleaLeaf in ilea._condLeas[0].getAleaLeavesSet())
+            self._condClea = Clea(*condAleaLeavesSet)
         # the first for loop binds a random value on each Alea instances refered in CPT conditions
         for _ in self._condClea._genOneRandomMC():
             # here, there will be at most one ilea having condition that evaluates to True,
