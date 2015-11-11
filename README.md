@@ -8,10 +8,6 @@ See [Installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installa
 
 ---
 
-**COMING SOON!** Saturday October 24, 2015: ["Probabilistic programming with Lea"](http://lanyrd.com/2015/pyconie/sdrkdr/) presentation at [PyCon Ireland 2015](http://python.ie/pycon-2015/). Save the date!
-
----
-
 ## What is Lea?
 
 Lea is a Python package aiming at working with discrete probability distributions in an intuitive way. It allows you to model a broad range of random phenomenons, like dice throwing, coin tossing, gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, … Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
