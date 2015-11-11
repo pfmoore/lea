@@ -144,9 +144,8 @@ class Lea(object):
         '''
         pass
 
-    # Lea attributes; name and data are placeholder attributes : these are not used by Lea
-    # but could be used by client applications for specific needs
-    __slots__ = ('_alea','name','data')
+    # Lea attributes
+    __slots__ = ('_alea',)
 
     # constructor methods
     # -------------------
@@ -157,7 +156,7 @@ class Lea(object):
         # alea instance acting as a cache when actual value-probability pairs have been calculated
         self._alea = None
         
-    def id(self):
+    def _id(self):
         ''' returns a unique id, containing the concrete Lea class name as prefix
         '''
         return '%s#%s'%(self.__class__.__name__,id(self))
