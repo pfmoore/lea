@@ -28,7 +28,7 @@ from itertools import islice
 from math import log
 from collections import namedtuple
 from prob_fraction import ProbFraction
-from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, dict
+from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip
 
 class Lea(object):
     
@@ -168,7 +168,10 @@ class Lea(object):
             this method is overloaded in Alea subclass to stop the recursion
         '''
         return frozenset(aleaLeaf for leaChild in self._getLeaChildren() for aleaLeaf in leaChild.getAleaLeavesSet())
-         
+
+    # constructor methods
+    # -------------------
+             
     def clone(self,cloneTable=None):
         ''' returns a deep copy of current Lea, without any value binding;
             if the Lea tree contains multiple references to the same Lea instance,
@@ -297,9 +300,72 @@ class Lea(object):
         '''
         return Lea.fromVals(*range(fromVal,toVal+1))
 
+    @staticmethod
+    def fromCSVFilename(csvFilename,dialect='excel',**fmtparams):
+        ''' static method, returns an Alea instance representing the joint probability
+            distribution of the data read in the CSV file of the given csvFilename;
+            it is similar to Lea.fromCSVFile method, except that it takes a filename
+            instead of an open file (i.e. the method opens itself the file for reading);
+            see Lea.fromCSVFile doc for more details
+        '''
+        (attrNames,dataFreq) = readCSVFilename(csvFilename,dialect,**fmtparams)
+        return Lea.fromValFreqs(*dataFreq).asJoint(*attrNames)
 
-    # constructor methods
-    # -------------------
+    @staticmethod
+    def fromCSVFile(csvFile,dialect='excel',**fmtparams):
+        ''' static method, returns an Alea instance representing the joint probability
+            distribution of the data read in the given CSV file;
+            the arguments follow the same semantics as those of Python's csv.reader
+            method, which supports different CSV formats;
+            see doc in https://docs.python.org/2/library/csv.html
+            the fields found in the first read row of the CSV file provide information
+            on the attributes: each field is made up of a name, which shall be a valid
+            identifier, followed by an optional 3-characters type code among  
+              {b} -> boolean
+              {i} -> integer
+              {f} -> float
+              {s} -> string
+              {#} -> count
+            if the type code is missing for a given field, the type string is assumed for
+            this field; for example, using the comma delimiter (default), the first row
+            in the CSV file could be:
+                name,age{i},heigth{f},married{b}
+            the type code define the conversion to be applied to the fields read on the
+            data lines; if the read value is empty, then it is converted to Python's None,
+            except if the type is string, then, the value is the empty string; 
+            if the read value is not empty and cannot be parsed for the expected type, then
+            an exception is raised; for boolean type, the following values (case insentive)
+              't', 'true' , '1' are interpreted as True;
+              'f', 'false', '0' are interpreted as False;
+            the {#} code identifies a field that provides a count number of the row,
+            representing the probability of the row or its frequency as a positive integer;
+            such field is NOT included as attribute of the joint distribution; it is useful
+            to define non-uniform probability distribution, as alternative to repeating the
+            same row multiple times
+        '''
+        (attrNames,dataFreq) = readCSVFile(csvFile,dialect,**fmtparams)
+        return Lea.fromValFreqs(*dataFreq).asJoint(*attrNames)
+
+    @staticmethod
+    def fromPandasDF(dataframe,indexColName=None):
+        ''' static method, returns an Alea instance representing the joint probability
+            distribution from the given pandas dataframe
+            the attribute names of the distribution are those of the column of the 
+            given dataframe; the first field in each item of the dataframe is assumed
+            to be the index; its treatment depends on given indexColName:
+            if indexColName is None, then this index field is ignored
+            otherwise, it is put in the joint distribution with indexColName as 
+            attribute name
+        '''
+        # TODO: retrieve index_col in df, if not 0
+        attrNames = tuple(dataframe.columns)
+        if indexColName is None:
+            valuesIter = (t[1:] for t in dataframe.itertuples())
+            attrNames = dataframe.columns
+        else:
+            valuesIter = dataframe.itertuples()
+            attrNames = (indexColName,) + attrNames
+        return Lea.fromSeq(valuesIter).asJoint(*attrNames)
 
     def withProb(self,condLea,pNum,pDen=None):
         ''' returns a new Alea instance from current distribution,
