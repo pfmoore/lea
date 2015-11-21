@@ -483,8 +483,8 @@ class Lea(object):
 
     @staticmethod
     def reduce(op,args):
-        ''' returns a new Flea instance that join the given args with the given
-            function op, from left to right;
+        ''' static method, returns a new Flea instance that join the given args with the
+            given function op, from left to right;
             requires that op is a 2-ary function, accepting self's values as arguments;
             requires that args contains at least one element
         '''
@@ -672,14 +672,14 @@ class Lea(object):
 
     @staticmethod
     def buildCPTFromDict(aCPTDict,priorLea=None):
-        ''' same as buildCPT, with clauses specified in the aCPTDict dictionary
+        ''' static method, same as buildCPT, with clauses specified in the aCPTDict dictionary
             {condition:result}
         '''
         return Blea.build(*(aCPTDict.items()),priorLea=priorLea)
 
     @staticmethod
     def if_(condLea,thenLea,elseLea):
-        ''' returns an instance of Blea representing the conditional probability table
+        ''' static method, an instance of Blea representing the conditional probability table
             giving thenLea  if condLea is true
                    elseLea  otherwise
             this is a convenience method equivalent to 
@@ -689,18 +689,35 @@ class Lea(object):
         
     @staticmethod
     def buildCPT(*clauses,**kwargs):
-        ''' returns an instance of Blea representing the conditional probability table
-            (e.g. a node in a Bayes network) from the given clauses;
+        ''' static method, returns an instance of Blea representing the conditional
+            probability table (e.g. a node in a Bayes network) from the given clauses;
             each clause is a tuple (condition,result)
             where condition is a boolean or a Lea boolean distribution
               and result is a value or Lea distribution representing the result
                    assuming that condition is true
             the conditions from all clauses shall be mutually exclusive
             if a clause contains None as condition, then it is considered as a 'else'
-            condition
-            if a priorLea argument is specified, then the 'else' clause is calculated
-            so that the returned Blea if no condition is given is priorLea ; it is an 
-            error to specify a 'else' clause if priorLea argument is specified
+            condition;
+            the method supports three optional named arguments:
+             'priorLea', 'autoElse' and 'check';
+            'priorLea' and 'autoElse' are mutually exclusive, they require the absence
+            of an 'else' clause (otherwise, an exception is raised); 
+            * if priorLea argument is specified, then the 'else' clause is calculated
+            so that the priorLea is returned for the unconditional case
+            * if autoElse argument is specified as True, then the 'else' clause is
+            calculated so that a uniform probability distribution is returned for
+            the condition cases not covered in given clauses (principle of indifference);
+            the values are retrieved from the results found in given clauses
+            * if check argument is specified as True, then checkup is made on clause
+            conditions to ensure that they form a partition:
+             1) the clause conditions shall be mutually disjoint, i.e. no subset
+                of conditions shall be true together;
+             2) if 'else' is missing and not calculated through 'priorLea' nor 'autoElse',
+                then the clause conditions shall cover all possible cases, i.e. ORing
+                them shall be certainly true;
+            an exception is raised if any of such conditions is not verified;
+            note that activating this check can significantly reduce performances, as the 
+            set of clauses or variables become large. 
         '''
         return Blea.build(*clauses,**kwargs)
 
@@ -713,10 +730,52 @@ class Lea(object):
                    assuming that condition is true
             the conditions from all clauses shall be mutually exclusive
             no clause can contain None as condition
-            the 'else' clause is calculated so that the returned Blea if no condition is given 
-            is self
+            the 'else' clause is calculated so that the returned Blea if no condition is
+            given is self
         ''' 
         return Blea.build(*clauses,priorLea=self)
+    
+    def buildBNfromJoint(self,*bnDefinition):
+        ''' returns a named tuple of Blea instances representing a Bayes network
+            with variables stored in attributes A1, ... , An, assuming that self
+            is a joint probability distribution having, as values, named tuples
+            with the same set of attributes A1, ... , An;
+            each argument of given bnDefinition represent a dependency relationship
+            from a set of given variables to one given variable; this is expressed as
+            a tuple (srcVarNames, tgtVarName) where srcVarNames is a sequence of
+            attribute names (strings) identifying 'from' variables and tgtName is the
+            attribute name (string) identifying the 'to' variable;
+            the method builds up the 'to' variable of the BN as a CPT calculated from
+            each combination of 'from' variables in the joint probability distribution:
+            for each such combination C, the distribution of 'to' variable is calculated
+            by marginalisation on the joint probability distribution given the C condition;
+            possible missing combinations are covered in an 'else' clause on the CPT
+            that is defined as a uniform distribution of the values of 'to' variable,
+            which are found in the other clauses (principle of indifference);
+            the variables that are never refered as 'to' variable are considered
+            as independent in the BN and are calculated by unconditional marginalisation
+            on the joint probability distribution;
+            if a variable appears in more than one 'to' variable, then an exception is
+            raised (error)
+        '''
+        jointAlea = self.getAlea()
+        # retrieve the named tuple class from the first value of the joint distribution,
+        NamedTuple = jointAlea._vs[0].__class__
+        varsDict = dict((varName,self.__getattribute__(varName)) for varName in NamedTuple._fields)
+        # all BN variables initialized as independent (maybe overwritten below, according to given relationships)
+        varsBNDict = dict((varName,var.getAlea()) for (varName,var) in varsDict.items())
+        for (srcVarNames,tgtVarName) in bnDefinition:
+            if not isinstance(varsBNDict[tgtVarName],Alea):
+                raise Lea.Error("'%s' is defined as target in more than one BN relationship"%tgtVarName)
+            tgtVar = varsDict[tgtVarName]
+            cprodSrcVars = Lea.cprod(*(varsDict[srcVarName] for srcVarName in srcVarNames))
+            cprodSrcVarsBN = Lea.cprod(*(varsBNDict[srcVarName] for srcVarName in srcVarNames))
+            varsBNDict[tgtVarName] = Lea.buildCPT(
+                                        *((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
+                                           for cprodSrcVal in cprodSrcVars.vals()), autoElse=True)
+        # return the BN variables as attributes of a new named tuple having the same
+        # attributes as the values found in self
+        return NamedTuple(**varsBNDict)
     
     def __call__(self,*args):
         ''' returns a new Flea instance representing the probability distribution
@@ -726,7 +785,7 @@ class Lea(object):
             called on evaluation of "self(*args)"
         '''
         return Flea.build(self,args)
-        
+
     def __getitem__(self,index):
         ''' returns a new Flea instance representing the probability distribution
             obtained by indexing or slicing each value with index
@@ -766,8 +825,8 @@ class Lea(object):
 
     @staticmethod
     def fastMax(*args):
-        ''' returns a new Alea instance giving the probabilities to have the maximum
-            value of each combination of the given args;
+        ''' static method, returns a new Alea instance giving the probabilities to
+            have the maximum value of each combination of the given args;
             if some elements of args are not Lea instance, then these are coerced
             to an Lea instance with probability 1;
             the method uses an efficient algorithm (linear complexity), which is
@@ -785,8 +844,8 @@ class Lea(object):
     
     @staticmethod
     def fastMin(*args):
-        ''' returns a new Alea instance giving the probabilities to have the minimum
-            value of each combination of the given args;
+        ''' static method, returns a new Alea instance giving the probabilities to have
+            the minimum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
             to an Alea instance with probability 1;
             the method uses an efficient algorithm (linear complexity), which is
@@ -804,8 +863,8 @@ class Lea(object):
         
     @staticmethod
     def max(*args):
-        ''' returns a new Flea instance giving the probabilities to have the maximum
-            value of each combination of the given args;
+        ''' static method, returns a new Flea instance giving the probabilities to
+            have the maximum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
             to a Lea instance with probability 1;
             the returned distribution keeps dependencies with args but the 
@@ -817,8 +876,8 @@ class Lea(object):
 
     @staticmethod
     def min(*args):
-        ''' returns a new Flea instance giving the probabilities to have the minimum
-            value of each combination of the given args;
+        ''' static method, returns a new Flea instance giving the probabilities to
+            have the minimum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
             to a Lea instance with probability 1;
             the returned distribution keeps dependencies with args but the 

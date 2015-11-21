@@ -60,31 +60,45 @@ class Blea(Lea):
                                            if aleaLeaf._count > 1                  )
         self._ctxClea = Clea(*aleaLeavesSet)
 
+    _argNamesOfBuildMeth = frozenset(('priorLea','autoElse','check'))
+
     @staticmethod
     def build(*clauses,**kwargs):
+        argNames = frozenset(kwargs.keys())
+        unknownArgNames = argNames - Blea._argNamesOfBuildMeth
+        if len(unknownArgNames) > 0:
+            raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknownArgNames)),tuple(Blea._argNamesOfBuildMeth)))
         priorLea = kwargs.get('priorLea',None)
-        # TODO: check no other args !!
-        # PY3: def build(*clauses,priorLea=None):
+        autoElse = kwargs.get('autoElse',False)
+        check = kwargs.get('check',False)
+        ## in PY3, could use: def build(*clauses,priorLea=None,autoElse=False,check=False):
         elseClauseResults = tuple(result for (cond,result) in clauses if cond is None)
         if len(elseClauseResults) > 1:
-            raise Lea.Error("impossible to define more than one 'other' clause")
+            raise Lea.Error("impossible to define more than one 'else' clause")
         if len(elseClauseResults) == 1:
             if priorLea is not None:
-                raise Lea.Error("impossible to define together prior probabilities and 'other' clause")
+                raise Lea.Error("impossible to define together prior probabilities and 'else' clause")
+            if autoElse:
+                raise Lea.Error("impossible to have autoElse=True and 'else' clause")                
             elseClauseResult = elseClauseResults[0]
+        elif autoElse:
+            if priorLea is not None:
+                raise Lea.Error("impossible to define together prior probabilities and autoElse=True")
+            # take uniform distribution on all values found in clause's results
+            elseClauseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
         else:
             elseClauseResult = None
         normClauseLeas = tuple((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
         condLeas = tuple(condLea for (condLea,resultLea) in normClauseLeas)
         # check that conditions are disjoint
-        if any(v.count(True) > 1 for (v,_) in Clea(*condLeas)._genVPs()):
-            raise Lea.Error("clause conditions are not disjoint")        
+        if check:
+            if any(v.count(True) > 1 for (v,_) in Clea(*condLeas)._genVPs()):
+                raise Lea.Error("clause conditions are not disjoint")
         # build the OR of all given conditions
         orCondsLea = Lea.reduce(or_,condLeas)
-        isClauseSetComplete = orCondsLea.isTrue()
         if priorLea is not None:
             # prior distribution: determine elseClauseResult
-            if isClauseSetComplete:
+            if check and orCondsLea.isTrue():
                 # TODO check priorLea equivalent to self
                 raise Lea.Error("forbidden to define prior probabilities for complete clause set")
             (pTrue,count) = orCondsLea._p(True)
@@ -108,14 +122,15 @@ class Blea(Lea):
                  vps.append((value,p))
             elseClauseResult = Lea.fromValFreqs(*vps)
         elif elseClauseResult is None:
-            # check that clause set is complete
-            if not isClauseSetComplete:
-                # TODO? : assume a uniform prior distribution ? ... which values ? 
-                raise Lea.Error("incomplete clause set requires 'other' clause or prior probabilities")
+            # no 'else' clause: check that clause set is complete
+            if check and not orCondsLea.isTrue():
+                raise Lea.Error("incomplete clause set requires 'else' clause or prior probabilities")
         if elseClauseResult is not None:
+            # add the else clause
             elseCondLea = ~orCondsLea
+            ## other equivalent statement: elseCondLea = Lea.reduce(and_,(~condLea for condLea in condLeas))
             normClauseLeas += ((elseCondLea,Lea.coerce(elseClauseResult)),)
-            # note that orCondsLea is NOT extended with rCondsLea |= elseCondLea
+            # note that orCondsLea is NOT extended with orCondsLea |= elseCondLea
             # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true
         return Blea(*(Ilea(resultLea,(condLea,)) for (condLea,resultLea) in normClauseLeas))    
 
