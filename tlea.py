@@ -24,7 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
-from flea import Flea
+from flea2 import Flea2
 
 class Tlea(Lea):
 
@@ -62,11 +62,11 @@ class Tlea(Lea):
         tlea = Tlea(self._op,lea1,nTimes1)
         alea = tlea.getAlea()
         # alea = tlea
-        flea = Flea.build(self._op,(alea,alea.clone()))
+        flea = Flea2(self._op,alea,alea.clone())
         if nTimes%2 == 1:
             # nTimes is odd : nTimes = 2*nTimes1 + 1
             # operate with one more lea1 on the current result 
-            flea = Flea.build(self._op,(flea,self._lea1))
+            flea = Flea2(self._op,flea,self._lea1)
         return flea._genVPs()
 
     def _genOneRandomMC(self):
