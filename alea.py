@@ -491,8 +491,22 @@ class Alea(Lea):
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
 
-    indicatorMethodNames = ('mean','var','std','mode','entropy','information')
+    indicatorMethodNames = ('P','Pf','mean','var','std','mode','entropy','information')
 
+    def P(self):
+        ''' returns a ProbFraction instance representing the probability of True,
+            from 0/1 to 1/1; this is a convenience method equivalent to self.p(True)
+            WARNING: this method is called without parentheses
+        '''
+        return ProbFraction(*self._p(True))
+
+    def Pf(self):
+        ''' returns the probability of True, as a floating point number,
+            from 0.0 to 1.0; this is a convenience method equivalent to self.pmf(True)
+            WARNING: this method is called without parentheses
+        '''
+        return self.pmf(True)
+        
     def mean(self):
         ''' returns the mean value of the probability distribution, which is the
             probability weighted sum of the values;

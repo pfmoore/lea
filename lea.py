@@ -353,7 +353,7 @@ class Lea(object):
     @staticmethod
     def fromPandasDF(dataframe,indexColName=None):
         ''' static method, returns an Alea instance representing the joint probability
-            distribution from the given pandas dataframe
+            distribution from the given pandas dataframe;
             the attribute names of the distribution are those of the column of the 
             given dataframe; the first field in each item of the dataframe is assumed
             to be the index; its treatment depends on given indexColName:
@@ -828,7 +828,6 @@ class Lea(object):
             obtained by indexing or slicing each value with index
             called on evaluation of "self[index]"
         '''
-        #return Flea.build(operator.getitem,(self,index))
         return Flea2(operator.getitem,self,index)
         
 
@@ -860,7 +859,6 @@ class Lea(object):
             return object.__getattribute__(self,attrName)
         except AttributeError:
             # return new Lea made up of attributes of inner values
-            #return Flea.build(getattr,(self,attrName))
             return Flea2(getattr,self,attrName)
 
     @staticmethod
@@ -1519,3 +1517,18 @@ Lea.true  = Alea(((True ,1),))
 Lea.false = Alea(((False,1),))
 Lea.zero  = Alea(((0    ,1),))
 
+# Lea convenience functions to get the probability of True
+
+def P(lea1):
+    ''' returns a ProbFraction instance representing the probability for
+        lea1 to be True, from 0/1 to 1/1;
+        this is a convenience function equivalent to lea1.P
+    '''
+    return lea1.P
+
+def Pf(lea1):
+    ''' returns the probability for lea1 to be True, as a floating point
+        number, from 0.0 to 1.0;
+        this is a convenience function equivalent to lea1.Pf
+    '''
+    return lea1.Pf
