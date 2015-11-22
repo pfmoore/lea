@@ -482,16 +482,23 @@ class Lea(object):
         return Plea(self,nTimes)
 
     @staticmethod
-    def reduce(op,args):
-        ''' static method, returns a new Flea instance that join the given args with the
-            given function op, from left to right;
+    def reduce(op,args,absorber=None):
+        ''' static method, returns a new Flea2 instance that join the given args with
+            the given function op, from left to right;
             requires that op is a 2-ary function, accepting self's values as arguments;
             requires that args contains at least one element
+            if absorber is not None, then it is considered as a "right-absorber" value
+            (i.e. op(x,absorber) = absorber); this activates a more efficient algorithm
+            which prunes the tree search as soon as the absorber is met.
         '''
         argsIter = iter(args)
         res = next(argsIter)
-        for arg in argsIter:
-            res = Flea.build(op,(res,arg))
+        if absorber is None:
+            for arg in argsIter:
+                res = Flea2(op,res,arg)
+        else:
+            for arg in argsIter:
+                res = Flea2a(op,res,arg,absorber)
         return res
 
     def merge(self,*leaArgs):
@@ -662,13 +669,13 @@ class Lea(object):
         ''' returns a boolean probability distribution
             indicating the probability that a value is any of the values passed as arguments
         '''
-        return Flea.build(lambda v: v in values,(self,))
+        return Flea1(lambda v: v in values,self)
 
     def isNoneOf(self,*values):
         ''' returns a boolean probability distribution
             indicating the probability that a value is none of the given values passed as arguments 
         '''
-        return Flea.build(lambda v: v not in values,(self,))
+        return Flea1(lambda v: v not in values,self)
 
     @staticmethod
     def buildCPTFromDict(aCPTDict,priorLea=None):
@@ -770,11 +777,36 @@ class Lea(object):
             tgtVar = varsDict[tgtVarName]
             cprodSrcVars = Lea.cprod(*(varsDict[srcVarName] for srcVarName in srcVarNames))
             cprodSrcVarsBN = Lea.cprod(*(varsBNDict[srcVarName] for srcVarName in srcVarNames))
-            varsBNDict[tgtVarName] = Lea.buildCPT(
-                                        *((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
-                                           for cprodSrcVal in cprodSrcVars.vals()), autoElse=True)
-        # return the BN variables as attributes of a new named tuple having the same
-        # attributes as the values found in self
+            ## Note: the following statement is functionnaly equivalent to statements after
+            ## BUT it is far slower in case of missing conditions on the CPT ('else' clause)
+            ## because it relies on the (too) generic 'autoElse' algorithm of Blea, which makes 
+            ## a negatated OR on all given conditions;
+            ## varsBNDict[tgtVarName] = Blea.build(
+            ##                *((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
+            ##                   for cprodSrcVal in cprodSrcVars.vals()), autoElse=True)
+            # build CPT clauses (condition,result) from the joint probability distribution
+            cprodSrcVals = cprodSrcVars.vals()
+            clauses = tuple((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
+                             for cprodSrcVal in cprodSrcVals)
+            # determine missing conditions in the CPT, if any
+            allVals = Lea.cprod(*(varsDict[srcVarName].getAlea() for srcVarName in srcVarNames)).vals()
+            missingVals = frozenset(allVals) - frozenset(cprodSrcVals)
+            if len(missingVals) > 0:
+                # there are missing conditions: add clauses with each of these conditions associating  
+                # them with a uniform distribution built on the values found in results of other other
+                # (principle of indifference)
+                elseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
+                clauses += tuple((cprodSrcVarsBN==missingVal,elseResult) for missingVal in missingVals)
+                ## Note: the following statements are functionally equivalent to the statement above
+                ## these aggregate missing condtions with an OR; the tests show similar performance,
+                ## albeit a small decrease : that's why the former has been preferred;
+                ## elseCond = Lea.reduce(operator.or_,(cprodSrcVarsBN==missingVal for missingVal in missingVals),True)
+                ## clauses += ((elseCond,elseResult),)
+            # overwrite the target BN variable (currently independent Alea instance), with a CPT built
+            # up from the clauses determined from the joint probability distribution
+            varsBNDict[tgtVarName] = Blea.build(*clauses)
+        # return the BN variables as attributes of a new named tuple having the same attributes as the
+        # values found in self
         return NamedTuple(**varsBNDict)
     
     def __call__(self,*args):
@@ -791,7 +823,9 @@ class Lea(object):
             obtained by indexing or slicing each value with index
             called on evaluation of "self[index]"
         '''
-        return Flea.build(operator.getitem,(self,index))
+        #return Flea.build(operator.getitem,(self,index))
+        return Flea2(operator.getitem,self,index)
+        
 
     def __iter__(self):
         ''' returns the iterator returned by genVP()
@@ -821,7 +855,8 @@ class Lea(object):
             return object.__getattribute__(self,attrName)
         except AttributeError:
             # return new Lea made up of attributes of inner values
-            return Flea.build(getattr,(self,attrName))
+            #return Flea.build(getattr,(self,attrName))
+            return Flea2(getattr,self,attrName)
 
     @staticmethod
     def fastMax(*args):
@@ -892,21 +927,21 @@ class Lea(object):
             that the values of self are less than the values of other;
             called on evaluation of "self < other"
         '''
-        return Flea.build(operator.lt,(self,other))
+        return Flea2(operator.lt,self,other)
 
     def __le__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             that the values of self are less than or equal to the values of other;
             called on evaluation of "self <= other"
         '''
-        return Flea.build(operator.le,(self,other))
+        return Flea2(operator.le,self,other)
 
     def __eq__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             that the values of self are equal to the values of other;
             called on evaluation of "self == other"
         '''
-        return Flea.build(operator.eq,(self,other))
+        return Flea2(operator.eq,self,other)
 
     def __hash__(self):
         return id(self)
@@ -916,119 +951,119 @@ class Lea(object):
             that the values of self are different from the values of other;
             called on evaluation of "self != other"
         '''
-        return Flea.build(operator.ne,(self,other))
+        return Flea2(operator.ne,self,other)
 
     def __gt__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             that the values of self are greater than the values of other;
             called on evaluation of "self > other"
         '''
-        return Flea.build(operator.gt,(self,other))
+        return Flea2(operator.gt,self,other)
 
     def __ge__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             that the values of self are greater than or equal to the values of other;
             called on evaluation of "self >= other"
         '''
-        return Flea.build(operator.ge,(self,other))
+        return Flea2(operator.ge,self,other)
     
     def __add__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the addition of the values of self with the values of other;
             called on evaluation of "self + other"
         '''
-        return Flea.build(operator.add,(self,other))
+        return Flea2(operator.add,self,other)
 
     def __radd__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the addition of the values of other with the values of self;
             called on evaluation of "other + self"
         '''
-        return Flea.build(operator.add,(other,self))
+        return Flea2(operator.add,other,self)
 
     def __sub__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the subtraction of the values of other from the values of self;
             called on evaluation of "self - other"
         '''
-        return Flea.build(operator.sub,(self,other))
+        return Flea2(operator.sub,self,other)
 
     def __rsub__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the subtraction of the values of self from the values of other;
             called on evaluation of "other - self"
         '''
-        return Flea.build(operator.sub,(other,self))
+        return Flea2(operator.sub,other,self)
 
     def __pos__(self):
         ''' returns a Flea instance representing the probability distribution
             resulting from applying the unary positive operator on the values of self;
             called on evaluation of "+self"
         '''
-        return Flea.build(operator.pos,(self,))
+        return Flea1(operator.pos,self)
 
     def __neg__(self):
         ''' returns a Flea instance representing the probability distribution
             resulting from negating the values of self;
             called on evaluation of "-self"
         '''
-        return Flea.build(operator.neg,(self,))
+        return Flea1(operator.neg,self)
 
     def __mul__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the multiplication of the values of self by the values of other;
             called on evaluation of "self * other"
         '''
-        return Flea.build(operator.mul,(self,other))
+        return Flea2(operator.mul,self,other)
 
     def __rmul__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the multiplication of the values of other by the values of self;
             called on evaluation of "other * self"
         '''
-        return Flea.build(operator.mul,(other,self))
+        return Flea2(operator.mul,other,self)
 
     def __pow__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the powering the values of self with the values of other;
             called on evaluation of "self ** other"
         '''
-        return Flea.build(operator.pow,(self,other))
+        return Flea2(operator.pow,self,other)
 
     def __rpow__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the powering the values of other with the values of self;
             called on evaluation of "other ** self"
         '''
-        return Flea.build(operator.pow,(other,self))
+        return Flea2(operator.pow,other,self)
 
     def __truediv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the division of the values of self by the values of other;
             called on evaluation of "self / other"
         '''
-        return Flea.build(operator.truediv,(self,other))
+        return Flea2(operator.truediv,self,other)
 
     def __rtruediv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the division of the values of other by the values of self;
             called on evaluation of "other / self"
         '''
-        return Flea.build(operator.truediv,(other,self))
+        return Flea2(operator.truediv,other,self)
 
     def __floordiv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the floor division of the values of self by the values of other;
             called on evaluation of "self // other"
         '''
-        return Flea.build(operator.floordiv,(self,other))
+        return Flea2(operator.floordiv,self,other)
 
     def __rfloordiv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the floor division of the values of other by the values of self;
             called on evaluation of "other // self"
         '''
-        return Flea.build(operator.floordiv,(other,self))
+        return Flea2(operator.floordiv,other,self)
 
     # Python 2 compatibility
     __div__ = __truediv__
@@ -1039,91 +1074,95 @@ class Lea(object):
             resulting from the modulus of the values of self with the values of other;
             called on evaluation of "self % other"
         '''
-        return Flea.build(operator.mod,(self,other))
+        return Flea2(operator.mod,self,other)
 
     def __rmod__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the modulus of the values of other with the values of self;
             called on evaluation of "other % self"
         '''
-        return Flea.build(operator.mod,(other,self))
+        return Flea2(operator.mod,other,self)
 
     def __divmod__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from applying the function divmod on the values of self and the values of other;
             called on evaluation of "divmod(self,other)"
         '''
-        return Flea.build(divmod,(self,other))
+        return Flea2(divmod,self,other)
 
     def __rdivmod__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from applying the function divmod on the values of other and the values of self;
             called on evaluation of "divmod(other,self)"
         '''
-        return Flea.build(divmod,(other,self))
+        return Flea2(divmod,other,self)
 
     def __floordiv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the integer division of the values of self by the values of other;
             called on evaluation of "self // other"
         '''
-        return Flea.build(operator.floordiv,(self,other))
+        return Flea2(operator.floordiv,self,other)
     
     def __rfloordiv__(self,other):
         ''' returns a Flea instance representing the probability distribution
             resulting from the integer division of the values of other by the values of self;
             called on evaluation of "other // self"
         '''
-        return Flea.build(operator.floordiv,(other,self))
+        return Flea2(operator.floordiv,other,self)
 
     def __abs__(self):
         ''' returns a Flea instance representing the probability distribution
             resulting from applying the abs function on the values of self;
             called on evaluation of "abs(self)"
         '''
-        return Flea.build(abs,(self,))
+        return Flea1(abs,self)
     
     def __and__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical AND between the values of self and the values of other;
+            note that the method uses short-circuit evaluation when other's value is false
             called on evaluation of "self & other"
         '''
-        return Flea.build(Lea._safeAnd,(self,other))
+        return Flea2a(Lea._safeAnd,self,other,False)
 
     def __rand__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical AND between the values of other and the values of self;
+            note that the method uses short-circuit evaluation when self's value is false
             called on evaluation of "other & self"
         '''
-        return Flea.build(Lea._safeAnd,(other,self))
+        return Flea2a(Lea._safeAnd,other,self,False)
 
     def __or__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical OR between the values of self and the values of other;
+            note that the method uses short-circuit evaluation when other's value is true
             called on evaluation of "self | other"
         '''
-        return Flea.build(Lea._safeOr,(self,other))
+        return Flea2a(Lea._safeOr,self,other,True)
 
     def __ror__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical OR between the values of other and the values of self;
+            note that the method uses short-circuit evaluation when self's value is true
             called on evaluation of "other | self"
         '''
-        return Flea.build(Lea._safeOr,(other,self))
+        return Flea2a(Lea._safeOr,other,self,True)
 
     def __xor__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical XOR between the values of self and the values of other;
             called on evaluation of "self ^ other"
         '''
-        return Flea.build(Lea._safeXor,(self,other))
+        return Flea2(Lea._safeXor,self,other)
 
     def __invert__(self):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical NOT of the values self;
             called on evaluation of "~self"
         '''
-        return Flea.build(Lea._safeNot,(self,))
+        return Flea1(Lea._safeNot,self)
 
     def __nonzero__(self):
         ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
@@ -1184,9 +1223,22 @@ class Lea(object):
             then it is cloned only once and the references are copied in the cloned tree
             (the cloneTable dictionary serves this purpose);
             Lea._clone method is abstract: it is implemented in all Lea's subclasses
-        ''' 
+        '''
         raise NotImplementedError("missing method '%s._clone(self,cloneTable)'"%(self.__class__.__name__))
 
+    def _getCount(self):
+        ''' returns the total probability weight count (integer) of current Lea;
+            this value depends on current binding(s) on depending Alea leaves (hence, the
+            calculated value cannot be cached);
+            Note that the returned value could be obtained also by calling _genVPs()
+            method and summing all the weights; however, the present method does that in
+            a far more efficient way
+        '''
+        count = 1
+        for aleaLeaf in self.getAleaLeavesSet():
+            count *= aleaLeaf._getCount()
+        return count
+        
     def _genVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability weight (integer > 0);
@@ -1450,9 +1502,12 @@ from clea import Clea
 from plea import Plea
 from tlea import Tlea
 from ilea import Ilea
-from flea import Flea
 from rlea import Rlea
 from blea import Blea
+from flea import Flea
+from flea1 import Flea1
+from flea2 import Flea2
+from flea2a import Flea2a
 
 # Lea constants representing certain values
 Lea.true  = Alea(((True ,1),))

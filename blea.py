@@ -95,7 +95,7 @@ class Blea(Lea):
             if any(v.count(True) > 1 for (v,_) in Clea(*condLeas)._genVPs()):
                 raise Lea.Error("clause conditions are not disjoint")
         # build the OR of all given conditions
-        orCondsLea = Lea.reduce(or_,condLeas)
+        orCondsLea = Lea.reduce(or_,condLeas,True)
         if priorLea is not None:
             # prior distribution: determine elseClauseResult
             if check and orCondsLea.isTrue():

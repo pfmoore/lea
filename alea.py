@@ -291,7 +291,15 @@ class Alea(Lea):
 
     def _clone(self,cloneTable):
         return Alea(zip(self._vs,self._ps))
-      
+
+    def _getCount(self):
+        ''' returns the total probability weight count (integer) of current Alea;
+            this value depends on current binding (hence, the calculated value cannot be cached)
+        '''
+        if self._val is self:
+            return self._count
+        return 1
+
     def _genVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability weight (integer > 0);
@@ -460,8 +468,9 @@ class Alea(Lea):
 
     @staticmethod
     def fastExtremum(cumulFunc,*aleaArgs):
-        ''' returns a new Alea instance giving the probabilities to have the extremum
-            value (min or max) of each combination of the given Alea args;
+        ''' static method, returns a new Alea instance giving the probabilities
+            to have the extremum value (min or max) of each combination of the
+            given Alea args;
             cumulFunc is the cumul function that determines whether max or min is
             used : respectively, Alea.pCumul or Alea.pInvCumul;
             the method uses an efficient algorithm (linear complexity), which is
