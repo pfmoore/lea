@@ -87,8 +87,8 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimateMC method).
 
-    There are eight concrete subclasses to Lea, namely:
-      Alea, Clea, Plea, Flea, Tlea, Ilea, Rlea and Blea.
+    There are ten concrete subclasses to Lea, namely:
+      Alea, Clea, Plea, Flea, Flea1, Flea2, Tlea, Ilea, Rlea and Blea.
     
     Each subclass represents a "definition" of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -114,11 +114,16 @@ class Lea(object):
 
     - Clea provides the cartesian product of a given sequence of Lea instances
     - Plea provides the cartesian product of one Lea instance with itself, a given number of times
-    - Flea applies a given function to a given sequence of Lea instances
+    - Flea applies a given n-ary function to a given sequence of n Lea instances
+    - Flea1 applies a given 1-ary function to a given Lea instance
+    - Flea2 applies a given 2-ary function to two given Lea instances
     - Tlea applies a given 2-ary function, a given number of times, on a given Lea instance
     - Ilea filters the values of a given Lea instance according to a given Lea instance representing a boolean condition (conditional probabilities)
     - Rlea embeds Lea instances as values of a parent Lea instance 
     - Blea defines CPT, providing Lea instances corresponding to given conditions (used for bayesian networks)
+
+    Note that Plea is meant to be a more efficient alternative to a Clea-based implementation;
+    similarily, Flea1, Flea2, Tlea are more efficient alternatives to a Flea-based implementation.
 
     WARNING: The following methods are called without parentheses:
         mean, var, std, mode, entropy, information
@@ -128,9 +133,9 @@ class Lea(object):
     Lea uses the "template method" design pattern: the Lea base abstract class calls the following methods,
     which are implemented in each Lea's subclass: _clone, _getLeaChildren, _genVPs and _genOneRandomMC.
     Excepting the afore-mentioned estimateMC method, Lea performs EXACT calculation of probability distributions.
-    It uses an original algorithm, called the "Statues" algorithm, by reference to the game of the same name;
+    It implements an original algorithm, called the "Statues" algorithm, by reference to the game of the same name;
     this uses a variable binding mechanism that relies on Python's generators. To learn more, see doc of
-    Alea._genVPs method as well as other Xlea._genVPs methods. 
+    Alea._genVPs method as well as other Xlea._genVPs methods implemented in Lea's subclasses. 
     '''
 
     class Error(Exception):
@@ -325,15 +330,15 @@ class Lea(object):
               {f} -> float
               {s} -> string
               {#} -> count
-            if the type code is missing for a given field, the type string is assumed for
-            this field; for example, using the comma delimiter (default), the first row
+            for example, using the comma delimiter (default), the first row
             in the CSV file could be:
                 name,age{i},heigth{f},married{b}
             the type code define the conversion to be applied to the fields read on the
-            data lines; if the read value is empty, then it is converted to Python's None,
-            except if the type is string, then, the value is the empty string; 
+            data lines; if the type code is missing for a given field, the type string is
+            assumed for this field; if the read value is empty, then it is converted to
+            Python's None, except if the type is string, then, the value is the empty string; 
             if the read value is not empty and cannot be parsed for the expected type, then
-            an exception is raised; for boolean type, the following values (case insentive)
+            an exception is raised; for the boolean type, the following values (case insentive)
               't', 'true' , '1' are interpreted as True;
               'f', 'false', '0' are interpreted as False;
             the {#} code identifies a field that provides a count number of the row,
