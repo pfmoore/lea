@@ -166,7 +166,7 @@ def strToBool(bStr):
         return False
     if bStr in ('t','true','1'):
         return True
-    raise ValueError("invalid boolean literal '%s'"%bStr)
+    raise ValueError("invalid boolean litteral '%s'"%bStr)
 
 def readCSVFilename(csvFilename,dialect='excel',**fmtparams):
     ''' same as readCSVFile method, except that it takes a filename instead
