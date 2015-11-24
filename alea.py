@@ -362,15 +362,36 @@ class Alea(Lea):
         
     def _p(self,val):
         ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
-            where
-            s is the sum of the probability weights of all values 
-            p is the probability weight of the given value val (from 0 to s)
+            where s is the sum of the probability weights of all values 
+                  p is the probability weight of the given value val (from 0 to s)
             note: the ratio p/s is not reduced
         '''
+        p1 = 0
+        # note: shall not exit the loop by a break/return (unbinding)
         for (v,p) in self._genVPs():
             if v == val:
-                return (p,self._count)
-        return (0,self._count)
+                p1 = p
+        return (p1,self._count)
+
+    def _pC(self,val):
+        ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
+            where s is the sum of the probability weights of all values 
+                  p is the probability weight of the given value val (from 0 to s)
+            note: the ratio p/s is not reduced
+            raises an exception if some value in the distribution has a type different from val's
+        '''
+        p1 = 0
+        errVal = self
+        typeToCheck = type(val)
+        # note: shall not exit the loop by a break/return (unbinding)
+        for (v,p) in self._genVPs():
+            if not isinstance(v,typeToCheck):
+                errVal = v
+            elif v == val:
+                p1 = p
+        if errVal is not self:
+            raise Lea.Error("found <%s> value although <%s> is expected"%(type(errVal).__name__,typeToCheck.__name__))
+        return (p1,self._count)
 
     def cumul(self):
         ''' returns a tuple with the probability weights p that self <= value ;
@@ -495,17 +516,21 @@ class Alea(Lea):
 
     def P(self):
         ''' returns a ProbFraction instance representing the probability of True,
-            from 0/1 to 1/1; this is a convenience method equivalent to self.p(True)
+            from 0/1 to 1/1;
+            raises an exception if some value in the distribution is not boolean
+            (this is NOT the case with self.p(True))
             WARNING: this method is called without parentheses
         '''
-        return ProbFraction(*self._p(True))
+        return ProbFraction(*self._pC(True))
 
     def Pf(self):
         ''' returns the probability of True, as a floating point number,
-            from 0.0 to 1.0; this is a convenience method equivalent to self.pmf(True)
+            from 0.0 to 1.0;
+            raises an exception if some value in the distribution is not boolean
+            (this is NOT the case with self.pmf(True))
             WARNING: this method is called without parentheses
         '''
-        return self.pmf(True)
+        return float(self.P)
         
     def mean(self):
         ''' returns the mean value of the probability distribution, which is the

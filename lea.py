@@ -670,6 +670,16 @@ class Lea(object):
         '''
         return self.getAlea()._p(val)
 
+    def _pC(self,val):
+        ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
+            where
+            s is the sum of the probability weights of all values 
+            p is the probability weight of the given value val (from 0 to s)
+            note: the ratio p/s is not reduced
+            raises an exception if some value in the distribution has a type different from val's
+        '''
+        return self.getAlea()._pC(val)
+        
     def isAnyOf(self,*values):
         ''' returns a boolean probability distribution
             indicating the probability that a value is any of the values passed as arguments
@@ -785,7 +795,7 @@ class Lea(object):
             ## Note: the following statement is functionnaly equivalent to statements after
             ## BUT it is far slower in case of missing conditions on the CPT ('else' clause)
             ## because it relies on the (too) generic 'autoElse' algorithm of Blea, which makes 
-            ## a negatated OR on all given conditions;
+            ## a negated OR on all given conditions;
             ## varsBNDict[tgtVarName] = Blea.build(
             ##                *((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
             ##                   for cprodSrcVal in cprodSrcVars.vals()), autoElse=True)
@@ -798,7 +808,7 @@ class Lea(object):
             missingVals = frozenset(allVals) - frozenset(cprodSrcVals)
             if len(missingVals) > 0:
                 # there are missing conditions: add clauses with each of these conditions associating  
-                # them with a uniform distribution built on the values found in results of other other
+                # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
                 elseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
                 clauses += tuple((cprodSrcVarsBN==missingVal,elseResult) for missingVal in missingVals)
@@ -1324,28 +1334,20 @@ class Lea(object):
     
     def isTrue(self):
         ''' returns True iff the value True has probability 1;
-            returns False otherwise
+                    False otherwise;
+            raises exception if some value is not boolean
         '''
-        (p,count) = self._p(True)
-        return p > 0 and p == count
+        (n,d) = self._pC(True) 
+        return n == d
 
     def isFeasible(self):
         ''' returns True iff the value True has a non-null probability;
-            returns False otherwise;
-            raises exception if some value are not booleans
+                    False otherwise;
+            raises exception if some value is not boolean
         '''
-        res = False
-        for (v,p) in self._genVPs():
-            if res is False:
-                if not isinstance(v,bool):
-                    res = v
-                elif v and p > 0:
-                    # true or maybe true
-                    res = True
-        if not isinstance(res,bool):    
-            raise Lea.Error("condition evaluated as a %s although a boolean is expected"%type(res))    
-        return res
-
+        (n,d) = self._pC(True) 
+        return n > 0
+        
     def asString(self,kind='/',nbDecimals=6,chartSize=100):
         ''' returns, after evaluation of the probability distribution self, a string
             representation of it;
@@ -1522,6 +1524,8 @@ Lea.zero  = Alea(((0    ,1),))
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for
         lea1 to be True, from 0/1 to 1/1;
+        raises an exception if some value in the distribution is not boolean
+        (this is NOT the case with lea1.p(True))
         this is a convenience function equivalent to lea1.P
     '''
     return lea1.P
@@ -1529,6 +1533,8 @@ def P(lea1):
 def Pf(lea1):
     ''' returns the probability for lea1 to be True, as a floating point
         number, from 0.0 to 1.0;
+        raises an exception if some value in the distribution is not boolean
+        (this is NOT the case with self.pmf(True))
         this is a convenience function equivalent to lea1.Pf
     '''
     return lea1.Pf
