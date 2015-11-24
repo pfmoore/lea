@@ -760,8 +760,9 @@ class Lea(object):
     def buildBNfromJoint(self,*bnDefinition):
         ''' returns a named tuple of Blea instances representing a Bayes network
             with variables stored in attributes A1, ... , An, assuming that self
-            is a joint probability distribution having, as values, named tuples
-            with the same set of attributes A1, ... , An;
+            is a Lea joint probability distribution having, as values, named tuples
+            with the same set of attributes A1, ... , An (such Lea instance is
+            returned by asJoint method, for example);
             each argument of given bnDefinition represent a dependency relationship
             from a set of given variables to one given variable; this is expressed as
             a tuple (srcVarNames, tgtVarName) where srcVarNames is a sequence of
@@ -823,6 +824,31 @@ class Lea(object):
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**varsBNDict)
+    
+    @staticmethod
+    def makeVars(obj,tgtDict,prefix='',suffix=''):
+        ''' retrieve attributes names A1, ... , An of obj and put associations 
+            {V1 : obj.A1, ... , Vn : obj.An} in tgtDict dictionary
+            where Vi is a variable name string built as prefix + Ai + suffix;
+            obj is
+            (a) either a named tuple with attributes A1, ... , An (as returned
+            by buildBNfromJoint, for example)
+            (b) or a Lea instances representing a joint probability distribution
+            with the attributes A1, ... , An (such Lea instance is returned by
+            asJoint method, for example);
+            note: if the caller passes globals() as tgtDict, then the variables
+            named Vi, refering to obj.Ai, shall be created in its scope, as
+            a side-effect (this is the purpose of the method);
+            warning: the method may silently overwrite caller's variables
+        '''
+        if isinstance(obj,Lea):
+            # case (b)
+            # retrieve the named tuple class from the first value of the joint distribution
+            NamedTuple = obj.getAlea()._vs[0].__class__
+        else:
+            # case (a)
+            NamedTuple = obj.__class__
+        tgtDict.update((prefix+varName+suffix,obj.__getattribute__(varName)) for varName in NamedTuple._fields)       
     
     def __call__(self,*args):
         ''' returns a new Flea instance representing the probability distribution
