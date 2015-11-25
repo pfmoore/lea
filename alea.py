@@ -43,7 +43,7 @@ class Alea(Lea):
     Values having null probability counters are dropped.
     '''
 
-    __slots__ = ('_vs','_ps','_count','_val','_cumul','_invCumul','_cachesByFunc')
+    __slots__ = ('_vs','_ps','_count','_val','_cumul','_invCumul','_randomIter','_cachesByFunc')
     
     def __init__(self,vps):
         ''' initializes Alea instance's attributes
@@ -59,6 +59,7 @@ class Alea(Lea):
         self._val = self
         self._cumul = None
         self._invCumul = None
+        self._randomIter = self._createRandomIter()
         self._cachesByFunc = dict()
 
     # constructor methods
@@ -420,9 +421,9 @@ class Alea(Lea):
     def randomVal(self):
         ''' returns a random value among the values of self, according to their probabilities
         '''
-        return next(self.randomIter())
+        return next(self._randomIter)
         
-    def randomIter(self):
+    def _createRandomIter(self):
         ''' generates an infinite sequence of random values among the values of self,
             according to their probabilities
         '''

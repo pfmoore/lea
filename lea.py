@@ -1242,6 +1242,19 @@ class Lea(object):
         Lea._checkBooleans('NOT',a)
         return operator.not_(a)    
 
+    def _getCount(self):
+        ''' returns the total probability weight count (integer) of current Lea;
+            this value depends on current binding(s) on depending Alea leaves (hence, the
+            calculated value cannot be cached);
+            Note that the returned value could be obtained also by calling _genVPs()
+            method and summing all the weights; however, the present method does that in
+            a far more efficient way
+        '''
+        count = 1
+        for aleaLeaf in self.getAleaLeavesSet():
+            count *= aleaLeaf._getCount()
+        return count
+
     def _getLeaChildren(self):
         ''' returns a tuple containing all the Lea instances children of the current Lea;
             Lea._getLeaChildren method is abstract: it is implemented in all Lea's subclasses
@@ -1256,19 +1269,6 @@ class Lea(object):
             Lea._clone method is abstract: it is implemented in all Lea's subclasses
         '''
         raise NotImplementedError("missing method '%s._clone(self,cloneTable)'"%(self.__class__.__name__))
-
-    def _getCount(self):
-        ''' returns the total probability weight count (integer) of current Lea;
-            this value depends on current binding(s) on depending Alea leaves (hence, the
-            calculated value cannot be cached);
-            Note that the returned value could be obtained also by calling _genVPs()
-            method and summing all the weights; however, the present method does that in
-            a far more efficient way
-        '''
-        count = 1
-        for aleaLeaf in self.getAleaLeavesSet():
-            count *= aleaLeaf._getCount()
-        return count
         
     def _genVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
@@ -1290,7 +1290,7 @@ class Lea(object):
             the instance is rebound to a new value at each iteration, as soon as the execution
             is resumed after the yield;
             the instance is unbound at the end;
-            Lea._genVPs method is abstract: it is implemented in all Lea's subclasses
+            Lea._genOneRandomMC method is abstract: it is implemented in all Lea's subclasses
         '''
         raise NotImplementedError("missing method '%s._genOneRandomMC(self)'"%(self.__class__.__name__))
             
@@ -1474,7 +1474,7 @@ class Lea(object):
             generates an infinite sequence of random values among the values of self,
             according to their probabilities
         '''
-        return self.getAlea().randomIter()
+        return self.getAlea()._randomIter
         
     def random(self,n=None):
         ''' evaluates the distribution, then, 
