@@ -359,37 +359,26 @@ class Alea(Lea):
             finally:
                 # unbind value, after the random value has been bound or if an exception has been raised
                 self._val = self
-        
-    def _p(self,val):
+    
+    def _p(self,val,checkValType=False):
         ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
             where s is the sum of the probability weights of all values 
                   p is the probability weight of the given value val (from 0 to s)
             note: the ratio p/s is not reduced
+            if checkValType is True, then raises an exception if some value in the
+            distribution has a type different from val's
         '''
         p1 = 0
+        if checkValType:
+            errVal = self  # dumy value
+            typeToCheck = type(val)
         # note: shall not exit the loop by a break/return (unbinding)
         for (v,p) in self._genVPs():
-            if v == val:
-                p1 = p
-        return (p1,self._count)
-
-    def _pC(self,val):
-        ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
-            where s is the sum of the probability weights of all values 
-                  p is the probability weight of the given value val (from 0 to s)
-            note: the ratio p/s is not reduced
-            raises an exception if some value in the distribution has a type different from val's
-        '''
-        p1 = 0
-        errVal = self
-        typeToCheck = type(val)
-        # note: shall not exit the loop by a break/return (unbinding)
-        for (v,p) in self._genVPs():
-            if not isinstance(v,typeToCheck):
+            if checkValType and not isinstance(v,typeToCheck):
                 errVal = v
-            elif v == val:
+            if p1 == 0 and v == val:
                 p1 = p
-        if errVal is not self:
+        if checkValType and errVal is not self:
             raise Lea.Error("found <%s> value although <%s> is expected"%(type(errVal).__name__,typeToCheck.__name__))
         return (p1,self._count)
 
@@ -521,7 +510,7 @@ class Alea(Lea):
             (this is NOT the case with self.p(True))
             WARNING: this method is called without parentheses
         '''
-        return ProbFraction(*self._pC(True))
+        return ProbFraction(*self._p(True,checkValType=True))
 
     def Pf(self):
         ''' returns the probability of True, as a floating point number,

@@ -661,25 +661,17 @@ class Lea(object):
             return tuple(p/count for p in self.cumul()[1:])
         return self.getAlea().pCumul(val)/count
 
-    def _p(self,val):
+    def _p(self,val,checkValType=False):
         ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
             where
             s is the sum of the probability weights of all values 
             p is the probability weight of the given value val (from 0 to s)
             note: the ratio p/s is not reduced
+            if checkValType is True, then raises an exception if some value in the
+            distribution has a type different from val's
         '''
-        return self.getAlea()._p(val)
+        return self.getAlea()._p(val,checkValType)
 
-    def _pC(self,val):
-        ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
-            where
-            s is the sum of the probability weights of all values 
-            p is the probability weight of the given value val (from 0 to s)
-            note: the ratio p/s is not reduced
-            raises an exception if some value in the distribution has a type different from val's
-        '''
-        return self.getAlea()._pC(val)
-        
     def isAnyOf(self,*values):
         ''' returns a boolean probability distribution
             indicating the probability that a value is any of the values passed as arguments
@@ -1363,7 +1355,7 @@ class Lea(object):
                     False otherwise;
             raises exception if some value is not boolean
         '''
-        (n,d) = self._pC(True) 
+        (n,d) = self._p(True,checkValType=True) 
         return n == d
 
     def isFeasible(self):
@@ -1371,7 +1363,7 @@ class Lea(object):
                     False otherwise;
             raises exception if some value is not boolean
         '''
-        (n,d) = self._pC(True) 
+        (n,d) = self._p(True,checkValType=True)
         return n > 0
         
     def asString(self,kind='/',nbDecimals=6,chartSize=100):
@@ -1560,7 +1552,7 @@ def Pf(lea1):
     ''' returns the probability for lea1 to be True, as a floating point
         number, from 0.0 to 1.0;
         raises an exception if some value in the distribution is not boolean
-        (this is NOT the case with self.pmf(True))
+        (this is NOT the case with lea1.pmf(True))
         this is a convenience function equivalent to lea1.Pf
     '''
     return lea1.Pf
