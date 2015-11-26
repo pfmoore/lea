@@ -461,14 +461,14 @@ class Alea(Lea):
             res.sort()
         return tuple(res)
     
-    #@memoize
+    @memoize
     def pCumul(self,val):
         ''' returns, as an integer, the probability weight that self <= val
             note that it is not required that val is in the support of self
         '''
         return self.cumul()[bisect_right(self._vs,val)] 
 
-    #@memoize
+    @memoize
     def pInvCumul(self,val):
         ''' returns, as an integer, the probability weight that self >= val
             note that it is not required that val is in the support of self
