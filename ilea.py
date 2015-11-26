@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
+from operator import and_
 
 class Ilea(Lea):
     
@@ -103,3 +104,20 @@ class Ilea(Lea):
             if u is not self: 
                 for v in self._lea1._genOneRandomMC():
                     yield v
+
+    def lr(self):
+        ''' returns a float giving the likelihood ratio (LR) of an 'evidence' E,
+            which is self's unconditional probability distribution, for a given
+            'hypothesis' H, which is self's condition; it is calculated as 
+                  P(E | H) / P(E | not H)
+            both E and H must be boolean probability distributions, otherwise
+            an exception is raised;
+            an exception is raised also if H is certainly true or certainly false      
+        '''
+        lrN = self.P
+        lrD = self._lea1.given(~Lea.reduce(and_,self._condLeas,False)).P
+        if lrD == 0:
+            if lrN == 0:
+                raise Lea.Error("undefined likelihood ratio")
+            return float('inf') 
+        return float(lrN) / float(lrD)

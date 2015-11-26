@@ -457,8 +457,9 @@ class Lea(object):
             distribution are those and only those compatible with the given AND of
             evidences;
             the resulting (value,probability) pairs are calculated when the
-            returned Ilea instance is evaluated; if no value is found,
-            then an exception is raised
+            returned Ilea instance is evaluated;
+            an exception is raised if the evidences contain a non-boolean or
+            if they are unfeasible
         '''
         return Ilea(self,(Lea.coerce(evidence) for evidence in evidences))    
     
@@ -857,7 +858,6 @@ class Lea(object):
             called on evaluation of "self[index]"
         '''
         return Flea2(operator.getitem,self,index)
-        
 
     def __iter__(self):
         ''' returns the iterator returned by genVP()
@@ -1519,6 +1519,16 @@ class Lea(object):
             raise Lea.Error("no information from impossible value")
         return log2(count/float(p))
 
+    def lr(self,*hypLeas):
+        ''' returns a float giving the likelihood ratio (LR) of an 'evidence' E,
+            which is self, for a given 'hypothesis' H, which is the AND of given
+            hypLeas arguments; it is calculated as 
+                  P(E | H) / P(E | not H)
+            both E and H must be boolean probability distributions, otherwise
+            an exception is raised;
+            an exception is raised also if H is certainly true or certainly false      
+        '''
+        return self.given(*hypLeas).lr()
     
 from alea import Alea
 from clea import Clea
