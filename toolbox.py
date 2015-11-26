@@ -143,16 +143,17 @@ def memoize(f):
        note: not usable on functions and static methods
    '''
    @wraps(f)
-   def wrapper(self,*args):
-       cache = self._cachesByFunc.get(f)
+   def wrapper(obj,*args):
+       # retrieve the cache for method f
+       cache = obj._cachesByFunc.get(f)
        if cache is None:
-           # first call to self.f(...) -> build a new cache for f
-           cache = self._cachesByFunc[f] = dict()
-       if args in cache:
-           # first call to self.f(*args) -> returns the cached result
+           # first call to obj.f(...) -> build a new cache for f
+           cache = obj._cachesByFunc[f] = dict()
+       elif args in cache:
+           # obj.f(*args) already called in the past -> returns the cached result
            return cache[args]
-       # first call to self.f(*args) -> put self.f(*args) in the cache    
-       res = cache[args] = f(self,*args)
+       # first call to obj.f(*args) -> calls obj.f(*args) and store the result in the cache    
+       res = cache[args] = f(obj,*args)
        return res
    return wrapper
 

@@ -461,21 +461,19 @@ class Alea(Lea):
             res.sort()
         return tuple(res)
     
-    @memoize
+    #@memoize
     def pCumul(self,val):
         ''' returns, as an integer, the probability weight that self <= val
             note that it is not required that val is in the support of self
         '''
-        probs = self.cumul()
-        return probs[bisect_right(self._vs,val)] 
+        return self.cumul()[bisect_right(self._vs,val)] 
 
-    @memoize
+    #@memoize
     def pInvCumul(self,val):
         ''' returns, as an integer, the probability weight that self >= val
             note that it is not required that val is in the support of self
         '''
-        probs = self.invCumul()
-        return probs[bisect_left(self._vs,val)] 
+        return self.invCumul()[bisect_left(self._vs,val)] 
 
     @staticmethod
     def fastExtremum(cumulFunc,*aleaArgs):
