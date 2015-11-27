@@ -338,9 +338,10 @@ class Lea(object):
             assumed for this field; if the read value is empty, then it is converted to
             Python's None, except if the type is string, then, the value is the empty string; 
             if the read value is not empty and cannot be parsed for the expected type, then
-            an exception is raised; for the boolean type, the following values (case insentive)
-              't', 'true' , '1' are interpreted as True;
-              'f', 'false', '0' are interpreted as False;
+            an exception is raised; for the boolean type, the following values (case
+            insensitive):
+              '1', 't', 'true', 'y', 'yes' are interpreted as Python's True,
+              '0', 'f', 'false', 'n', 'no' are interpreted as Python's False;
             the {#} code identifies a field that provides a count number of the row,
             representing the probability of the row or its frequency as a positive integer;
             such field is NOT included as attribute of the joint distribution; it is useful

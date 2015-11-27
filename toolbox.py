@@ -158,26 +158,26 @@ def memoize(f):
    return wrapper
 
 def strToBool(bStr):
-    ''' returns False if bStr is 'f', 'false' or '0' (case insentive)
-                True  if bStr is 't', 'true'  or '1' (case insentive)
+    ''' returns True  if bStr is '1', 't', 'true', 'y' or 'yes' (case insentive)
+                False if bStr is '0', 'f', 'false', 'n' or 'no' (case insentive)
         raise ValueError exception in other cases
     '''
     bStr = bStr.lower()
-    if bStr in ('f','false','0'):
-        return False
-    if bStr in ('t','true','1'):
+    if bStr in ('t','true','1','y','yes'):
         return True
+    if bStr in ('f','false','0','n','no'):
+        return False
     raise ValueError("invalid boolean litteral '%s'"%bStr)
 
-def readCSVFilename(csvFilename,dialect='excel',**fmtparams):
+def readCSVFilename(csvFilename,colNames=None,dialect='excel',**fmtparams):
     ''' same as readCSVFile method, except that it takes a filename instead
         of an open file (i.e. the method opens itself the file for reading);
         see readCSVFile doc for more details
     '''
     with open(csvFilename,'rU') as csvFile:
-        return readCSVFile(csvFile,dialect,**fmtparams)
+        return readCSVFile(csvFile,colNames,dialect,**fmtparams)
 
-def readCSVFile(csvFile,dialect='excel',**fmtparams):
+def readCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
     ''' returns a tuple (attrNames,dataFreq) from the data read in the given CSV file
         * attrNames is a tuplewith the attribute names found in the header row 
         * dataFreq is a list of tuples (tupleValue,count) for each CSV row 
@@ -186,25 +186,31 @@ def readCSVFile(csvFile,dialect='excel',**fmtparams):
         the arguments follow the same semantics as those of Python's csv.reader
         method, which supports different CSV formats
         see doc in https://docs.python.org/2/library/csv.html
-        the fields found in the first read row of the CSV file provide information
-        on the attributes: each field is made up of a name, which shall be a valid
-        identifier, followed by an optional 3-characters type code among  
-          {b} -> boolean
-          {i} -> integer
-          {f} -> float
-          {s} -> string
-          {#} -> count
-        if the type code is missing for a given field, the type string is assumed for
-        this field; for example, using the comma delimiter (default), the first row
-        in the CSV file could be:
-            name,age{i},heigth{f},married{b}
-        the type code define the conversion to be applied to the fields read on the
+        * if colNames is None, then the fields found in the first read row of the CSV
+          file provide information on the attributes: each field is made up of a name,
+          which shall be a valid identifier, followed by an optional 3-characters type
+          code among  
+            {b} -> boolean
+            {i} -> integer
+            {f} -> float
+            {s} -> string
+            {#} -> count   
+          if the type code is missing for a given field, the type string is assumed for
+          this field; for example, using the comma delimiter (default), the first row
+          in the CSV file could be:
+              name,age{i},heigth{f},married{b}
+        * if colNames is not None, then colNames shall be a sequence of strings giving
+          attribute information as described above, e.g.
+              ('name','age{i}','heigth{f}','married{b}')
+          it assumed that there is NO header row in the CSV file
+        the type code defines the conversion to be applied to the fields read on the
         data lines; if the read value is empty, then it is converted to Python's None,
         except if the type is string, then, the value is the empty string; 
         if the read value is not empty and cannot be parsed for the expected type, then
-        an exception is raised; for boolean type, the following values (case insentive)
-          't', 'true' , '1' are interpreted as True;
-          'f', 'false', '0' are interpreted as False;
+        an exception is raised; for boolean type, the following values (case
+        insensitive):
+          '1', 't', 'true', 'y', 'yes' are interpreted as Python's True,
+          '0', 'f', 'false', 'n', 'no' are interpreted as Python's False;
         the {#} code identifies a field that provides a count number of the row,
         representing the probability of the row or its frequency as a positive integer;
         such field is NOT included as attribute of the joint distribution; it is useful
@@ -212,12 +218,14 @@ def readCSVFile(csvFile,dialect='excel',**fmtparams):
         same row multiple times
     '''
     # read the CSV file
-    fieldsPerRowIter = csv.reader(csvFile,dialect,**fmtparams)
-    # parse the header row
-    colNames = next(fieldsPerRowIter)
     attrNames = []
     convFunctions = []
     countAttrIdx = None
+    fieldsPerRowIter = csv.reader(csvFile,dialect,**fmtparams)
+    if colNames is None:
+        # parse the header row
+        colNames = next(fieldsPerRowIter)
+    # if colNames is not None, it is assumed that there is no header row in the CSV file
     for (colIdx,colName) in enumerate(colNames):
         colName = colName.strip()
         if colName.endswith('{#}'):
