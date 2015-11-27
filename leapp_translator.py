@@ -287,7 +287,7 @@ class LeappTranslator(object):
         targetFragment = LeappTranslator.parse(targetFragment,'$_' ,'(',')','.randomDraw(%s)')
         targetFragment = LeappTranslator.parse(targetFragment,'$' ,'(',')','.random(%s)')
         targetFragment = LeappTranslator.parseSingle(targetFragment,'$','.random()')
-        targetFragment = LeappTranslator.parseSingle(targetFragment,'.@','.getAleaClone()')
+        targetFragment = LeappTranslator.parseSingle(targetFragment,'.@','.new()')
         targetFragment = LeappTranslator.parse(targetFragment,'@' ,'(',')','.p(%s)')
         targetFragment = LeappTranslator.parseIsolatedAt(targetFragment)
         targetFragment = LeappTranslator.parseSingle(targetFragment,'@','.p(True)')

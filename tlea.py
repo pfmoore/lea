@@ -54,7 +54,7 @@ class Tlea(Lea):
     def _genVPs(self,nTimes=None):
         if nTimes is None:
             nTimes = self._nTimes
-        lea1 = self._lea1.getAleaClone()
+        lea1 = self._lea1.new()
         if nTimes == 1:
             return lea1._genVPs()
         # nTimes >= 2 : use dichotomic algorithm

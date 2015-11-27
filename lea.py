@@ -576,7 +576,7 @@ class Lea(object):
             as unique (certain) value
         '''
         if not isinstance(value,Lea):
-            return Alea(((value,1),))
+            return Alea((value,),(1,))
         return value
 
     def equiv(self,other):
@@ -869,7 +869,7 @@ class Lea(object):
                 or on "for x in self"
         '''
         return self._genVPs()
-        
+
     def __getattribute__(self,attrName):
         ''' returns the attribute with the given name in the current Lea instance;
             if the attribute name is a distribution indicator, then the distribution
@@ -1440,19 +1440,21 @@ class Lea(object):
 
     def getAlea(self):
         ''' returns an Alea instance representing the distribution after it has been evaluated;
-            Note : the returned value is cached (the evaluation occurs only for the first call,
-            for successive calls, a cached Alea instance is returned, which is faster) 
+            if self is an Alea instance, then it returns itself,
+            otherwise the newly created Alea is cached : the evaluation occurs only for the first
+            call; for successive calls, the cached Alea instance is returned, which is faster 
         '''
         if self._alea is None:
-            self._alea = Alea.fromValFreqs(*(tuple(self._genVPs())))
+            self._alea = self.new()
         return self._alea
 
-    def getAleaClone(self):
-        ''' same as getAlea method, excepting if applied on an Alea instance:
-            in this case, a clone of the Alea instance is returned (instead of itself)
+    def new(self):
+        ''' returns a new Alea instance representing the distribution after it has been evaluated;
+            if self is an Alea, then it returns a clone of itself (independent)
+            note that the present method is overloaded in Alea class, to be more efficient
         '''
-        return self.getAlea()
-        
+        return Alea.fromValFreqs(*self._genVPs())
+
     def cumul(self):
         ''' evaluates the distribution, then,
             returns a tuple with probability weights p that self <= value ;
@@ -1547,11 +1549,13 @@ from flea2 import Flea2
 from flea2a import Flea2a
 
 # Lea constants representing certain values
-Lea.true  = Alea(((True ,1),))
-Lea.false = Alea(((False,1),))
-Lea.zero  = Alea(((0    ,1),))
+Lea.true  = Lea.coerce(True)
+Lea.false = Lea.coerce(False)
+Lea.zero  = Lea.coerce(0)
 
-# Lea convenience functions to get the probability of True
+# Lea convenience functions
+
+X = Lea.cprod
 
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for

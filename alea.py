@@ -45,31 +45,39 @@ class Alea(Lea):
 
     __slots__ = ('_vs','_ps','_count','_val','_cumul','_invCumul','_randomIter','_cachesByFunc')
     
-    def __init__(self,vps):
+    def __init__(self,vs,ps):
         ''' initializes Alea instance's attributes
+            vs is a sequence of values
+            ps is a sequence of probability weights (same size and order as ps)
         '''
         Lea.__init__(self)
         # for an Alea instance, the alea cache is itself
         self._alea = self
-        (self._vs,self._ps) = zip(*vps)
-        self._count = sum(self._ps)
+        self._vs = vs
+        self._ps = ps
+        self._count = sum(ps)
         # _val is the value temporarily bound to the instance, during evaluation (see _genVPs method)
         # note: self is used as a sentinel value to express that no value is currently bound; Python's
-        #  None is not a good sentinel value since it prevents using None as value in a distribution 
+        # None is not a good sentinel value since it prevents using None as value in a distribution 
         self._val = self
-        self._cumul = None
-        self._invCumul = None
+        self._cumul = [0]
+        self._invCumul = []
         self._randomIter = self._createRandomIter()
         self._cachesByFunc = dict()
 
     # constructor methods
     # -------------------
     
-    def getAleaClone(self):
-        ''' same as getAlea method, excepting if applied on an Alea instance:
-            in this case, a clone of the Alea instance is returned (insead of itself)
-        '''        
-        return self.clone()
+    def new(self):
+        ''' returns a new Alea instance which is an independent clone of self;
+            note that the present method overloads Lea.new to be more efficient
+        '''
+        # note that the new Alea instance shares the immutable _vs and _ps attributes of self
+        newAlea = Alea(self._vs,self._ps)
+        # it can share also the mutable _cumul and _invCumul attributes of self (lists)
+        newAlea._cumul = self._cumul
+        newAlea._invCumul = self._invCumul
+        return newAlea
 
     @staticmethod
     def fromValFreqsDictGen(probDict):
@@ -121,7 +129,7 @@ class Alea(Lea):
         except:
             # no ordering relationship on values (e.g. complex numbers)
             pass
-        return Alea(vps)
+        return Alea(*zip(*vps))
 
     @staticmethod
     def fromVals(*values):
@@ -291,7 +299,8 @@ class Alea(Lea):
         return ()
 
     def _clone(self,cloneTable):
-        return Alea(zip(self._vs,self._ps))
+        # note that the new Alea instance shares the immutable _vs and _ps attributes of self
+        return Alea(self._vs,self._ps)
 
     def _getCount(self):
         ''' returns the total probability weight count (integer) of current Alea;
@@ -384,38 +393,36 @@ class Alea(Lea):
         return (p1,self._count)
 
     def cumul(self):
-        ''' returns a tuple with the probability weights p that self <= value ;
+        ''' returns a list with the probability weights p that self <= value ;
             there is one element more than number of values; the first element is 0, then
             the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
-            Note : the returned value is cached
+            Note : the returned list is cached
         '''
-        if self._cumul is None:
-            cumulList = [0]
+        if len(self._cumul) == 1:
+            cumulList = self._cumul
             pSum = 0
             for p in self._ps:
                 pSum += p
                 cumulList.append(pSum)
-            self._cumul = tuple(cumulList)
         return self._cumul
-        
+
     def invCumul(self):
         ''' returns a tuple with the probability weights p that self >= value ;
             there is one element more than number of values; the first element is 0, then
             the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
-            Note : the returned value is cached
+            Note : the returned list is cached
         '''
-        if self._invCumul is None:
-            invCumulList = []
+        if len(self._invCumul) == 0:
+            invCumulList = self._invCumul
             pSum = self._count
             for p in self._ps:
                 invCumulList.append(pSum)
                 pSum -= p
             invCumulList.append(0)
-            self._invCumul = tuple(invCumulList)
         return self._invCumul
             
     def randomVal(self):
