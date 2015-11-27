@@ -70,8 +70,8 @@ class Blea(Lea):
             raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknownArgNames)),tuple(Blea._argNamesOfBuildMeth)))
         priorLea = kwargs.get('priorLea',None)
         autoElse = kwargs.get('autoElse',False)
-        check = kwargs.get('check',False)
-        ## in PY3, could use: def build(*clauses,priorLea=None,autoElse=False,check=False):
+        check = kwargs.get('check',True)
+        ## in PY3, could use: def build(*clauses,priorLea=None,autoElse=False,check=True):
         elseClauseResults = tuple(result for (cond,result) in clauses if cond is None)
         if len(elseClauseResults) > 1:
             raise Lea.Error("impossible to define more than one 'else' clause")
@@ -84,8 +84,8 @@ class Blea(Lea):
         elif autoElse:
             if priorLea is not None:
                 raise Lea.Error("impossible to define together prior probabilities and autoElse=True")
-            # take uniform distribution on all values found in clause's results
-            elseClauseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
+            # take uniform distribution on all values found in clause's results (principle of indifference)
+            elseClauseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in Lea.coerce(result).vals()))
         else:
             elseClauseResult = None
         normClauseLeas = tuple((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
@@ -124,7 +124,7 @@ class Blea(Lea):
         elif elseClauseResult is None:
             # no 'else' clause: check that clause set is complete
             if check and not orCondsLea.isTrue():
-                raise Lea.Error("incomplete clause set requires 'else' clause or prior probabilities")
+                raise Lea.Error("incomplete clause set requires 'else' clause or autoElse=True or priorLea=...")
         if elseClauseResult is not None:
             # add the else clause
             elseCondLea = ~orCondsLea

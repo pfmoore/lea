@@ -723,16 +723,17 @@ class Lea(object):
             calculated so that a uniform probability distribution is returned for
             the condition cases not covered in given clauses (principle of indifference);
             the values are retrieved from the results found in given clauses
-            * if check argument is specified as True, then checkup is made on clause
+            * if check argument is specified as False, then NO checks are made on the given
+            clauses (see below); this can significantly increase performances, as the 
+            set of clauses or variables become large; 
+            by default (check arg absent or set to True), checks are made on clause
             conditions to ensure that they form a partition:
-             1) the clause conditions shall be mutually disjoint, i.e. no subset
-                of conditions shall be true together;
-             2) if 'else' is missing and not calculated through 'priorLea' nor 'autoElse',
-                then the clause conditions shall cover all possible cases, i.e. ORing
-                them shall be certainly true;
+              1) the clause conditions shall be mutually disjoint, i.e. no subset
+                 of conditions shall be true together;
+              2) if 'else' is missing and not calculated through 'priorLea' nor 'autoElse',
+                 then the clause conditions shall cover all possible cases, i.e. ORing
+                 them shall be certainly true;
             an exception is raised if any of such conditions is not verified;
-            note that activating this check can significantly reduce performances, as the 
-            set of clauses or variables become large. 
         '''
         return Blea.build(*clauses,**kwargs)
 
@@ -813,7 +814,9 @@ class Lea(object):
                 ## clauses += ((elseCond,elseResult),)
             # overwrite the target BN variable (currently independent Alea instance), with a CPT built
             # up from the clauses determined from the joint probability distribution
-            varsBNDict[tgtVarName] = Blea.build(*clauses)
+            # the check is deactivated for the sake of performance; this is safe since, by construction,
+            # the clauses conditions verify the "truth partioning" rules  
+            varsBNDict[tgtVarName] = Blea.build(*clauses,check=False)
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**varsBNDict)
