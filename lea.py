@@ -305,40 +305,45 @@ class Lea(object):
         return Lea.fromVals(*range(fromVal,toVal+1))
 
     @staticmethod
-    def fromCSVFilename(csvFilename,dialect='excel',**fmtparams):
+    def fromCSVFilename(csvFilename,colNames=None,dialect='excel',**fmtparams):
         ''' static method, returns an Alea instance representing the joint probability
             distribution of the data read in the CSV file of the given csvFilename;
             it is similar to Lea.fromCSVFile method, except that it takes a filename
             instead of an open file (i.e. the method opens itself the file for reading);
             see Lea.fromCSVFile doc for more details
         '''
-        (attrNames,dataFreq) = readCSVFilename(csvFilename,dialect,**fmtparams)
+        (attrNames,dataFreq) = readCSVFilename(csvFilename,colNames,dialect,**fmtparams)
         return Lea.fromValFreqs(*dataFreq).asJoint(*attrNames)
 
     @staticmethod
-    def fromCSVFile(csvFile,dialect='excel',**fmtparams):
+    def fromCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
         ''' static method, returns an Alea instance representing the joint probability
             distribution of the data read in the given CSV file;
             the arguments follow the same semantics as those of Python's csv.reader
             method, which supports different CSV formats;
             see doc in https://docs.python.org/2/library/csv.html
-            the fields found in the first read row of the CSV file provide information
-            on the attributes: each field is made up of a name, which shall be a valid
-            identifier, followed by an optional 3-characters type code among  
-              {b} -> boolean
-              {i} -> integer
-              {f} -> float
-              {s} -> string
-              {#} -> count
-            for example, using the comma delimiter (default), the first row
-            in the CSV file could be:
-                name,age{i},heigth{f},married{b}
-            the type code define the conversion to be applied to the fields read on the
-            data lines; if the type code is missing for a given field, the type string is
-            assumed for this field; if the read value is empty, then it is converted to
-            Python's None, except if the type is string, then, the value is the empty string; 
+            * if colNames is None, then the fields found in the first read row of the CSV
+              file provide information on the attributes: each field is made up of a name,
+              which shall be a valid identifier, followed by an optional 3-characters type
+              code among  
+                {b} -> boolean
+                {i} -> integer
+                {f} -> float
+                {s} -> string
+                {#} -> count   
+              if the type code is missing for a given field, the type string is assumed for
+              this field; for example, using the comma delimiter (default), the first row
+              in the CSV file could be:
+                  name,age{i},heigth{f},married{b}
+            * if colNames is not None, then colNames shall be a sequence of strings giving
+              attribute information as described above, e.g.
+                  ('name','age{i}','heigth{f}','married{b}')
+              it assumed that there is NO header row in the CSV file
+            the type code defines the conversion to be applied to the fields read on the
+            data lines; if the read value is empty, then it is converted to Python's None,
+            except if the type is string, then, the value is the empty string; 
             if the read value is not empty and cannot be parsed for the expected type, then
-            an exception is raised; for the boolean type, the following values (case
+            an exception is raised; for boolean type, the following values (case
             insensitive):
               '1', 't', 'true', 'y', 'yes' are interpreted as Python's True,
               '0', 'f', 'false', 'n', 'no' are interpreted as Python's False;
@@ -348,7 +353,7 @@ class Lea(object):
             to define non-uniform probability distribution, as alternative to repeating the
             same row multiple times
         '''
-        (attrNames,dataFreq) = readCSVFile(csvFile,dialect,**fmtparams)
+        (attrNames,dataFreq) = readCSVFile(csvFile,colNames,dialect,**fmtparams)
         return Lea.fromValFreqs(*dataFreq).asJoint(*attrNames)
 
     @staticmethod
@@ -1548,14 +1553,16 @@ from flea1 import Flea1
 from flea2 import Flea2
 from flea2a import Flea2a
 
-# Lea constants representing certain values
+# Constants representing certain values (Lea static attributes)
 Lea.true  = Lea.coerce(True)
 Lea.false = Lea.coerce(False)
 Lea.zero  = Lea.coerce(0)
 
 # Lea convenience functions
-
-X = Lea.cprod
+V  = Lea.fromVals
+VP = Lea.fromValFreqs
+B  = Lea.boolProb
+X  = Lea.cprod
 
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for
