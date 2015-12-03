@@ -521,7 +521,7 @@ class Lea(object):
         '''
         leas = (self,) + leaArgs
         lea = Lea.fromSeq(range(len(leas)))
-        return Blea(*(Ilea(leaArg,(lea==i,)) for (i,leaArg) in enumerate(leas)))
+        return Blea.build(*((lea==i,leaArg) for (i,leaArg) in enumerate(leas)))
     
     def map(self,f,args=()):
         ''' returns a new Flea instance representing the distribution obtained
@@ -564,7 +564,7 @@ class Lea(object):
         if nbValues == 1:
             return self.map(makeTuple)
         vps = tuple(self._genVPs())
-        return Blea(*(Ilea((v,)+Alea.fromValFreqs(*((v2,p2) for (v2,p2) in vps if v2 is not v)).draw(nbValues-1),(self==v,)) for (v,p) in vps))
+        return Blea.build(*((self==v,(v,)+Alea.fromValFreqs(*((v2,p2) for (v2,p2) in vps if v2 is not v)).draw(nbValues-1)) for (v,p) in vps))
 
     def flat(self):
         ''' assuming that self's values are themselves Lea instances,
@@ -821,8 +821,10 @@ class Lea(object):
             # overwrite the target BN variable (currently independent Alea instance), with a CPT built
             # up from the clauses determined from the joint probability distribution
             # the check is deactivated for the sake of performance; this is safe since, by construction,
-            # the clauses conditions verify the "truth partioning" rules  
-            varsBNDict[tgtVarName] = Blea.build(*clauses,check=False)
+            # the clauses conditions verify the "truth partioning" rules 
+            # the requiresCtx is deactivated for the sake of performance; this is safe since, by
+            # construction, the clauses conditions refer to the same variable, namely cprodSrcVarsBN  
+            varsBNDict[tgtVarName] = Blea.build(*clauses,check=False,requiresCtx=False)
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**varsBNDict)
