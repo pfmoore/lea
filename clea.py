@@ -24,8 +24,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
-from toolbox import calcLCM
-
 
 class Clea(Lea):
     
