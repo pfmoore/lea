@@ -1161,34 +1161,30 @@ class Lea(object):
     def __and__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical AND between the values of self and the values of other;
-            note that the method uses short-circuit evaluation when other's value is false
             called on evaluation of "self & other"
         '''
-        return Flea2a(Lea._safeAnd,self,other,False)
+        return Flea2(Lea._safeAnd,self,other)
 
     def __rand__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical AND between the values of other and the values of self;
-            note that the method uses short-circuit evaluation when self's value is false
             called on evaluation of "other & self"
         '''
-        return Flea2a(Lea._safeAnd,other,self,False)
+        return Flea2(Lea._safeAnd,other,self)
 
     def __or__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical OR between the values of self and the values of other;
-            note that the method uses short-circuit evaluation when other's value is true
             called on evaluation of "self | other"
         '''
-        return Flea2a(Lea._safeOr,self,other,True)
+        return Flea2(Lea._safeOr,self,other)
 
     def __ror__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
             resulting from the locical OR between the values of other and the values of self;
-            note that the method uses short-circuit evaluation when self's value is true
             called on evaluation of "other | self"
         '''
-        return Flea2a(Lea._safeOr,other,self,True)
+        return Flea2(Lea._safeOr,other,self)
 
     def __xor__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
