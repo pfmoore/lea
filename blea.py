@@ -28,7 +28,7 @@ from alea import Alea
 from clea import Clea
 from ilea import Ilea
 from prob_fraction import ProbFraction
-from toolbox import dict, genPairs
+from toolbox import dict, genPairs, zip
 from operator import or_
 from itertools import chain
             
