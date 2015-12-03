@@ -43,11 +43,12 @@ def calcLCM(values):
     ''' returns the greatest least common multiple among the given sequence of integers
         requires that all values are strictly positive (not tested) 
     ''' 
-    values1 = list(values)
+    values0 = tuple(frozenset(values))
+    values1 = list(values0)
     while len(set(values1)) > 1:
         minVal = min(values1)
         idx = values1.index(minVal)
-        values1[idx] += values[idx]
+        values1[idx] += values0[idx]
     return values1[0]
     
 LOG2 = log(2.)
