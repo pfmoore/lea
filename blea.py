@@ -53,19 +53,22 @@ class Blea(Lea):
         # _condLea is used only by _genOneRandomMC method
         self._condClea = None
 
-    ## in PY3, could use: def build(*clauses,priorLea=None,autoElse=False,check=True,requiresCtx=True):
-    _argNamesOfBuildMeth = frozenset(('priorLea','autoElse','check','requiresCtx'))
+    __argNamesOfBuildMeth = frozenset(('priorLea','autoElse','check','ctxType'))
 
     @staticmethod
     def build(*clauses,**kwargs):
+        ''' see Lea.buildCPT method        
+        '''
         argNames = frozenset(kwargs.keys())
-        unknownArgNames = argNames - Blea._argNamesOfBuildMeth
+        unknownArgNames = argNames - Blea.__argNamesOfBuildMeth
         if len(unknownArgNames) > 0:
             raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknownArgNames)),tuple(Blea._argNamesOfBuildMeth)))
         priorLea = kwargs.get('priorLea',None)
         autoElse = kwargs.get('autoElse',False)
         check = kwargs.get('check',True)
-        requiresCtx = kwargs.get('requiresCtx',True)
+        ctxType = kwargs.get('ctxType',2)
+        if ctxType not in (0,1,2):
+            raise Lea.Error("invalid ctxType argument '%s'; shall be 0, 1 or 2"%ctxType)
         elseClauseResults = tuple(result for (cond,result) in clauses if cond is None)
         if len(elseClauseResults) > 1:
             raise Lea.Error("impossible to define more than one 'else' clause")
@@ -82,16 +85,19 @@ class Blea(Lea):
             elseClauseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in Lea.coerce(result).vals()))
         else:
             elseClauseResult = None
-        # note that the getAlea call limits what can be done by the caller (e.g. no way to have "cascaded" CPT)
-        normClauses = ((Lea.coerce(cond),Lea.coerce(result).getAlea()) for (cond,result) in clauses if cond is not None)
-        ## alternative (NOK):
-        ##  normClauses = ((Lea.coerce(cond),Lea.coerce(result).given(cond).getAlea()) for (cond,result) in clauses if cond is not None)
-        (condLeas,resAleas) = tuple(zip(*normClauses))
+        # get clause conditions and results, excepting 'else' clause, after coercion to Lea instances
+        normClauses = ((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
+        ## alternatives (NOK):
+        ## normClauses = ((Lea.coerce(cond),Lea.coerce(result).given(cond).getAlea()) for (cond,result) in clauses if cond is not None)
+        ## normClauses = ((Lea.coerce(cond),Lea.coerce(result).getAlea()) for (cond,result) in clauses if cond is not None)  
+        (condLeas,resLeas) = tuple(zip(*normClauses))
+        if ctxType in (0,1) and not all(isinstance(resLea,Alea) for resLea in resLeas):
+            raise Lea.Error("for ctxType 0 or 1, all clause's results shall be Alea instances")
         # check that conditions are disjoint
         if check:
             if any(v.count(True) > 1 for (v,_) in Clea(*condLeas)._genVPs()):
                 raise Lea.Error("clause conditions are not disjoint")
-        # build the OR of all given conditions
+        # build the OR of all given conditions, excepting 'else'
         orCondsLea = Lea.reduce(or_,condLeas,True)
         if priorLea is not None:
             # prior distribution: determine elseClauseResult
@@ -102,7 +108,7 @@ class Blea(Lea):
             pFalse = count - pTrue
             priorAleaDict = dict(priorLea.getAlea()._genVPs())
             priorAleaCount = sum(priorAleaDict.values())
-            normAleaDict = dict(Lea.fromSeq(resAleas).flat().getAlea()._genVPs())
+            normAleaDict = dict(Lea.fromSeq(resLeas).flat().getAlea()._genVPs())
             normAleaCount = sum(normAleaDict.values())
             valuesSet = frozenset(chain(priorAleaDict.keys(),normAleaDict.keys()))
             vps = []
@@ -126,42 +132,50 @@ class Blea(Lea):
             # add the else clause
             elseCondLea = ~orCondsLea
             ## other equivalent statement: elseCondLea = Lea.reduce(and_,(~condLea for condLea in condLeas))
+            elseClauseResult = Lea.coerce(elseClauseResult)
+            if ctxType in (0,1):
+                elseClauseResult = elseClauseResult.getAlea()
+            resLeas += (elseClauseResult,)
             condLeas += (elseCondLea,)
-            resAleas += (Lea.coerce(elseClauseResult).getAlea(),)
             # note that orCondsLea is NOT extended with orCondsLea |= elseCondLea
             # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true
-        if requiresCtx:
-            # the caller cannot guarantee that all CPT conditions refer to the same set of variables
-            # (e.g. CPT with context-specific independence); to handle this, we define _ctxLea as a 
-            # cartesian product of all Alea leaves present in CPT conditions and having multiple
-            # possible values; a rebalancing of probability weights is needed if there are such
-            # missing variables and if these admit multiple possible values (total probability
-            # weight > 1)
-            aleaLeavesSet = frozenset(aleaLeaf for condLea in condLeas                    \
-                                               for aleaLeaf in condLea.getAleaLeavesSet() \
-                                               if aleaLeaf._count > 1                     )
-            ctxClea = Clea(*aleaLeavesSet)
-        else:
+        if ctxType is 0:
             # the caller guarantees that all CPT conditions refer to the same set of variables
             # e.g. each condition is of the form someLeaVar == v
             ctxClea = None
-        # make a probability weight balancing, in the case where Alea results have different 
-        # probability weight total
-        # 1. calculate the common denominator from probability weight totals of Alea results;
-        # note that it would be sensible to calculate the LCM but this could be time-consuming,
-        # the technique below (multiplication of unique values) is the fastest
-        commonDenominator = 1
-        for aleaCount in frozenset(resAlea._count for resAlea in resAleas):
-            commonDenominator *= aleaCount
-        # 2. transform the Alea results into equivalent Alea having ALL the same total probability
-        # weight, using the "non-reduction" Alea constructor (i.e. the given probability weights
-        # remain unchanged)
-        resAleasNR = []
-        for resAlea in resAleas:
-            normFactor = commonDenominator // resAlea._count
-            resAleasNR.append(Alea.fromValFreqsNR(*((v,p*normFactor) for (v,p) in zip(resAlea._vs,resAlea._ps))))
+        else: # ctxType is 1 or 2
+            # the caller cannot guarantee that all CPT clauses refer to the same set of variables
+            # (e.g. CPT with context-specific independence); to handle this, we define _ctxLea as a 
+            # cartesian product of all Alea leaves present in CPT clauses and having multiple
+            # possible values; a rebalancing of probability weights is needed if there are such
+            # missing variables and if these admit multiple possible values (total probability
+            # weight > 1)
+            # first, take clause's conditions 
+            aleaLeavesSet = set(aleaLeaf for condLea in condLeas for aleaLeaf in condLea.getAleaLeavesSet() if aleaLeaf._count > 1 )
+            if ctxType is 2:
+                # if ctxtType is 2, then add clause's results
+                aleaLeavesSet.update(aleaLeaf for resLea in resLeas for aleaLeaf in resLea.getAleaLeavesSet() if aleaLeaf._count > 1 )
+            ctxClea = Clea(*aleaLeavesSet)
+        if ctxType in (0,1):
+            # ctxType is 0 or 1
+            # make a probability weight balancing, in the case where Alea results have different 
+            # probability weight total
+            # 1. calculate the common denominator from probability weight totals of Alea results;
+            # note that it would be sensible to calculate the LCM but this could be time-consuming,
+            # the technique below (multiplication of unique values) is the fastest
+            commonDenominator = 1
+            for aleaCount in frozenset(resAlea._count for resAlea in resLeas):
+                commonDenominator *= aleaCount
+            # 2. transform the Alea results into equivalent Alea having ALL the same total probability
+            # weight, using the "non-reduction" Alea constructor (i.e. the given probability weights
+            # remain unchanged)
+            resLeasNR = []
+            for resAlea in resLeas:
+                normFactor = commonDenominator // resAlea._count
+                resLeasNR.append(Alea.fromValFreqsNR(*((v,p*normFactor) for (v,p) in zip(resAlea._vs,resAlea._ps))))
+            resLeas = resLeasNR
         # build a Blea, providing a sequence of new Ileas for each of the clause 
-        return Blea(*(Ilea(resAleaNR,(condLea,)) for (resAleaNR,condLea) in zip(resAleasNR,condLeas)),ctxClea=ctxClea)    
+        return Blea(*(Ilea(resLea,(condLea,)) for (resLea,condLea) in zip(resLeas,condLeas)),ctxClea=ctxClea)    
 
     def _getLeaChildren(self):
         leaChildren = self._ileas
