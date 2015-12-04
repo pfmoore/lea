@@ -709,7 +709,7 @@ class Lea(object):
         return Blea.build((condLea,thenLea),(None,elseLea))
     
     ## note: in PY3, could use:
-    ## def buildCPT(*clauses,priorLea=None,autoElse=False,check=True,ctxType=2):
+    ## def buildCPT(*clauses,priorLea=None,autoElse=False,check=True,ctxType=0):
     @staticmethod
     def buildCPT(*clauses,**kwargs):
         ''' static method, returns an instance of Blea representing the conditional
@@ -742,15 +742,15 @@ class Lea(object):
                  then the clause conditions shall cover all possible cases, i.e. ORing
                  them shall be certainly true;
             an exception is raised if any of such conditions is not verified;
-            * ctxType can be 0, 1 or 2 (the default) 
-              if ctxType=0, then all results of given clauses shall be Alea instances
+            * ctxType can be 0 (the default), 1 or 2  
+              if ctxType=0, then NO assumption is made on given clauses,
+                            the algorithm is the slowest and safest       
+              if ctxType=1, then all results of given clauses shall be Alea instances,
+                            the algorithm is slower
+              if ctxType=2, then all results of given clauses shall be Alea instances,
                                  all conditions of given clauses are assumed to refer to
                                  the same set of variables,
                             the algorithm is the fastest
-              if ctxType=1, then all results of given clauses shall be Alea instances,
-                            the algorithm is slower
-              if ctxType=2, then NO assumption is made on given clauses,
-                            the algorithm is the slowest and safest       
         '''
         return Blea.build(*clauses,**kwargs)
 
@@ -833,10 +833,10 @@ class Lea(object):
             # up from the clauses determined from the joint probability distribution
             # the check is deactivated for the sake of performance; this is safe since, by construction,
             # the clauses conditions verify the "truth partioning" rules 
-            # the ctxType is 0 for the sake of performance; this is safe since, by construction, the
+            # the ctxType is 2 for the sake of performance; this is safe since, by construction, the
             # clauses results are Alea instances and clause conditions refer to the same variable,
             # namely cprodSrcVarsBN  
-            varsBNDict[tgtVarName] = Blea.build(*clauses,check=False,ctxType=0)
+            varsBNDict[tgtVarName] = Blea.build(*clauses,check=False,ctxType=2)
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**varsBNDict)

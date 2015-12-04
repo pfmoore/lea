@@ -66,7 +66,7 @@ class Blea(Lea):
         priorLea = kwargs.get('priorLea',None)
         autoElse = kwargs.get('autoElse',False)
         check = kwargs.get('check',True)
-        ctxType = kwargs.get('ctxType',2)
+        ctxType = kwargs.get('ctxType',0)
         if ctxType not in (0,1,2):
             raise Lea.Error("invalid ctxType argument '%s'; shall be 0, 1 or 2"%ctxType)
         elseClauseResults = tuple(result for (cond,result) in clauses if cond is None)
@@ -91,8 +91,8 @@ class Blea(Lea):
         ## normClauses = ((Lea.coerce(cond),Lea.coerce(result).given(cond).getAlea()) for (cond,result) in clauses if cond is not None)
         ## normClauses = ((Lea.coerce(cond),Lea.coerce(result).getAlea()) for (cond,result) in clauses if cond is not None)  
         (condLeas,resLeas) = tuple(zip(*normClauses))
-        if ctxType in (0,1) and not all(isinstance(resLea,Alea) for resLea in resLeas):
-            raise Lea.Error("for ctxType 0 or 1, all clause's results shall be Alea instances")
+        if ctxType in (1,2) and not all(isinstance(resLea,Alea) for resLea in resLeas):
+            raise Lea.Error("for ctxType 1 or 2, all clause's results shall be Alea instances")
         # check that conditions are disjoint
         if check:
             if any(v.count(True) > 1 for (v,_) in Clea(*condLeas)._genVPs()):
@@ -133,17 +133,17 @@ class Blea(Lea):
             elseCondLea = ~orCondsLea
             ## other equivalent statement: elseCondLea = Lea.reduce(and_,(~condLea for condLea in condLeas))
             elseClauseResult = Lea.coerce(elseClauseResult)
-            if ctxType in (0,1):
+            if ctxType in (1,2):
                 elseClauseResult = elseClauseResult.getAlea()
             resLeas += (elseClauseResult,)
             condLeas += (elseCondLea,)
             # note that orCondsLea is NOT extended with orCondsLea |= elseCondLea
             # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true
-        if ctxType is 0:
+        if ctxType is 2:
             # the caller guarantees that all CPT conditions refer to the same set of variables
             # e.g. each condition is of the form someLeaVar == v
             ctxClea = None
-        else: # ctxType is 1 or 2
+        else: # ctxType is 0 or 1
             # the caller cannot guarantee that all CPT clauses refer to the same set of variables
             # (e.g. CPT with context-specific independence); to handle this, we define _ctxLea as a 
             # cartesian product of all Alea leaves present in CPT clauses and having multiple
@@ -152,12 +152,12 @@ class Blea(Lea):
             # weight > 1)
             # first, take clause's conditions 
             aleaLeavesSet = set(aleaLeaf for condLea in condLeas for aleaLeaf in condLea.getAleaLeavesSet() if aleaLeaf._count > 1 )
-            if ctxType is 2:
-                # if ctxtType is 2, then add clause's results
+            if ctxType is 0:
+                # if ctxtType is 0, then add clause's results
                 aleaLeavesSet.update(aleaLeaf for resLea in resLeas for aleaLeaf in resLea.getAleaLeavesSet() if aleaLeaf._count > 1 )
             ctxClea = Clea(*aleaLeavesSet)
-        if ctxType in (0,1):
-            # ctxType is 0 or 1
+        if ctxType in (1,2):
+            # ctxType is 1 or 2
             # make a probability weight balancing, in the case where Alea results have different 
             # probability weight total
             # 1. calculate the common denominator from probability weight totals of Alea results;
