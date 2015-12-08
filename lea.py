@@ -200,6 +200,8 @@ class Lea(object):
             occurrence is taken as equiprobable;
             if each value occurs exactly once, then the distribution is uniform,
             i.e. the probability of each value is equal to 1 / #values;
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
         return Alea.fromVals(*vals)
@@ -211,20 +213,32 @@ class Lea(object):
             so that each value occurrence is taken as equiprobable;        
             if each value occurs exactly once, then the distribution is uniform,
             i.e. the probability of each value is equal to 1 / #values;
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
-        return Lea.fromVals(*sequence)
+        return Alea.fromVals(*sequence)
 
     @staticmethod
-    def fromValFreqs(*valFreqs):
+    def fromValFreqs(*valFreqs,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
-            for the given sequence of (val,freq) tuples, where freq is a natural number
-            so that each value is taken with the given frequency (or sum of 
-            frequencies of that value if it occurs multiple times);
-            the frequencies are reduced by dividing them by their GCD
-            if the sequence is empty, then an exception is raised
+            for the given sequence of (val,freq) tuples, where freq is a natural
+            number so that each value is taken with the given frequency (or sum
+            of frequencies of that value if it occurs multiple times);
+            the frequencies are reduced by dividing them by their GCD;
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
+            if the sequence is empty, then an exception is raised;
+            if the optional argument sorting is False, then the values shall be
+            stored and displayed in the given order; this case requires that NO
+            value occurs multiple times, otherwise an exception is raised
         '''
-        return Alea.fromValFreqs(*valFreqs)
+        if kwargs and 'sorting' not in kwargs:
+            raise Lea.Error("unknown argument '%s' for fromValFreqs, use only sorting=False"%tuple(kwargs.keys())[0])
+        if kwargs.get('sorting',True):
+            return Alea.fromValFreqs(*valFreqs)
+        else:
+            return Alea.fromValFreqsNoSort(*valFreqs)
     
     @staticmethod
     def fromValFreqsNR(*valFreqs):
@@ -232,6 +246,8 @@ class Lea(object):
             for the given sequence of (val,freq) tuples, where freq is a natural number
             so that each value is taken with the given frequency (or sum of 
             frequencies of that value if it occurs multiple times);
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
         return Alea.fromValFreqsNR(*valFreqs)
@@ -241,6 +257,8 @@ class Lea(object):
         ''' static method, returns an Alea instance representing a distribution
             for the given dictionary of {val:prob}, where prob is an integer number
             so that each value val has probability proportional to prob to occur
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
         return Alea.fromValFreqsDict(probDict)
@@ -678,6 +696,17 @@ class Lea(object):
             distribution has a type different from val's
         '''
         return self.getAlea()._p(val,checkValType)
+
+    def sortBy(self,*orderingLeas):
+        ''' returns an Alea instance representing the same probability distribution as self
+            but having values ordered according to given orderingLeas;
+            requires that self doesn't contain duplicate values, otherwise an exception is
+            raised; note that it is NOT required that all orderingLeas appear in self 
+        '''
+        # after prepending orderingLeas to self, the Alea returned by new() is sorted with orderingLeas;
+        # then, extracting self (index -1) allows generating self's (v,p) pairs in the expected order;
+        # these shall be used to create a new Alea, keeping the values in that order (no sort)
+        return Alea.fromValFreqsNoSort(*Lea.cprod(*orderingLeas).cprod(self).new()[-1]._genVPs())
 
     def isAnyOf(self,*values):
         ''' returns a boolean probability distribution

@@ -86,6 +86,8 @@ class Alea(Lea):
             a floating-point number or a fraction (Fraction or ProbFraction instance)
             so that each value val has probability proportional to prob to occur
             any value with null probability is ignored (hence not stored)
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
         probFractions = tuple(ProbFraction.coerce(probWeight) for probWeight in probDict.values())
@@ -100,6 +102,8 @@ class Alea(Lea):
             so that each value val has probability proportional to prob to occur
             any value with null probability is ignored (hence not stored)
             if reducing is True, then the probability weights are reduced to have a GCD = 1
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
         count = sum(probDict.values())
@@ -138,6 +142,8 @@ class Alea(Lea):
             taken as equiprobable;
             if each value occurs exactly once, then the distribution is uniform,
             i.e. the probability of each value is equal to 1 / #values;
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
         probDict = dict()
@@ -152,7 +158,9 @@ class Alea(Lea):
             so that each value is taken with the given frequency (or sum of 
             frequencies of that value if it occurs multiple times);
             if reducing is True, then the frequencies are reduced by dividing them by
-            their GCD
+            their GCD;
+            the values are sorted if possible (i.e. no exception on sort), 
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''        
         probDict = dict()
@@ -166,7 +174,9 @@ class Alea(Lea):
             for the given sequence of (val,freq) tuples, where freq is a natural number
             so that each value is taken with the given frequency (or sum of 
             frequencies of that value if it occurs multiple times);
-            the frequencies are reduced by dividing them by their GCD
+            the frequencies are reduced by dividing them by their GCD;
+            the values are sorted if possible (i.e. no exception on sort),
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''        
         return Alea._fromValFreqs(valueFreqs,True)
@@ -177,9 +187,27 @@ class Alea(Lea):
             for the given sequence of (val,freq) tuples, where freq is a natural number
             so that each value is taken with the given frequency (or sum of 
             frequencies of that value if it occurs multiple times);
+            the values are sorted if possible (i.e. no exception on sort),
+            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
         '''
         return Alea._fromValFreqs(valueFreqs,False)
+
+    @staticmethod
+    def fromValFreqsNoSort(*valueFreqs):
+        ''' static method, returns an Alea instance representing a distribution
+            for the given sequence of (val,freq) tuples, where freq is a natural
+            number so that each value is taken with the given frequency
+            the frequencies are reduced by dividing them by their GCD;
+            the values shall be stored and displayed in the given order (no sort);
+            if a value occurs multiple times, then an exception is raised;
+            if the sequence is empty, then an exception is raised
+        '''
+        (vs,ps) = zip(*valueFreqs)
+        # check duplicates
+        if len(frozenset(vs)) < len(vs):
+            raise Lea.Error("duplicate values")
+        return Alea(vs,ps)
 
     @staticmethod
     def poisson(mean,precision):
