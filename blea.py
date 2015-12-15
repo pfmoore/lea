@@ -172,7 +172,7 @@ class Blea(Lea):
             resLeasNR = []
             for resAlea in resLeas:
                 normFactor = commonDenominator // resAlea._count
-                resLeasNR.append(Alea.fromValFreqsNR(*((v,p*normFactor) for (v,p) in zip(resAlea._vs,resAlea._ps))))
+                resLeasNR.append(Alea.fromValFreqs(*((v,p*normFactor) for (v,p) in zip(resAlea._vs,resAlea._ps)),reducing=False))
             resLeas = resLeasNR
         # build a Blea, providing a sequence of new Ileas for each of the clause 
         return Blea(*(Ilea(resLea,(condLea,)) for (resLea,condLea) in zip(resLeas,condLeas)),ctxClea=ctxClea)    

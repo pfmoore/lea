@@ -193,31 +193,62 @@ class Lea(object):
                 clonedLea._alea = self._alea.clone(cloneTable)
         return clonedLea
 
+
+    __contructorArgNames = frozenset(('ordered','sorting','reducing'))
+
     @staticmethod
-    def fromVals(*vals):
+    def _parsedKwargs(kwargs):
+        ''' return (ordered,sorting,reducing) tuple, with values found
+            in the given kwargs dictionary (keywords); for missing keywords,
+            the default values are False, True, True, respectively, except if
+            ordered=True and sorting is missing, then sorting=False;
+            check that the given kwargs dictionary contains no other keywords
+            than 'ordered', 'sorting' and 'reducing' and that ordered and
+            sorting are not set to True together; otherwise, raises an
+            exception
+        '''
+        argNames = frozenset(kwargs.keys())
+        unknownArgNames = argNames - Lea.__contructorArgNames
+        if len(unknownArgNames) > 0:
+            raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknownArgNames)),tuple(Lea.__contructorArgNames)))
+        reducing = kwargs.get('reducing',True)
+        ordered = kwargs.get('ordered',False)
+        if ordered and 'sorting' not in kwargs:
+            sorting = False
+        else:
+            sorting = kwargs.get('sorting',True)
+            if ordered and sorting:
+                raise Lea.Error("ordered and sorting arguments cannot be set to True together")
+        return (ordered,sorting,reducing)    
+        
+    @staticmethod
+    def fromVals(*vals,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given values passed as arguments, so that each value
             occurrence is taken as equiprobable;
             if each value occurs exactly once, then the distribution is uniform,
             i.e. the probability of each value is equal to 1 / #values;
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
+            for treatment of optional kwargs keywords arguments, see doc of
+            Lea.formValFreqs;
         '''
-        return Alea.fromVals(*vals)
+        (ordered,sorting,reducing) = Lea._parsedKwargs(kwargs)
+        if ordered:
+            return Alea.fromValFreqsOrdered(*((v,1) for v in vals),**kwargs)
+        return Alea.fromVals(*vals,**kwargs)
 
     @staticmethod
-    def fromSeq(sequence):
+    def fromSeq(vals,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of values (e.g. a list, tuple, iterator,...),
             so that each value occurrence is taken as equiprobable;        
             if each value occurs exactly once, then the distribution is uniform,
             i.e. the probability of each value is equal to 1 / #values;
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
+            for treatment of optional kwargs keywords arguments, see doc of
+            Lea.formValFreqs;
         '''
-        return Alea.fromVals(*sequence)
+        return Lea.fromVals(*vals,**kwargs)
 
     @staticmethod
     def fromValFreqs(*valFreqs,**kwargs):
@@ -225,43 +256,41 @@ class Lea(object):
             for the given sequence of (val,freq) tuples, where freq is a natural
             number so that each value is taken with the given frequency (or sum
             of frequencies of that value if it occurs multiple times);
-            the frequencies are reduced by dividing them by their GCD;
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised;
-            if the optional argument sorting is False, then the values shall be
-            stored and displayed in the given order; this case requires that NO
-            value occurs multiple times, otherwise an exception is raised
+            the method admits 3 optional boolean arguments (kwargs), viz.
+              ordered, sorting and reducing:
+            * ordered (default:False): if True, then the order of given values 
+            shall be kept and used for displaying the probability distribution
+            or getting the values; this option requires that there are NO
+            duplicate in the given values (otherwise, exception); if False, then
+            the order of given values is not taken into account; the display order
+            shall depend on sorting arguments (see below)
+            * sorting (default:True, can only be True if ordered=False): if True,
+            then the values for displaying the distribution or getting the values
+            will be sorted if possible (i.e. no exception on sort); otherwise,
+            or if sorting=ordered=False, the order of values is unspecified; 
+            * reducing (default:True): if True, then the given frequencies are
+            reduced by dividing them by their GCD, otherwise, theay are kept
+            unaltered;
         '''
-        if kwargs and 'sorting' not in kwargs:
-            raise Lea.Error("unknown argument '%s' for fromValFreqs, use only sorting=False"%tuple(kwargs.keys())[0])
-        if kwargs.get('sorting',True):
-            return Alea.fromValFreqs(*valFreqs)
-        else:
-            return Alea.fromValFreqsNoSort(*valFreqs)
-    
-    @staticmethod
-    def fromValFreqsNR(*valFreqs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given sequence of (val,freq) tuples, where freq is a natural number
-            so that each value is taken with the given frequency (or sum of 
-            frequencies of that value if it occurs multiple times);
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
-            if the sequence is empty, then an exception is raised
-        '''
-        return Alea.fromValFreqsNR(*valFreqs)
+        (ordered,sorting,reducing) = Lea._parsedKwargs(kwargs)
+        if ordered:
+            return Alea.fromValFreqsOrdered(*valFreqs,**kwargs)
+        return Alea.fromValFreqs(*valFreqs,**kwargs)
 
     @staticmethod
-    def fromValFreqsDict(probDict):
+    def fromValFreqsDict(probDict,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given dictionary of {val:prob}, where prob is an integer number
-            so that each value val has probability proportional to prob to occur
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
-            if the sequence is empty, then an exception is raised
+            so that each value val has probability proportional to prob to occur;
+            if the sequence is empty, then an exception is raised;
+            for treatment of optional kwargs keywords arguments, see doc of
+            Lea.formValFreqs;
         '''
-        return Alea.fromValFreqsDict(probDict)
+        (ordered,sorting,reducing) = Lea._parsedKwargs(kwargs)
+        if ordered:
+            raise Lea.Error("ordered argument cannot be set to True in fromValFreqsDict")            
+        return Alea.fromValFreqsDict(probDict,**kwargs)
 
     @staticmethod
     def fromValFreqsDictArgs(**probDict):
@@ -407,7 +436,7 @@ class Lea(object):
         elif not reqCondLea.isFeasible():
             lea1 = self.given(~curCondLea)
         else:    
-            lea1 = Blea.if_(reqCondLea,self.given(curCondLea).getAlea(),self.given(~curCondLea).getAlea())
+            lea1 = Blea.if_(reqCondLea,self.given(curCondLea).getAlea(sorting=False),self.given(~curCondLea).getAlea(sorting=False))
         return lea1.getAlea()
         
     def withCondProb(self,condLea,givenCondLea,pNum,pDen):
@@ -589,7 +618,7 @@ class Lea(object):
             returns a new Rlea instance representing a probability distribution of
             inner values of these Lea instances  
         '''
-        return Rlea(self)      
+        return Rlea(self)
       
     @staticmethod
     def coerce(value):
@@ -612,7 +641,7 @@ class Lea(object):
         res = frozenset(self.vps()) == frozenset(other.vps())
         if not res:
             # the previous test assumed that the instances have the same denominator
-            # this is not the case if one of them has been created with fromValFreqsNR method
+            # this is not the case if one of them has been created with reducing=False
             # make an 'advanced' test, by insuring that both instances have the same denominator
             s = Alea.fromValFreqs(*self.vps())
             o = Alea.fromValFreqs(*other.vps())
@@ -632,11 +661,13 @@ class Lea(object):
         return ProbFraction(*self._p(val))
  
     def vps(self):
-        ''' generates tuples (v,p) where v is a value of self
+        ''' generates, after evaluation of the probability distribution self,
+            tuples (v,p) where v is a value of self
             and p is the associated probability weight (integer > 0);
             the sequence follows the order defined on values
+            not that there is NO binding, contrarily to _genVPs method
         '''
-        return self.getAlea()._genVPs()
+        return self.getAlea().vps()
 
     def vals(self):
         ''' returns a tuple with values of self
@@ -826,7 +857,7 @@ class Lea(object):
         NamedTuple = jointAlea._vs[0].__class__
         varsDict = dict((varName,self.__getattribute__(varName)) for varName in NamedTuple._fields)
         # all BN variables initialized as independent (maybe overwritten below, according to given relationships)
-        varsBNDict = dict((varName,var.getAlea()) for (varName,var) in varsDict.items())
+        varsBNDict = dict((varName,var.getAlea(sorting=False)) for (varName,var) in varsDict.items())
         for (srcVarNames,tgtVarName) in bnDefinition:
             if not isinstance(varsBNDict[tgtVarName],Alea):
                 raise Lea.Error("'%s' is defined as target in more than one BN relationship"%tgtVarName)
@@ -842,10 +873,10 @@ class Lea(object):
             ##                   for cprodSrcVal in cprodSrcVars.vals()), autoElse=True)
             # build CPT clauses (condition,result) from the joint probability distribution
             cprodSrcVals = cprodSrcVars.vals()
-            clauses = tuple((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
+            clauses = tuple((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea(sorting=False)) \
                              for cprodSrcVal in cprodSrcVals)
             # determine missing conditions in the CPT, if any
-            allVals = Lea.cprod(*(varsDict[srcVarName].getAlea() for srcVarName in srcVarNames)).vals()
+            allVals = Lea.cprod(*(varsDict[srcVarName].getAlea(sorting=False) for srcVarName in srcVarNames)).vals()
             missingVals = frozenset(allVals) - frozenset(cprodSrcVals)
             if len(missingVals) > 0:
                 # there are missing conditions: add clauses with each of these conditions associating  
@@ -1482,22 +1513,22 @@ class Lea(object):
         '''
         return self.getAlea().histo(size)
 
-    def getAlea(self):
+    def getAlea(self,**kwargs):
         ''' returns an Alea instance representing the distribution after it has been evaluated;
             if self is an Alea instance, then it returns itself,
             otherwise the newly created Alea is cached : the evaluation occurs only for the first
             call; for successive calls, the cached Alea instance is returned, which is faster 
         '''
         if self._alea is None:
-            self._alea = self.new()
+            self._alea = self.new(**kwargs)
         return self._alea
 
-    def new(self):
+    def new(self,**kwargs):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
             if self is an Alea, then it returns a clone of itself (independent)
             note that the present method is overloaded in Alea class, to be more efficient
         '''
-        return Alea.fromValFreqs(*self._genVPs())
+        return Alea.fromValFreqs(*self._genVPs(),**kwargs)
 
     def cumul(self):
         ''' evaluates the distribution, then,
@@ -1596,6 +1627,7 @@ from flea2a import Flea2a
 Lea.true  = Lea.coerce(True)
 Lea.false = Lea.coerce(False)
 Lea.zero  = Lea.coerce(0)
+Lea.emptyTuple = Lea.coerce(())
 
 # Lea convenience functions
 V  = Lea.fromVals

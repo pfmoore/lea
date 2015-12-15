@@ -96,119 +96,110 @@ class Alea(Lea):
         return Alea.fromValFreqsDict(dict(zip(probDict.keys(),probWeights)))
     
     @staticmethod
-    def fromValFreqsDict(probDict,reducing=True):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given probDict dictionary of {val:prob}, where prob is an integer number
-            so that each value val has probability proportional to prob to occur
-            any value with null probability is ignored (hence not stored)
-            if reducing is True, then the probability weights are reduced to have a GCD = 1
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
-            if the sequence is empty, then an exception is raised
-        '''
-        count = sum(probDict.values())
-        if count == 0:
+    def _getVPsIter(vps,reducing):
+        gcd = sum(p for (v,p) in vps)
+        if gcd == 0:
             raise Lea.Error("impossible to build a probability distribution with no value")
-        gcd = count
-        impossibleValues = []
-        # check probabilities, remove null probabilities and calculate GCD
-        for (v,p) in probDict.items():
+        if not reducing:
+            gcd = 1
+        for (v,p) in vps:
             if p < 0:
                 raise Lea.Error("negative probability")
-            if p == 0:
-                impossibleValues.append(v)
-            elif reducing and gcd > 1:
+            if gcd > 1 and p > 0:
                 while p != 0:
                     if gcd > p:
                         (gcd,p) = (p,gcd)
                     p %= gcd
-        for impossibleValue in impossibleValues:
-            del probDict[impossibleValue]
-        vpsIter = probDict.items()
-        if reducing:
-            vpsIter = ((v,p//gcd) for (v,p) in vpsIter)
-        vps = list(vpsIter)
-        try:            
-            vps.sort()
-        except:
-            # no ordering relationship on values (e.g. complex numbers)
-            pass
+        return ((v,p//gcd) for (v,p) in vps if p > 0)        
+    
+    @staticmethod
+    def fromValFreqsDict(probDict,**kwargs):
+        ''' static method, returns an Alea instance representing a distribution
+            for the given probDict dictionary of {val:prob}, where prob is an integer number
+            so that each value val has probability proportional to prob to occur;
+            any value with null probability is ignored (hence not stored)
+            if the sequence is empty, then an exception is raised;
+            the method admits 2 optional boolean arguments (kwargs), viz.
+              sorting and reducing:
+            * sorting (default:True): if True, then the values for displaying
+            the distribution or getting the values will be sorted if possible
+            (i.e. no exception on sort); otherwise, or if sorting=False, then
+            the order of values is unspecified; 
+            * reducing (default:True): if True, then the given frequencies are
+            reduced by dividing them by their GCD, otherwise, they are kept
+            unaltered;  
+        '''
+        sorting = kwargs.get('sorting',True)
+        reducing = kwargs.get('reducing',True)
+        # check probabilities, remove null probabilities and calculate GCD
+        vpsIter = Alea._getVPsIter(tuple(probDict.items()),reducing)
+        if sorting:
+            vps = list(vpsIter)
+            try:            
+                vps.sort()
+            except:
+                # no ordering relationship on values (e.g. complex numbers)
+                pass
+        else:
+            vps = vpsIter
         return Alea(*zip(*vps))
 
     @staticmethod
-    def fromVals(*values):
+    def fromVals(*values,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of values, so that each value occurrence is
             taken as equiprobable;
             if each value occurs exactly once, then the distribution is uniform,
             i.e. the probability of each value is equal to 1 / #values;
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
+            for treatment of optional kwargs keywords arguments, see doc of
+            Alea.fromValFreqsDict;
         '''
         probDict = dict()
         for value in values:
             probDict[value] = probDict.get(value,0) + 1
-        return Alea.fromValFreqsDict(probDict)
+        return Alea.fromValFreqsDict(probDict,**kwargs)
 
     @staticmethod
-    def _fromValFreqs(valueFreqs,reducing):
+    def fromValFreqs(*valueFreqs,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of (val,freq) tuples, where freq is a natural number
             so that each value is taken with the given frequency (or sum of 
             frequencies of that value if it occurs multiple times);
-            if reducing is True, then the frequencies are reduced by dividing them by
-            their GCD;
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
-            if the sequence is empty, then an exception is raised
+            if the sequence is empty, then an exception is raised;
+            for treatment of optional kwargs keywords arguments, see doc of
+            Alea.fromValFreqsDict;
         '''        
         probDict = dict()
         for (value,freq) in valueFreqs:
             probDict[value] = probDict.get(value,0) + freq
-        return Alea.fromValFreqsDict(probDict,reducing)
-
+        return Alea.fromValFreqsDict(probDict,**kwargs)
+            
     @staticmethod
-    def fromValFreqs(*valueFreqs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given sequence of (val,freq) tuples, where freq is a natural number
-            so that each value is taken with the given frequency (or sum of 
-            frequencies of that value if it occurs multiple times);
-            the frequencies are reduced by dividing them by their GCD;
-            the values are sorted if possible (i.e. no exception on sort),
-            otherwise, the order of values is unspecified; 
-            if the sequence is empty, then an exception is raised
-        '''        
-        return Alea._fromValFreqs(valueFreqs,True)
-
-    @staticmethod
-    def fromValFreqsNR(*valueFreqs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given sequence of (val,freq) tuples, where freq is a natural number
-            so that each value is taken with the given frequency (or sum of 
-            frequencies of that value if it occurs multiple times);
-            the values are sorted if possible (i.e. no exception on sort),
-            otherwise, the order of values is unspecified; 
-            if the sequence is empty, then an exception is raised
-        '''
-        return Alea._fromValFreqs(valueFreqs,False)
-
-    @staticmethod
-    def fromValFreqsNoSort(*valueFreqs):
+    def fromValFreqsOrdered(*valueFreqs,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of (val,freq) tuples, where freq is a natural
             number so that each value is taken with the given frequency
             the frequencies are reduced by dividing them by their GCD;
             the values shall be stored and displayed in the given order (no sort);
-            if a value occurs multiple times, then an exception is raised;
-            if the sequence is empty, then an exception is raised
+            if the sequence is empty, then an exception is raised;
+            requires that each value has a unique occurrence;
+            the method admits 2 optional boolean arguments (kwargs), viz.
+              reducing, check:
+            * reducing (default: True): if True, then the given frequencies are
+            reduced by dividing them by their GCD, otherwise, they are kept
+            unaltered;  
+            * check (default: True): if True and if a value occurs multiple
+            times, then an exception is raised;
         '''
-        (vs,ps) = zip(*valueFreqs)
+        reducing = kwargs.get('reducing',True)
+        check = kwargs.get('check',True)
+        (vs,ps) = zip(*Alea._getVPsIter(valueFreqs,reducing))
         # check duplicates
-        if len(frozenset(vs)) < len(vs):
+        if check and len(frozenset(vs)) < len(vs):
             raise Lea.Error("duplicate values")
         return Alea(vs,ps)
-
+        
     @staticmethod
     def poisson(mean,precision):
         ''' static method, returns an Alea instance representing a Poisson probability
@@ -338,6 +329,14 @@ class Alea(Lea):
             return self._count
         return 1
 
+    def vps(self):
+        ''' generates tuples (v,p) where v is a value of self
+            and p is the associated probability weight (integer > 0);
+            the sequence follows the order defined on values
+            not that there is NO binding, contrarily to _genVPs method
+        '''
+        return zip(self._vs,self._ps)
+
     def _genVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability weight (integer > 0);
@@ -360,7 +359,7 @@ class Alea(Lea):
             # distribution not yet bound to a value
             try:
                 # browse all (v,p) tuples 
-                for (v,p) in zip(self._vs,self._ps):
+                for (v,p) in self.vps():
                     # bind value v: this is important if an object calls genVPs on the same instance
                     # before resuming the present generator (see above)
                     self._val = v
@@ -485,7 +484,7 @@ class Alea(Lea):
         lea1 = self
         res = []
         while True:
-            lea1 = lea1.getAlea()
+            lea1 = lea1.getAlea(sorting=False)
             x = lea1.random()
             res.append(x)
             n -= 1
