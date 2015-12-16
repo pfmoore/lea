@@ -28,7 +28,7 @@ from prob_fraction import ProbFraction
 from random import randrange
 from bisect import bisect_left, bisect_right
 from math import log, sqrt, exp
-from toolbox import LOG2, memoize, zip, next, dict, defaultdict
+from toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM
 import operator
 import sys
 
@@ -181,16 +181,16 @@ class Alea(Lea):
             for the given sequence of (val,freq) tuples, where freq is a natural
             number so that each value is taken with the given frequency
             the frequencies are reduced by dividing them by their GCD;
-            the values shall be stored and displayed in the given order (no sort);
+            the values will be stored and displayed in the given order (no sort);
             if the sequence is empty, then an exception is raised;
             requires that each value has a unique occurrence;
             the method admits 2 optional boolean arguments (kwargs), viz.
-              reducing, check:
+              reducing and check:
             * reducing (default: True): if True, then the given frequencies are
             reduced by dividing them by their GCD, otherwise, they are kept
-            unaltered;  
+            unaltered;
             * check (default: True): if True and if a value occurs multiple
-            times, then an exception is raised;
+            times, then an exception is raised;        
         '''
         reducing = kwargs.get('reducing',True)
         check = kwargs.get('check',True)
@@ -199,7 +199,33 @@ class Alea(Lea):
         if check and len(frozenset(vs)) < len(vs):
             raise Lea.Error("duplicate values")
         return Alea(vs,ps)
-        
+
+    def draw(self,nbValues):
+        ''' returns a new Alea instance representing a probability distribution
+            of the tuples of values obtained by the given number of draws without
+            replacement from the current distribution;
+            requires that 0 <= nbValues <= number of values of self,
+            otherwise an exception is raised
+        '''
+        if nbValues < 0:
+            raise Lea.Error("draw method requires a positive integer")
+        if nbValues == 0:
+            return Lea.emptyTuple
+        if len(self._vs) == 1:
+            if nbValues > 1:
+                raise Lea.Error("number of values to draw exceeds the number of possible values")
+            return Alea(((self._vs[0],),),(1,))
+        lcmP = calcLCM(self._ps)
+        alea2s = tuple(Alea.fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),reducing=False,check=False).draw(nbValues-1) for v in self._vs)
+        lcmP2 = calcLCM(alea2._count*(lcmP//p) for (alea2,p) in zip(alea2s,self._ps))
+        f = lcmP2 // lcmP
+        vps = []
+        for (v,p,alea2) in zip(self._vs,self._ps,alea2s):
+            g = (f*p) // alea2._count
+            for (vt,pt) in alea2.vps():
+                vps.append(((v,)+vt,g*pt))
+        return Alea.fromValFreqsOrdered(*vps,reducing=False,check=False)
+
     @staticmethod
     def poisson(mean,precision):
         ''' static method, returns an Alea instance representing a Poisson probability

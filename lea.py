@@ -600,18 +600,14 @@ class Lea(object):
         return self.map(lambda aTuple: NTClass(*aTuple)).getAlea()
 
     def draw(self,nbValues):
-        ''' returns a new Lea instance representing a probability distribution of the
-            sequences of values obtained by the given number of draws without
-            replacement from the current distribution
-            Note: if nbValues = 1, then a Flea instance is returned,
-                  otherwise a Blea instance is returned 
+        ''' returns, after evaluation of the probability distribution self,
+            a new Alea instance representing a probability distribution of the
+            tuples of values obtained by the given number of draws without
+            replacement from the current distribution;
+            requires that 0 <= nbValues <= number of values of self,
+            otherwise an exception is raised
         '''
-        if nbValues <= 0:
-            raise Lea.Error("draw method requires a strictly positive integer")
-        if nbValues == 1:
-            return self.map(makeTuple)
-        vps = tuple(self._genVPs())
-        return Blea.build(*((self==v,(v,)+Alea.fromValFreqs(*((v2,p2) for (v2,p2) in vps if v2 is not v)).draw(nbValues-1)) for (v,p) in vps))
+        return self.getAlea().draw(nbValues) 
 
     def flat(self):
         ''' assuming that self's values are themselves Lea instances,
