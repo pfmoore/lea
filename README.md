@@ -1,126 +1,128 @@
 # Lea - Discrete probability distributions in Python #
 
-![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png)
-
-_Welcome in Lea!_
-
-See [Installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installation).
-
----
+[comment]: <> (![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png))
 
 ## What is Lea?
 
-Lea is a Python package aiming at working with discrete probability distributions in an intuitive way. It allows you to model a broad range of random phenomenons, like dice throwing, coin tossing, gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, … Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
+Lea is a Python package aiming at working with discrete probability distributions in an intuitive way. It allows you to model a broad range of random phenomenon’s, like dice throwing, coin tossing, gambling, weather, finance, etc. Lea lets you define random variables with given probability distributions on any set of Python objects; then, these random variables can be combined together using usual arithmetic, comparison, logical operators, as well as cartesian product, conditional probability and user-defined functions. Lea can then calculate the probability distributions on these derived random variables. Note that, by default, the _exact_ distribution is computed; a Monte-Carlo sampling method is also available, should the combinatorial becomes prohibitively large. Advanced functions let you define conditional probability tables, Bayes networks and Markov chains. With these features, Lea is definitely a toolkit for _probabilistic programming_.
 
-Lea can be used in any Python program or interactively, in the Python console. As a basic example, the statements below define and display the probability of a fair six-sided die :
-
+Let's start by modelling a biased coin in the Python interactive console.
 ```
->>> die = Lea.fromVals(1,2,3,4,5,6)
->>> die
-1 : 1/6
-2 : 1/6
-3 : 1/6
-4 : 1/6
-5 : 1/6
-6 : 1/6
-```
-
-and here is how you can model a biased coin, then make a random sample of 10 throws :
-
-```
->>> flip = Lea.fromValFreqsDict({'head': 67, 'tail': 33})
->>> flip 
+>>> from lea import *
+>>> flip1 = Lea.fromValFreqs(('head',67),('tail',33))
+>>> flip1
 head : 67/100
 tail : 33/100
->>> flip.random(10)
-('head', 'head', 'tail', 'head', 'head', 'head', 'head', 'tail', 'head', 'head')
 ```
 
-Lea allows you to compute new probability distributions from existing ones, by using different transformation means: arithmetic operators, logical operators, functions, conditions and cartesian product. For example, this is how you can count the probability distribution of number of 'heads' on 2 throws :
-
+Then let's get individual probabilities and make a random sample of 10 throws:
 ```
->>> flipCount = Lea.fromValFreqsDict({1: 67, 0: 33})
->>> flipCount
+>>> P(flip1=='head')
+67/100
+>>> Pf(flip1=='head')
+0.67
+>>> flip1.random(10)
+('head', 'head', 'tail', 'head', 'head', 'head', 'tail', 'head', 'tail', 'head')
+```
+
+Note that Lea internally uses integers to store probabilities, which enables for unlimited precision, even for the most unlikely event. The common usual float-point representation can be obtained when needed, using dedicated methods (see `Pf` in the example).  
+
+We can then throw another coin, which has the same bias, and check the combinations: 
+```
+>>> flip2 = flip1.clone()
+>>> flips = flip1 + '-' + flip2
+>>> flips
+head-head : 4489/10000
+head-tail : 2211/10000
+tail-head : 2211/10000
+tail-tail : 1089/10000
+>>> P(flip1==flip2)
+2789/5000
+>>> P(flip1!=flip2)
+2211/5000
+```
+
+The following example shows how functions can be applied on probability distributions and how conditional probabilities can be calculated.
+```
+>>> flip1.upper()
+HEAD : 67/100
+TAIL : 33/100
+>>> flip1[0].upper()
+H : 67/100
+T : 33/100
+>>> def m(f):
+...     return 1 if f=='head' else 0
+...
+>>> headCount1 = flip1.map(m)
+>>> headCount1
 0 : 33/100
 1 : 67/100
->>> flipCount2 = flipCount + flipCount.clone()
->>> flipCount2
+>>> headCount2 = flip2.map(m)
+>>> headCounts = headCount1 + headCount2
+>>> headCounts 
 0 : 1089/10000
 1 : 4422/10000
 2 : 4489/10000
-```
-then, on 4 throws :
-```
->>> flipCount4 = flipCount.times(4)
-0 :  1185921/100000000
-1 :  9631116/100000000
-2 : 29331126/100000000
-3 : 39700716/100000000
-4 : 20151121/100000000
->>> print (flipCount4.asFloat())
-0 : 0.011859
-1 : 0.096311
-2 : 0.293311
-3 : 0.397007
-4 : 0.201511
+>>> headCounts.given(flip1==flip2)
+0 : 1089/5578
+2 : 4489/5578
+>>> headCounts.given(flip1!=flip2)
+1 : 1
+>>> flip1.given(headCounts==0)
+tail : 1
+>>> flip1.given(headCounts==1)
+head : 1/2
+tail : 1/2
+>>> flip1.given(headCounts==2)
+head : 1
 ```
 
-Also, comparison operators can be used to derive boolean probability distributions:
-
+In this example, you can notice that Lea does _lazy evaluation_, so that `flip1`, `flip2`, `headCount1`, `headCount2` and `headCounts` form a network of random variables that "remember" their causal dependencies. Based on such features, Lea can do complex probabilistic inferences like 
+Markov chains and bayesian networks. For instance, the classical ["Rain-Sprinkler-Grass" bayesian network (Wikipedia)](https://en.wikipedia.org/wiki/Bayesian_network) is easily modeled in a couple of lines:
 ```
->>> flipCount4 >= 3
-False : 40148163/100000000
- True : 59851837/100000000
->>> (1 <= flipCount4) & (flipCount4 < 4)
-False : 10668521/50000000
- True : 39331479/50000000
-```
-
-Lea provides a large set of operations that allow you to model complex stochastic processes. Advanced operations allow to handle conditional probabilities, including Bayesian networks and Markov chains.
-
-## Leapp : a probabilistic programming language
-
-As of version 2, the Lea package includes a small probabilistic programming language (PPL) called _Leapp_. It provides concise syntax to make use of Lea as easy as possible, … especially for non-Python programmers! Here are some above Python statements revamped in Leapp (`lea>` is the prompt!):
-
-**[Leapp]**
-```
-lea> die = ?(1,2,3,4,5,6)
-lea> flip = ?{'head': 67%, 'tail': 33%}
-lea> flip 
-head : 67/100
-tail : 33/100
-lea> flip$(10)
-('head', 'head', 'head', 'head', 'head', 'tail', 'head', 'head', 'tail', 'tail')
-lea> flipCount = ?{1: 67%, 0: 33%}
-lea> flipCount2 = flipCount + ?flipCount
-lea> flipCount4 = ?[4]flipCount
-lea> :. flipCount4 
-0 : 0.011859
-1 : 0.096311
-2 : 0.293311
-3 : 0.397007
-4 : 0.201511
+# -- rsg_net.py --------
+from lea import *
+rain = B(20,100)
+sprinkler = Lea.if_(rain, B(1,100), B(40,100))
+grassWet = Lea.buildCPT( ( ~sprinkler & ~rain, False               ),
+                         ( ~sprinkler &  rain, B(80,100)),
+                         (  sprinkler & ~rain, B(90,100)),
+                         (  sprinkler &  rain, B(99,100)))
 ```
 
-Do you notice the syntax _leap_ compared to Python statements?
+Then, this bayesian network can be imported and queried in an interactive session:
+```
+>>> from rsg_net import *
+>>> P(grassWet & sprinkler & rain)
+99/50000
+>>> Pf(grassWet & sprinkler & rain)
+0.00198
+>>> P(rain.given(grassWet))
+891/2491
+>>> Pf(rain.given(grassWet))
+0.3576876756322762
+>>> Pf(grassWet.given(rain))
+0.8019
+>>> Pf(grassWet.given(sprinkler&~rain))
+0.9
+>>> Pf(grassWet.given(~sprinkler&~rain))
+0.0
+```
 
-Note that Leapp is not a true programming language. It is just a thin "syntactic sugar" layer on top of Python / Lea. The good news is that you can use standard Python syntax and put Leapp expressions as needed (or the opposite!) ; your favorite Python modules can be used as usual.
-
-The "_probabilistic programming_" nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
+The inference engine remains hidden for the user who builds and queries probabilistic models in a high-level, declarative manner. Hence, Lea is definitely a toolkit for _probabilistic programming_. Note that the Lea package includes a small _probabilistic programming language_ (PPL) called _Leapp_. It provides concise syntax to make use of Lea as easy as possible, … especially for non-Python programmers! Note that Leapp is not a true programming language. It is just a thin "syntactic sugar" layer on top of Python / Lea. The good news is that you can use standard Python syntax and put Leapp expressions as needed (or the opposite!); your favorite Python modules can be used as usual. The probabilistic programming nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
 
 ## Lea features
-
-Here are the main features of Lea :
 
   * scope : finite discrete probability distributions
   * can assign probabilities on _any_ hashable Python object
   * standard distribution indicators + information theory
-  * probability stored as integers (no rounding errors)
-  * probability distribution calculus based on arithmetic, comparison, boolean operators and functions
-  * generation of random values
-  * joint tables, marginalisation
+  * probabilities stored as integers (no rounding errors)
+  * probability distribution calculus based on arithmetic, comparison, logical operators and functions
+  * either _exact_ calculation of probability distributions (default) or Monte-Carlo sampling 
+  * generation of random samples
+  * joint probability tables, marginalization
   * conditional probabilities
-  * Bayesian networks
+  * bayesian networks
   * Markov chains (basic)
   * _Leapp_, a light PPL (probabilistic programming language)
   * comprehensive tutorials (Wiki)
@@ -129,18 +131,37 @@ Here are the main features of Lea :
 
 ---
 
-See [Installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installation).
+# To learn more...
 
-To learn more, read the [Lea tutorial](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0), which uses pure Python; this tutorial exists also in [Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0).
+If you want to use Lea, see the [installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installation).
 
-You can find more materials on [Lea Wiki](https://bitbucket.org/piedenis/lea/wiki). See also a [presentation of Lea (pdf)](https://bitbucket.org/piedenis/lea/raw/5efd5fe01d059000585bfdc5d7b3693cc8942626/images/Lea_FOSDEM15.pdf) done at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/) on 31st January 2015.
+If you are an absolute beginner in Lea, read the [Lea tutorial](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0), which uses pure Python. NO _deep_ knowledge of probabilities nor Python is required! This tutorial exists also in [Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0).
+
+To go deeper in the tool and elaborate on probabilistic programming, there are three advanced tutorials:
+
+  * [Advanced tutorial 1](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial1) : conditional probabilities, JPD, cartesion products, …
+  * [Advanced tutorial 2](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial2) : CPT, bayesian networks, Markov chains
+  * [Advanced tutorial 3](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial3) : (new features of Lea.2.2) MC sampling, advanced JPD, machine learning, …
+
+The Python advanced tutorials 1 & 2 are also translated in Leapp([1](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial1), [2](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial2)).
+
+To see examples of Lea in action, check the [Python examples](https://bitbucket.org/piedenis/lea/wiki/Examples) or [Leapp examples](https://bitbucket.org/piedenis/lea/wiki/LeappExamples). 
+
+For a table of contents, go on [Lea Wiki TOC](https://bitbucket.org/piedenis/lea/wiki). 
+
+You can get also see Lea presentations made at some conferences:
+
+* [Lea, a probability engine in Python](https://drive.google.com/open?id=0B1_ICcQCs7geUld1eE1CWGhEVEk) - presented at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/)
+* [Probabilistic Programming with Lea](https://drive.google.com/open?id=0B1_ICcQCs7gebF9uVGdNdG1nR0E) - presented at [PyCon Ireland 15](https://python.ie/pycon-2015/)
 
 
 ---
 
+# Feedbacks
 
-Please send your comments, critics, suggestions, bug reports, … in English or French by E-mail to: **pie.denis@skynet.be**. You are more than welcome / _bienvenus_ !
+Please send your comments, critics, suggestions, bug reports, … by E-mail to: **pie.denis@skynet.be**, in English or French. You are welcome / _bienvenus_ ! You can also post issues in the present Bitbucket project page.
 
-You can also post issues in the present project site.
+Also, if you use Lea in your developments or researches, please tell about it! So, your experience can be shared and the project can gain recognition.
 
-Project author, administrator : Pierre Denis (Louvain-la-Neuve, Belgium)
+Project author, administrator: Pierre Denis — Louvain-la-Neuve, Belgium
+
