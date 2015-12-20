@@ -87,8 +87,8 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimateMC method).
 
-    There are ten concrete subclasses to Lea, namely:
-      Alea, Clea, Plea, Flea, Flea1, Flea2, Tlea, Ilea, Rlea and Blea.
+    There are nine concrete subclasses to Lea, namely:
+      Alea, Clea, Plea, Flea, Flea1, Flea2, Ilea, Rlea and Blea.
     
     Each subclass represents a "definition" of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -117,13 +117,12 @@ class Lea(object):
     - Flea applies a given n-ary function to a given sequence of n Lea instances
     - Flea1 applies a given 1-ary function to a given Lea instance
     - Flea2 applies a given 2-ary function to two given Lea instances
-    - Tlea applies a given 2-ary function, a given number of times, on a given Lea instance
     - Ilea filters the values of a given Lea instance according to a given Lea instance representing a boolean condition (conditional probabilities)
     - Rlea embeds Lea instances as values of a parent Lea instance 
     - Blea defines CPT, providing Lea instances corresponding to given conditions (used for bayesian networks)
 
     Note that Plea is meant to be a more efficient alternative to a Clea-based implementation;
-    similarily, Flea1, Flea2, Tlea are more efficient alternatives to a Flea-based implementation.
+    similarily, Flea1 and Flea2 are more efficient alternatives to a Flea-based implementation.
 
     WARNING: The following methods are called without parentheses:
         mean, var, std, mode, entropy, information
@@ -517,13 +516,19 @@ class Lea(object):
         return Ilea(self,(Lea.coerce(evidence) for evidence in evidences))    
     
     def times(self,n,op=operator.add):
-        ''' returns a new Tlea instance representing the current distribution
-            operated n times with itself, through the given binary operator
+        ''' returns, after evaluation of the probability distribution self, a new
+            Alea instance representing the current distribution operated n times
+            with itself, through the given binary operator op;
+            if n = 1, then a copy of self is returned;
+            requires that n is strictly positive; otherwise, an exception is
+            raised;
+            note that the implementation uses a fast dichotomic algorithm,
+            instead of a naive approach that scales up badly as n grows
         '''
-        return Tlea(op,self,n)
+        return self.getAlea().times(n,op)
 
     def timesTuple(self,n):
-        ''' returns a new Tlea instance with tuples of length n, containing
+        ''' returns a new Alea instance with tuples of length n, containing
             the cartesian product of self with itslef repeated n times
         '''
         return self.map(makeTuple).times(n)
@@ -1610,7 +1615,6 @@ class Lea(object):
 from alea import Alea
 from clea import Clea
 from plea import Plea
-from tlea import Tlea
 from ilea import Ilea
 from rlea import Rlea
 from blea import Blea

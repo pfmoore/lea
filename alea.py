@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea import Lea
+from flea2 import Flea2
 from prob_fraction import ProbFraction
 from random import randrange
 from bisect import bisect_left, bisect_right
@@ -199,6 +200,26 @@ class Alea(Lea):
         if check and len(frozenset(vs)) < len(vs):
             raise Lea.Error("duplicate values")
         return Alea(vs,ps)
+
+    def times(self,n,op=operator.add):
+        ''' returns a new Alea instance representing the current distribution
+            operated n times with itself, through the given binary operator op;
+            if n = 1, then a copy of self is returned;
+            requires that n is strictly positive; otherwise, an exception is
+            raised;
+            note that the implementation uses a fast dichotomic algorithm,
+            instead of a naive approach that scales up badly as n grows
+        '''
+        if n <= 0:
+            raise Lea.Error("times method requires a strictly positive integer")
+        if n == 1:
+            return self.new()
+        (n2,r) = divmod(n,2)
+        alea2 = self.times(n2)
+        resFlea2 = Flea2(op,alea2,alea2.new())
+        if r == 1:
+            resFlea2 = Flea2(op,resFlea2,self)
+        return resFlea2.getAlea()
 
     def draw(self,nbValues):
         ''' returns a new Alea instance representing a probability distribution
