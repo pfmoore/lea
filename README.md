@@ -42,22 +42,22 @@ tail-tail : 1089/10000
 2211/5000
 ```
 
-The following example shows how functions can be applied on probability distributions and how conditional probabilities can be calculated.
+The following example shows how functions/methods can be applied on probability distributions and how conditional probabilities can be calculated.
 ```
 >>> flip1.upper()
 HEAD : 67/100
 TAIL : 33/100
->>> flip1[0].upper()
+>>> flip1.upper()[0]
 H : 67/100
 T : 33/100
->>> def m(f):
-...     return 1 if f=='head' else 0
+>>> def toInt(flip):
+...     return 1 if flip=='head' else 0
 ...
->>> headCount1 = flip1.map(m)
+>>> headCount1 = flip1.map(toInt)
 >>> headCount1
 0 : 33/100
 1 : 67/100
->>> headCount2 = flip2.map(m)
+>>> headCount2 = flip2.map(toInt)
 >>> headCounts = headCount1 + headCount2
 >>> headCounts 
 0 : 1089/10000
@@ -164,4 +164,3 @@ Please send your comments, critics, suggestions, bug reports, … by E-mail to: 
 Also, if you use Lea in your developments or researches, please tell about it! So, your experience can be shared and the project can gain recognition.
 
 Project author, administrator: Pierre Denis — Louvain-la-Neuve, Belgium
-
