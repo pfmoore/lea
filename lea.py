@@ -1506,6 +1506,24 @@ class Lea(object):
         '''
         return self.getAlea().histo(size)
 
+    def plot(self,title=None,fname=None,savefigArgs=dict(),**barArgs):
+        ''' produces, after evaluation of the probability distribution self,
+            a matplotlib bar chart representing it with the given title (if not None);
+            the bar chart may be customised by using named arguments barArgs, which are
+            relayed to matplotlib.pyplot.bar function
+            (see doc in http://matplotlib.org/api/pyplot_api.html)
+            * if fname is None, then the chart is displayed on screen, in a matplotlib window;
+              the previous chart, if any, is erased
+            * otherwise, the chart is saved in a file specified by given fname as specified
+              by matplotlib.pyplot.savefig; the file format may be customised by using
+              savefigArgs argument, which is a dictionary relayed to matplotlib.pyplot.savefig
+              function and containing named arguments expected by this function;
+              example:
+               flip.plot(fname='flip.png',savefigArgs=dict(bbox_inches='tight'),color='green')
+            the method requires matplotlib package; an exception is raised if it is not installed
+        '''
+        self.getAlea().plot(title,fname,savefigArgs,**barArgs)
+
     def getAlea(self,**kwargs):
         ''' returns an Alea instance representing the distribution after it has been evaluated;
             if self is an Alea instance, then it returns itself,

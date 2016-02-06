@@ -31,8 +31,15 @@ from bisect import bisect_left, bisect_right
 from math import log, sqrt, exp
 from toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM
 import operator
-import sys
 
+# try to import matplotlib package, required by plot() method
+# if missing, no error is reported until plot is called
+try:
+    import matplotlib.pyplot as plt
+    # switch on interactive mode, so the control is back to console as soon as a chart is displayed
+    plt.ion()
+except:
+    pass
 
 class Alea(Lea):
     
@@ -353,7 +360,44 @@ class Alea(Lea):
             increasing order; otherwise, an arbitrary order is used;
         '''
         return self.asString('-',histoSize=size)
-                
+
+    def plot(self,title=None,fname=None,savefigArgs=dict(),**barArgs):
+        ''' produces a matplotlib bar chart representing the probability distribution self
+            with the given title (if not None); the bar chart may be customised by using
+            named arguments barArgs, which are relayed to matplotlib.pyplot.bar function
+            (see doc in http://matplotlib.org/api/pyplot_api.html)
+            * if fname is None, then the chart is displayed on screen, in a matplotlib window;
+              the previous chart, if any, is erased
+            * otherwise, the chart is saved in a file specified by given fname as specified
+              by matplotlib.pyplot.savefig; the file format may be customised by using
+              savefigArgs argument, which is a dictionary relayed to matplotlib.pyplot.savefig
+              function and containing named arguments expected by this function;
+              example:
+               flip.plot(fname='flip.png',savefigArgs=dict(bbox_inches='tight'),color='green')
+            the method requires matplotlib package; an exception is raised if it is not installed
+        '''
+        try:
+            plt
+        except:
+            raise Lea.Error("the plot() method requires the matplotlib package")
+        if fname is None:
+            # no file specified: erase the current chart, if any
+            plt.clf()
+        else:
+            # file specified: switch off interactive mode
+            plt.ioff()
+        plt.bar(range(len(self._vs)),self.pmf(),tick_label=self._vs,align='center',**barArgs)
+        plt.ylabel('Probability')
+        if title is not None:
+            plt.title(title)
+        if fname is None:
+            # no file specified: display the chart on screen
+            plt.show()
+        else:
+            # file specified: save chart on file, using given paramaters and switch back interactive mode
+            plt.savefig(fname,**savefigArgs)
+            plt.ion()
+
     def getAleaLeavesSet(self):
         ''' returns a set containing all the Alea leaves in the tree having the root self
             in the present case of Alea instance, it returns the singleton set with self as element
