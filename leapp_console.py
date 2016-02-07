@@ -32,7 +32,6 @@ DEBUG = False
 CONTINUATION_LINE_CHARS = '(,:\\'
 
 from leapp_translator import LeappTranslator
-import license
 from toolbox import input
 
 import traceback

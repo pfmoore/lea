@@ -25,7 +25,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 import operator
 from itertools import islice
-from math import log
 from collections import namedtuple
 from prob_fraction import ProbFraction
 from toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip
