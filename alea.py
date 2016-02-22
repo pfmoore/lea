@@ -4,7 +4,7 @@
     alea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -23,13 +23,13 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea import Lea
-from flea2 import Flea2
-from prob_fraction import ProbFraction
+from lea.lea import Lea
+from lea.flea2 import Flea2
+from lea.prob_fraction import ProbFraction
 from random import randrange
 from bisect import bisect_left, bisect_right
 from math import log, sqrt, exp
-from toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM
+from lea.toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM
 import operator
 
 # try to import matplotlib package, required by plot() method
@@ -394,7 +394,7 @@ class Alea(Lea):
             # no file specified: display the chart on screen
             plt.show()
         else:
-            # file specified: save chart on file, using given paramaters and switch back interactive mode
+            # file specified: save chart on file, using given parameters and switch back interactive mode
             plt.savefig(fname,**savefigArgs)
             plt.ion()
 

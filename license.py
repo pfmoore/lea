@@ -4,7 +4,7 @@
     license.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-VER = "2.2.0-beta.5"
+VER = "2.2.0-beta.6"
 
 licenseText = '''\
 Lea %s Copyright (C) 2013-2016 Pierre Denis

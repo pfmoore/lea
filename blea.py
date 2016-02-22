@@ -4,7 +4,7 @@
     blea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -23,12 +23,12 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea import Lea
-from alea import Alea
-from clea import Clea
-from ilea import Ilea
-from prob_fraction import ProbFraction
-from toolbox import dict, zip
+from lea.lea import Lea
+from lea.alea import Alea
+from lea.clea import Clea
+from lea.ilea import Ilea
+from lea.prob_fraction import ProbFraction
+from lea.toolbox import dict, zip
 from operator import or_
 from itertools import chain
             

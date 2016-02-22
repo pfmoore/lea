@@ -4,7 +4,7 @@
     leapp.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -24,7 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import sys
-import license
+import lea.license
 
 ''' 
 Leapp main program
@@ -38,11 +38,11 @@ it executes directly the Python statements.
 if __name__=='__main__':
     if len(sys.argv) == 1:
         # no argument : start leapp console
-        from leapp_console import LeappConsole
+        from lea.leapp_console import LeappConsole
         import platform
         leappConsole = LeappConsole()
         print ("[running on Python %s]"%platform.python_version())
-        print (license.licenseText)
+        print (lea.license.licenseText)
         print ('Welcome in Leapp console!')
         leappConsole.startCmdLoop()
         print ()
@@ -50,7 +50,7 @@ if __name__=='__main__':
         # argument(s) present : compile files into Python statements then,
         # if '-c' given, write Python statements .py files
         # otherwise, execute Python statements 
-        from leapp_compiler import LeappCompiler
+        from lea.leapp_compiler import LeappCompiler
         firstArg = sys.argv[1]
         if firstArg.startswith('-'):
             if firstArg not in ('-c','-cf'):

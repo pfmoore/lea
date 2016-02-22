@@ -1,7 +1,7 @@
 '''
 --------------------------------------------------------------------------------
 
-    flea1.py
+    __init__.py
 
 --------------------------------------------------------------------------------
 Copyright 2013-2016 Pierre Denis
@@ -23,34 +23,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea.lea import Lea
-
-class Flea1(Lea):
-    
-    '''
-    Flea1 is a Lea subclass, which instance is defined by a function applied on one given Lea argument.
-    The function is applied on all values of the argument. This results in a new probability distribution
-    for all the values returned by the function.
-    '''
-    
-    __slots__ = ('_f','_leaArg')
-
-    def __init__(self,f,leaArg):
-        Lea.__init__(self)
-        self._f = f
-        self._leaArg = leaArg
-
-    def _getLeaChildren(self):
-        return (self._leaArg,)
-
-    def _clone(self,cloneTable):
-        return Flea1(self._f,self._leaArg.clone(cloneTable))    
-
-    def _genVPs(self):
-        f = self._f
-        for (v,p) in self._leaArg._genVPs():
-            yield (f(v),p)
-
-    def _genOneRandomMC(self):
-        for v in self._leaArg._genOneRandomMC():
-            yield self._f(v)
+from lea.leaf import *
+__all__ = ( # objects defined in lea.lea module
+            'Lea', 'V', 'VP', 'B', 'P', 'Pf', 'X',
+            # objects defined in lea.leaf module
+            'die', 'dice', 'diceSeq', 'D6', 'flip', 'cardRank', 'cardSuite', 'card')

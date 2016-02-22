@@ -4,7 +4,7 @@
     leapp_console.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -31,8 +31,8 @@ DEBUG = False
 
 CONTINUATION_LINE_CHARS = '(,:\\'
 
-from leapp_translator import LeappTranslator
-from toolbox import input
+from lea.leapp_translator import LeappTranslator
+from lea.toolbox import input
 
 import traceback
 

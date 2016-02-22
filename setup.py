@@ -4,7 +4,7 @@
     setup.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -24,6 +24,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from distutils.core import setup
+from distutils.sysconfig import get_python_lib
+from os.path import join
 
 from license import VER
 
@@ -35,25 +37,17 @@ setup( name = 'lea',
        url = 'http://bitbucket.org/piedenis/lea',
        license = 'LGPL',
        keywords = ['probability', 'discrete', 'distribution', 'probabilistic programming'],
-       py_modules = [ 'lea',
-                      'alea',
-                      'blea',
-                      'clea',
-                      'flea',
-                      'flea1',
-                      'flea2',
-                      'flea2a',
-                      'ilea',
-                      'rlea',
-                      'markov',
-                      'toolbox',
-                      'prob_fraction',
-                      'leaf',
-                      'leapp',
-                      'leapp_compiler',
-                      'leapp_console',
-                      'leapp_translator',
-                      'license' ] ,
-       data_files = [('.', [ 'COPYING',
-                             'COPYING.LESSER' ] ) ],
+       packages = [ 'lea' ],
+       package_dir = {'lea': ''},
+       data_files = [(join(get_python_lib(),'lea'), [ 'COPYING', 'COPYING.LESSER' ] ) ],
+       long_description = '''Lea is a Python package aiming at working with discrete probability distributions in an intuitive way. It allows you to model a broad range of random phenomenons, like dice throwing, coin tossing, gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, … Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
+
+Lea also provides advanced functions that target Probabilistic Programming (PP); these include conditional probabilities, Bayes inference and Markov chains. To ease interactive calculations, an optional PP language (PPL), called "Leapp", is included in the package; it extends Python syntax with few constructs to define and manipulate probabilistic models in an extremely concise way.
+
+To install this beta version of Lea, type the following command:
+::
+
+  pip install lea==%s
+
+Please go on project home page below for a comprehensive documentation.''' % VER
       )

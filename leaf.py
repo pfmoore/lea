@@ -4,7 +4,7 @@
     leaf.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015, 2016 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea import *
+from lea.lea import *
 
 def die(nbFaces):
     ''' returns an Alea instance representing the value obtained by throwing

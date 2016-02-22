@@ -4,7 +4,7 @@
     leapp_translator.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -24,8 +24,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import string
-from prob_fraction import ProbFraction
-from toolbox import zip
+from lea.prob_fraction import ProbFraction
+from lea.toolbox import zip
 
 # leapp internal configuration parameters, language-dependant
 IDENTIFIER_CHARACTERS = string.ascii_letters + string.digits + '_'

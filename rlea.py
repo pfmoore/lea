@@ -4,7 +4,7 @@
     rlea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013, 2014, 2015 Pierre Denis
+Copyright 2013-2016 Pierre Denis
 
 This file is part of Lea.
 
@@ -23,8 +23,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea import Lea
-from toolbox import dict
+from lea.lea import Lea
+from lea.toolbox import dict
 
 class Rlea(Lea):
     
