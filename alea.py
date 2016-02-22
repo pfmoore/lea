@@ -222,7 +222,7 @@ class Alea(Lea):
         if n == 1:
             return self.new()
         (n2,r) = divmod(n,2)
-        alea2 = self.times(n2)
+        alea2 = self.times(n2,op)
         resFlea2 = Flea2(op,alea2,alea2.new())
         if r == 1:
             resFlea2 = Flea2(op,resFlea2,self)
