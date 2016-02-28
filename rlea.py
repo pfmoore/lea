@@ -24,7 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from lea.lea import Lea
-from lea.toolbox import dict
+from lea.toolbox import zip
 
 class Rlea(Lea):
     
@@ -41,17 +41,16 @@ class Rlea(Lea):
         pcount = 1
         for (lea1_,count) in leaCounts:
             pcount *= count
-        self._factors = dict((lea_,pcount//count) for (lea_,count) in leaCounts)
+        self._factors = tuple(pcount//count for (lea_,count) in leaCounts)
          
     def _getLeaChildren(self):
         return (self._leaOfLeas,)
 
     def _clone(self,cloneTable):
-        return Rlea(self._leaOfLeas.clone(cloneTable))    
+        return Rlea(self._leaOfLeas.clone(cloneTable))
 
     def _genVPs(self):
-        for (lea1,p1) in self._leaOfLeas._genVPs():
-            factor = self._factors[lea1]
+        for ((lea1,p1),factor) in zip(self._leaOfLeas._genVPs(),self._factors):
             p1 *= factor
             for (v,p2) in lea1._genVPs():
                 yield (v,p1*p2)
