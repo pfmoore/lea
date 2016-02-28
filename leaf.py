@@ -42,7 +42,7 @@ def diceSeq(nbDice,nbFaces):
         throwing nbDice independent fair dice with faces marked from 1 to nbFaces
         (each value is a tuple with nbDice elements)
     '''
-    return die(nbFaces).cprodTimes(nbDice)
+    return die(nbFaces).timesTuple(nbDice)
 
 # D6 represents the value obtained by throwing a fair die with 6 faces
 D6 = die(6)
