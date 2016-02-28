@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-VER = "2.2.0-beta.7"
+VER = "2.2.0-beta.8"
 
 licenseText = '''\
 Lea %s Copyright (C) 2013-2016 Pierre Denis
