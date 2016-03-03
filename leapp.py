@@ -24,7 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import sys
-import .license
+from . import license
 
 ''' 
 Leapp main program
@@ -42,7 +42,7 @@ if __name__=='__main__':
         import platform
         leappConsole = LeappConsole()
         print ("[running on Python %s]"%platform.python_version())
-        print (lea.license.licenseText)
+        print (license.licenseText)
         print ('Welcome in Leapp console!')
         leappConsole.startCmdLoop()
         print ()

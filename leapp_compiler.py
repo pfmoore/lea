@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-import .license
+from . import license
 from .leapp_translator import LeappTranslator
 from .toolbox import input
 
