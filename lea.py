@@ -1266,11 +1266,14 @@ class Lea(object):
         '''
         return Flea1(Lea._safeNot,self)
 
-    def __nonzero__(self):
+    def __bool__(self):
         ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
-            called on evaluation of "bool(self)"
+            called on evaluation of "bool(self)", "if self:", "while self:", etc
         '''
-        raise Lea.Error("Lea instance cannot be evaluated as a boolean (maybe due to a lack of parentheses)")
+        raise Lea.Error("Lea instance cannot be evaluated as a boolean")
+
+    # Python 2 compatibility
+    __nonzero__ = __bool__
 
     @staticmethod
     def _checkBooleans(opMsg,*vals):
