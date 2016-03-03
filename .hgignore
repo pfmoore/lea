@@ -1,0 +1,11 @@
+syntax: glob
+
+# Ignore compiled Python files
+__pycache__
+
+# Tox working files
+.cache
+.tox
+
+# Files generated when building sdist
+MANIFEST
