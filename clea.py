@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea.lea import Lea
+from .lea import Lea
 
 class Clea(Lea):
     

@@ -23,13 +23,13 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea.lea import Lea
-from lea.flea2 import Flea2
-from lea.prob_fraction import ProbFraction
+from .lea import Lea
+from .flea2 import Flea2
+from .prob_fraction import ProbFraction
 from random import randrange
 from bisect import bisect_left, bisect_right
 from math import log, sqrt, exp
-from lea.toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM
+from .toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM
 import operator
 
 # try to import matplotlib package, required by plot() method

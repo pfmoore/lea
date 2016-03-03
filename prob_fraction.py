@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea.toolbox import calcLCM
+from .toolbox import calcLCM
 
 from fractions import Fraction
 

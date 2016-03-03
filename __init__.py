@@ -23,7 +23,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea.leaf import *
+from .leaf import *
 __all__ = ( # objects defined in lea.lea module
             'Lea', 'V', 'VP', 'B', 'P', 'Pf', 'X',
             # objects defined in lea.leaf module

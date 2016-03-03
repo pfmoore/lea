@@ -26,8 +26,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 import operator
 from itertools import islice
 from collections import namedtuple
-from lea.prob_fraction import ProbFraction
-from lea.toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip
+from .prob_fraction import ProbFraction
+from .toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip
 
 class Lea(object):
     
@@ -1624,15 +1624,15 @@ class Lea(object):
         '''
         return self.given(*hypLeas).lr()
     
-from lea.alea import Alea
-from lea.clea import Clea
-from lea.ilea import Ilea
-from lea.rlea import Rlea
-from lea.blea import Blea
-from lea.flea import Flea
-from lea.flea1 import Flea1
-from lea.flea2 import Flea2
-from lea.flea2a import Flea2a
+from .alea import Alea
+from .clea import Clea
+from .ilea import Ilea
+from .rlea import Rlea
+from .blea import Blea
+from .flea import Flea
+from .flea1 import Flea1
+from .flea2 import Flea2
+from .flea2a import Flea2a
 
 # Constants representing certain values (Lea static attributes)
 Lea.true  = Lea.coerce(True)
