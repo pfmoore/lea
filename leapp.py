@@ -24,7 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import sys
-import lea.license
+import .license
 
 ''' 
 Leapp main program
@@ -38,7 +38,7 @@ it executes directly the Python statements.
 if __name__=='__main__':
     if len(sys.argv) == 1:
         # no argument : start leapp console
-        from lea.leapp_console import LeappConsole
+        from .leapp_console import LeappConsole
         import platform
         leappConsole = LeappConsole()
         print ("[running on Python %s]"%platform.python_version())
@@ -50,7 +50,7 @@ if __name__=='__main__':
         # argument(s) present : compile files into Python statements then,
         # if '-c' given, write Python statements .py files
         # otherwise, execute Python statements 
-        from lea.leapp_compiler import LeappCompiler
+        from .leapp_compiler import LeappCompiler
         firstArg = sys.argv[1]
         if firstArg.startswith('-'):
             if firstArg not in ('-c','-cf'):

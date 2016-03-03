@@ -23,8 +23,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea.lea import Lea
-from lea.toolbox import zip
+from .lea import Lea
+from .toolbox import zip
 
 class Rlea(Lea):
     

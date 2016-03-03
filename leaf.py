@@ -26,7 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 from itertools import combinations_with_replacement
 from math import factorial
 
-from lea.lea import *
+from .lea import *
 
 def die(nbFaces):
     ''' returns an Alea instance representing the value obtained by throwing

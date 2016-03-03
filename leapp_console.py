@@ -31,8 +31,8 @@ DEBUG = False
 
 CONTINUATION_LINE_CHARS = '(,:\\'
 
-from lea.leapp_translator import LeappTranslator
-from lea.toolbox import input
+from .leapp_translator import LeappTranslator
+from .toolbox import input
 
 import traceback
 
@@ -96,7 +96,7 @@ class LeappConsole(object):
         return ''.join(readLines)    
 
     def startCmdLoop(self):
-        from lea import Lea
+        from .lea import Lea
         while True:
             try:
                 rMultilineStatement = self.inputMultilineStatement()

@@ -23,8 +23,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from lea.lea import Lea
-from lea.clea import Clea
+from .lea import Lea
+from .clea import Clea
 
 class Flea(Lea):
     

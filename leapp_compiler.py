@@ -23,9 +23,9 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-import lea.license
-from lea.leapp_translator import LeappTranslator
-from lea.toolbox import input
+import .license
+from .leapp_translator import LeappTranslator
+from .toolbox import input
 
 PY_FILE_HEADER = '''
 # ----------------------------------------------------------------------------- 
