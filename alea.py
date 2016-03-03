@@ -431,7 +431,7 @@ class Alea(Lea):
     def _genVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability weight (integer > 0);
-            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            this obeys the "binding" mechanism, so if the same variable is referred multiple times in
             a given expression, then same value will be yielded at each occurrence; 
             "Statues" algorithm: 
             before yielding a value v, this value v is bound to the current instance;
@@ -441,6 +441,9 @@ class Alea(Lea):
             is resumed after the yield;
             it is unbound at the end;
             the method calls the _genVPs method implemented in Lea subclasses;
+            the present Alea._genVPs method is called by the _genVPs methods implemented in
+            other Lea subclasses; these methods are themselves called by Lea.new and,
+            indirectly, by Lea.getAlea
         '''
         if self._val is not self:
             # distribution already bound to a value because genVPs has been called already on self
