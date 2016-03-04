@@ -1,12 +1,12 @@
 from lea import Lea
 import pytest
 
-def test_add():
-    """Two distributions can be added together"""
+def test_equiv():
+    """Equivalence behaves as expected"""
     d1 = Lea.fromVals(1,2,3,4)
-    d2 = Lea.fromVals(1,2,3,4)
-    dsum = Lea.fromValFreqs((2,1), (3,2), (4,3), (5,4), (6,3), (7,2), (8,1))
-    assert (d1 + d2).equiv(dsum)
+    d2 = Lea.fromVals(1,2,3)
+    assert (d1).equiv(d1)
+    assert not (d1).equiv(d2)
 
 def test_add():
     """Two distributions can be added together"""
@@ -17,7 +17,6 @@ def test_add():
     assert (d1 + d2).equiv(dsum)
     assert (d1 + 1).equiv(dinc)
     assert (1 + d1).equiv(dinc)
-    assert (d1).equiv(d1)
 
 def test_sub():
     """A distribution can be subtracted from another"""
