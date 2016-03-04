@@ -299,35 +299,38 @@ class Lea(object):
     def boolProb(pNum,pDen=None):
         ''' static method, returns an Alea instance representing a boolean
             distribution such that probability of True is pNum/pDen
-            if pDen is None, then pNum expresses the probability as a Fraction
+            if pDen is None, then pNum expresses the probability as a float,
+            a string, a Python's Fraction or a Decimal instance, in the same
+            way as Fraction constructor; for strings, percentages are also
+            allowed using the '%' suffix
         '''
-        if pDen is None:
-            # pNum is expected to be a Fraction
-            pDen = pNum.denominator
-            pNum = pNum.numerator
-        ProbFraction(pNum,pDen).check()
-        return Alea.fromValFreqs((True,pNum),(False,pDen-pNum))
+        probFraction = ProbFraction(pNum,pDen)
+        probFraction.check()
+        return Alea.fromValFreqs((True,probFraction.numerator),(False,probFraction.denominator-probFraction.numerator))
 
     @staticmethod
     def bernoulli(pNum,pDen=None):
         ''' static method, returns an Alea instance representing a bernoulli
             distribution giving 1 with probability pNum/pDen and 0 with
             complementary probability;
-            if pDen is None, then pNum expresses the probability as a Fraction
+            if pDen is None, then pNum expresses the probability as a float,
+            a string, a Python's Fraction or a Decimal instance, in the same
+            way as Fraction constructor; for strings, percentages are also
+            allowed using the '%' suffix
         '''
-        if pDen is None:
-            # pNum is expected to be a Fraction
-            pDen = pNum.denominator
-            pNum = pNum.numerator
-        ProbFraction(pNum,pDen).check()
-        return Alea.fromValFreqs((1,pNum),(0,pDen-pNum))
+        probFraction = ProbFraction(pNum,pDen)
+        probFraction.check()
+        return Alea.fromValFreqs((1,probFraction.numerator),(0,probFraction.denominator-probFraction.numerator))
 
     @staticmethod
     def binom(n,pNum,pDen=None):
         ''' static method, returns an Alea instance representing a binomial
             distribution giving the number of successes among a number n of 
             independent experiments, each having probability pNum/pDen of success;  
-            if pDen is None, then pNum expresses the probability as a Fraction
+            if pDen is None, then pNum expresses the probability as a float,
+            a string, a Python's Fraction or a Decimal instance, in the same
+            way as Fraction constructor; for strings, percentages are also
+            allowed using the '%' suffix
         '''
         return Lea.bernoulli(pNum,pDen).times(n)
 
