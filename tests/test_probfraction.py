@@ -1,5 +1,7 @@
 from lea import ProbFraction as PF
 from fractions import Fraction
+from decimal import Decimal
+import sys
 import pytest
 
 def test_pf_is_fraction():
@@ -8,15 +10,73 @@ def test_pf_is_fraction():
     assert isinstance(pf, PF)
     assert isinstance(pf, Fraction)
 
+def test_pf_as_str():
+    pf1 = PF("0")
+    assert pf1 == PF(0)
+    pf2 = PF("0.5")
+    assert pf2 == PF(1,2)
+    pf3 = PF("1")
+    assert pf3 == PF(1)
+    pf4 = PF("0.123456789")
+    assert pf4 == PF(123456789,1000000000)
+    pf5 = PF("   0.123456789000 ")
+    assert pf5 == PF(123456789,1000000000)
+
 def test_pf_as_pct():
     """Test creating from a percentage"""
-    pf = PF("50%")
-    assert pf == PF(1,2)
+    pf1 = PF("0%")
+    assert pf1 == PF(0)
+    pf2 = PF("50%")
+    assert pf2 == PF(1,2)
+    pf3 = PF("100%")
+    assert pf3 == PF(1)
+    pf4 = PF("12.3456789 %")
+    assert pf4 == PF(123456789,1000000000)
+    pf5 = PF("   12.3456789000    % ")
+    assert pf5 == PF(123456789,1000000000)
 
 def test_pf_from_fraction():
     """Test creating from a fraction"""
     pf = PF.fromFraction(Fraction(3,4))
     assert pf == PF(3,4)
+
+def test_pf_from_decimal():
+    pf1 = PF(Decimal("0"))
+    assert pf1 == PF(0)
+    pf2 = PF(Decimal("0.5"))
+    assert pf2 == PF(1,2)
+    pf3 = PF(Decimal("1"))
+    assert pf3 == PF(1)
+    pf4 = PF(Decimal("0.123456789"))
+    assert pf4 == PF(123456789,1000000000)
+    pf5 = PF(Decimal("   0.123456789000 "))
+    assert pf5 == PF(123456789,1000000000)
+
+def test_pf_from_float():
+    """Test creating from a float"""
+    # Checking float numbers that can be represented exactly as fractions,
+    # i.e. zero and multiples of powers of 2
+    pf1 = PF(0.0)
+    assert pf1 == PF(0)
+    pf2 = PF(1.0)
+    assert pf2 == PF(1)
+    pf3 = PF(0.5)
+    assert pf3 == PF(1,2)
+    pf4 = PF(3.0/4.0)
+    assert pf4 == PF(3,4)
+    # Checking float numbers that cannot be represented exactly as fractions
+    # e.g. PF(0.2) is not exactly the same as fraction PF(2,10)
+    # we expect no loss of accuracy when converting back the fraction to float
+    pf5 = PF(0.2)
+    assert float(pf5) == 0.2
+    pf6 = PF(2.0/3.0)
+    assert float(pf6) == 2.0/3.0
+    pf7 = PF(0.123456789)
+    assert float(pf7) == 0.123456789
+    pf8 = PF(sys.float_info.epsilon)
+    assert float(pf8) ==  sys.float_info.epsilon
+    pf9 = PF(1.0-sys.float_info.epsilon)
+    assert float(pf9) ==  1.0-sys.float_info.epsilon
 
 def test_coerce():
     """Test coercing values to ProbFractions"""

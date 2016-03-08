@@ -1,7 +1,10 @@
 from lea import Lea
 from lea import ProbFraction as PF
+from fractions import Fraction
+from decimal import Decimal
 import pytest
 import math
+import sys
 
 def test_clone():
     dist1 = Lea.fromVals(1,2,3,4)
@@ -63,16 +66,68 @@ def test_from_dict():
     assert set(d.vps()) == {('a', 5), ('b', 6)}
 
 def test_boolprob():
+    d = Lea.boolProb(0)
+    assert d.p(True) == PF(0)
     d = Lea.boolProb(1,2)
     assert d.p(True) == PF(1,2)
-    d = Lea.boolProb(PF(1,2))
+    d = Lea.boolProb(1)
+    assert d.p(True) == PF(1)
+    d = Lea.boolProb(Fraction(123456789,1000000000))
+    assert d.p(True) == PF(123456789,1000000000)
+    d = Lea.boolProb(Decimal("0.123456789"))
+    assert d.p(True) == PF(123456789,1000000000)
+    d = Lea.boolProb("12.3456789%")
+    assert d.p(True) == PF(123456789,1000000000)
+    assert d.p(False) == 1 - PF(123456789,1000000000)
+    d = Lea.boolProb(0.0)
+    assert d.p(True) == PF(0)
+    d = Lea.boolProb(0.5)
     assert d.p(True) == PF(1,2)
+    d = Lea.boolProb(1.0)
+    assert d.p(True) == PF(1)
+    # the following cases cannot assert exact values due to float representation
+    # the pmf method shall convert the prob. fraction back into the given float (no loss of precision)
+    d = Lea.boolProb(0.2)
+    assert d.pmf(True) == 0.2
+    assert d.pmf(False) == 1.0 - 0.2
+    d = Lea.boolProb(0.123456789)
+    assert d.pmf(True) == 0.123456789
+    assert d.pmf(False) == 1.0 - 0.123456789
+    d = Lea.boolProb(sys.float_info.epsilon)
+    assert d.pmf(True) == sys.float_info.epsilon
+    assert d.pmf(False) == 1.0 - sys.float_info.epsilon
 
 def test_bernoulli():
+    d = Lea.bernoulli(0)
+    assert d.p(1) == PF(0)
     d = Lea.bernoulli(1,2)
     assert d.p(1) == PF(1,2)
-    d = Lea.bernoulli(PF(1,2))
+    d = Lea.bernoulli(1)
+    assert d.p(1) == PF(1)
+    d = Lea.bernoulli(Fraction(123456789,1000000000))
+    assert d.p(1) == PF(123456789,1000000000)
+    d = Lea.bernoulli(Decimal("0.123456789"))
+    assert d.p(1) == PF(123456789,1000000000)
+    d = Lea.bernoulli("12.3456789%")
+    assert d.p(1) == PF(123456789,1000000000)
+    assert d.p(0) == 1 - PF(123456789,1000000000)
+    d = Lea.bernoulli(0.0)
+    assert d.p(1) == PF(0)
+    d = Lea.bernoulli(0.5)
     assert d.p(1) == PF(1,2)
+    d = Lea.bernoulli(1.0)
+    assert d.p(1) == PF(1)
+    # the following cases cannot assert exact values due to float representation
+    # the pmf method shall convert the prob. fraction back into the given float (no loss of precision)
+    d = Lea.bernoulli(0.2)
+    assert d.pmf(1) == 0.2
+    assert d.pmf(0) == 1.0 - 0.2
+    d = Lea.bernoulli(0.123456789)
+    assert d.pmf(1) == 0.123456789
+    assert d.pmf(0) == 1.0 - 0.123456789
+    d = Lea.bernoulli(sys.float_info.epsilon)
+    assert d.pmf(1) == sys.float_info.epsilon
+    assert d.pmf(0) == 1.0 - sys.float_info.epsilon
 
 def test_poisson():
     d = Lea.poisson(2)
