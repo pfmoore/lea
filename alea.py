@@ -28,8 +28,9 @@ from .flea2 import Flea2
 from .prob_fraction import ProbFraction
 from random import randrange
 from bisect import bisect_left, bisect_right
-from math import log, sqrt, exp
-from .toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM
+from itertools import combinations, combinations_with_replacement
+from math import log, sqrt, exp, factorial
+from .toolbox import LOG2, memoize, zip, next, dict, defaultdict, calcLCM, makeTuple
 import operator
 
 # try to import matplotlib package, required by plot() method
@@ -228,23 +229,115 @@ class Alea(Lea):
             resFlea2 = Flea2(op,resFlea2,self)
         return resFlea2.getAlea()
 
-    def draw(self,nbValues):
-        ''' returns a new Alea instance representing a probability distribution
-            of the tuples of values obtained by the given number of draws without
-            replacement from the current distribution;
-            requires that 0 <= nbValues <= number of values of self,
-            otherwise an exception is raised
+    def isUniform(self):
+        ''' returns True  if the probability distribution is uniform,
+                    False otherwise
         '''
-        if nbValues < 0:
-            raise Lea.Error("draw method requires a positive integer")
-        if nbValues == 0:
+        p0 = self._ps[0]
+        return all(p==p0 for p in self._ps)
+
+    def _selections(self,n,genSelector):
+        ''' returns a new Alea instance representing a probability distribution of
+            the n-length tuples yielded by the given combinatorial generator
+            genSelector, applied on the values of self distribution;
+            the order of the elements of each built tuple is irrelevant: each tuple
+            represents any permutation of its elements; the actual order of the
+            elements of each tuple shall be the one defined by genSelector;
+            assumes that n >= 0
+            the efficient combinatorial algorithm is due to Paul Moore
+        '''
+        # First of all, get the values and weights for the distribution
+        vps = dict(self.vps())
+        # The total number of permutations of N samples is N!
+        permutations = factorial(n)
+        # We will calculate the frequency table for the result
+        freqTable = []
+        # Use genSelector to get the list of outcomes.
+        # as itertools guarantees to give sorted output for sorted input,
+        # giving the sorted sequence self._vs ensures our outputs are sorted
+        for outcome in genSelector(self._vs,n):
+            # We calculate the weight in 2 stages.
+            # First we calculate the weight as if all values were equally
+            # likely - in that case, the weight is N!/a!b!c!... where
+            # a, b, c... are the sizes of each group of equal values
+            weight = permutations
+            # We run through the set counting and dividing as we go
+            runLen = 0
+            prevRoll = None
+            for roll in outcome:
+                if roll != prevRoll:
+                    prevRoll = roll
+                    runLen = 0
+                runLen += 1
+                if runLen > 1:
+                    weight //= runLen
+            # Now we take into account the relative weights of the values, by
+            # multiplying the weight by the product of the weights of the
+            # individual elements selected
+            for roll in outcome:
+                weight *= vps[roll]
+            freqTable.append((outcome,weight))
+        return Alea.fromValFreqs(*freqTable)
+
+    def drawSortedWithReplacement(self,n):
+        ''' returns a new Alea instance representing the probability distribution
+            of drawing n elements from self WITH replacement, whatever the order
+            of drawing these elements; the returned values are tuples with n
+            elements sorted by increasing order;
+            assumes that n >= 0
+            the efficient combinatorial algorithm is due to Paul Moore
+        '''
+        return self._selections(n,combinations_with_replacement)
+
+    def drawSortedWithoutReplacement(self,n):
+        ''' returns a new Alea instance representing the probability distribution
+            of drawing n elements from self WITHOUT replacement, whatever the order
+            of drawing these elements; the returned values are tuples with n
+            elements sorted by increasing order;
+            assumes that 0 <= n <= number of values of self;
+            note: if the probability distribution of self is uniform
+            then the results is produced in an efficient way, tanks to the
+            combinatorial algorithm of Paul Moore
+        '''
+        if self.isUniform():
+            # the probability distribution is uniform,
+            # the efficient algorithm of Paul Moore can be used
+            return self._selections(n,combinations)
+        else:
+            # the probability distribution is not uniform,
+            # we use the general algorithm less efficient:
+            # make first a draw unsorted then sort (the sort makes the
+            # required probability additions between permutations)
+            return self.drawWithoutReplacement(n).map(lambda vs: tuple(sorted(vs))).getAlea()
+
+    def drawWithReplacement(self,n):
+        ''' returns a new Alea instance representing the probability distribution
+            of drawing n elements from self WITH replacement, taking the order
+            of drawing into account; the returned values are tuples with n elements
+            put in the order of their drawing;
+            assumes that n >= 0
+        '''
+        if n == 0:
+            return Lea.emptyTuple
+        return self.map(makeTuple).times(n)
+
+    def drawWithoutReplacement(self,n):
+        ''' returns a new Alea instance representing the probability distribution
+            of drawing n elements from self WITHOUT replacement, taking the order
+            of drawing into account; the returned values are tuples with n elements
+            put in the order of their drawing
+            assumes that n >= 0
+            requires that n <= number of values of self, otherwise an exception
+            is raised
+        '''
+        if n == 0:
             return Lea.emptyTuple
         if len(self._vs) == 1:
             if nbValues > 1:
                 raise Lea.Error("number of values to draw exceeds the number of possible values")
             return Alea(((self._vs[0],),),(1,))
         lcmP = calcLCM(self._ps)
-        alea2s = tuple(Alea.fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),reducing=False,check=False).draw(nbValues-1) for v in self._vs)
+        alea2s = tuple(Alea.fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),reducing=False,check=False).drawWithoutReplacement(n-1) for v in self._vs)
         lcmP2 = calcLCM(alea2._count*(lcmP//p) for (alea2,p) in zip(alea2s,self._ps))
         f = lcmP2 // lcmP
         vps = []

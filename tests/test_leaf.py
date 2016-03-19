@@ -25,13 +25,13 @@ def test_dice():
     assert len(dice(3,6).vals()) == 16
     assert dice(3,6).equiv(die(6) + die(6) + die(6))
 
-def test_dice_seq_ordered():
+def test_dice_seq_unsorted():
     """Check we can get ordered sets of dice"""
-    assert diceSeq(3, 6, ordered=True).equiv(Lea.cprod(die(6), die(6), die(6)))
+    assert diceSeq(3, 6, sorted=False).equiv(Lea.cprod(die(6), die(6), die(6)))
 
-def test_dice_seq_unordered():
+def test_dice_seq_sorted():
     """Check we can get unordered sets of dice"""
-    dist = diceSeq(3, 6, ordered=False)
+    dist = diceSeq(3, 6, sorted=True)
     vals = []
     for i in range(1,7):
         for j in range(i,7):
@@ -41,6 +41,6 @@ def test_dice_seq_unordered():
     assert dist.p((1,1,1)) == PF(1,36)
     assert dist.p((1,2,3)) == PF(1,216)
 
-def test_dice_seq_unordered():
+def test_dice_seq_sorted():
     """Check that the default is unordered sets of dice"""
-    assert diceSeq(3, 6).equiv(diceSeq(3, 6, ordered=False))
+    assert diceSeq(3, 6).equiv(diceSeq(3, 6, sorted=True))

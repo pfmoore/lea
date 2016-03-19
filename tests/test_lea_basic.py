@@ -141,3 +141,210 @@ def test_csv():
     Lea.fromCSVFilename
     Lea.fromCSVFile
     Lea.fromPandasDF
+
+
+def test_draw_unsorted_without_replacement():
+    # test an unbiased die
+    d = Lea.interval(1,6)
+    d0 = d.draw(0)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2)
+    assert len(d2._vs) == 6*5
+    assert d2.p((1,1)) == 0
+    assert d2.p((6,6)) == 0
+    assert d2.p((1,2)) == PF(1,6) * PF(1,5)
+    assert d2.p((2,1)) == PF(1,6) * PF(1,5)
+    assert d2.p((2,3)) == PF(1,6) * PF(1,5)
+    d3 = d.draw(3)
+    assert len(d3._vs) == 6*5*4
+    assert d3.p((1,2,1)) == 0
+    assert d3.p((1,6,6)) == 0
+    assert d3.p((1,2,3)) == PF(1,6) * PF(1,5) * PF(1,4)
+    assert d3.p((2,1,3)) == PF(1,6) * PF(1,5) * PF(1,4)
+    assert d3.p((2,3,1)) == PF(1,6) * PF(1,5) * PF(1,4)
+    assert d3.p((2,3,4)) == PF(1,6) * PF(1,5) * PF(1,4)
+    assert d3.equiv(d.draw(3,sorted=False,replacement=False))
+    with pytest.raises(Lea.Error):
+        d7 = d.draw(7)
+    # test a biased die, with P(d==1) = 2/7
+    d = Lea.fromValFreqsDict({1: 2, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1})
+    d0 = d.draw(0)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2)
+    assert len(d2._vs) == 6*5
+    assert d2.p((1,1)) == 0
+    assert d2.p((6,6)) == 0
+    assert d2.p((1,2)) == PF(2,7) * PF(1,5)
+    assert d2.p((2,1)) == PF(1,7) * PF(2,6)
+    assert d2.p((2,3)) == PF(1,7) * PF(1,6)
+    d3 = d.draw(3)
+    assert len(d3._vs) == 6*5*4
+    assert d3.p((1,2,1)) == 0
+    assert d3.p((1,6,6)) == 0
+    assert d3.p((1,2,3)) == PF(2,7) * PF(1,5) * PF(1,4)
+    assert d3.p((2,1,3)) == PF(1,7) * PF(2,6) * PF(1,4)
+    assert d3.p((2,3,1)) == PF(1,7) * PF(1,6) * PF(2,5)
+    assert d3.p((2,3,4)) == PF(1,7) * PF(1,6) * PF(1,5)
+    assert d3.equiv(d.draw(3,sorted=False,replacement=False))
+    with pytest.raises(Lea.Error):
+        d7 = d.draw(7)
+
+def test_draw_unsorted_with_replacement():
+    # test an unbiased die
+    d = Lea.interval(1,6)
+    d0 = d.draw(0,replacement=True)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1,replacement=True)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2,replacement=True)
+    assert len(d2._vs) == 6**2
+    assert d2.p((1,1)) == PF(1,6) * PF(1,6)
+    assert d2.p((6,6)) == PF(1,6) * PF(1,6)
+    assert d2.p((1,2)) == PF(1,6) * PF(1,6)
+    assert d2.p((2,1)) == PF(1,6) * PF(1,6)
+    assert d2.p((2,3)) == PF(1,6) * PF(1,6)
+    d3 = d.draw(3,replacement=True)
+    assert len(d3._vs) == 6**3
+    assert d3.p((1,2,1)) == PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.p((1,6,6)) == PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.p((1,2,3)) == PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.p((2,1,3)) == PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.p((2,3,1)) == PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.p((2,3,4)) == PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.equiv(d.draw(3,sorted=False,replacement=True))
+    d7 = d.draw(7,replacement=True)
+    assert len(d7._vs) == 6**7
+    # test a biased die, with P(d==1) = 2/7
+    d = Lea.fromValFreqsDict({1: 2, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1})
+    d0 = d.draw(0,replacement=True)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1,replacement=True)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2,replacement=True)
+    assert len(d2._vs) == 6**2
+    assert d2.p((1,1)) == PF(2,7) * PF(2,7)
+    assert d2.p((6,6)) == PF(1,7) * PF(1,7)
+    assert d2.p((1,2)) == PF(2,7) * PF(1,7)
+    assert d2.p((2,1)) == PF(1,7) * PF(2,7)
+    assert d2.p((2,3)) == PF(1,7) * PF(1,7)
+    d3 = d.draw(3,replacement=True)
+    assert len(d3._vs) == 6**3
+    assert d3.p((1,2,1)) == PF(2,7) * PF(2,7) * PF(1,7)
+    assert d3.p((1,6,6)) == PF(2,7) * PF(1,7) * PF(1,7)
+    assert d3.p((1,2,3)) == PF(2,7) * PF(1,7) * PF(1,7)
+    assert d3.p((2,1,3)) == PF(1,7) * PF(2,7) * PF(1,7)
+    assert d3.p((2,3,1)) == PF(1,7) * PF(1,7) * PF(2,7)
+    assert d3.p((2,3,4)) == PF(1,7) * PF(1,7) * PF(1,7)
+    assert d3.equiv(d.draw(3,sorted=False,replacement=True))
+    d7 = d.draw(7,replacement=True)
+    assert len(d7._vs) == 6**7
+
+def test_draw_sorted_without_replacement():
+    # test an unbiased die
+    d = Lea.interval(1,6)
+    d0 = d.draw(0,sorted=True)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1,sorted=True)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2,sorted=True)
+    assert len(d2._vs) == 15
+    assert d2.p((1,1)) == 0
+    assert d2.p((6,6)) == 0
+    assert d2.p((1,2)) == 2 * PF(1,6) * PF(1,5)
+    assert d2.p((2,1)) == 0
+    assert d2.p((2,3)) == 2 * PF(1,6) * PF(1,5)
+    assert d2.equiv(d.draw(2).map(lambda vs: tuple(sorted(vs))).getAlea())
+    d3 = d.draw(3,sorted=True)
+    assert len(d3._vs) == 20
+    assert d3.p((1,2,1)) == 0
+    assert d3.p((1,6,6)) == 0
+    assert d3.p((1,2,3)) == 6 * PF(1,6) * PF(1,5) * PF(1,4)
+    assert d3.p((2,1,3)) == 0
+    assert d3.p((2,3,1)) == 0
+    assert d3.p((2,3,4)) == 6 * PF(1,6) * PF(1,5) * PF(1,4)
+    assert d3.equiv(d.draw(3,sorted=True,replacement=False))
+    assert d3.equiv(d.draw(3).map(lambda vs: tuple(sorted(vs))).getAlea())
+    with pytest.raises(Lea.Error):
+        d7 = d.draw(7,sorted=True)
+    # test a biased die, with P(d==1) = 2/7
+    d = Lea.fromValFreqsDict({1: 2, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1})
+    d0 = d.draw(0,sorted=True)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1,sorted=True)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2,sorted=True)
+    assert len(d2._vs) == 15
+    assert d2.p((1,1)) == 0
+    assert d2.p((6,6)) == 0
+    assert d2.p((1,2)) == PF(2,7) * PF(1,5) + PF(1,7) * PF(2,6)
+    assert d2.p((2,1)) == 0
+    assert d2.p((2,3)) == PF(1,7) * PF(1,6) + PF(1,7) * PF(1,6)
+    assert d2.equiv(d.draw(2).map(lambda vs: tuple(sorted(vs))).getAlea())
+    d3 = d.draw(3,sorted=True)
+    assert len(d3._vs) == 20
+    assert d3.p((1,2,1)) == 0
+    assert d3.p((1,6,6)) == 0
+    assert d3.p((1,2,3)) == 2 * (PF(2,7) * PF(1,5) * PF(1,4) + PF(1,7) * PF(1,6) * PF(2,5) + PF(1,7) * PF(2,6) * PF(1,4))
+    assert d3.p((2,1,3)) == 0
+    assert d3.p((2,3,1)) == 0
+    assert d3.p((2,3,4)) == 6 * PF(1,7) * PF(1,6) * PF(1,5)
+    assert d3.equiv(d.draw(3,sorted=True,replacement=False))
+    assert d3.equiv(d.draw(3).map(lambda vs: tuple(sorted(vs))).getAlea())
+    with pytest.raises(Lea.Error):
+        d7 = d.draw(7,sorted=True)
+
+def test_draw_sorted_with_replacement():
+    # test an unbiased die
+    d = Lea.interval(1,6)
+    d0 = d.draw(0,sorted=True,replacement=True)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1,sorted=True,replacement=True)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2,sorted=True,replacement=True)
+    assert len(d2._vs) == 21
+    assert d2.p((1,1)) == PF(1,6) * PF(1,6)
+    assert d2.p((6,6)) == PF(1,6) * PF(1,6)
+    assert d2.p((1,2)) == 2 * PF(1,6) * PF(1,6)
+    assert d2.p((2,1)) == 0
+    assert d2.p((2,3)) == 2 * PF(1,6) * PF(1,6)
+    assert d2.equiv(d.draw(2,replacement=True).map(lambda vs: tuple(sorted(vs))).getAlea())
+    d3 = d.draw(3,sorted=True,replacement=True)
+    assert len(d3._vs) == 56
+    assert d3.p((1,2,1)) == 0
+    assert d3.p((1,6,6)) == 3 * PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.p((1,2,3)) == 6 * PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.p((2,1,3)) == 0
+    assert d3.p((2,3,1)) == 0
+    assert d3.p((2,3,4)) == 6 * PF(1,6) * PF(1,6) * PF(1,6)
+    assert d3.equiv(d.draw(3,replacement=True).map(lambda vs: tuple(sorted(vs))).getAlea())
+    d7 = d.draw(7,sorted=True,replacement=True)
+    assert len(d7._vs) == 792
+    # test a biased die, with P(d==1) = 2/7
+    d = Lea.fromValFreqsDict({1: 2, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1})
+    d0 = d.draw(0,sorted=True,replacement=True)
+    assert d0.equiv(Lea.fromVals(()))
+    d1 = d.draw(1,sorted=True,replacement=True)
+    assert d1.equiv(d.map(lambda v: (v,)))
+    d2 = d.draw(2,sorted=True,replacement=True)
+    assert len(d2._vs) == 21
+    assert d2.p((1,1)) == PF(2,7) * PF(2,7)
+    assert d2.p((6,6)) == PF(1,7) * PF(1,7)
+    assert d2.p((1,2)) == 2 * PF(2,7) * PF(1,7)
+    assert d2.p((2,1)) == 0
+    assert d2.p((2,3)) == 2 * PF(1,7) * PF(1,7)
+    assert d2.equiv(d.draw(2,replacement=True).map(lambda vs: tuple(sorted(vs))).getAlea())
+    d3 = d.draw(3,sorted=True,replacement=True)
+    assert len(d3._vs) == 56
+    assert d3.p((1,2,1)) == 0
+    assert d3.p((1,6,6)) == 3 * PF(2,7) * PF(1,7) * PF(1,7)
+    assert d3.p((1,2,3)) == 6 * PF(2,7) * PF(1,7) * PF(1,7)
+    assert d3.p((2,1,3)) == 0
+    assert d3.p((2,3,1)) == 0
+    assert d3.p((2,3,4)) == 6 * PF(1,7) * PF(1,7) * PF(1,7)
+    assert d3.equiv(d.draw(3,replacement=True).map(lambda vs: tuple(sorted(vs))).getAlea())
+    d7 = d.draw(7,sorted=True,replacement=True)
+    assert len(d7._vs) == 792

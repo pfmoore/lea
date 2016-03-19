@@ -27,7 +27,7 @@ import operator
 from itertools import islice
 from collections import namedtuple
 from .prob_fraction import ProbFraction
-from .toolbox import calcGCD, log2, makeTuple, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip
+from .toolbox import calcGCD, log2, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip
 
 class Lea(object):
     
@@ -530,8 +530,9 @@ class Lea(object):
     def timesTuple(self,n):
         ''' returns a new Alea instance with tuples of length n, containing
             the cartesian product of self with itself repeated n times
+            note: equivalent to self.draw(n,sorted=False,replacement=True)
         '''
-        return self.map(makeTuple).times(n)
+        return self.getAlea().drawWithReplacement(n)
 
     def cprod(self,*args):
         ''' returns a new Clea instance, representing the cartesian product of all
@@ -598,15 +599,54 @@ class Lea(object):
         NTClass = namedtuple('_',attrNames)
         return self.map(lambda aTuple: NTClass(*aTuple)).getAlea()
 
-    def draw(self,nbValues):
+    def isUniform(self):
         ''' returns, after evaluation of the probability distribution self,
-            a new Alea instance representing a probability distribution of the
-            tuples of values obtained by the given number of draws without
-            replacement from the current distribution;
-            requires that 0 <= nbValues <= number of values of self,
-            otherwise an exception is raised
+            True  if the probability distribution is uniform,
+            False otherwise
         '''
-        return self.getAlea().draw(nbValues) 
+        return self.getAlea().isUniform()
+
+    def draw(self,n,sorted=False,replacement=False):
+        ''' returns, after evaluation of the probability distribution self,
+            a new Alea instance representing the probability distribution
+            of drawing n elements from self
+            the returned values are tuples with n elements;
+            * if sorted is True, then the order of drawing is irrelevant and
+                 the tuples are arbitrarily sorted by increasing order;
+                 (the efficient algorithm used is due to Paul Moore)
+              otherwise, the order of elements of each tuple follows the order
+                 of the drawing
+            * if replacement is True, then the drawing is made WITH replacement,
+                 so the same element may occur several times in each tuple
+              otherwise, the drawing is made WITHOUT replacement,
+                 so an element can only occur once in each tuple;
+                 this last case requires that 0 <= n <= number of values of self,
+                 otherwise an exception is raised
+            Note: if the order of drawing is irrelevant, it is strongly advised to
+             use sorted=True because the processing can be far more efficient thanks
+             to a combinatorial algorithm proposed by Paul Moore; however, this
+             algorithm is NOT used if replacement is False AND the probability
+             distribution is NOT uniform.
+        '''
+        if n < 0:
+            raise Lea.Error("draw method requires a positive integer")
+        alea1 = self.getAlea()
+        if replacement:
+            if sorted:
+                # draw sorted with replacement
+                return alea1.drawSortedWithReplacement(n)
+            else:
+                # draw sorted without replacement
+                return alea1.drawWithReplacement(n)
+        else:
+            if len(alea1._vs) < n:
+                raise Lea.Error("number of values to draw without replacement (%d) exceeds the number of possible values (%d)"%(n,len(alea1._vs)))
+            if sorted:
+                # draw sorted without replacement
+                return alea1.drawSortedWithoutReplacement(n)
+            else:
+                # draw unsorted without replacement
+                return alea1.drawWithoutReplacement(n)
 
     def flat(self):
         ''' assuming that self's values are themselves Lea instances,
