@@ -419,7 +419,7 @@ class Alea(Lea):
             probability expressed as a rational number "n/d" or "0" or "1";
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
-            called on evalution of "str(self)" and "repr(self)"
+            called on evaluation of "str(self)" and "repr(self)"
         '''
         return self.asString()
           
@@ -804,7 +804,7 @@ class Alea(Lea):
         return tuple(v for (v,p) in self._genVPs() if p == maxP)
             
     def entropy(self):
-        ''' returns a float number representing the entropy of the probability  distribution
+        ''' returns a float number representing the entropy of the probability distribution
             WARNING: this method is called without parentheses
         '''
         res = 0
