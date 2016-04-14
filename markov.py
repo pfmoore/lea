@@ -174,7 +174,7 @@ class StateAlea(Alea):
             corresponding to the probability distribution given in stateObjLea
             and referring to the given chain, instance of Chain 
         '''
-        Alea.__init__(self,*zip(*stateObjLea.getAlea()._genVPs()))
+        Alea.__init__(self,*zip(*stateObjLea.getAlea().vps()))
         self._chain = chain
 
     def nextState(self,n=1):

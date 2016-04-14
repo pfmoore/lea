@@ -58,7 +58,7 @@ class Ilea(Lea):
             # empty condition: evaluated as True (seed of recursion)
             yield 1
         else:
-            for (cv0,p0) in condLeas[0]._genVPs():
+            for (cv0,p0) in condLeas[0].genVPs():
                 if cv0 is True:
                     # the first condition is true, for some binding of variables
                     for p1 in Ilea._genTrueP(condLeas[1:]):
@@ -75,7 +75,7 @@ class Ilea(Lea):
         for cp in Ilea._genTrueP(self._condLeas):
             # the AND of conditions is true, for some binding of variables
             # yield value-probability pairs of _lea1, given this binding
-            for (v,p) in self._lea1._genVPs():
+            for (v,p) in self._lea1.genVPs():
                 yield (v,cp*p)
 
     def _genOneRandomTrueCond(self,condLeas,withException):

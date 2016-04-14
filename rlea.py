@@ -37,7 +37,8 @@ class Rlea(Lea):
     def __init__(self,leaOfLeas):
         Lea.__init__(self)
         self._leaOfLeas = leaOfLeas
-        leaCounts = tuple((lea_,sum(p1 for (v,p1) in lea_._genVPs())) for (lea_,p2) in leaOfLeas._genVPs())
+        leaOfLeas._initCalc()
+        leaCounts = tuple((lea_,sum(p1 for (v,p1) in lea_.genVPs())) for (lea_,p2) in leaOfLeas.genVPs())
         pcount = 1
         for (lea1_,count) in leaCounts:
             pcount *= count
@@ -50,9 +51,9 @@ class Rlea(Lea):
         return Rlea(self._leaOfLeas.clone(cloneTable))
 
     def _genVPs(self):
-        for ((lea1,p1),factor) in zip(self._leaOfLeas._genVPs(),self._factors):
+        for ((lea1,p1),factor) in zip(self._leaOfLeas.genVPs(),self._factors):
             p1 *= factor
-            for (v,p2) in lea1._genVPs():
+            for (v,p2) in lea1.genVPs():
                 yield (v,p1*p2)
 
     def _genOneRandomMC(self):

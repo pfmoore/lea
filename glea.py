@@ -1,7 +1,7 @@
 '''
 --------------------------------------------------------------------------------
 
-    flea1.py
+    glea.py
 
 --------------------------------------------------------------------------------
 Copyright 2013-2016 Pierre Denis
@@ -24,33 +24,37 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
+from .clea import Clea
 
-class Flea1(Lea):
+class Glea(Lea):
     
     '''
-    Flea1 is a Lea subclass, which instance is defined by a given function applied on one given Lea argument.
-    The function is applied on all values of the argument. This results in a new probability distribution
-    for all the values returned by the function.
+    Glea is a Lea subclass, which instance is defined by a Lea instance having functions as values applied
+    on a given sequence of arguments. The arguments are coerced to Lea instances. All functions are applied
+    on all elements of cartesian product of all arguments (see Clea class). This results in a new probability
+    distribution for all the values returned by calls to all the functions.
     '''
     
-    __slots__ = ('_f','_leaArg')
+    __slots__ = ('_cleaFuncAndArgs',)
 
-    def __init__(self,f,leaArg):
+    def __init__(self,cleaFuncAndArgs):
         Lea.__init__(self)
-        self._f = f
-        self._leaArg = leaArg
+        self._cleaFuncAndArgs = cleaFuncAndArgs
+
+    @staticmethod
+    def build(leaFunc,args):
+        return Glea(Clea(leaFunc,Clea(*args)))
 
     def _getLeaChildren(self):
-        return (self._leaArg,)
+        return (self._cleaFuncAndArgs,)
 
     def _clone(self,cloneTable):
-        return Flea1(self._f,self._leaArg.clone(cloneTable))    
+        return Glea(self._cleaFuncAndArgs.clone(cloneTable))
 
     def _genVPs(self):
-        f = self._f
-        for (v,p) in self._leaArg.genVPs():
-            yield (f(v),p)
+        for ((f,args),p) in self._cleaFuncAndArgs.genVPs():
+            yield (f(*args),p)
 
     def _genOneRandomMC(self):
-        for v in self._leaArg._genOneRandomMC():
-            yield self._f(v)
+        for (f,args) in self._cleaFuncAndArgs._genOneRandomMC():
+            yield f(*args)

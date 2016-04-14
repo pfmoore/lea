@@ -86,8 +86,8 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimateMC method).
 
-    There are eight concrete subclasses to Lea, namely:
-      Alea, Clea, Flea, Flea1, Flea2, Ilea, Rlea and Blea.
+    There are nine concrete subclasses to Lea, namely:
+      Alea, Clea, Flea, Flea1, Flea2, Glea, Ilea, Rlea and Blea.
     
     Each subclass represents a "definition" of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -115,6 +115,7 @@ class Lea(object):
     - Flea applies a given n-ary function to a given sequence of n Lea instances
     - Flea1 applies a given 1-ary function to a given Lea instance
     - Flea2 applies a given 2-ary function to two given Lea instances
+    - Glea applies n-ary functions present in a given Lea instance to a given sequence of n Lea instances
     - Ilea filters the values of a given Lea instance according to a given Lea instance representing a boolean condition (conditional probabilities)
     - Rlea embeds Lea instances as values of a parent Lea instance 
     - Blea defines CPT, providing Lea instances corresponding to given conditions (used for bayesian networks)
@@ -146,7 +147,7 @@ class Lea(object):
         pass
 
     # Lea attributes
-    __slots__ = ('_alea',)
+    __slots__ = ('_alea','_val','genVPs')
 
     # constructor methods
     # -------------------
@@ -156,7 +157,14 @@ class Lea(object):
         '''
         # alea instance acting as a cache when actual value-probability pairs have been calculated
         self._alea = None
-        
+        # _val is the value temporarily bound to the instance, during evaluation (see _genBoundVPs method)
+        # note: self is used as a sentinel value to express that no value is currently bound; Python's
+        # None is not a good sentinel value since it prevents using None as value in a distribution
+        self._val = self
+        # when evaluation is needed, genVPs shall be bound on _genVPs or _genBoundVPs method
+        # (see _initCalc method)
+        self.genVPs = None
+
     def _id(self):
         ''' returns a unique id, containing the concrete Lea class name as prefix
         '''
@@ -188,7 +196,6 @@ class Lea(object):
             if self._alea is not None:
                 clonedLea._alea = self._alea.clone(cloneTable)
         return clonedLea
-
 
     __contructorArgNames = frozenset(('ordered','sorting','reducing'))
 
@@ -423,6 +430,76 @@ class Lea(object):
             attrNames = (indexColName,) + attrNames
         return Lea.fromSeq(valuesIter).asJoint(*attrNames)
 
+    def _genBoundVPs(self):
+        ''' generates tuple (v,p) where v is a value of the current probability distribution
+            and p is the associated probability weight (integer > 0);
+            this obeys the "binding" mechanism, so if the same variable is referred multiple times in
+            a given expression, then same value will be yielded at each occurrence;
+            "Statues" algorithm:
+            before yielding a value v, this value v is bound to the current instance;
+            then, if the current calculation requires to get again values on the current
+            instance, then the bound value is yielded with probability 1;
+            the instance is rebound to a new value at each iteration, as soon as the execution
+            is resumed after the yield;
+            it is unbound at the end;
+            the method calls the _genVPs method implemented in Lea subclasses;
+            the present Alea._genVPs method is called by the _genVPs methods implemented in
+            other Lea subclasses; these methods are themselves called by Lea.new and,
+            indirectly, by Lea.getAlea
+        '''
+        if self._val is not self:
+            # distribution already bound to a value because genVPs has been called already on self
+            # it is yielded as a certain distribution (unique yield)
+            yield (self._val,1)
+        else:
+            # distribution not yet bound to a value
+            try:
+                # browse all (v,p) tuples
+                for (v,p) in self._genVPs():
+                    # bind value v: this is important if an object calls genVPs on the same instance
+                    # before resuming the present generator (see above)
+                    self._val = v
+                    # yield the bound value v with probability weight p
+                    yield (v,p)
+            finally:
+                # unbind value v, after all values have been bound or if an exception has been raised
+                self._val = self
+
+    def _resetGenVPs(self):
+        ''' set genVPs = None on self and all Lea descendants
+        '''
+        self.genVPs = None
+        # treat children recursively, up to Alea instances
+        for leaChild in self._getLeaChildren():
+            leaChild._resetGenVPs()
+
+    def _setGenVPs(self):
+        ''' prepare calculation of probability distribution by binding self.genVPs to the most adequate method:
+            self.genVPs is bound
+             either on self._genVPs method, if no binding is required (single occurrence of self in expression)
+             or on self._genBoundVPs method, if binding is required (multiple occurrences of self in expression)
+            note: self._genBoundVPs works in any case but perform unnecessary binding job if self occurrence is
+            unique in the evaluated expression
+            requires that genVPs = None for self and all Lea descendants
+        '''
+        if self.genVPs is None:
+            # first occurrence of self in the expression: use the simplest _genVPs method
+            # this may be overwritten if a second occurrence is found
+            self.genVPs = self._genVPs
+        elif self.genVPs == self._genVPs:
+            # second occurrence of self in the expression: use the _genBoundVPs method
+            self.genVPs = self._genBoundVPs
+        # treat children recursively, up to Alea instances
+        for leaChild in self._getLeaChildren():
+            leaChild._setGenVPs()
+
+    def _initCalc(self):
+        ''' prepare calculation of probability distribution by binding self.genVPs to the most adequate method;
+            see _setGenVPs method
+        '''
+        self._resetGenVPs()
+        self._setGenVPs()
+
     def withProb(self,condLea,pNum,pDen=None):
         ''' returns a new Alea instance from current distribution,
             such that pNum/pDen is the probability that condLea is true
@@ -500,7 +577,7 @@ class Lea(object):
         # factors to be applied on current probabilities
         # depending on the truth value of (condLea,givenCondLea) on each value
         w2 = dict((cg,w[cg]*(m//ecg)) for (cg,ecg) in e.items())
-        return Alea.fromValFreqs(*((v,p*w2[(condLea.isTrue(),givenCondLea.isTrue())]) for (v,p) in self._genVPs()))
+        return Alea.fromValFreqs(*((v,p*w2[(condLea.isTrue(),givenCondLea.isTrue())]) for (v,p) in self.genVPs()))
 
     def given(self,*evidences):
         ''' returns a new Ilea instance representing the current distribution
@@ -772,7 +849,7 @@ class Lea(object):
         # after prepending orderingLeas to self, the Alea returned by new() is sorted with orderingLeas;
         # then, extracting self (index -1) allows generating self's (v,p) pairs in the expected order;
         # these shall be used to create a new Alea, keeping the values in that order (no sort)
-        return Alea.fromValFreqsOrdered(*Lea.cprod(*orderingLeas).cprod(self).new()[-1]._genVPs())
+        return Alea.fromValFreqsOrdered(*Lea.cprod(*orderingLeas).cprod(self).new()[-1].genVPs())
 
     def isAnyOf(self,*values):
         ''' returns a boolean probability distribution
@@ -968,7 +1045,7 @@ class Lea(object):
             functions);
             called on evaluation of "self(*args)"
         '''
-        return Flea.build(self,args)
+        return Glea.build(self,args)
 
     def __getitem__(self,index):
         ''' returns a new Flea instance representing the probability distribution
@@ -978,11 +1055,11 @@ class Lea(object):
         return Flea2(operator.getitem,self,index)
 
     def __iter__(self):
-        ''' returns the iterator returned by genVP()
-            called on evaluation of "iter(self)", "tuple(self)", "list(self" 
+        ''' raises en error exception
+            called on evaluation of "iter(self)", "tuple(self)", "list(self)"
                 or on "for x in self"
         '''
-        return self._genVPs()
+        raise Lea.Error("cannot iterate on a Lea instance")
 
     def __getattribute__(self,attrName):
         ''' returns the attribute with the given name in the current Lea instance;
@@ -1465,7 +1542,8 @@ class Lea(object):
         ''' returns the number of atomic cases evaluated to build the exact probability distribution;
             this provides a measure of the complexity of the probability distribution 
         '''
-        return sum(1 for vp in self._genVPs())
+        self._initCalc()
+        return sum(1 for vp in self.genVPs())
     
     def isTrue(self):
         ''' returns True iff the value True has probability 1;
@@ -1584,7 +1662,8 @@ class Lea(object):
             if self is an Alea, then it returns a clone of itself (independent)
             note that the present method is overloaded in Alea class, to be more efficient
         '''
-        return Alea.fromValFreqs(*self._genVPs(),**kwargs)
+        self._initCalc()
+        return Alea.fromValFreqs(*tuple(self.genVPs()),**kwargs)
 
     def cumul(self):
         ''' evaluates the distribution, then,
@@ -1676,6 +1755,7 @@ from .flea import Flea
 from .flea1 import Flea1
 from .flea2 import Flea2
 from .flea2a import Flea2a
+from .glea import Glea
 
 # Constants representing certain values (Lea static attributes)
 Lea.true  = Lea.coerce(True)

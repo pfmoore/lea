@@ -29,7 +29,7 @@ from .clea import Clea
 class Flea(Lea):
     
     '''
-    Flea is a Lea subclass, which instance is defined by a function applied on a given sequence
+    Flea is a Lea subclass, which instance is defined by a given function applied on a given sequence
     of arguments. The arguments are coerced to Lea instances. The function is applied on all elements
     of cartesian product of all arguments (see Clea class). This results in a new probability
     distribution for all the values returned by the function.
@@ -54,18 +54,10 @@ class Flea(Lea):
 
     def _genVPs(self):
         f = self._f
-        if isinstance(f,Lea):
-            for ((f2,args),p) in Clea(f,self._cleaArgs)._genVPs():
-                yield (f2(*args),p)            
-        else:
-            for (args,p) in self._cleaArgs._genVPs():
-                yield (f(*args),p)
+        for (args,p) in self._cleaArgs.genVPs():
+            yield (f(*args),p)
 
     def _genOneRandomMC(self):
         f = self._f
-        if isinstance(f,Lea):
-            for (f2,args) in Clea(f,self._cleaArgs)._genOneRandomMC():
-                yield f2(*args)            
-        else:
-            for args in self._cleaArgs._genOneRandomMC():
-                yield f(*args)
+        for args in self._cleaArgs._genOneRandomMC():
+            yield f(*args)

@@ -95,7 +95,9 @@ class Blea(Lea):
             raise Lea.Error("for ctxType 1 or 2, all clause's results shall be Alea instances")
         # check that conditions are disjoint
         if check:
-            if any(v.count(True) > 1 for (v,_) in Clea(*condLeas)._genVPs()):
+            clea_ = Clea(*condLeas)
+            clea_._initCalc()
+            if any(v.count(True) > 1 for (v,_) in clea_.genVPs()):
                 raise Lea.Error("clause conditions are not disjoint")
         # build the OR of all given conditions, excepting 'else'
         orCondsLea = Lea.reduce(or_,condLeas,True)
@@ -106,9 +108,9 @@ class Blea(Lea):
                 raise Lea.Error("forbidden to define prior probabilities for complete clause set")
             (pTrue,count) = orCondsLea._p(True)
             pFalse = count - pTrue
-            priorAleaDict = dict(priorLea.getAlea()._genVPs())
+            priorAleaDict = dict(priorLea.getAlea().vps())
             priorAleaCount = sum(priorAleaDict.values())
-            normAleaDict = dict(Lea.fromSeq(resLeas).flat().getAlea()._genVPs())
+            normAleaDict = dict(Lea.fromSeq(resLeas).flat().getAlea().vps())
             normAleaCount = sum(normAleaDict.values())
             valuesSet = frozenset(chain(priorAleaDict.keys(),normAleaDict.keys()))
             vps = []
@@ -188,7 +190,7 @@ class Blea(Lea):
 
     def _genCtxFreeVPs(self):
         for iLea in self._ileas:
-            for vp in iLea._genVPs():
+            for vp in iLea.genVPs():
                 yield vp
 
     def _genVPs(self):
@@ -198,7 +200,7 @@ class Blea(Lea):
         else:
             ctxClea = self._ctxClea
             for (v,p) in self._genCtxFreeVPs():
-                for (_,p2) in ctxClea:
+                for (_,p2) in ctxClea.genVPs():
                     yield (v,p*p2)
 
     def _genOneRandomMC(self):

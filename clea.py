@@ -56,7 +56,7 @@ class Clea(Lea):
                     yield xs + (x,)
 
     def _genVPs(self):
-        for vps in Clea.prod(tuple(leaArg._genVPs for leaArg in self._leaArgs)):
+        for vps in Clea.prod(tuple(leaArg.genVPs for leaArg in self._leaArgs)):
             v = tuple(v for (v,p) in vps)
             p = 1
             for (v1,p1) in vps:

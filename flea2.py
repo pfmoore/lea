@@ -28,7 +28,7 @@ from .lea import Lea
 class Flea2(Lea):
     
     '''
-    Flea2 is a Lea subclass, which instance is defined by a function applied on two given arguments.
+    Flea2 is a Lea subclass, which instance is defined by a given function applied on two given arguments.
     The function is applied on all elements of cartesian product of the arguments. This results in a new
     probability distribution for all the values returned by the function.
     '''
@@ -49,8 +49,8 @@ class Flea2(Lea):
 
     def _genVPs(self):
         f = self._f
-        for (v1,p1) in self._leaArg1._genVPs():
-            for (v2,p2) in self._leaArg2._genVPs():
+        for (v1,p1) in self._leaArg1.genVPs():
+            for (v2,p2) in self._leaArg2.genVPs():
                 yield (f(v1,v2),p1*p2)
 
     def _genOneRandomMC(self):

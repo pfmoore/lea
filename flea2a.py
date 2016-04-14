@@ -28,7 +28,7 @@ from .flea2 import Flea2
 class Flea2a(Flea2):
     
     '''
-    Flea2a is a Flea2 subclass, which instance is defined by a function applied on two given Lea arguments
+    Flea2a is a Flea2 subclass, which instance is defined by a guven function applied on two given Lea arguments
     with a given "right-absorber" value (i.e. f(x,absorber) = absorber). This gives equivalent results as
     Flea2 (without absorber) but these could be more efficient by pruning the tree search. 
     The function is applied on all elements of cartesian product of the arguments. This results in a new
@@ -47,9 +47,9 @@ class Flea2a(Flea2):
     def _genVPs(self):
         f = self._f
         absorber = self._absorber
-        for (v2,p2) in self._leaArg2._genVPs():
+        for (v2,p2) in self._leaArg2.genVPs():
             if v2 is absorber:
                 yield (absorber,self._leaArg1._getCount()*p2)
             else:
-                for (v1,p1) in self._leaArg1._genVPs():
+                for (v1,p1) in self._leaArg1.genVPs():
                     yield (f(v1,v2),p1*p2)
