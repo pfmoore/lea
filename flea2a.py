@@ -28,7 +28,7 @@ from .flea2 import Flea2
 class Flea2a(Flea2):
     
     '''
-    Flea2a is a Flea2 subclass, which instance is defined by a guven function applied on two given Lea arguments
+    Flea2a is a Flea2 subclass, which instance is defined by a given function applied on two given Lea arguments
     with a given "right-absorber" value (i.e. f(x,absorber) = absorber). This gives equivalent results as
     Flea2 (without absorber) but these could be more efficient by pruning the tree search. 
     The function is applied on all elements of cartesian product of the arguments. This results in a new
