@@ -2,7 +2,7 @@
 
 [comment]: <> (![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png))
 
-**NEW**: May 4, 2016 - [Lea 2.2.0](http://pypi.python.org/pypi/lea/2.2.0) is there!
+**NEW**: May 4, 2016 - [Lea 2.2.0](http://pypi.python.org/pypi/lea/2.2.0) is there! See [Wiki advanced tutorial 3](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial3) to discover the new features.
 
 ## What is Lea?
 
