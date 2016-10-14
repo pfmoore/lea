@@ -776,3 +776,17 @@ class Alea(Lea):
                p /= count
                res -= p*log(p)
         return res / LOG2
+
+    def internal(self,indent='',refs=None):
+        ''' returns a string representing the inner definition of self;
+            if the same lea child appears multiple times, it is expanded only
+            on the first occurrence, the other ones being marked with
+            reference id; the arguments are used only for recursive calls
+            from Lea.internal method, they can be ignored for a normal usage
+        '''
+        if refs is None:
+            refs = set()
+        if self in refs:
+            return self._id()+'*'
+        refs.add(self)
+        return self._id() + str(tuple(self.vps()))

@@ -1745,7 +1745,36 @@ class Lea(object):
             an exception is raised also if H is certainly true or certainly false      
         '''
         return self.given(*hypLeas).lr()
-    
+
+    def internal(self,indent='',refs=None):
+        ''' returns a string representing the inner definition of self, with
+            children leas recursively up to Alea leaves; if the same lea child
+            appears multiple times, it is expanded only on the first occurrence,
+            the other ones being marked with reference id;
+            the arguments are used only for recursive calls, they can be ignored
+            for a normal usage;
+            note: this method is overloaded in Alea class
+        '''
+        if refs is None:
+            refs = set()
+        if self in refs:
+            args = [self._id()+'*']
+        else:
+            refs.add(self)
+            args = [self._id()]
+            for attrName in self.__slots__:
+                attrVal = getattr(self,attrName)
+                if isinstance(attrVal,Lea):
+                    args.append(attrVal.internal(indent+'  ',refs))
+                elif isinstance(attrVal,tuple):
+                    args1 = ['(']
+                    for lea1 in attrVal:
+                        args1.append(lea1.internal(indent+'    ',refs))
+                    args.append(('\n'+indent+'    ').join(args1)+'\n'+indent+'  )')
+                elif hasattr(attrVal,'__call__'):
+                    args.append(attrVal.__module__+'.'+attrVal.__name__)
+        return ('\n'+indent+'  ').join(args)
+
 from .alea import Alea
 from .clea import Clea
 from .ilea import Ilea
