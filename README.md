@@ -2,6 +2,8 @@
 
 [comment]: <> (![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png))
 
+**NEW**: May 4, 2016 - [Lea 2.2.0](http://pypi.python.org/pypi/lea/2.2.0) is there! See [Wiki advanced tutorial 3](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial3) to discover the new features.
+
 ## What is Lea?
 
 Lea is a Python package aiming at working with discrete probability distributions in an intuitive way. It allows you to model a broad range of random phenomenon’s, like dice throwing, coin tossing, gambling, weather, finance, etc. Lea lets you define random variables with given probability distributions on any set of Python objects; then, these random variables can be combined together using usual arithmetic, comparison, logical operators, as well as cartesian product, conditional probability and user-defined functions. Lea can then calculate the probability distributions on these derived random variables. Note that, by default, the _exact_ distribution is computed; a Monte-Carlo sampling method is also available, should the combinatorial becomes prohibitively large. Advanced functions let you define conditional probability tables, Bayes networks and Markov chains. With these features, Lea is definitely a toolkit for _probabilistic programming_.
