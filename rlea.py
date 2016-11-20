@@ -38,11 +38,11 @@ class Rlea(Lea):
         Lea.__init__(self)
         self._leaOfLeas = leaOfLeas
         leaOfLeas._initCalc()
-        leaCounts = tuple((lea_,sum(p1 for (v,p1) in lea_.genVPs())) for (lea_,p2) in leaOfLeas.genVPs())
+        leaCounts = tuple(sum(p1 for (v,p1) in lea_.genVPs()) for (lea_,p2) in leaOfLeas.genVPs())
         pcount = 1
-        for (lea1_,count) in leaCounts:
+        for count in leaCounts:
             pcount *= count
-        self._factors = tuple(pcount//count for (lea_,count) in leaCounts)
+        self._factors = tuple(pcount//count for count in leaCounts)
          
     def _getLeaChildren(self):
         return (self._leaOfLeas,)
