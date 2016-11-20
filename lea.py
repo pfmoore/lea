@@ -149,6 +149,9 @@ class Lea(object):
     # Lea attributes
     __slots__ = ('_alea','_val','genVPs')
 
+    # a mutable object, which cannnot appear in Lea's values (not hashable)
+    _DUMMY_VAL = []
+
     # constructor methods
     # -------------------
 
@@ -872,14 +875,28 @@ class Lea(object):
 
     @staticmethod
     def if_(condLea,thenLea,elseLea):
-        ''' static method, an instance of Blea representing the conditional probability table
+        ''' static method, returns an instance of Tlea representing the
+            conditional probability table
             giving thenLea  if condLea is true
                    elseLea  otherwise
             this is a convenience method equivalent to 
+              condLea.switch({True:thenLea,False:elseLea})
+            Note: before ver 2.3, it was equivalent to
               Lea.buildCPT((condLea,thenLea),(None,elseLea))
         '''
-        return Blea.build((condLea,thenLea),(None,elseLea))
-    
+        return Tlea(condLea,{True:thenLea,False:elseLea})
+        ## before version 2.3: Blea.build((condLea,thenLea),(None,elseLea))
+
+    def switch(self,leaDict,defaultLea=_DUMMY_VAL):
+        ''' returns an instance of Tlea representing a conditional probability table (CPT)
+            defined by the given dictionary leaDict associating each value of self to a
+            specific Lea instance;
+            if defaultLea is given, then it provides the Lea instance associated to the
+            value(s) of self missing in leaDict;
+            all dictionary's values and defaultLea (if defined) are cast to Lea instances
+        '''
+        return Tlea(self,leaDict,defaultLea)
+
     ## note: in PY3, could use:
     ## def buildCPT(*clauses,priorLea=None,autoElse=False,check=True,ctxType=0):
     @staticmethod
@@ -1785,6 +1802,7 @@ from .flea1 import Flea1
 from .flea2 import Flea2
 from .flea2a import Flea2a
 from .glea import Glea
+from .tlea import Tlea
 
 # Constants representing certain values (Lea static attributes)
 Lea.true  = Lea.coerce(True)
