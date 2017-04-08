@@ -1728,6 +1728,21 @@ class Lea(object):
         '''
         return self.getAlea().randomDraw(n,sorted)
 
+    @staticmethod
+    def jointEntropy(*args):
+        ''' returns a float number representing the joint entropy of arguments,
+            expressed in bits
+        '''
+        return Clea(*args).entropy
+
+    def condEntropy(self,other):
+        ''' returns a float number representing the conditional entropy of self
+            given other, expressed in bits; note that this value is also known
+            as the equivocation of self about other
+        '''
+        other = Lea.coerce(other)
+        return max(0.,Clea(self,other).entropy - other.entropy)
+
     def mutualInformation(self,other):
         ''' returns a float number representing the mutual information between self and other,
             expressed in bits
