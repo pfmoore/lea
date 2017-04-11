@@ -2,7 +2,7 @@
 
 [comment]: <> (![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png))
 
-**NEW**: May 4, 2016 - [Lea 2.2.0](http://pypi.python.org/pypi/lea/2.2.0) is there! See [Wiki advanced tutorial 3](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial3) to discover the new features.
+**NEW**: April, 2017 - [Lea 2.3](http://pypi.python.org/pypi/lea/2.3.1) is there!
 
 ## What is Lea?
 
@@ -113,14 +113,15 @@ Then, this bayesian network can be imported and queried in an interactive sessio
 
 The inference engine remains hidden for the user who builds and queries probabilistic models in a high-level, declarative manner. Hence, Lea is definitely a toolkit for _probabilistic programming_. Note that the Lea package includes a small _probabilistic programming language_ (PPL) called _Leapp_. It provides concise syntax to make use of Lea as easy as possible, … especially for non-Python programmers! Note that Leapp is not a true programming language. It is just a thin "syntactic sugar" layer on top of Python / Lea. The good news is that you can use standard Python syntax and put Leapp expressions as needed (or the opposite!); your favorite Python modules can be used as usual. The probabilistic programming nature of Lea/Leapp is advocated in the small apologia  [P("Hello world!") = 0.28](https://bitbucket.org/piedenis/lea/wiki/LeappPPLHelloWorld).
 
-## Lea features
+## Features
 
   * scope : finite discrete probability distributions
   * can assign probabilities on _any_ hashable Python object
   * standard distribution indicators + information theory
   * probabilities stored as integers (no rounding errors)
   * probability distribution calculus based on arithmetic, comparison, logical operators and functions
-  * either _exact_ calculation of probability distributions (default) or Monte-Carlo sampling 
+  * either _exact_ calculation of probability distributions (default) or Monte-Carlo sampling
+  * exact probabilisitc inference based on Python generators (the "statues algorithm")
   * generation of random samples
   * joint probability tables, marginalization
   * conditional probabilities
@@ -137,17 +138,19 @@ The inference engine remains hidden for the user who builds and queries probabil
 
 If you want to use Lea, see the [installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installation).
 
-If you are an absolute beginner in Lea, read the [Lea tutorial](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0), which uses pure Python. NO _deep_ knowledge of probabilities nor Python is required! This tutorial exists also in [Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0).
+If you are an absolute beginner in Lea, read first the [Lea tutorial](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial0). NO deep knowledge of probabilities nor Python is required! This tutorial exists also in [Leapp flavor](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial0).
 
 To go deeper in the tool and elaborate on probabilistic programming, there are three advanced tutorials:
 
   * [Advanced tutorial 1](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial1) : conditional probabilities, JPD, cartesion products, …
   * [Advanced tutorial 2](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial2) : CPT, bayesian networks, Markov chains
-  * [Advanced tutorial 3](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial3) : (new features of Lea.2.2) MC sampling, advanced JPD, machine learning, …
+  * [Advanced tutorial 3](https://bitbucket.org/piedenis/lea/wiki/LeaPyTutorial3) :  MC sampling, advanced JPD, machine learning, … (new features of Lea.2.2)
 
 The Python advanced tutorials 1 & 2 are also translated in Leapp([1](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial1), [2](https://bitbucket.org/piedenis/lea/wiki/LeappTutorial2)).
 
 To see examples of Lea in action, check the [Python examples](https://bitbucket.org/piedenis/lea/wiki/Examples) or [Leapp examples](https://bitbucket.org/piedenis/lea/wiki/LeappExamples). 
+
+If you want to understand how the "statues algorithm" works, then you may have a look at [MicroLea](https://bitbucket.org/piedenis/microlea), an independent Python implementation that is much shorter and much simpler than Lea.
 
 For a table of contents, go on [Lea Wiki TOC](https://bitbucket.org/piedenis/lea/wiki). 
 
@@ -159,9 +162,13 @@ You can get also see Lea presentations made at some conferences:
 
 ---
 
+# Bugs / Enhancements
+
+If you have enhancements to propose or if you discover bugs, you are kindly invited to post issues in the present Bitbucket project page. All issues will be answered.
+
 # Feedbacks
 
-Please send your comments, critics, suggestions, bug reports, … by E-mail to: **pie.denis@skynet.be**, in English or French. You are welcome / _bienvenus_ ! You can also post issues in the present Bitbucket project page.
+Don't hesitate to send your comments, questions, … by e-mail to: **pie.denis@skynet.be**, in English or French. You are welcome / _bienvenus_ !
 
 Also, if you use Lea in your developments or researches, please tell about it! So, your experience can be shared and the project can gain recognition.
 
