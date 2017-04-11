@@ -4,7 +4,7 @@
     leapp_console.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2016 Pierre Denis
+Copyright 2013-2017 Pierre Denis
 
 This file is part of Lea.
 
