@@ -147,7 +147,7 @@ class Lea(object):
         pass
 
     # Lea attributes
-    __slots__ = ('_alea','_val','genVPs')
+    __slots__ = ('_alea','_val','genVPs','_ctxClea')
 
     # a mutable object, which cannnot appear in Lea's values (not hashable)
     _DUMMY_VAL = []
@@ -167,6 +167,7 @@ class Lea(object):
         # when evaluation is needed, genVPs shall be bound on _genVPs or _genBoundVPs method
         # (see _initCalc method)
         self.genVPs = None
+        self._ctxClea = None
 
     def _id(self):
         ''' returns a unique id, containing the concrete Lea class name as prefix
@@ -496,12 +497,35 @@ class Lea(object):
         for leaChild in self._getLeaChildren():
             leaChild._setGenVPs()
 
+    def _genDependingAleas(self):
+        for leaChild in self._getLeaChildren():
+            for dependingAlea in leaChild._genDependingAleas():
+                yield dependingAlea
+
     def _initCalc(self):
         ''' prepare calculation of probability distribution by binding self.genVPs to the most adequate method;
             see _setGenVPs method
         '''
         self._resetGenVPs()
         self._setGenVPs()
+        # the following treatment is needed only due to probability represensation
+        # as integer weights; when some child Lea instances may be skipped due to
+        # given conditions (CPT), a balancing is required to guarantee that there
+        # are no bias on the sum of weights
+        dependingAleasSet = set(alea1 for alea1 in self._genDependingAleas() if alea1._count > 1)
+        if len(dependingAleasSet) > 0:
+            self._ctxClea = Clea(*dependingAleasSet)
+            for dependingAlea in dependingAleasSet:
+                dependingAlea.genVPs = dependingAlea._genBoundVPs
+            self.genVPs = self._genCtxVPs
+
+    def _genCtxVPs(self):
+        try:
+            for (v,p) in self._genVPs():
+                for (_,pf) in self._ctxClea._genVPs():
+                    yield (v,p*pf)
+        finally:
+            self._ctxClea = None
 
     def withProb(self,condLea,pNum,pDen=None):
         ''' returns a new Alea instance from current distribution,
@@ -956,10 +980,10 @@ class Lea(object):
             given is self
         ''' 
         return Blea.build(*clauses,priorLea=self)
-    
+
     def buildBNfromJoint(self,*bnDefinition):
-        ''' returns a named tuple of Blea instances representing a Bayes network
-            with variables stored in attributes A1, ... , An, assuming that self
+        ''' returns a named tuple of Lea instances (Alea or Tlea) representing a Bayes
+            network with variables stored in attributes A1, ... , An, assuming that self
             is a Lea joint probability distribution having, as values, named tuples
             with the same set of attributes A1, ... , An (such Lea instance is
             returned by asJoint method, for example);
@@ -993,16 +1017,9 @@ class Lea(object):
             tgtVar = varsDict[tgtVarName]
             cprodSrcVars = Lea.cprod(*(varsDict[srcVarName] for srcVarName in srcVarNames))
             cprodSrcVarsBN = Lea.cprod(*(varsBNDict[srcVarName] for srcVarName in srcVarNames))
-            ## Note: the following statement is functionnaly equivalent to statements after
-            ## BUT it is far slower in case of missing conditions on the CPT ('else' clause)
-            ## because it relies on the (too) generic 'autoElse' algorithm of Blea, which makes 
-            ## a negated OR on all given conditions;
-            ## varsBNDict[tgtVarName] = Blea.build(
-            ##                *((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
-            ##                   for cprodSrcVal in cprodSrcVars.vals()), autoElse=True)
             # build CPT clauses (condition,result) from the joint probability distribution
             cprodSrcVals = cprodSrcVars.vals()
-            clauses = tuple((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea(sorting=False)) \
+            clauses = tuple((cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea(sorting=False)) \
                              for cprodSrcVal in cprodSrcVals)
             # determine missing conditions in the CPT, if any
             allVals = Lea.cprod(*(varsDict[srcVarName].getAlea(sorting=False) for srcVarName in srcVarNames)).vals()
@@ -1012,12 +1029,7 @@ class Lea(object):
                 # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
                 elseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
-                clauses += tuple((cprodSrcVarsBN==missingVal,elseResult) for missingVal in missingVals)
-                ## Note: the following statements are functionally equivalent to the statement above
-                ## these aggregate missing condtions with an OR; the tests show similar performance,
-                ## albeit a small decrease : that's why the former has been preferred;
-                ## elseCond = Lea.reduce(operator.or_,(cprodSrcVarsBN==missingVal for missingVal in missingVals),True)
-                ## clauses += ((elseCond,elseResult),)
+                clauses += tuple((missingVal,elseResult) for missingVal in missingVals)
             # overwrite the target BN variable (currently independent Alea instance), with a CPT built
             # up from the clauses determined from the joint probability distribution
             # the check is deactivated for the sake of performance; this is safe since, by construction,
@@ -1025,7 +1037,7 @@ class Lea(object):
             # the ctxType is 2 for the sake of performance; this is safe since, by construction, the
             # clauses results are Alea instances and clause conditions refer to the same variable,
             # namely cprodSrcVarsBN  
-            varsBNDict[tgtVarName] = Blea.build(*clauses,check=False,ctxType=2)
+            varsBNDict[tgtVarName] = cprodSrcVarsBN.switch(dict(clauses))
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**varsBNDict)
@@ -1803,6 +1815,13 @@ class Lea(object):
                     for lea1 in attrVal:
                         args1.append(lea1.internal(indent+'    ',refs))
                     args.append(('\n'+indent+'    ').join(args1)+'\n'+indent+'  )')
+                elif isinstance(attrVal,dict) and 'lea' in attrName:
+                    print (attrName)
+                    args1 = ['{']
+                    for (val,lea1) in attrVal.items():
+                        args1.append('   %s :'%val)
+                        args1.append(lea1.internal(indent+'    ',refs))
+                    args.append(('\n'+indent+'    ').join(args1)+'\n'+indent+'  }')
                 elif hasattr(attrVal,'__call__'):
                     args.append(attrVal.__module__+'.'+attrVal.__name__)
         return ('\n'+indent+'  ').join(args)

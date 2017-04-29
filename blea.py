@@ -44,12 +44,13 @@ class Blea(Lea):
      ANDing all conditions pairwise shall give "certain false" distributions
     '''
 
-    __slots__ = ('_ileas','_ctxClea','_condClea')
+    __slots__ = ('_ileas','_ctxClea','_condClea','_ctxType')
     
     def __init__(self,*ileas,**kwargs):
         Lea.__init__(self)
         self._ileas = ileas
         self._ctxClea = kwargs.get('ctxClea')
+        self._ctxType = kwargs.get('ctxType')
         # _condLea is used only by _genOneRandomMC method
         self._condClea = None
 
@@ -152,12 +153,16 @@ class Blea(Lea):
             # possible values; a rebalancing of probability weights is needed if there are such
             # missing variables and if these admit multiple possible values (total probability
             # weight > 1)
-            # first, take clause's conditions 
+            # first, take clause's conditions
+            '''
             aleaLeavesSet = set(aleaLeaf for condLea in condLeas for aleaLeaf in condLea.getAleaLeavesSet() if aleaLeaf._count > 1 )
             if ctxType is 0:
                 # if ctxtType is 0, then add clause's results
                 aleaLeavesSet.update(aleaLeaf for resLea in resLeas for aleaLeaf in resLea.getAleaLeavesSet() if aleaLeaf._count > 1 )
             ctxClea = Clea(*aleaLeavesSet)
+            '''
+            ctxClea = None
+        '''
         if ctxType in (1,2):
             # ctxType is 1 or 2
             # make a probability weight balancing, in the case where Alea results have different 
@@ -176,18 +181,37 @@ class Blea(Lea):
                 normFactor = commonDenominator // resAlea._count
                 resLeasNR.append(Alea.fromValFreqs(*((v,p*normFactor) for (v,p) in zip(resAlea._vs,resAlea._ps)),reducing=False))
             resLeas = resLeasNR
+        '''
         # build a Blea, providing a sequence of new Ileas for each of the clause 
-        return Blea(*(Ilea(resLea,(condLea,)) for (resLea,condLea) in zip(resLeas,condLeas)),ctxClea=ctxClea)    
+        return Blea(*(Ilea(resLea,(condLea,)) for (resLea,condLea) in zip(resLeas,condLeas)),ctxClea=ctxClea,ctxType=ctxType)
 
     def _getLeaChildren(self):
         leaChildren = self._ileas
         if self._ctxClea is not None:
             leaChildren += (self._ctxClea,)
         return leaChildren 
-    
+
+    def _genDependingAleas(self):
+        if self._ctxType in (0,1):
+            for ilea1 in self._ileas:
+                for condLea in ilea1._condLeas:
+                    for aleaLeaf in condLea.getAleaLeavesSet():
+                        yield aleaLeaf
+            if self._ctxType == 0:
+                # if ctxtType is 0, then add clause's results
+                for ilea1 in self._ileas:
+                    for aleaLeaf in ilea1._lea1.getAleaLeavesSet():
+                        yield aleaLeaf
+
     def _clone(self,cloneTable):
         return Blea(*(iLea.clone(cloneTable) for iLea in self._ileas),ctxClea=self._ctxClea.clone(cloneTable))
 
+    def _genVPs(self):
+        for iLea in self._ileas:
+            for vp in iLea.genVPs():
+                yield vp
+
+    '''
     def _genCtxFreeVPs(self):
         for iLea in self._ileas:
             for vp in iLea.genVPs():
@@ -202,6 +226,7 @@ class Blea(Lea):
             for (v,p) in self._genCtxFreeVPs():
                 for (_,p2) in ctxClea.genVPs():
                     yield (v,p*p2)
+    '''
 
     def _genOneRandomMC(self):
         if self._condClea is None:

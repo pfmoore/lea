@@ -32,6 +32,7 @@ def test_cpt_refactoring():
             ( x & ~y, Lea.boolProb(1,2)),
             ( x &  y, Lea.boolProb(1,2)),
         )
+    assert (z1.given(y)).equiv(Lea.boolProb(11,42))
     z2 = Lea.buildCPT(
             (~x & ~y, Lea.boolProb(1,5)),
             (~x &  y, Lea.boolProb(1,7)),
@@ -47,6 +48,75 @@ def test_cpt_refactoring():
         )
     assert z2.equiv(z1)
     assert z3.equiv(z1)
+    assert (z2.given(y)).equiv(z1.given(y))
+    assert (z3.given(y)).equiv(z1.given(y))
+
+def test_cpt_refactoring_2():
+    """See issues #9 and #11 on Bitbucket"""
+    x = Lea.boolProb(1,3)
+    y = Lea.boolProb(1,4)
+    z1 = Lea.cprod(x,y).switch({
+            ( True, False) : Lea.boolProb(1,2),
+            ( True, True ) : Lea.boolProb(1,2),
+            (False, False) : Lea.boolProb(1,5),
+            (False, True ) : Lea.boolProb(1,7)}
+        )
+    #assert (z1.given(y)).equiv(Lea.boolProb(11,42))
+    z0 = y.switch({
+            False : Lea.boolProb(1,5),
+            True  : Lea.boolProb(1,7) }
+        )
+    z3 = x.switch({
+            False : z0,
+            True  : Lea.boolProb(1,2) }
+        )
+    assert z3.equiv(z1)
+    assert (z3.given(y)).equiv(z1.given(y))
+
+    z4 = Lea.if_(x, Lea.boolProb(1,2),
+                    Lea.if_ (y, Lea.boolProb(1,7),
+                                Lea.boolProb(1,5)) )
+    assert z4.equiv(z1)
+    assert (z4.given(y)).equiv(z1.given(y))
+
+'''
+TODO: remove
+z0._factorsDict = {False: 3*420//5, True: 1*420//7}
+z3._factorsDict = {False: 3*1, True: 4*420//2}
+z0._cFactor = 1
+z3._cFactor = 1
+
+z0._factorsDict = {False: 420//5, True: 420//7}
+z3._factorsDict = {False: 1*1, True: 420//2}
+z0._cFactor = 1
+z3._cFactor = 1
+
+z0._factorsDict = {False: 420//5, True: 420//7}
+z3._factorsDict = {False: 1, True: 4*420//2}
+z0._cFactor = 3
+z3._cFactor = 1
+
+# this is OK for P(z3.given(y)) but NOK for P(z3)
+# trick: P(z3.given(y==y)) gives the right result for P(z3)
+z0._factorsDict = {False: 420//5, True: 420//7}
+z3._factorsDict = {False: 1, True: 420//2}
+z0._cFactor = 1
+z3._cFactor = 1
+
+# this is OK for P(z3.given(y)) but NOK for P(z3)
+# trick: P(z3.given(y==y)) gives the right result for P(z3)
+z0._factorsDict = {False: 420//5//3, True: 420//7//3}
+z3._factorsDict = {False: 1, True: 420//2}
+z0._cFactor = 3
+z3._cFactor = 1
+
+
+# this is OK for P(z3) but NOK for P(z3.given(y))
+z0._factorsDict = {False: 420//5, True: 420//7}
+z3._factorsDict = {False: 1, True: 4*420//2}
+z0._cFactor = 1
+z3._cFactor = 1
+'''
 
 def test_draw_nonuniform():
     """See issue #19 on bitbucket"""
