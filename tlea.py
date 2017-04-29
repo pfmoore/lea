@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
+from .alea import Alea
 from .toolbox import dict, defaultdict
 
 class Tlea(Lea):
@@ -42,6 +43,8 @@ class Tlea(Lea):
         Lea.__init__(self)
         self._leaC = Lea.coerce(leaC)
         self._leaDict = dict((c,Lea.coerce(lea1)) for (c,lea1) in leaDict.items())
+        if not all(isinstance(lea1,Alea) for lea1 in self._leaDict.values()):
+            raise Lea.Error('all Tlea dictionary values shall be Alea instances or constants')
         leaDictItems = list(self._leaDict.items())
         if defaultLea is Lea._DUMMY_VAL:
             self._defaultLea = Lea._DUMMY_VAL
