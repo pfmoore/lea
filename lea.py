@@ -305,8 +305,56 @@ class Lea(object):
         '''
         return Lea.fromValFreqsDict(probDict)
 
+    '''
     @staticmethod
     def boolProb(pNum,pDen=None):
+        '' static method, returns an Alea instance representing a boolean
+            distribution such that probability of True is pNum/pDen
+            if pDen is None, then pNum expresses the probability as a float,
+            a string, a Python's Fraction or a Decimal instance, in the same
+            way as Fraction constructor; for strings, percentages are also
+            allowed using the '%' suffix
+        ''
+        probFraction = ProbFraction(pNum,pDen)
+        probFraction.check()
+        return Alea.fromValFreqs((True,probFraction.numerator),(False,probFraction.denominator-probFraction.numerator))
+
+    @staticmethod
+    def bernoulli(pNum,pDen=None):
+        '' static method, returns an Alea instance representing a bernoulli
+            distribution giving 1 with probability pNum/pDen and 0 with
+            complementary probability;
+            if pDen is None, then pNum expresses the probability as a float,
+            a string, a Python's Fraction or a Decimal instance, in the same
+            way as Fraction constructor; for strings, percentages are also
+            allowed using the '%' suffix
+        ''
+        probFraction = ProbFraction(pNum,pDen)
+        probFraction.check()
+        return Alea.fromValFreqs((1,probFraction.numerator),(0,probFraction.denominator-probFraction.numerator))
+
+    @staticmethod
+    def binom(n,pNum,pDen=None):
+        '' static method, returns an Alea instance representing a binomial
+            distribution giving the number of successes among a number n of 
+            independent experiments, each having probability pNum/pDen of success;  
+            if pDen is None, then pNum expresses the probability as a float,
+            a string, a Python's Fraction or a Decimal instance, in the same
+            way as Fraction constructor; for strings, percentages are also
+            allowed using the '%' suffix
+        ''
+        return Lea.bernoulli(pNum,pDen).times(n)
+    '''
+
+    @staticmethod
+    def _checkProb(p):
+        if p < 0:
+            raise Lea.Error("negative probability")
+        if p > 1:
+            raise Lea.Error("probability strictly greater than 1")
+
+    @staticmethod
+    def boolProb(p):
         ''' static method, returns an Alea instance representing a boolean
             distribution such that probability of True is pNum/pDen
             if pDen is None, then pNum expresses the probability as a float,
@@ -314,12 +362,12 @@ class Lea(object):
             way as Fraction constructor; for strings, percentages are also
             allowed using the '%' suffix
         '''
-        probFraction = ProbFraction(pNum,pDen)
-        probFraction.check()
-        return Alea.fromValFreqs((True,probFraction.numerator),(False,probFraction.denominator-probFraction.numerator))
+        Lea._checkProb(p)
+        #return Alea.fromValFreqs((True,p),(False,1-p))
+        return Alea((True,False),(p,1-p))
 
     @staticmethod
-    def bernoulli(pNum,pDen=None):
+    def bernoulli(p):
         ''' static method, returns an Alea instance representing a bernoulli
             distribution giving 1 with probability pNum/pDen and 0 with
             complementary probability;
@@ -328,21 +376,20 @@ class Lea(object):
             way as Fraction constructor; for strings, percentages are also
             allowed using the '%' suffix
         '''
-        probFraction = ProbFraction(pNum,pDen)
-        probFraction.check()
-        return Alea.fromValFreqs((1,probFraction.numerator),(0,probFraction.denominator-probFraction.numerator))
+        Lea._checkProb(p)
+        return Alea((1,0),(p,1-p))
 
     @staticmethod
-    def binom(n,pNum,pDen=None):
+    def binom(n,p):
         ''' static method, returns an Alea instance representing a binomial
-            distribution giving the number of successes among a number n of 
-            independent experiments, each having probability pNum/pDen of success;  
+            distribution giving the number of successes among a number n of
+            independent experiments, each having probability pNum/pDen of success;
             if pDen is None, then pNum expresses the probability as a float,
             a string, a Python's Fraction or a Decimal instance, in the same
             way as Fraction constructor; for strings, percentages are also
             allowed using the '%' suffix
         '''
-        return Lea.bernoulli(pNum,pDen).times(n)
+        return Lea.bernoulli(p).times(n)
 
     @staticmethod
     def poisson(mean,precision=1e-20):

@@ -26,7 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 from .lea import Lea
 from .flea2 import Flea2
 from .prob_fraction import ProbFraction
-from random import randrange
+from random import random
 from bisect import bisect_left, bisect_right
 from itertools import combinations, combinations_with_replacement
 from math import log, sqrt, exp, factorial
@@ -46,25 +46,23 @@ class Alea(Lea):
     
     '''
     Alea is a Lea subclass, which instance is defined by explicit probability distribution data.
-    An Alea instance is defined by given value-probability pairs. Each probability is
-    defined as a positive "counter" or "weight" integer, without upper limit. The actual
-    probabilities are calculated by dividing the counters by the sum of all counters.
-    Values having null probability counters are dropped.
+    An Alea instance is defined by given value-probability pairs. The probabilities can be
+    expressed as any object with arithmetic semantic. The main candidates are float, fraction
+    or symbolic expressions. Values having null probability counters are dropped.
     '''
 
-    __slots__ = ('_vs','_ps','_count','_cumul','_invCumul','_randomIter','_cachesByFunc')
+    __slots__ = ('_vs','_ps','_cumul','_invCumul','_randomIter','_cachesByFunc')
     
     def __init__(self,vs,ps):
         ''' initializes Alea instance's attributes
             vs is a sequence of values
-            ps is a sequence of probability weights (same size and order as ps)
+            ps is a sequence of probabilities (same size and order as ps)
         '''
         Lea.__init__(self)
         # for an Alea instance, the alea cache is itself
         self._alea = self
         self._vs = vs
         self._ps = ps
-        self._count = sum(ps)
         self._cumul = [0]
         self._invCumul = []
         self._randomIter = self._createRandomIter()
@@ -84,9 +82,11 @@ class Alea(Lea):
         newAlea._invCumul = self._invCumul
         return newAlea
 
+    '''
+    Not used in Lea 3
     @staticmethod
     def fromValFreqsDictGen(probDict):
-        ''' static method, returns an Alea instance representing a distribution
+        '' static method, returns an Alea instance representing a distribution
             for the given probDict dictionary of {val:prob}, where prob is an integer number,
             a floating-point number or a fraction (Fraction or ProbFraction instance)
             so that each value val has probability proportional to prob to occur
@@ -94,28 +94,24 @@ class Alea(Lea):
             the values are sorted if possible (i.e. no exception on sort), 
             otherwise, the order of values is unspecified; 
             if the sequence is empty, then an exception is raised
-        '''
-        probFractions = tuple(ProbFraction.coerce(probWeight) for probWeight in probDict.values())
+        ''
+        probFractions = tuple(ProbFraction.coerce(prob) for prob in probDict.values())
         # TODO Check positive
         probWeights = ProbFraction.getProbWeights(probFractions)
         return Alea.fromValFreqsDict(dict(zip(probDict.keys(),probWeights)))
-    
+    '''
+
     @staticmethod
-    def _getVPsIter(vps,reducing):
-        gcd = sum(p for (v,p) in vps)
-        if gcd == 0:
+    def _getVPsIter(vps):
+        if any(p < 0 for (_,p) in vps):
+            raise Lea.Error("negative probability")
+        probSum = sum(p for (_,p) in vps)
+        if probSum == 0:
             raise Lea.Error("impossible to build a probability distribution with no value")
-        if not reducing:
-            gcd = 1
-        for (v,p) in vps:
-            if p < 0:
-                raise Lea.Error("negative probability")
-            if gcd > 1 and p > 0:
-                while p != 0:
-                    if gcd > p:
-                        (gcd,p) = (p,gcd)
-                    p %= gcd
-        return ((v,p//gcd) for (v,p) in vps if p > 0)        
+        if probSum != 1:
+            # return ((v,p/probSum) for (v,p) in vps if p > 0)
+            return ((v,p/probSum) for (v,p) in vps)
+        return iter(vps)
     
     @staticmethod
     def fromValFreqsDict(probDict,**kwargs):
@@ -130,14 +126,10 @@ class Alea(Lea):
             the distribution or getting the values will be sorted if possible
             (i.e. no exception on sort); otherwise, or if sorting=False, then
             the order of values is unspecified; 
-            * reducing (default:True): if True, then the given frequencies are
-            reduced by dividing them by their GCD, otherwise, they are kept
-            unaltered;  
         '''
         sorting = kwargs.get('sorting',True)
-        reducing = kwargs.get('reducing',True)
-        # check probabilities, remove null probabilities and calculate GCD
-        vpsIter = Alea._getVPsIter(tuple(probDict.items()),reducing)
+        # check and normalize probabilities
+        vpsIter = Alea._getVPsIter(tuple(probDict.items()))
         if sorting:
             vps = list(vpsIter)
             try:            
@@ -160,9 +152,9 @@ class Alea(Lea):
             for treatment of optional kwargs keywords arguments, see doc of
             Alea.fromValFreqsDict;
         '''
-        probDict = dict()
+        probDict = defaultdict(int)
         for value in values:
-            probDict[value] = probDict.get(value,0) + 1
+            probDict[value] += 1
         return Alea.fromValFreqsDict(probDict,**kwargs)
 
     @staticmethod
@@ -175,9 +167,9 @@ class Alea(Lea):
             for treatment of optional kwargs keywords arguments, see doc of
             Alea.fromValFreqsDict;
         '''        
-        probDict = dict()
+        probDict = defaultdict(int)
         for (value,freq) in valueFreqs:
-            probDict[value] = probDict.get(value,0) + freq
+            probDict[value] += freq
         return Alea.fromValFreqsDict(probDict,**kwargs)
             
     @staticmethod
@@ -197,9 +189,8 @@ class Alea(Lea):
             * check (default: True): if True and if a value occurs multiple
             times, then an exception is raised;        
         '''
-        reducing = kwargs.get('reducing',True)
         check = kwargs.get('check',True)
-        (vs,ps) = zip(*Alea._getVPsIter(valueFreqs,reducing))
+        (vs,ps) = zip(*Alea._getVPsIter(valueFreqs))
         # check duplicates
         if check and len(frozenset(vs)) < len(vs):
             raise Lea.Error("duplicate values")
@@ -317,15 +308,16 @@ class Alea(Lea):
             return Lea.emptyTuple
         return self.map(makeTuple).times(n)
 
+    '''
     def drawWithoutReplacement(self,n):
-        ''' returns a new Alea instance representing the probability distribution
+        '' returns a new Alea instance representing the probability distribution
             of drawing n elements from self WITHOUT replacement, taking the order
             of drawing into account; the returned values are tuples with n elements
             put in the order of their drawing
             assumes that n >= 0
             requires that n <= number of values of self, otherwise an exception
             is raised
-        '''
+        ''
         if n == 0:
             return Lea.emptyTuple
         if len(self._vs) == 1:
@@ -342,14 +334,38 @@ class Alea(Lea):
             for (vt,pt) in alea2.vps():
                 vps.append(((v,)+vt,g*pt))
         return Alea.fromValFreqsOrdered(*vps,reducing=False,check=False)
+    '''
+
+    def drawWithoutReplacement(self,n):
+        ''' returns a new Alea instance representing the probability distribution
+            of drawing n elements from self WITHOUT replacement, taking the order
+            of drawing into account; the returned values are tuples with n elements
+            put in the order of their drawing
+            assumes that n >= 0
+            requires that n <= number of values of self, otherwise an exception
+            is raised
+        '''
+        if n == 0:
+            return Lea.emptyTuple
+        if len(self._vs) == 1:
+            if n > 1:
+                raise Lea.Error("number of values to draw exceeds the number of possible values")
+            return Alea(((self._vs[0],),),(1,))
+        alea2s = tuple(Alea.fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),reducing=False,check=False).drawWithoutReplacement(n-1) for v in self._vs)
+        vps = []
+        for (v,p,alea2) in zip(self._vs,self._ps,alea2s):
+            for (vt,pt) in alea2.vps():
+                vps.append(((v,)+vt,p*pt))
+        return Alea.fromValFreqsOrdered(*vps,reducing=False,check=False)
+    '''
 
     @staticmethod
     def poisson(mean,precision):
-        ''' static method, returns an Alea instance representing a Poisson probability
+        '' static method, returns an Alea instance representing a Poisson probability
             distribution having the given mean; the distribution is approximated by
             the finite set of values that have probability > precision
             (i.e. low/high values with too small probabilities are dropped)
-        '''
+        ''
         precFactor = 0.5 / precision
         valFreqs = []
         p = exp(-mean)
@@ -361,15 +377,33 @@ class Alea(Lea):
             v += 1
             p = (p*mean) / v
         return Alea.fromValFreqs(*valFreqs)
+    '''
 
-    def asString(self,kind='/',nbDecimals=6,histoSize=100):
+    def poisson(mean,precision):
+        ''' static method, returns an Alea instance representing a Poisson probability
+            distribution having the given mean; the distribution is approximated by
+            the finite set of values that have probability > precision
+            (i.e. low/high values with too small probabilities are dropped)
+        '''
+        valFreqs = []
+        p = exp(-mean)
+        v = 0
+        t = 0.
+        while p >= precision or v <= mean:
+            if p >= precision:
+                valFreqs.append((v,p))
+            t += p
+            v += 1
+            p = (p*mean) / v
+        return Alea.fromValFreqs(*valFreqs)
+
+    def asString(self,kind='.',nbDecimals=None,histoSize=100):
         ''' returns a string representation of probability distribution self;
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value with its
             probability in a format depending of given kind, which is string among
-            '/', '.', '%', '-', '/-', '.-', '%-'; 
+            '.', '%', '-', '/-', '.-', '%-';
             the probabilities are displayed as
-            - if kind[0] is '/' : rational numbers "n/d" or "0" or "1"
             - if kind[0] is '.' : decimals with given nbDecimals digits
             - if kind[0] is '%' : percentage decimals with given nbDecimals digits
             - if kind[0] is '-' : histogram bar made up of repeated '-', such that
@@ -379,7 +413,7 @@ class Alea(Lea):
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used
         '''
-        if kind not in ('/', '.', '%', '-', '/-', '.-', '%-'):
+        if kind not in ('.', '%', '-', '/-', '.-', '%-'):
             raise Lea.Error("invalid display format '%s'"%kind)
         valueStrings = tuple(str(v) for v in self._vs)
         ps = self._ps
@@ -387,25 +421,20 @@ class Alea(Lea):
         linesIter = (v.rjust(vm)+' : ' for v in valueStrings)
         probRepresentation = kind[0]
         withHisto = kind[-1] == '-'
-        if probRepresentation == '/':
-            pStrings = tuple(str(p) for p in ps)
-            pm = len(str(max(p for p in ps)))
-            if self._count == 1:
-                den = ''
+        if probRepresentation == '.':
+            if nbDecimals is None:
+                fmt = "%s%s"
             else:
-                den = '/%d' % self._count
-            linesIter = (line+pString.rjust(pm)+den for (line,pString) in zip(linesIter,pStrings))
-        else:
-            c = float(self._count)    
-            if probRepresentation == '.':
                 fmt = "%%s%%.%df" % nbDecimals
-                linesIter = (fmt%(line,p/c) for (line,p) in zip(linesIter,ps))
-            elif probRepresentation == '%':
+            linesIter = (fmt%(line,p) for (line,p) in zip(linesIter,ps))
+        elif probRepresentation == '%':
+            if nbDecimals is None:
+                fmt = "%s%s %%"
+            else:
                 fmt = "%%s%%%d.%df %%%%" % (4+nbDecimals,nbDecimals)
-                linesIter = (fmt%(line,100.*p/c) for (line,p) in zip(linesIter,ps))    
+            linesIter = (fmt%(line,100.*p) for (line,p) in zip(linesIter,ps))
         if withHisto:
-            c = float(self._count)    
-            linesIter = (line+' '+int(0.5+(p/c)*histoSize)*'-' for (line,p) in zip(linesIter,ps))
+            linesIter = (line+' '+int(0.5+(p)*histoSize)*'-' for (line,p) in zip(linesIter,ps))
         return '\n'.join(linesIter)
 
     def __str__(self):
@@ -429,7 +458,7 @@ class Alea(Lea):
         '''
         return self.asString('.',nbDecimals)
         
-    def asPct(self,nbDecimals=1):
+    def asPct(self,nbDecimals=2):
         ''' returns a string representation of probability distribution self;
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value with its
@@ -501,13 +530,15 @@ class Alea(Lea):
         # note that the new Alea instance shares the immutable _vs and _ps attributes of self
         return Alea(self._vs,self._ps)
 
+    '''
     def _getCount(self):
-        ''' returns the total probability weight count (integer) of current Alea;
+        '' returns the total probability weight count (integer) of current Alea;
             this value depends on current binding (hence, the calculated value cannot be cached)
-        '''
+        ''
         if self._val is self:
             return self._count
         return 1
+    '''
 
     def _genVPs(self):
         ''' generates tuples (v,p) where v is a value of self
@@ -547,10 +578,7 @@ class Alea(Lea):
                 self._val = self
     
     def _p(self,val,checkValType=False):
-        ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
-            where s is the sum of the probability weights of all values 
-                  p is the probability weight of the given value val (from 0 to s)
-            note: the ratio p/s is not reduced
+        ''' returns the probability p of the given value val
             if checkValType is True, then raises an exception if some value in the
             distribution has a type different from val's
         '''
@@ -566,7 +594,7 @@ class Alea(Lea):
                 p1 = p
         if checkValType and errVal is not self:
             raise Lea.Error("found <%s> value although <%s> is expected"%(type(errVal).__name__,typeToCheck.__name__))
-        return (p1,self._count)
+        return p1
 
     def cumul(self):
         ''' returns a list with the probability weights p that self <= value ;
@@ -594,7 +622,7 @@ class Alea(Lea):
         '''
         if len(self._invCumul) == 0:
             invCumulList = self._invCumul
-            pSum = self._count
+            pSum = 1
             for p in self._ps:
                 invCumulList.append(pSum)
                 pSum -= p
@@ -610,11 +638,10 @@ class Alea(Lea):
         ''' generates an infinite sequence of random values among the values of self,
             according to their probabilities
         '''
-        count = self._count
         probs = self.cumul()[1:]
         vals = self._vs
         while True:
-            yield vals[bisect_right(probs,randrange(count))]    
+            yield vals[bisect_right(probs,random())]
         
     def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
@@ -677,32 +704,22 @@ class Alea(Lea):
             for (v,p) in aleaArg1.vps():
                 valFreqsDict[v] = p * cumulFunc(aleaArg2,v)
             for (v,p) in aleaArg2.vps():
-                valFreqsDict[v] += (cumulFunc(aleaArg1,v)-aleaArg1._p(v)[0]) * p
+                valFreqsDict[v] += (cumulFunc(aleaArg1,v)-aleaArg1._p(v)) * p
             return Lea.fromValFreqsDict(valFreqsDict)
         return Alea.fastExtremum(cumulFunc,aleaArgs[0],Alea.fastExtremum(cumulFunc,*aleaArgs[1:]))
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
 
-    indicatorMethodNames = ('P','Pf','mean','var','std','mode','entropy','information')
+    indicatorMethodNames = ('P','mean','var','std','mode','entropy','information')
 
     def P(self):
-        ''' returns a ProbFraction instance representing the probability of True,
-            from 0/1 to 1/1;
+        ''' returns the probability of True
             raises an exception if some value in the distribution is not boolean
             (this is NOT the case with self.p(True))
             WARNING: this method is called without parentheses
         '''
-        return ProbFraction(*self._p(True,checkValType=True))
+        return self._p(True,checkValType=True)
 
-    def Pf(self):
-        ''' returns the probability of True, as a floating point number,
-            from 0.0 to 1.0;
-            raises an exception if some value in the distribution is not boolean
-            (this is NOT the case with self.pmf(True))
-            WARNING: this method is called without parentheses
-        '''
-        return float(self.P)
-        
     def mean(self):
         ''' returns the mean value of the probability distribution, which is the
             probability weighted sum of the values;
@@ -727,12 +744,7 @@ class Alea(Lea):
             else:
                 res += p * (x-x0)
         if res is not None:
-            try:
-                x0 += res / float(self._count)
-            except:
-                # if the / operator is not supported with float as denominator
-                # e.g. datetime.timedelta in Python 2.x 
-                x0 += res / self._count    
+            x0 += res
         return x0
    
     def var(self):
@@ -749,7 +761,7 @@ class Alea(Lea):
         m = self.mean
         for (v,p) in self.vps():
             res += p*(v-m)**2
-        return res / float(self._count)    
+        return res
 
     def std(self):
         ''' returns a float number representing the standard deviation of the probability distribution
@@ -770,10 +782,8 @@ class Alea(Lea):
             WARNING: this method is called without parentheses
         '''
         res = 0
-        count = float(self._count)
         for (v,p) in self.vps():
             if p > 0:
-               p /= count
                res -= p*log(p)
         return res / LOG2
 

@@ -58,7 +58,7 @@ def diceSeq(nbDice,nbFaces,sorted=True):
 D6 = die(6)
 
 # flip represents a True/False boolean variable with uniform probabilities
-flip = Lea.boolProb(1,2)
+flip = Lea.boolProb(1/2)
 
 # cardSuite is a random one character symbol representing a card suite among
 # Spades, Hearts, Diamonds and Clubs
