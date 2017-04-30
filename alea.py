@@ -329,7 +329,7 @@ class Alea(Lea):
         if n == 0:
             return Lea.emptyTuple
         if len(self._vs) == 1:
-            if nbValues > 1:
+            if n > 1:
                 raise Lea.Error("number of values to draw exceeds the number of possible values")
             return Alea(((self._vs[0],),),(1,))
         lcmP = calcLCM(self._ps)
