@@ -69,7 +69,7 @@ class Chain(object):
             the probabilities of state transitions are set according to transition
             frequencies in the given sequence 
         '''
-        (fromStateObjIter,toStateObjIter) = tee(stateObjSeq);
+        (fromStateObjIter,toStateObjIter) = tee(stateObjSeq)
         for _ in toStateObjIter:
             break
         nextStateObjsDict = dict()
@@ -91,7 +91,7 @@ class Chain(object):
             formatFunc is a function to represent probability distribution, taking a Lea instance
             as argument and returning a string 
         '''
-        nextStateLeas = (nextStateILea._lea1 for nextStateILea in self._nextStateBlea._iLeas)
+        nextStateLeas = (nextStateILea._lea1 for nextStateILea in self._nextStateBlea._ileas)
         formattedNextStateLeas = ('  -> ' + nextStateLea.map(str) for nextStateLea in nextStateLeas)
         return '\n'.join('%s\n%s'%(stateObj,formatFunc(formattedNextStateLea)) for (stateObj,formattedNextStateLea) in zip(self._stateObjs,formattedNextStateLeas))
 
