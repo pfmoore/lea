@@ -38,7 +38,10 @@ class Rlea(Lea):
         Lea.__init__(self)
         self._leaOfLeas = leaOfLeas
         leaOfLeas._initCalc()
-        leaCounts = tuple(sum(p1 for (v,p1) in lea_.genVPs()) for (lea_,p2) in leaOfLeas.genVPs())
+        leas = tuple(lea_ for (lea_,_) in leaOfLeas.genVPs())
+        for lea_ in leas:
+            lea_._initCalc()
+        leaCounts = tuple(sum(p1 for (_,p1) in lea_.genVPs()) for lea_ in leas)
         pcount = 1
         for count in leaCounts:
             pcount *= count
