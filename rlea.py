@@ -24,7 +24,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
-from .toolbox import zip
 
 class Rlea(Lea):
     
@@ -32,18 +31,12 @@ class Rlea(Lea):
     Rlea is a Lea subclass, which instance has other Lea instances as values.
     '''
     
-    __slots__ = ('_leaOfLeas','_factors')
+    __slots__ = ('_leaOfLeas',)
 
     def __init__(self,leaOfLeas):
         Lea.__init__(self)
         self._leaOfLeas = leaOfLeas
-        leaOfLeas._initCalc()
-        leaCounts = tuple(sum(p1 for (v,p1) in lea_.genVPs()) for (lea_,p2) in leaOfLeas.genVPs())
-        pcount = 1
-        for count in leaCounts:
-            pcount *= count
-        self._factors = tuple(pcount//count for count in leaCounts)
-         
+
     def _getLeaChildren(self):
         return (self._leaOfLeas,)
 
@@ -51,8 +44,7 @@ class Rlea(Lea):
         return Rlea(self._leaOfLeas.clone(cloneTable))
 
     def _genVPs(self):
-        for ((lea1,p1),factor) in zip(self._leaOfLeas.genVPs(),self._factors):
-            p1 *= factor
+        for (lea1,p1) in self._leaOfLeas.genVPs():
             for (v,p2) in lea1.genVPs():
                 yield (v,p1*p2)
 

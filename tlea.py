@@ -35,7 +35,7 @@ class Tlea(Lea):
     possible value of C to a specific Lea instance.
     '''
 
-    __slots__ = ('_leaC','_leaDict','_defaultLea','_factorsDict')
+    __slots__ = ('_leaC','_leaDict','_defaultLea')
 
     def __init__(self,leaC,leaDict,defaultLea=Lea._DUMMY_VAL):
         if isinstance(leaDict,defaultdict):
@@ -43,27 +43,11 @@ class Tlea(Lea):
         Lea.__init__(self)
         self._leaC = Lea.coerce(leaC)
         self._leaDict = dict((c,Lea.coerce(lea1)) for (c,lea1) in leaDict.items())
-        if not all(isinstance(lea1,Alea) for lea1 in self._leaDict.values()):
-            raise Lea.Error('all Tlea dictionary values shall be Alea instances or constants')
-        leaDictItems = list(self._leaDict.items())
         if defaultLea is Lea._DUMMY_VAL:
             self._defaultLea = Lea._DUMMY_VAL
         else:
             self._defaultLea = Lea.coerce(defaultLea)
             self._leaDict = defaultdict(lambda:self._defaultLea,self._leaDict)
-            leaDictItems.append((Lea._DUMMY_VAL,self._defaultLea))
-        for (_,lea1) in leaDictItems:
-            lea1._initCalc()
-        leaCounts = [(c,sum(p for (_,p) in lea1.genVPs())) for (c,lea1) in leaDictItems]
-        pcount = 1
-        for (_,count) in leaCounts:
-            pcount *= count
-        if defaultLea is not Lea._DUMMY_VAL:
-            (_,count) = leaCounts.pop()
-            defaultFactor = pcount // count
-        self._factorsDict = dict((c,pcount//count) for (c,count) in leaCounts)
-        if defaultLea is not Lea._DUMMY_VAL:
-            self._factorsDict = defaultdict(lambda:defaultFactor,self._factorsDict)
 
     def _getLeaChildren(self):
         leaChildren = [self._leaC]
@@ -83,9 +67,8 @@ class Tlea(Lea):
                 leaV = leaDict[vc]
             except KeyError:
                 raise Lea.Error("missing value '%s' in CPT"%vc)
-            f = self._factorsDict[vc]
             for (vd,pd) in leaV.genVPs():
-                yield (vd,pc*pd*f)
+                yield (vd,pc*pd)
 
     def _genOneRandomMC(self):
         leaDict = self._leaDict

@@ -945,7 +945,7 @@ class Lea(object):
         return Tlea(self,leaDict,defaultLea)
 
     ## note: in PY3, could use:
-    ## def buildCPT(*clauses,priorLea=None,autoElse=False,check=True,ctxType=0):
+    ## def buildCPT(*clauses,priorLea=None,autoElse=False,check=True):
     @staticmethod
     def buildCPT(*clauses,**kwargs):
         ''' static method, returns an instance of Blea representing the conditional
@@ -978,15 +978,6 @@ class Lea(object):
                  then the clause conditions shall cover all possible cases, i.e. ORing
                  them shall be certainly true;
             an exception is raised if any of such conditions is not verified;
-            * ctxType can be 0 (the default), 1 or 2  
-              if ctxType=0, then NO assumption is made on given clauses,
-                            the algorithm is the slowest and safest       
-              if ctxType=1, then all results of given clauses shall be Alea instances,
-                            the algorithm is slower
-              if ctxType=2, then all results of given clauses shall be Alea instances,
-                                 all conditions of given clauses are assumed to refer to
-                                 the same set of variables,
-                            the algorithm is the fastest
         '''
         return Blea.build(*clauses,**kwargs)
 
