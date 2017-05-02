@@ -83,9 +83,9 @@ class Tlea(Lea):
                 leaV = leaDict[vc]
             except KeyError:
                 raise Lea.Error("missing value '%s' in CPT"%vc)
-            f = self._factorsDict[vc]
+            pc *= self._factorsDict[vc]
             for (vd,pd) in leaV.genVPs():
-                yield (vd,pc*pd*f)
+                yield (vd,pc*pd)
 
     def _genOneRandomMC(self):
         leaDict = self._leaDict
