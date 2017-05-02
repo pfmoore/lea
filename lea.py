@@ -958,8 +958,8 @@ class Lea(object):
         return Blea.build(*clauses,priorLea=self)
     
     def buildBNfromJoint(self,*bnDefinition):
-        ''' returns a named tuple of Blea instances representing a Bayes network
-            with variables stored in attributes A1, ... , An, assuming that self
+        ''' returns a named tuple of Lea instances (Alea or Tlea) representing a Bayes
+            network with variables stored in attributes A1, ... , An, assuming that self
             is a Lea joint probability distribution having, as values, named tuples
             with the same set of attributes A1, ... , An (such Lea instance is
             returned by asJoint method, for example);
@@ -993,43 +993,31 @@ class Lea(object):
             tgtVar = varsDict[tgtVarName]
             cprodSrcVars = Lea.cprod(*(varsDict[srcVarName] for srcVarName in srcVarNames))
             cprodSrcVarsBN = Lea.cprod(*(varsBNDict[srcVarName] for srcVarName in srcVarNames))
-            ## Note: the following statement is functionnaly equivalent to statements after
-            ## BUT it is far slower in case of missing conditions on the CPT ('else' clause)
-            ## because it relies on the (too) generic 'autoElse' algorithm of Blea, which makes 
-            ## a negated OR on all given conditions;
-            ## varsBNDict[tgtVarName] = Blea.build(
-            ##                *((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea()) \
-            ##                   for cprodSrcVal in cprodSrcVars.vals()), autoElse=True)
             # build CPT clauses (condition,result) from the joint probability distribution
             cprodSrcVals = cprodSrcVars.vals()
-            clauses = tuple((cprodSrcVarsBN==cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea(sorting=False)) \
+            clauses = tuple((cprodSrcVal,tgtVar.given(cprodSrcVars==cprodSrcVal).getAlea(sorting=False)) \
                              for cprodSrcVal in cprodSrcVals)
             # determine missing conditions in the CPT, if any
             allVals = Lea.cprod(*(varsDict[srcVarName].getAlea(sorting=False) for srcVarName in srcVarNames)).vals()
             missingVals = frozenset(allVals) - frozenset(cprodSrcVals)
             if len(missingVals) > 0:
-                # there are missing conditions: add clauses with each of these conditions associating  
+                # there are missing conditions: add clauses with each of these conditions associating
                 # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
                 elseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
-                clauses += tuple((cprodSrcVarsBN==missingVal,elseResult) for missingVal in missingVals)
-                ## Note: the following statements are functionally equivalent to the statement above
-                ## these aggregate missing condtions with an OR; the tests show similar performance,
-                ## albeit a small decrease : that's why the former has been preferred;
-                ## elseCond = Lea.reduce(operator.or_,(cprodSrcVarsBN==missingVal for missingVal in missingVals),True)
-                ## clauses += ((elseCond,elseResult),)
+                clauses += tuple((missingVal,elseResult) for missingVal in missingVals)
             # overwrite the target BN variable (currently independent Alea instance), with a CPT built
             # up from the clauses determined from the joint probability distribution
             # the check is deactivated for the sake of performance; this is safe since, by construction,
-            # the clauses conditions verify the "truth partioning" rules 
+            # the clauses conditions verify the "truth partioning" rules
             # the ctxType is 2 for the sake of performance; this is safe since, by construction, the
             # clauses results are Alea instances and clause conditions refer to the same variable,
-            # namely cprodSrcVarsBN  
-            varsBNDict[tgtVarName] = Blea.build(*clauses,check=False,ctxType=2)
+            # namely cprodSrcVarsBN
+            varsBNDict[tgtVarName] = cprodSrcVarsBN.switch(dict(clauses))
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**varsBNDict)
-    
+
     @staticmethod
     def makeVars(obj,tgtDict,prefix='',suffix=''):
         ''' retrieve attributes names A1, ... , An of obj and put associations 
