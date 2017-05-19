@@ -37,7 +37,7 @@ def test_pf_as_pct():
 
 def test_pf_from_fraction():
     """Test creating from a fraction"""
-    pf = PF.fromFraction(Fraction(3,4))
+    pf = PF._fromFraction(Fraction(3, 4))
     assert pf == PF(3,4)
 
 def test_pf_from_decimal():

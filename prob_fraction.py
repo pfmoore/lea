@@ -54,13 +54,17 @@ class ProbFraction(Fraction):
                 numerator = Fraction(numerator[:-1])
                 denominator = 100
         fraction = Fraction(numerator,denominator)        
-        return ProbFraction.fromFraction(fraction)
+        return ProbFraction._fromFraction(fraction)
     
     @staticmethod         
-    def fromFraction(fraction):
-        ''' static method, returns a ProbFraction numerically
-            equivalent to the given Fraction instance
+    def _fromFraction(fraction):
+        ''' static method, returns a ProbFraction numerically equivalent to
+            the given Fraction instance;
+            if fraction is not an instance of Fraction then it is returned
+             as-is
         '''
+        if not isinstance(fraction,Fraction):
+            return fraction
         probFraction = Fraction.__new__(ProbFraction)
         probFraction._numerator = fraction._numerator
         probFraction._denominator = fraction._denominator
@@ -81,7 +85,7 @@ class ProbFraction(Fraction):
             returns a function returning a ProbFraction
             equivalent to the given function f returning Fraction
         '''
-        return lambda *x: ProbFraction.fromFraction(f(*x))
+        return lambda *x: ProbFraction._fromFraction(f(*x))
      
     # overloading arithmetic magic methods of Fraction
     # to convert Fraction result into ProbFraction result
@@ -141,3 +145,6 @@ class ProbFraction(Fraction):
             raise ProbFraction.Error('getProbWeights requires at least one fraction')
         lcm = calcLCM(denominators)
         return tuple(fraction.numerator*(lcm//fraction.denominator) for fraction in fractions) 
+
+# constant unity instance to ease definition of other instances by multiplication
+ProbFraction.one = ProbFraction(1)

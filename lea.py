@@ -24,10 +24,11 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import operator
+import sys
 from itertools import islice
 from collections import namedtuple
 from .prob_fraction import ProbFraction
-from .toolbox import calcGCD, log2, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip
+from .toolbox import calcGCD, log2, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip, isclose
 
 class Lea(object):
     
@@ -199,286 +200,6 @@ class Lea(object):
             if self._alea is not None:
                 clonedLea._alea = self._alea.clone(cloneTable)
         return clonedLea
-
-    __contructorArgNames = frozenset(('ordered','sorting','reducing'))
-
-    @staticmethod
-    def _parsedKwargs(kwargs):
-        ''' return (ordered,sorting,reducing) tuple, with values found
-            in the given kwargs dictionary (keywords); for missing keywords,
-            the default values are False, True, True, respectively, except if
-            ordered=True and sorting is missing, then sorting=False;
-            check that the given kwargs dictionary contains no other keywords
-            than 'ordered', 'sorting' and 'reducing' and that ordered and
-            sorting are not set to True together; otherwise, raises an
-            exception
-        '''
-        argNames = frozenset(kwargs.keys())
-        unknownArgNames = argNames - Lea.__contructorArgNames
-        if len(unknownArgNames) > 0:
-            raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknownArgNames)),tuple(Lea.__contructorArgNames)))
-        reducing = kwargs.get('reducing',True)
-        ordered = kwargs.get('ordered',False)
-        if ordered and 'sorting' not in kwargs:
-            sorting = False
-        else:
-            sorting = kwargs.get('sorting',True)
-            if ordered and sorting:
-                raise Lea.Error("ordered and sorting arguments cannot be set to True together")
-        return (ordered,sorting,reducing)    
-        
-    @staticmethod
-    def fromVals(*vals,**kwargs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given values passed as arguments, so that each value
-            occurrence is taken as equiprobable;
-            if each value occurs exactly once, then the distribution is uniform,
-            i.e. the probability of each value is equal to 1 / #values;
-            if the sequence is empty, then an exception is raised
-            for treatment of optional kwargs keywords arguments, see doc of
-            Lea.formValFreqs;
-        '''
-        (ordered,sorting,reducing) = Lea._parsedKwargs(kwargs)
-        if ordered:
-            return Alea.fromValFreqsOrdered(*((v,1) for v in vals),**kwargs)
-        return Alea.fromVals(*vals,**kwargs)
-
-    @staticmethod
-    def fromSeq(vals,**kwargs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given sequence of values (e.g. a list, tuple, iterator,...),
-            so that each value occurrence is taken as equiprobable;        
-            if each value occurs exactly once, then the distribution is uniform,
-            i.e. the probability of each value is equal to 1 / #values;
-            if the sequence is empty, then an exception is raised
-            for treatment of optional kwargs keywords arguments, see doc of
-            Lea.formValFreqs;
-        '''
-        return Lea.fromVals(*vals,**kwargs)
-
-    @staticmethod
-    def fromValFreqs(*valFreqs,**kwargs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given sequence of (val,freq) tuples, where freq is a natural
-            number so that each value is taken with the given frequency (or sum
-            of frequencies of that value if it occurs multiple times);
-            if the sequence is empty, then an exception is raised;
-            the method admits 3 optional boolean arguments (kwargs), viz.
-              ordered, sorting and reducing:
-            * ordered (default:False): if True, then the order of given values 
-            shall be kept and used for displaying the probability distribution
-            or getting the values; this option requires that there are NO
-            duplicate in the given values (otherwise, exception); if False, then
-            the order of given values is not taken into account; the display order
-            shall depend on sorting arguments (see below)
-            * sorting (default:True, can only be True if ordered=False): if True,
-            then the values for displaying the distribution or getting the values
-            will be sorted if possible (i.e. no exception on sort); otherwise,
-            or if sorting=ordered=False, the order of values is unspecified; 
-            * reducing (default:True): if True, then the given frequencies are
-            reduced by dividing them by their GCD, otherwise, theay are kept
-            unaltered;
-        '''
-        (ordered,sorting,reducing) = Lea._parsedKwargs(kwargs)
-        if ordered:
-            return Alea.fromValFreqsOrdered(*valFreqs,**kwargs)
-        return Alea.fromValFreqs(*valFreqs,**kwargs)
-
-    @staticmethod
-    def fromValFreqsDict(probDict,**kwargs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given dictionary of {val:prob}, where prob is an integer number
-            so that each value val has probability proportional to prob to occur;
-            if the sequence is empty, then an exception is raised;
-            for treatment of optional kwargs keywords arguments, see doc of
-            Lea.formValFreqs;
-        '''
-        (ordered,sorting,reducing) = Lea._parsedKwargs(kwargs)
-        if ordered:
-            raise Lea.Error("ordered argument cannot be set to True in fromValFreqsDict")            
-        return Alea.fromValFreqsDict(probDict,**kwargs)
-
-    @staticmethod
-    def fromValFreqsDictArgs(**probDict):
-        ''' static method, same as fromValFreqsDict, excepting that the dictionary
-            is passed in a **kwargs style
-        '''
-        return Lea.fromValFreqsDict(probDict)
-
-    '''
-    @staticmethod
-    def boolProb(pNum,pDen=None):
-        '' static method, returns an Alea instance representing a boolean
-            distribution such that probability of True is pNum/pDen
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
-        ''
-        probFraction = ProbFraction(pNum,pDen)
-        probFraction.check()
-        return Alea.fromValFreqs((True,probFraction.numerator),(False,probFraction.denominator-probFraction.numerator))
-
-    @staticmethod
-    def bernoulli(pNum,pDen=None):
-        '' static method, returns an Alea instance representing a bernoulli
-            distribution giving 1 with probability pNum/pDen and 0 with
-            complementary probability;
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
-        ''
-        probFraction = ProbFraction(pNum,pDen)
-        probFraction.check()
-        return Alea.fromValFreqs((1,probFraction.numerator),(0,probFraction.denominator-probFraction.numerator))
-
-    @staticmethod
-    def binom(n,pNum,pDen=None):
-        '' static method, returns an Alea instance representing a binomial
-            distribution giving the number of successes among a number n of 
-            independent experiments, each having probability pNum/pDen of success;  
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
-        ''
-        return Lea.bernoulli(pNum,pDen).times(n)
-    '''
-
-    @staticmethod
-    def _checkProb(p):
-        if p < 0:
-            raise Lea.Error("negative probability")
-        if p > 1:
-            raise Lea.Error("probability strictly greater than 1")
-
-    @staticmethod
-    def boolProb(p):
-        ''' static method, returns an Alea instance representing a boolean
-            distribution such that probability of True is pNum/pDen
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
-        '''
-        Lea._checkProb(p)
-        #return Alea.fromValFreqs((True,p),(False,1-p))
-        return Alea((True,False),(p,1-p))
-
-    @staticmethod
-    def bernoulli(p):
-        ''' static method, returns an Alea instance representing a bernoulli
-            distribution giving 1 with probability pNum/pDen and 0 with
-            complementary probability;
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
-        '''
-        Lea._checkProb(p)
-        return Alea((1,0),(p,1-p))
-
-    @staticmethod
-    def binom(n,p):
-        ''' static method, returns an Alea instance representing a binomial
-            distribution giving the number of successes among a number n of
-            independent experiments, each having probability pNum/pDen of success;
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
-        '''
-        return Lea.bernoulli(p).times(n)
-
-    @staticmethod
-    def poisson(mean,precision=1e-20):
-        ''' static method, returns an Alea instance representing a Poisson probability
-            distribution having the given mean; the distribution is approximated by
-            the finite set of values that have probability > precision (= 1e-20 by default)
-            (i.e. low/high values with too small probabilities are dropped)
-        '''
-        return Alea.poisson(mean,precision)
-
-    @staticmethod
-    def interval(fromVal,toVal):
-        ''' static method, returns an Alea instance representing a uniform probability
-            distribution, for all the integers in the interval [fromVal,toVal]
-        '''
-        return Lea.fromVals(*range(fromVal,toVal+1))
-
-    @staticmethod
-    def fromCSVFilename(csvFilename,colNames=None,dialect='excel',**fmtparams):
-        ''' static method, returns an Alea instance representing the joint probability
-            distribution of the data read in the CSV file of the given csvFilename;
-            it is similar to Lea.fromCSVFile method, except that it takes a filename
-            instead of an open file (i.e. the method opens itself the file for reading);
-            see Lea.fromCSVFile doc for more details
-        '''
-        (attrNames,dataFreq) = readCSVFilename(csvFilename,colNames,dialect,**fmtparams)
-        return Lea.fromValFreqs(*dataFreq).asJoint(*attrNames)
-
-    @staticmethod
-    def fromCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
-        ''' static method, returns an Alea instance representing the joint probability
-            distribution of the data read in the given CSV file;
-            the arguments follow the same semantics as those of Python's csv.reader
-            method, which supports different CSV formats;
-            see doc in https://docs.python.org/2/library/csv.html
-            * if colNames is None, then the fields found in the first read row of the CSV
-              file provide information on the attributes: each field is made up of a name,
-              which shall be a valid identifier, followed by an optional 3-characters type
-              code among  
-                {b} -> boolean
-                {i} -> integer
-                {f} -> float
-                {s} -> string
-                {#} -> count   
-              if the type code is missing for a given field, the type string is assumed for
-              this field; for example, using the comma delimiter (default), the first row
-              in the CSV file could be:
-                  name,age{i},heigth{f},married{b}
-            * if colNames is not None, then colNames shall be a sequence of strings giving
-              attribute information as described above, e.g.
-                  ('name','age{i}','heigth{f}','married{b}')
-              it assumed that there is NO header row in the CSV file
-            the type code defines the conversion to be applied to the fields read on the
-            data lines; if the read value is empty, then it is converted to Python's None,
-            except if the type is string, then, the value is the empty string; 
-            if the read value is not empty and cannot be parsed for the expected type, then
-            an exception is raised; for boolean type, the following values (case
-            insensitive):
-              '1', 't', 'true', 'y', 'yes' are interpreted as Python's True,
-              '0', 'f', 'false', 'n', 'no' are interpreted as Python's False;
-            the {#} code identifies a field that provides a count number of the row,
-            representing the probability of the row or its frequency as a positive integer;
-            such field is NOT included as attribute of the joint distribution; it is useful
-            to define non-uniform probability distribution, as alternative to repeating the
-            same row multiple times
-        '''
-        (attrNames,dataFreq) = readCSVFile(csvFile,colNames,dialect,**fmtparams)
-        return Lea.fromValFreqs(*dataFreq).asJoint(*attrNames)
-
-    @staticmethod
-    def fromPandasDF(dataframe,indexColName=None):
-        ''' static method, returns an Alea instance representing the joint probability
-            distribution from the given pandas dataframe;
-            the attribute names of the distribution are those of the column of the 
-            given dataframe; the first field in each item of the dataframe is assumed
-            to be the index; its treatment depends on given indexColName:
-            if indexColName is None, then this index field is ignored
-            otherwise, it is put in the joint distribution with indexColName as 
-            attribute name
-        '''
-        # TODO: retrieve index_col in df, if not 0
-        attrNames = tuple(dataframe.columns)
-        if indexColName is None:
-            valuesIter = (t[1:] for t in dataframe.itertuples())
-            attrNames = dataframe.columns
-        else:
-            valuesIter = dataframe.itertuples()
-            attrNames = (indexColName,) + attrNames
-        return Lea.fromSeq(valuesIter).asJoint(*attrNames)
 
     def _genBoundVPs(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
@@ -781,34 +502,47 @@ class Lea(object):
             inner values of these Lea instances  
         '''
         return Rlea(self)
-      
+    '''
     @staticmethod
     def coerce(value):
-        ''' static method, returns a Lea instance corresponding the given value:
+        '' static method, returns a Lea instance corresponding the given value:
             if the value is a Lea instance, then it is returned
             otherwise, an Alea instance is returned, with given value
             as unique (certain) value
-        '''
+        ''
         if not isinstance(value,Lea):
             return Alea((value,),(1,))
         return value
+    '''
 
-    def equiv(self,other):
+    def equiv(self,other,prec=None):
         ''' returns True iff self and other represent the same probability distribution,
             i.e. they have the same probability for each of their value
             returns False otherwise
         '''
         other = Lea.coerce(other)
-        # set(...) is used to avoid any dependency on the order of values
-        res = frozenset(self.vps()) == frozenset(other.vps())
-        if not res:
-            # the previous test assumed that the instances have the same denominator
-            # this is not the case if one of them has been created with reducing=False
-            # make an 'advanced' test, by insuring that both instances have the same denominator
-            s = Alea.fromValFreqs(*self.vps())
-            o = Alea.fromValFreqs(*other.vps())
-            res = frozenset(s.vps()) == frozenset(o.vps()) 
-        return res
+        # absolute equality required -> quick test
+        # frozenset(...) is used to avoid any dependency on the order of values
+        return frozenset(self.vps()) == frozenset(other.vps())
+
+    def equivF(self,other): #prec=sys.float_info.epsilon):
+        ''' returns True iff self and other represent the same probability distribution,
+            i.e. they have the same probability for each of their value
+            returns False otherwise
+        '''
+        other = Lea.coerce(other)
+        vps1 = tuple(self.vps())
+        vps2Dict = dict(other.vps())
+        if len(vps1) != len(vps2Dict):
+            return False
+        for (v1,p1) in vps1:
+            p2 = vps2Dict.get(v1)
+            if p2 is None:
+                return False
+            #if abs(p1-p2) > prec:
+            if not isclose(p1,p2):
+                return False
+        return True
 
     def p(self,val=None):
         ''' returns a ProbFraction instance representing the probability of given value val,
@@ -818,9 +552,8 @@ class Lea(object):
             ordered sequence)
         '''
         if val is None:
-            count = self.getAlea()._count
-            return tuple(ProbFraction(p,count) for p in self.ps())
-        return ProbFraction(*self._p(val))
+            return tuple(self.ps())
+        return self._p(val)
  
     def vps(self):
         ''' generates, after evaluation of the probability distribution self,
@@ -860,12 +593,11 @@ class Lea(object):
             in the same order as defined on values (call vals method to get this 
             ordered sequence)
         '''
+        # TODO: float vs frac , see cdf
         if val is None:
-            count = float(self.getAlea()._count)
-            return tuple(p/count for p in self.ps())
-        (p,count) = self._p(val)
-        return p / float(count)
-        
+            return tuple(float(p) for p in self.ps())
+        return self._p(val)
+
     def cdf(self,val=None):
         ''' cumulative distribution function
             returns the probability that self's value is less or equal to the given value val,
@@ -874,10 +606,9 @@ class Lea(object):
             in the same order as defined on values (call vals method to get this 
             ordered sequence); the last probability is always 1.0 
         '''
-        count = float(self.getAlea()._count)
         if val is None:
-            return tuple(p/count for p in self.cumul()[1:])
-        return self.getAlea().pCumul(val)/count
+            return tuple(self.cumul()[1:])
+        return self.getAlea().pCumul(val)
 
     def _p(self,val,checkValType=False):
         ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
@@ -1857,32 +1588,48 @@ from .flea2a import Flea2a
 from .glea import Glea
 from .tlea import Tlea
 
-# Constants representing certain values (Lea static attributes)
-Lea.true  = Lea.coerce(True)
-Lea.false = Lea.coerce(False)
-Lea.zero  = Lea.coerce(0)
-Lea.emptyTuple = Lea.coerce(())
+# init Alea class
+Alea._init()
 
-# Lea convenience functions
+# Lea static methods exported from Alea
+Lea.coerce = Alea.coerce
+Lea.fromVals = Alea.fromVals
+Lea.fromSeq = Alea.fromSeq
+Lea.fromValFreqs = Alea.fromValFreqs
+Lea.interval = Alea.interval
+Lea.boolProb = Alea.boolProb
+Lea.fromValFreqsDict = Alea.fromValFreqsDict
+Lea.fromValFreqsOrdered = Alea.fromValFreqsOrdered
+Lea.fromCSVFile = Alea.fromCSVFile
+Lea.fromCSVFilename = Alea.fromCSVFilename
+Lea.fromPandasDF = Alea.fromPandasDF
+Lea.bernoulli = Alea.bernoulli
+Lea.binom = Alea.binom
+Lea.poisson = Alea.poisson
+
+
+# Lea convenience functions (see __init__.py)
 V  = Lea.fromVals
 VP = Lea.fromValFreqs
 B  = Lea.boolProb
 X  = Lea.cprod
+f_1 = ProbFraction.one
 
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for
-        lea1 to be True, from 0/1 to 1/1;
+        lea1 to be True, expressed in the type used in lea1 definition;
         raises an exception if some value in the distribution is not boolean
-        (this is NOT the case with lea1.p(True))
+        (this is NOT the case with lea1.p(True));
         this is a convenience function equivalent to lea1.P
     '''
     return lea1.P
 
 def Pf(lea1):
-    ''' returns the probability for lea1 to be True, as a floating point
-        number, from 0.0 to 1.0;
+    ''' returns a ProbFraction instance representing the probability for
+        lea1 to be True, expressed as a float between 0.0 and 1.0;
         raises an exception if some value in the distribution is not boolean
-        (this is NOT the case with lea1.pmf(True))
+        (this is NOT the case with lea1.p(True));
         this is a convenience function equivalent to lea1.Pf
     '''
     return lea1.Pf
+

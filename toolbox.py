@@ -275,3 +275,5 @@ def readCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
         dataFreq.append((tuple(convFields),count))
     return (attrNames,dataFreq)
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
