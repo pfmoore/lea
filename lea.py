@@ -28,7 +28,7 @@ import sys
 from itertools import islice
 from collections import namedtuple
 from .prob_fraction import ProbFraction
-from .toolbox import calcGCD, log2, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip, isclose
+from .toolbox import calcGCD, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip, isclose
 
 class Lea(object):
     
@@ -630,7 +630,7 @@ class Lea(object):
         # after prepending orderingLeas to self, the Alea returned by new() is sorted with orderingLeas;
         # then, extracting self (index -1) allows generating self's (v,p) pairs in the expected order;
         # these shall be used to create a new Alea, keeping the values in that order (no sort)
-        return Alea.fromValFreqsOrdered(*Lea.cprod(*orderingLeas).cprod(self).new()[-1].genVPs())
+        return Alea._fromValFreqsOrdered(*Lea.cprod(*orderingLeas).cprod(self).new()[-1].genVPs())
 
     def isAnyOf(self,*values):
         ''' returns a boolean probability distribution
@@ -1449,7 +1449,7 @@ class Lea(object):
             note that the present method is overloaded in Alea class, to be more efficient
         '''
         self._initCalc()
-        return Alea.fromValFreqs(*tuple(self.genVPs()),**kwargs)
+        return Alea._fromValFreqs(*tuple(self.genVPs()),**kwargs)
 
     def cumul(self):
         ''' evaluates the distribution, then,
@@ -1530,11 +1530,8 @@ class Lea(object):
         ''' returns a float number representing the information of given val,
             expressed in bits
             raises an exception if given val is impossible
-        '''        
-        (p,count) = self._p(val)
-        if p == 0:
-            raise Lea.Error("no information from impossible value")
-        return log2(count/float(p))
+        '''
+        return self.getAlea().informationOf(val)
 
     def lr(self,*hypLeas):
         ''' returns a float giving the likelihood ratio (LR) of an 'evidence' E,
@@ -1589,9 +1586,11 @@ from .glea import Glea
 from .tlea import Tlea
 
 # init Alea class
-Alea._init()
+#Alea.init(float)
+Alea.setProbType('f')
 
 # Lea static methods exported from Alea
+Lea.setProbType = Alea.setProbType
 Lea.coerce = Alea.coerce
 Lea.fromVals = Alea.fromVals
 Lea.fromSeq = Alea.fromSeq
@@ -1599,7 +1598,7 @@ Lea.fromValFreqs = Alea.fromValFreqs
 Lea.interval = Alea.interval
 Lea.boolProb = Alea.boolProb
 Lea.fromValFreqsDict = Alea.fromValFreqsDict
-Lea.fromValFreqsOrdered = Alea.fromValFreqsOrdered
+Lea.fromValFreqsOrdered = Alea._fromValFreqsOrdered
 Lea.fromCSVFile = Alea.fromCSVFile
 Lea.fromCSVFilename = Alea.fromCSVFilename
 Lea.fromPandasDF = Alea.fromPandasDF

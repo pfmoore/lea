@@ -25,12 +25,17 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .lea import Lea
 from .flea2 import Flea2
+from .prob_number import ProbNumber
+from .prob_fraction import ProbFraction
+from .prob_decimal import ProbDecimal
+from fractions import Fraction
+from decimal import Decimal
 from random import random
 from bisect import bisect_left, bisect_right
 from itertools import combinations, combinations_with_replacement
-from math import log, sqrt, exp, factorial
-from .toolbox import LOG2, memoize, zip, next, dict, defaultdict, makeTuple
-from .prob_fraction import ProbFraction
+from math import exp, factorial
+from .toolbox import log2, memoize, zip, next, dict, defaultdict, makeTuple
+
 import operator
 
 # try to import matplotlib package, required by plot() method
@@ -52,7 +57,14 @@ class Alea(Lea):
     '''
 
     __slots__ = ('_vs','_ps','_cumul','_invCumul','_randomIter','_cachesByFunc')
-    
+
+    @staticmethod
+    def _simplify(p,toFloat=False):
+        if hasattr(p,'factor'):
+            p = p.factor()
+        elif toFloat:
+            p = float(p)
+        return p
 
     def __init__(self,vs,ps,normalization=True):
         ''' initializes Alea instance's attributes
@@ -69,7 +81,10 @@ class Alea(Lea):
         self._vs = tuple(vs)
         if normalization:
             pSum = sum(ps)
-            self._ps = tuple(p/pSum for p in ps)
+            if hasattr(pSum,'factor'):
+                self._ps = tuple((p/pSum).factor() for p in ps)
+            else:
+                self._ps = tuple(p/pSum for p in ps)
         else:
             self._ps = tuple(ps)
         self._cumul = [0]
@@ -77,9 +92,79 @@ class Alea(Lea):
         self._randomIter = self._createRandomIter()
         self._cachesByFunc = dict()
 
+    '''
     @staticmethod
-    def _init():
-        # Constants representing certain values (Alea static attributes)
+    def setProbType(probTypeCode):
+        # TODO remove checkProbability
+        Alea.checkProbability = True
+        if probTypeCode == 'f':
+            probType = float
+        elif probTypeCode == 'r':
+            from .prob_fraction import ProbFraction
+            probType = ProbFraction
+        elif probTypeCode == 'd':
+            from .prob_decimal import ProbDecimal
+            probType = ProbDecimal
+        elif probTypeCode == 's':
+            from sympy import factor #as simplifyFunc
+            from sympy import symbols, Symbol
+            class ProbSymbol(Symbol):
+                def __new__(cls, s=0):
+                    if isinstance(s,str):
+                        return Symbol(s)
+                    return s
+                def simplify(self,toFloat=False):
+                    return factor(self)
+            probType = ProbSymbol
+            Alea.checkProbability = False
+        else:
+            raise Lea.Error("unknown probability type code '%s', should be 'f', 'r', 'd' or 's'"%probTypeCode)
+        Alea.init(probType)
+        Alea.probTypeCode = probTypeCode
+    '''
+
+
+    @staticmethod
+    def setProbType(probTypeCode):
+        # TODO remove checkProbability
+        Alea.checkProbability = True
+        if probTypeCode == 'f':
+            probType = float
+        elif probTypeCode == 'r':
+            probType = Fraction
+        elif probTypeCode == 'd':
+            probType = Decimal
+        elif probTypeCode == 's':
+            from sympy import factor #as simplifyFunc
+            from sympy import symbols, Symbol
+            class ProbSymbol(Symbol):
+                def __new__(cls, s=0):
+                    if isinstance(s,str):
+                        return Symbol(s)
+                    return s
+                #def simplify(self,toFloat=False):
+                #    return factor(self)
+            probType = ProbSymbol
+            Alea.checkProbability = False
+        else:
+            raise Lea.Error("unknown probability type code '%s', should be 'f', 'r', 'd' or 's'"%probTypeCode)
+        Alea.init(probType)
+        Alea.probTypeCode = probTypeCode
+
+    # Constants representing certain values (Alea static attributes)
+    true = None
+    false = None
+    zero = None
+    emptyTuple = None
+
+    probTypeCode = None
+    _probOne = None
+    _probType = None
+
+    @staticmethod
+    def init(probType):
+        Alea._probOne = probType(1)
+        Alea._probType = probType
         Alea.true  = Alea.coerce(True)
         Alea.false = Alea.coerce(False)
         Alea.zero  = Alea.coerce(0)
@@ -96,6 +181,7 @@ class Alea(Lea):
             as unique value, with a probability of 1.
         '''
         if not isinstance(value,Lea):
+            #return Alea((value,),(Alea._probOne,),normalization=False)
             return Alea((value,),(1,),normalization=False)
         return value
 
@@ -128,6 +214,7 @@ class Alea(Lea):
         probWeights = ProbFraction.getProbWeights(probFractions)
         return Alea.fromValFreqsDict(dict(zip(probDict.keys(),probWeights)))
     '''
+
 
     __contructorArgNames = frozenset(('ordered','sorting','normalization','check','frac'))
 
@@ -173,7 +260,7 @@ class Alea(Lea):
     '''
 
     @staticmethod
-    def fromValFreqsDict(probDict,**kwargs):
+    def _fromValFreqsDict(probDict,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given probDict dictionary of {val:prob};
             if the sequence is empty, then an exception is raised;
@@ -203,6 +290,24 @@ class Alea(Lea):
         return Alea(*zip(*vps),normalization=normalization)
 
     @staticmethod
+    def fromValFreqsDict(probDict,**kwargs):
+        ''' static method, returns an Alea instance representing a distribution
+            for the given probDict dictionary of {val:prob};
+            if the sequence is empty, then an exception is raised;
+            the method admits two optional boolean argument (in kwargs):
+            * sorting (default:True): if True, then the values for displaying
+            the distribution or getting the values will be sorted if possible
+            (i.e. no exception on sort); otherwise, or if sorting=False, then
+            the order of values is unspecified;
+            * normalization (default:True): if True, then each element
+            of the given ps is divided by the sum of all ps before being stored
+            (in such case, it's not mandatory to have true probabilities for ps
+             elements; these could be simple counters for example)
+        '''
+        probType = Alea._probType
+        return Alea._fromValFreqsDict(dict((v,probType(p)) for (v,p) in valueFreqs),**kwargs)
+
+    @staticmethod
     def fromVals(*vals,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of values, so that each value occurrence is
@@ -221,9 +326,10 @@ class Alea(Lea):
             if the sequence is empty, then an exception is raised;
         '''
         # TODO: could add decimal
-        frac = kwargs.get('frac',False)
-        one = ProbFraction.one if frac else 1.0
-        return Alea.fromValFreqs(*((val,one) for val in vals),**kwargs)
+        #frac = kwargs.get('frac',False)
+        #one = ProbFraction.one if frac else 1.0
+        #probOne = Alea._probOne
+        return Alea.fromValFreqs(*((val,1) for val in vals),**kwargs)
 
     @staticmethod
     def fromSeq(vals,**kwargs):
@@ -234,6 +340,27 @@ class Alea(Lea):
             for detailed description, refer to the doc of this method
         '''
         return Alea.fromVals(*vals,**kwargs)
+    '''
+    @staticmethod
+    def fromValFreqs(*valueFreqs,**kwargs):
+        '' static method, returns an Alea instance representing a distribution
+            for the given sequence of (v,p) tuples, where p is the
+            probability of v or some number proportional to this probability;
+            if the same v occurs multiple times, then the associated p are summed
+            together;
+            if the sequence is empty, then an exception is raised;
+            for treatment of optional kwargs keywords arguments, see doc of
+            Alea.fromValFreqsDict;
+        ''
+        (ordered,sorting,normalization,check) = Alea._parsedKwargs(kwargs)
+        if ordered:
+            return Alea._fromValFreqsOrdered(*valueFreqs,**kwargs)
+        probType = Alea._probType
+        probDict = defaultdict(probType)
+        for (value,freq) in valueFreqs:
+            probDict[value] += probType(freq)
+        return Alea.fromValFreqsDict(probDict,**kwargs)
+    '''
 
     @staticmethod
     def fromValFreqs(*valueFreqs,**kwargs):
@@ -246,13 +373,27 @@ class Alea(Lea):
             for treatment of optional kwargs keywords arguments, see doc of
             Alea.fromValFreqsDict;
         '''
+        probType = Alea._probType
+        return Alea._fromValFreqs(*((v,probType(p)) for (v,p) in valueFreqs),**kwargs)
+
+    @staticmethod
+    def _fromValFreqs(*valueFreqs,**kwargs):
+        ''' static method, returns an Alea instance representing a distribution
+            for the given sequence of (v,p) tuples, where p is the
+            probability of v or some number proportional to this probability;
+            if the same v occurs multiple times, then the associated p are summed
+            together;
+            if the sequence is empty, then an exception is raised;
+            for treatment of optional kwargs keywords arguments, see doc of
+            Alea.fromValFreqsDict;
+        '''
         (ordered,sorting,normalization,check) = Alea._parsedKwargs(kwargs)
         if ordered:
-            return Alea.fromValFreqsOrdered(*valueFreqs,**kwargs)
+            return Alea._fromValFreqsOrdered(*valueFreqs, **kwargs)
         probDict = defaultdict(int)
         for (value,freq) in valueFreqs:
             probDict[value] += freq
-        return Alea.fromValFreqsDict(probDict,**kwargs)
+        return Alea._fromValFreqsDict(probDict,**kwargs)
 
     '''
     @staticmethod
@@ -264,7 +405,7 @@ class Alea(Lea):
     '''
 
     @staticmethod
-    def fromValFreqsOrdered(*valueFreqs,**kwargs):
+    def _fromValFreqsOrdered(*valueFreqs, **kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of (val,freq) tuples, where freq is a natural
             number so that each value is taken with the given frequency
@@ -295,13 +436,16 @@ class Alea(Lea):
 
     @staticmethod
     def _binaryDistribution(p1,v1,v2):
+        # TODO: check this
+        p1 = Alea._probType(p1)
         Alea._checkProb(p1)
         if p1 == 1:
             (vs,ps) = ((v1,),(1,))
         elif p1 == 0:
             (vs,ps) = ((v2,),(1,))
         else:
-            (vs,ps) = ((v1,v2),(p1,1-p1))
+            #p1 = Alea._probType(p1)
+            (vs,ps) = ((v1,v2),(p1,Alea._probOne-p1))
         return Alea(vs,ps,normalization=False)
 
     @staticmethod
@@ -541,7 +685,7 @@ class Alea(Lea):
                 raise Lea.Error("number of values to draw exceeds the number of possible values")
             return Alea(((self._vs[0],),),(1,))
         lcmP = calcLCM(self._ps)
-        alea2s = tuple(Alea.fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),normalization=False,check=False).drawWithoutReplacement(n-1) for v in self._vs)
+        alea2s = tuple(Alea._fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),normalization=False,check=False).drawWithoutReplacement(n-1) for v in self._vs)
         lcmP2 = calcLCM(alea2._count*(lcmP//p) for (alea2,p) in zip(alea2s,self._ps))
         f = lcmP2 // lcmP
         vps = []
@@ -549,7 +693,7 @@ class Alea(Lea):
             g = (f*p) // alea2._count
             for (vt,pt) in alea2.vps():
                 vps.append(((v,)+vt,g*pt))
-        return Alea.fromValFreqsOrdered(*vps,normalization=False,check=False)
+        return Alea._fromValFreqsOrdered(*vps,normalization=False,check=False)
     '''
 
     def drawWithoutReplacement(self,n):
@@ -568,12 +712,12 @@ class Alea(Lea):
                 raise Lea.Error("number of values to draw exceeds the number of possible values")
             #return Alea(((self._vs[0],),),(1,))
             return Alea.coerce((self._vs[0],))
-        alea2s = tuple(Alea.fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),check=False).drawWithoutReplacement(n-1) for v in self._vs)
+        alea2s = tuple(Alea._fromValFreqsOrdered(*tuple((v0, p0) for (v0, p0) in self.vps() if v0 != v), check=False).drawWithoutReplacement(n - 1) for v in self._vs)
         vps = []
         for (v,p,alea2) in zip(self._vs,self._ps,alea2s):
             for (vt,pt) in alea2.vps():
                 vps.append(((v,)+vt,p*pt))
-        return Alea.fromValFreqsOrdered(*vps,check=False)
+        return Alea._fromValFreqsOrdered(*vps, check=False)
     '''
 
     @staticmethod
@@ -823,17 +967,20 @@ class Alea(Lea):
             if checkValType is True, then raises an exception if some value in the
             distribution has a type different from val's
         '''
-        p1 = 0
+        p1 = None
         if checkValType:
             errVal = self  # dummy value
             typeToCheck = type(val)
         for (v,p) in self._genVPs():
             if checkValType and not isinstance(v,typeToCheck):
                 errVal = v
-            if p1 == 0 and v == val:
+            if p1 is None and v == val:
                 p1 = p
         if checkValType and errVal is not self:
             raise Lea.Error("found <%s> value although <%s> is expected"%(type(errVal).__name__,typeToCheck.__name__))
+        if p1 is None:
+            # val is absent form self: the probability is null, casted in the type of the last probability found
+            p1 = 0 * p
         return p1
 
     def cumul(self):
@@ -950,7 +1097,10 @@ class Alea(Lea):
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
 
-    indicatorMethodNames = ('P','Pf','mean','var','std','mode','entropy','information')
+    indicatorMethodNames = ('P','Pf','mean','meanF','var','varF','std','stdF','mode','entropy','information')
+
+    _upcastProbClass = {Fraction : ProbFraction,
+                        Decimal  : ProbDecimal }
 
     def P(self):
         ''' returns the probability of True, expressed in the type used in self;
@@ -958,7 +1108,11 @@ class Alea(Lea):
             (this is NOT the case with self.p(True))
             WARNING: this method is called without parentheses
         '''
-        return self._p(True,checkValType=True)
+        p = self._p(True,checkValType=True)
+        upcastProbClass = Alea._upcastProbClass.get(p.__class__)
+        if upcastProbClass is not None:
+            p = upcastProbClass(p)
+        return p
 
     def Pf(self):
         ''' returns the probability of True, expressed as a float between 0.0 and 1.0;
@@ -966,7 +1120,33 @@ class Alea(Lea):
             (this is NOT the case with self.p(True))
             WARNING: this method is called without parentheses
         '''
-        return float(self.P)
+        return float(self._p(True,checkValType=True))
+
+    def _mean(self):
+        ''' returns the mean value of the probability distribution, which is the
+            probability weighted sum of the values;
+            requires that
+            1 - the values can be subtracted together,
+            2 - the differences of values can be multiplied by integers,
+            3 - the differences of values multiplied by integers can be
+                added to the values,
+            4 - the sum of values calculated in 3 can be divided by a float
+                or an integer;
+            if any of these conditions is not met, then the result depends of the
+            value class implementation (likely, raised exception)
+        '''
+        res = None
+        v0 = None
+        for (v,p) in self.vps():
+            if v0 is None:
+                v0 = v
+            elif res is None:
+                res = p * (v-v0)
+            else:
+                res += p * (v-v0)
+        if res is not None:
+            v0 += res
+        return v0
 
     def mean(self):
         ''' returns the mean value of the probability distribution, which is the
@@ -982,20 +1162,12 @@ class Alea(Lea):
             value class implementation (likely, raised exception)
             WARNING: this method is called without parentheses
         '''
-        res = None
-        x0 = None
-        for (x,p) in self.vps():
-            if x0 is None:
-                x0 = x
-            elif res is None:
-                res = p * (x-x0)
-            else:
-                res += p * (x-x0)
-        if res is not None:
-            x0 += res
-        return x0
-   
-    def var(self):
+        return Alea._simplify(self._mean(),False)
+
+    def meanF(self):
+        return Alea._simplify(self._mean(),True)
+
+    def _var(self):
         ''' returns a float number representing the variance of the probability distribution;
             requires that
             1 - the requirements of the mean() method are met,
@@ -1006,34 +1178,75 @@ class Alea(Lea):
             WARNING: this method is called without parentheses
         '''
         res = 0
-        m = self.mean
+        m = self._mean()
         for (v,p) in self.vps():
             res += p*(v-m)**2
         return res
 
-    def std(self):
+    def var(self):
+        return Alea._simplify(self._var(),False)
+
+    def varF(self):
+        return Alea._simplify(self._var(),True)
+
+    def _std(self):
         ''' returns a float number representing the standard deviation of the probability distribution
             requires that the requirements of the variance() method are met
             WARNING: this method is called without parentheses
-        '''      
-        return sqrt(self.var)
- 
+        '''
+        var = self._var()
+        sqrtExp = var.__class__(0.5)
+        return self._var() ** sqrtExp
+
+    def std(self):
+        return Alea._simplify(self._std(),False)
+
+    def stdF(self):
+        return Alea._simplify(self._std(),True)
+
     def mode(self):
         ''' returns a tuple with the value(s) of the probability distribution having the highest probability 
             WARNING: this method is called without parentheses
         '''
         maxP = max(self._ps)
         return tuple(v for (v,p) in self.vps() if p == maxP)
-            
+
+    def informationOf(self,val):
+        ''' returns a float number representing the information of given val,
+            expressed in bits
+            raises an exception if given val is impossible
+        '''
+        p = self._p(val)
+        try:
+            if p == 0:
+                raise Lea.Error("no information from impossible value")
+            return -log2(p)
+        except TypeError:
+            try:
+                from sympy import log
+                return -log(p,2)
+            except:
+                raise Lea.Error("cannot calculate logarithm of %s"%p)
+
+
     def entropy(self):
         ''' returns a float number representing the entropy of the probability distribution
             WARNING: this method is called without parentheses
         '''
         res = 0
-        for (v,p) in self.vps():
-            if p > 0:
-               res -= p*log(p)
-        return res / LOG2
+        try:
+            for (v,p) in self.vps():
+                if p > 0:
+                    res -= p*log2(p)
+            return res
+        except TypeError:
+            try:
+                from sympy import log
+                for (v,p) in self.vps():
+                    res -= p*log(p)
+                return res / log(2)
+            except:
+                raise Lea.Error("cannot calculate logarithm on given probability types")
 
     def internal(self,indent='',refs=None):
         ''' returns a string representing the inner definition of self;

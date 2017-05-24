@@ -25,6 +25,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .leaf import *
 __all__ = ( # objects defined in lea.lea module
-            'Lea', 'V', 'VP', 'B', 'P', 'Pf', 'X', 'f_1',
+            'Lea', 'V', 'VP', 'B', 'P', 'Pf', 'X', 'f_1', 'ProbFraction',
             # objects defined in lea.leaf module
             'die', 'dice', 'diceSeq', 'D6', 'flip', 'cardRank', 'cardSuite', 'card')

@@ -27,7 +27,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 The module toolbox provides general functions and constants needed by Lea classes 
 '''
 
-from math import log
 from functools import wraps
 import sys
 import csv
@@ -50,13 +49,17 @@ def calcLCM(values):
         idx = values1.index(minVal)
         values1[idx] += values0[idx]
     return values1[0]
-    
-LOG2 = log(2.)
 
-def log2(x):
-    ''' returns a float number that is the logarithm in base 2 of the given float x
-    '''
-    return log(x)/LOG2
+try:
+    # log2 function available in Python 3.3+
+    from math import log2
+except ImportError:
+    # Python ver < 3.3 does not have log2 function
+    from math import log
+    def log2(x):
+        ''' returns a float number that is the logarithm in base 2 of the given number x
+        '''
+        return log(x,2)
 
 def makeTuple(v):
     ''' returns a tuple with v as unique element
