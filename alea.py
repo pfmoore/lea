@@ -668,34 +668,6 @@ class Alea(Lea):
             return Alea.emptyTuple
         return self.map(makeTuple).times(n)
 
-    '''
-    def drawWithoutReplacement(self,n):
-        '' returns a new Alea instance representing the probability distribution
-            of drawing n elements from self WITHOUT replacement, taking the order
-            of drawing into account; the returned values are tuples with n elements
-            put in the order of their drawing
-            assumes that n >= 0
-            requires that n <= number of values of self, otherwise an exception
-            is raised
-        ''
-        if n == 0:
-            return Alea.emptyTuple
-        if len(self._vs) == 1:
-            if nbValues > 1:
-                raise Lea.Error("number of values to draw exceeds the number of possible values")
-            return Alea(((self._vs[0],),),(1,))
-        lcmP = calcLCM(self._ps)
-        alea2s = tuple(Alea._fromValFreqsOrdered(*tuple((v0,p0) for (v0,p0) in self.vps() if v0 != v),normalization=False,check=False).drawWithoutReplacement(n-1) for v in self._vs)
-        lcmP2 = calcLCM(alea2._count*(lcmP//p) for (alea2,p) in zip(alea2s,self._ps))
-        f = lcmP2 // lcmP
-        vps = []
-        for (v,p,alea2) in zip(self._vs,self._ps,alea2s):
-            g = (f*p) // alea2._count
-            for (vt,pt) in alea2.vps():
-                vps.append(((v,)+vt,g*pt))
-        return Alea._fromValFreqsOrdered(*vps,normalization=False,check=False)
-    '''
-
     def drawWithoutReplacement(self,n):
         ''' returns a new Alea instance representing the probability distribution
             of drawing n elements from self WITHOUT replacement, taking the order
@@ -718,38 +690,18 @@ class Alea(Lea):
             for (vt,pt) in alea2.vps():
                 vps.append(((v,)+vt,p*pt))
         return Alea._fromValFreqsOrdered(*vps, check=False)
-    '''
 
-    @staticmethod
-    def poisson(mean,precision):
-        '' static method, returns an Alea instance representing a Poisson probability
-            distribution having the given mean; the distribution is approximated by
-            the finite set of values that have probability > precision
-            (i.e. low/high values with too small probabilities are dropped)
-        ''
-        precFactor = 0.5 / precision
-        valFreqs = []
-        p = exp(-mean)
-        v = 0
-        t = 0.
-        while p > 0.0:
-            valFreqs.append((v,int(0.5+p*precFactor)))
-            t += p
-            v += 1
-            p = (p*mean) / v
-        return Alea.fromValFreqs(*valFreqs)
-    '''
-
-    def poisson(mean,precision):
+    def poisson(mean,precision=1e-20):
         ''' static method, returns an Alea instance representing a Poisson probability
             distribution having the given mean; the distribution is approximated by
             the finite set of values that have probability > precision
-            (i.e. low/high values with too small probabilities are dropped)
+            (i.e. low/high values with too small probabilities are dropped);
+            the probabilities are stored as float
         '''
         valFreqs = []
         p = exp(-mean)
         v = 0
-        t = 0.
+        t = 0.0
         while p >= precision or v <= mean:
             if p >= precision:
                 valFreqs.append((v,p))
@@ -820,6 +772,10 @@ class Alea(Lea):
         return self.asString('.',nbDecimals)
 
     def withFloatProb(self):
+        ''' returns a new Alea instance equivalent to self, where the probabilities
+            are converted to float;
+            requires that probabilities of self are convertible to float
+        '''
         return Alea(self._vs,(float(p) for p in self._ps),normalization=False)
 
     def asPct(self,nbDecimals=2):
@@ -894,16 +850,6 @@ class Alea(Lea):
         # note that the new Alea instance shares the immutable _vs and _ps attributes of self
         return Alea(self._vs,self._ps,normalization=False)
 
-    '''
-    def _getCount(self):
-        '' returns the total probability weight count (integer) of current Alea;
-            this value depends on current binding (hence, the calculated value cannot be cached)
-        ''
-        if self._val is self:
-            return self._count
-        return 1
-    '''
-
     def _genVPs(self):
         ''' generates tuples (v,p) where v is a value of self
             and p is the associated probability;
@@ -940,32 +886,11 @@ class Alea(Lea):
             finally:
                 # unbind value, after the random value has been bound or if an exception has been raised
                 self._val = self
-    
-    '''
-    def _p(self,val,checkValType=False):
-        '' returns the probability p of the given value val
-            if checkValType is True, then raises an exception if some value in the
-            distribution has a type different from val's
-        ''
-        p1 = 0
-        if checkValType:
-            errVal = self  # dummy value
-            typeToCheck = type(val)
-        # note: shall not exit the loop by a break/return (unbinding)
-        for (v,p) in self._genVPs():
-            if checkValType and not isinstance(v,typeToCheck):
-                errVal = v
-            if p1 == 0 and v == val:
-                p1 = p
-        if checkValType and errVal is not self:
-            raise Lea.Error("found <%s> value although <%s> is expected"%(type(errVal).__name__,typeToCheck.__name__))
-        return p1
-    '''
 
     def _p(self,val,checkValType=False):
         ''' returns the probability p of the given value val
-            if checkValType is True, then raises an exception if some value in the
-            distribution has a type different from val's
+            if checkValType is True, then raises an exception if some value
+            in the distribution has a type different from val's
         '''
         p1 = None
         if checkValType:
@@ -989,7 +914,7 @@ class Alea(Lea):
             the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
-            Note : the returned list is cached
+            Note: the returned list is cached
         '''
         if len(self._cumul) == 1:
             cumulList = self._cumul
@@ -1005,7 +930,7 @@ class Alea(Lea):
             the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
-            Note : the returned list is cached
+            Note: the returned list is cached
         '''
         if len(self._invCumul) == 0:
             invCumulList = self._invCumul
@@ -1099,41 +1024,34 @@ class Alea(Lea):
 
     indicatorMethodNames = ('P','Pf','mean','meanF','var','varF','std','stdF','mode','entropy','information')
 
-    _upcastProbClass = {Fraction : ProbFraction,
-                        Decimal  : ProbDecimal }
+    # dicitionary used in P method
+    __downcastProbClass = dict(Fraction = ProbFraction,
+                               Decimal  = ProbDecimal)
 
     def P(self):
-        ''' returns the probability of True, expressed in the type used in self;
+        ''' returns the probability of True, expressed in the probability type used in self
+            or downcasted if possible (Fraction -> ProbFraction, Decimal -> ProbDecimal)
             raises an exception if some value in the distribution is not boolean
-            (this is NOT the case with self.p(True))
+            (note that this is NOT the case with self.p(True))
             WARNING: this method is called without parentheses
         '''
         p = self._p(True,checkValType=True)
-        upcastProbClass = Alea._upcastProbClass.get(p.__class__)
-        if upcastProbClass is not None:
-            p = upcastProbClass(p)
+        downcastProbClass = Alea.__downcastProbClass.get(p.__class__)
+        if downcastProbClass is not None:
+            p = downcastProbClass(p)
         return p
 
     def Pf(self):
         ''' returns the probability of True, expressed as a float between 0.0 and 1.0;
             raises an exception if some value in the distribution is not boolean
             (this is NOT the case with self.p(True))
+            raises an exception if the probability type is no convertible to float
             WARNING: this method is called without parentheses
         '''
         return float(self._p(True,checkValType=True))
 
     def _mean(self):
-        ''' returns the mean value of the probability distribution, which is the
-            probability weighted sum of the values;
-            requires that
-            1 - the values can be subtracted together,
-            2 - the differences of values can be multiplied by integers,
-            3 - the differences of values multiplied by integers can be
-                added to the values,
-            4 - the sum of values calculated in 3 can be divided by a float
-                or an integer;
-            if any of these conditions is not met, then the result depends of the
-            value class implementation (likely, raised exception)
+        ''' same as mean method but without conversion nor simplification
         '''
         res = None
         v0 = None
@@ -1165,17 +1083,13 @@ class Alea(Lea):
         return Alea._simplify(self._mean(),False)
 
     def meanF(self):
+        ''' same as mean method but with conversion to float or simplification of symbolic expression
+            WARNING: this method is called without parentheses
+        '''
         return Alea._simplify(self._mean(),True)
 
     def _var(self):
-        ''' returns a float number representing the variance of the probability distribution;
-            requires that
-            1 - the requirements of the mean() method are met,
-            2 - the values can be subtracted to the mean value,
-            3 - the differences between values and the mean value can be squared;
-            if any of these conditions is not met, then the result depends of the
-            value implementation (likely, raised exception)
-            WARNING: this method is called without parentheses
+        ''' same as var method but without conversion nor simplification
         '''
         res = 0
         m = self._mean()
@@ -1184,28 +1098,47 @@ class Alea(Lea):
         return res
 
     def var(self):
+        ''' returns the variance of the probability distribution;
+            requires that
+            1 - the requirements of the mean() method are met,
+            2 - the values can be subtracted to the mean value,
+            3 - the differences between values and the mean value can be squared;
+            if any of these conditions is not met, then the result depends of the
+            value implementation (likely, raised exception)
+            WARNING: this method is called without parentheses
+        '''
         return Alea._simplify(self._var(),False)
 
     def varF(self):
+        ''' same as var method but with conversion to float or simplification of symbolic expression
+            WARNING: this method is called without parentheses
+        '''
         return Alea._simplify(self._var(),True)
 
     def _std(self):
-        ''' returns a float number representing the standard deviation of the probability distribution
-            requires that the requirements of the variance() method are met
-            WARNING: this method is called without parentheses
+        ''' same as std method but without conversion nor simplification
         '''
         var = self._var()
         sqrtExp = var.__class__(0.5)
-        return self._var() ** sqrtExp
+        return var ** sqrtExp
 
     def std(self):
+        ''' returns the standard deviation of the probability distribution
+            requires that the requirements of the var method are met
+            WARNING: this method is called without parentheses
+        '''
         return Alea._simplify(self._std(),False)
 
     def stdF(self):
+        ''' same as std method but with conversion to float or simplification
+            of symbolic expression
+            WARNING: this method is called without parentheses
+        '''
         return Alea._simplify(self._std(),True)
 
     def mode(self):
-        ''' returns a tuple with the value(s) of the probability distribution having the highest probability 
+        ''' returns a tuple with the value(s) of the probability distribution
+            having the highest probability
             WARNING: this method is called without parentheses
         '''
         maxP = max(self._ps)
@@ -1213,8 +1146,14 @@ class Alea(Lea):
 
     def informationOf(self,val):
         ''' returns a float number representing the information of given val,
-            expressed in bits
+            expressed in bits:
+               log2(P(self==val))
+            assuming that probability of val is (convertible to) float;
+            if probability of val is a sympy expression, then the returned
+            object is the information of val as a sympy expression
             raises an exception if given val is impossible
+            raises an exception if probability of given val is neither
+            convertible to float nor a sympy expression
         '''
         p = self._p(val)
         try:
@@ -1228,9 +1167,14 @@ class Alea(Lea):
             except:
                 raise Lea.Error("cannot calculate logarithm of %s"%p)
 
-
     def entropy(self):
-        ''' returns a float number representing the entropy of the probability distribution
+        ''' returns a float number representing the entropy of the probability
+            distribution expressed in bits, assuming that probabilities are
+            (convertible to) float;
+            if any probability is a sympy expression, then returns
+            the entropy of self as a sympy expression
+            raises an exception if some probabilities are neither
+            convertible to float nor a sympy expression
             WARNING: this method is called without parentheses
         '''
         res = 0
@@ -1261,5 +1205,3 @@ class Alea(Lea):
             return self._id()+'*'
         refs.add(self)
         return self._id() + str(tuple(self.vps()))
-
-

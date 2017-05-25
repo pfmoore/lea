@@ -31,7 +31,8 @@ class ProbFraction(ProbNumber,Fraction):
 
     ''' 
     A ProbFraction instance represents a probability as a fraction
-    It inherits Fraction, overloading methods to improve useability
+    It inherits ProbFraction and Fraction, overloading methods to
+    improve useability
     '''
     
     class Error(Exception):
@@ -61,7 +62,7 @@ class ProbFraction(ProbNumber,Fraction):
         ''' static method, returns a ProbFraction numerically equivalent to
             the given Fraction instance;
             if fraction is not an instance of Fraction then it is returned
-             as-is
+            as-is
         '''
         if not isinstance(fraction,Fraction):
             return fraction
@@ -103,36 +104,6 @@ class ProbFraction(ProbNumber,Fraction):
     # Python 2 compatibility
     __div__ = __truediv__
     __rdiv__ = __rtruediv__
-
-    '''
-    def check(self):
-        '' raises an Exception if the fraction is not in the probability range, from 0 to 1
-        ''
-        if not (0 <= self <= 1):
-            raise ProbFraction.Error("%s is not a valid probability (between 0 and 1)"%Fraction.__str__(self))
-
-    def __str__(self):
-        '' returns a string representation "numerator/denominator" of self
-            raises an Exception if the fraction is not in the probability range, from 0 to 1
-        ''
-        self.check()
-        #return Fraction.__str__(self)
-        return super(Fraction,self).__str__()
-    
-    # overwrites representation method
-    __repr__ = __str__
-    
-    def asFloat(self):
-        '' returns float string representation of self
-            note: to get float number, use float(self) 
-        ''
-        return str(float(self))
-
-    def asPct(self):
-        '' returns float percentage string representation of self
-        ''
-        return "%f %%" % float(self*100)
-    '''
 
     @staticmethod
     def getProbWeights(fractions):

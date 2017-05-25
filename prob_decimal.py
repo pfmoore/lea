@@ -30,7 +30,8 @@ class ProbDecimal(ProbNumber,Decimal):
 
     ''' 
     A ProbDecimal instance represents a probability as a decimal
-    It inherits Decimal, overloading methods to improve useability
+    It inherits ProbNumber and Decimal, overloading methods to
+    improve useability
     '''
     
     class Error(Exception):
@@ -63,7 +64,7 @@ class ProbDecimal(ProbNumber,Decimal):
         ''' static method, returns a ProbDecimal numerically equivalent to
             the given Decimal instance;
             if decimal is not an instance of Decimal then it is returned
-             as-is
+            as-is
         '''
         if not isinstance(decimal,Decimal):
             return decimal
