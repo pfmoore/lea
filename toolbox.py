@@ -279,4 +279,6 @@ def readCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
     return (attrNames,dataFreq)
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    ''' returns True iff float a and b are almost equal
+    '''
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)

@@ -53,7 +53,7 @@ class Alea(Lea):
     Alea is a Lea subclass, which instance is defined by explicit probability distribution data.
     An Alea instance is defined by given value-probability pairs. The probabilities can be
     expressed as any object with arithmetic semantic. The main candidates are float, fraction
-    or symbolic expressions. Values having null probability counters are dropped.
+    or symbolic expressions
     '''
 
     __slots__ = ('_vs','_ps','_cumul','_invCumul','_randomIter','_cachesByFunc')
@@ -92,38 +92,6 @@ class Alea(Lea):
         self._randomIter = self._createRandomIter()
         self._cachesByFunc = dict()
 
-    '''
-    @staticmethod
-    def setProbType(probTypeCode):
-        # TODO remove checkProbability
-        Alea.checkProbability = True
-        if probTypeCode == 'f':
-            probType = float
-        elif probTypeCode == 'r':
-            from .prob_fraction import ProbFraction
-            probType = ProbFraction
-        elif probTypeCode == 'd':
-            from .prob_decimal import ProbDecimal
-            probType = ProbDecimal
-        elif probTypeCode == 's':
-            from sympy import factor #as simplifyFunc
-            from sympy import symbols, Symbol
-            class ProbSymbol(Symbol):
-                def __new__(cls, s=0):
-                    if isinstance(s,str):
-                        return Symbol(s)
-                    return s
-                def simplify(self,toFloat=False):
-                    return factor(self)
-            probType = ProbSymbol
-            Alea.checkProbability = False
-        else:
-            raise Lea.Error("unknown probability type code '%s', should be 'f', 'r', 'd' or 's'"%probTypeCode)
-        Alea.init(probType)
-        Alea.probTypeCode = probTypeCode
-    '''
-
-
     @staticmethod
     def setProbType(probTypeCode):
         # TODO remove checkProbability
@@ -135,15 +103,12 @@ class Alea(Lea):
         elif probTypeCode == 'd':
             probType = Decimal
         elif probTypeCode == 's':
-            from sympy import factor #as simplifyFunc
             from sympy import symbols, Symbol
             class ProbSymbol(Symbol):
                 def __new__(cls, s=0):
                     if isinstance(s,str):
                         return Symbol(s)
                     return s
-                #def simplify(self,toFloat=False):
-                #    return factor(self)
             probType = ProbSymbol
             Alea.checkProbability = False
         else:
@@ -215,7 +180,6 @@ class Alea(Lea):
         return Alea.fromValFreqsDict(dict(zip(probDict.keys(),probWeights)))
     '''
 
-
     __contructorArgNames = frozenset(('ordered','sorting','normalization','check','frac'))
 
     @staticmethod
@@ -243,22 +207,6 @@ class Alea(Lea):
                 raise Lea.Error("ordered and sorting arguments cannot be set to True together")
         return (ordered,sorting,normalization,check)
 
-    '''
-    # TODO: remove tests for symbolic calculations
-    @staticmethod
-    def _getVPsIter(vps,normalization):
-        #if any(p < 0 for (_,p) in vps):
-        #    raise Lea.Error("negative probability")
-        probSum = sum(p for (_,p) in vps)
-        if probSum == 0:
-            raise Lea.Error("impossible to build a probability distribution with no value")
-        if normalization and probSum != 1:
-            # return ((v,p/probSum) for (v,p) in vps if p > 0)
-            return ((v,p/probSum) for (v,p) in vps)
-        print (normalization, probSum)
-        return iter(vps)
-    '''
-
     @staticmethod
     def _fromValFreqsDict(probDict,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
@@ -277,16 +225,15 @@ class Alea(Lea):
         (ordered,sorting,normalization,check) = Alea._parsedKwargs(kwargs)
         if ordered:
             raise Lea.Error("cannot keep order of dictionary keys")
-        vpsIter = probDict.items()
+        vps = list(probDict.items())
+        if len(vps) == 0:
+            raise Lea.Error("cannot build a probability distribution with no value - maybe due to impossible evidence")
         if sorting:
-            vps = list(vpsIter)
-            try:            
+            try:
                 vps.sort()
             except:
                 # no ordering relationship on values (e.g. complex numbers)
                 pass
-        else:
-            vps = vpsIter
         return Alea(*zip(*vps),normalization=normalization)
 
     @staticmethod
@@ -958,7 +905,7 @@ class Alea(Lea):
     def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
             in a random order respecting the probabilities
-            (the higher count of a value, the most likely the value will be in the
+            (the higher probability of a value, the most likely the value will be in the
              beginning of the sequence)
             if n > 0, then only n different values will be drawn
             if sorted is True, then the returned tuple is sorted
@@ -1022,7 +969,8 @@ class Alea(Lea):
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
 
-    indicatorMethodNames = ('P','Pf','mean','meanF','var','varF','std','stdF','mode','entropy','information')
+    indicatorMethodNames = ('P','Pf','mean','meanF','var','varF','std','stdF','mode','entropy',
+                            'relEntropy','redundancy','information')
 
     # dicitionary used in P method
     __downcastProbClass = dict(Fraction = ProbFraction,
@@ -1167,14 +1115,24 @@ class Alea(Lea):
             except:
                 raise Lea.Error("cannot calculate logarithm of %s"%p)
 
+    def information(self):
+        ''' returns the information of self being true, expressed in bits
+            assuming that self is a boolean distribution;
+            the returned type is a float or a sympy expression (see doc of
+            Alea.entropy);
+            raises an exception if self is certainly false
+            WARNING: this method is called without parentheses
+        '''
+        return self.informationOf(True)
+
     def entropy(self):
-        ''' returns a float number representing the entropy of the probability
-            distribution expressed in bits, assuming that probabilities are
-            (convertible to) float;
-            if any probability is a sympy expression, then returns
-            the entropy of self as a sympy expression
-            raises an exception if some probabilities are neither
-            convertible to float nor a sympy expression
+        ''' returns the entropy of self in bits;
+            if all probabilities are (convertible to) float, then the entropy
+            is returned as a float;
+            if any probability is a sympy expression, then the entropy is
+            returned as a sympy expression
+            raises an exception if some probabilities are neither convertible
+            to float nor a sympy expression
             WARNING: this method is called without parentheses
         '''
         res = 0
@@ -1191,6 +1149,33 @@ class Alea(Lea):
                 return res / log(2)
             except:
                 raise Lea.Error("cannot calculate logarithm on given probability types")
+
+    def relEntropy(self):
+        ''' returns the relativz entropy of self;
+            if all probabilities are (convertible to) float, then the relative
+            entropy is returned as a float between 0.0 and 1.0;
+            if any probability is a sympy expression, then the relative entropy
+            is returned as a sympy expression;
+            raises an exception if some probabilities are neither convertible
+            to float nor a sympy expression
+            WARNING: this method is called without parentheses
+        '''
+        n = len(self._vs)
+        if n == 1:
+            return 0.0
+        return min(1.0,self.entropy/log2(n))
+
+    def redundancy(self):
+        ''' returns the redundancy of self;
+            if all probabilities are (convertible to) float, then the
+            redundancy is returned as a float between 0.0 and 1.0;
+            if any probability is a sympy expression, then the redundancy
+            is returned as a sympy expression;
+            raises an exception if some probabilities are neither convertible
+            to float nor a sympy expression
+            WARNING: this method is called without parentheses
+        '''
+        return 1.0 - self.relEntropy
 
     def internal(self,indent='',refs=None):
         ''' returns a string representing the inner definition of self;

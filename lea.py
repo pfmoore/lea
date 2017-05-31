@@ -97,10 +97,8 @@ class Lea(object):
     different methods to instantiate these subclasses, so it is usually not needed to instantiate
     them explicitely. Here is an overview on these subclasses, with their relationships.
 
-    - An Alea instance is defined by explicit value-probability pairs. Each probability is defined as
-    a positive "counter" integer, without upper limit; the actual probability is calculated by
-    dividing the counter by the sum of all counters; values having null probability counters are
-    dropped.
+    - An Alea instance is defined by explicit value-probability pairs, that is a probability mass
+    function.
 
     Instances of other Lea's subclasses represent probability distributions obtained by operations
     done on existing Lea instance(s). Any such instance forms a tree structure, having other Lea
@@ -1222,19 +1220,6 @@ class Lea(object):
         Lea._checkBooleans('NOT',a)
         return operator.not_(a)    
 
-    def _getCount(self):
-        ''' returns the total probability weight count (integer) of current Lea;
-            this value depends on current binding(s) on depending Alea leaves (hence, the
-            calculated value cannot be cached);
-            Note that the returned value could be obtained also by calling _genVPs()
-            method and summing all the weights; however, the present method does that in
-            a far more efficient way
-        '''
-        count = 1
-        for aleaLeaf in self.getAleaLeavesSet():
-            count *= aleaLeaf._getCount()
-        return count
-
     def _getLeaChildren(self):
         ''' returns a tuple containing all the Lea instances children of the current Lea;
             Lea._getLeaChildren method is abstract: it is implemented in all Lea's subclasses
@@ -1490,7 +1475,7 @@ class Lea(object):
     def randomDraw(self,n=None,sorted=False):
         ''' evaluates the distribution, then,
             if n=None, then returns a tuple with all the values of the distribution, in a random order
-                       respecting the probabilities (the higher count of a value, the most likely
+                       respecting the probabilities (the higher probability of a value, the most likely
                        the value will be in the beginning of the sequence)
             if n > 0,  then returns only n different drawn values
             if sorted is True, then the returned tuple is sorted
@@ -1499,37 +1484,44 @@ class Lea(object):
 
     @staticmethod
     def jointEntropy(*args):
-        ''' returns a float number representing the joint entropy of arguments,
-            expressed in bits
+        ''' returns the joint entropy of arguments, expressed in bits;
+            the returned type is a float or a sympy expression (see doc of
+            Alea.entropy)
         '''
         return Clea(*args).entropy
 
     def condEntropy(self,other):
-        ''' returns a float number representing the conditional entropy of self
-            given other, expressed in bits; note that this value is also known
-            as the equivocation of self about other
+        ''' returns the conditional entropy of self given other, expressed in
+            bits; note that this value is also known as the equivocation of
+            self about other;
+            the returned type is a float or a sympy expression (see doc of
+            Alea.entropy)
         '''
         other = Lea.coerce(other)
-        return max(0.,Clea(self,other).entropy - other.entropy)
+        ce = Clea(self,other).entropy - other.entropy
+        try:
+            return max(0.0,ce)
+        except:
+            return ce
 
     def mutualInformation(self,other):
-        ''' returns a float number representing the mutual information between self and other,
-            expressed in bits
+        ''' returns the mutual information between self and other, expressed
+            in bits;
+            the returned type is a float or a sympy expression (see doc of
+            Alea.entropy)
         '''
         other = Lea.coerce(other)
-        return max(0.,self.entropy + other.entropy - Clea(self,other).entropy)
-
-    def information(self):
-        ''' returns a float number representing the information of self being true,
-            expressed in bits (assuming that self is a boolean distribution)
-            raises an exception if self is certainly false
-        '''
-        return self.informationOf(True)
+        mi = self.entropy + other.entropy - Clea(self,other).entropy
+        try:
+            return max(0.0,mi)
+        except:
+            return mi
 
     def informationOf(self,val):
-        ''' returns a float number representing the information of given val,
-            expressed in bits
-            raises an exception if given val is impossible
+        ''' returns the information of given val, expressed in bits;
+            the returned type is a float or a sympy expression (see doc of
+            Alea.entropy);
+            raises an exception if given val has a null probability
         '''
         return self.getAlea().informationOf(val)
 
@@ -1585,8 +1577,7 @@ from .flea2a import Flea2a
 from .glea import Glea
 from .tlea import Tlea
 
-# init Alea class
-#Alea.init(float)
+# init Alea class, with float type by default
 Alea.setProbType('f')
 
 # Lea static methods exported from Alea
