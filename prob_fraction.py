@@ -23,7 +23,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from .toolbox import calcLCM
 from .prob_number import ProbNumber
 from fractions import Fraction
 
@@ -105,8 +104,22 @@ class ProbFraction(ProbNumber,Fraction):
     __div__ = __truediv__
     __rdiv__ = __rtruediv__
 
+
     @staticmethod
-    def getProbWeights(fractions):
+    def calcLCM(values):
+        ''' returns the least common multiple among the given sequence of integers;
+            assumes that all values are strictly positive
+        '''
+        values0 = tuple(frozenset(values))
+        values1 = list(values0)
+        while len(set(values1)) > 1:
+            minVal = min(values1)
+            idx = values1.index(minVal)
+            values1[idx] += values0[idx]
+        return values1[0]
+
+    @staticmethod
+    def convertToSameDenom(fractions):
         ''' static method, returns a tuple of integers
             which are the numerators of given sequence of fractions,
             after conversion to a common denominator  
@@ -114,8 +127,8 @@ class ProbFraction(ProbNumber,Fraction):
         denominators = tuple(fraction.denominator for fraction in fractions)
         if len(denominators) == 0:
             raise ProbFraction.Error('getProbWeights requires at least one fraction')
-        lcm = calcLCM(denominators)
-        return tuple(fraction.numerator*(lcm//fraction.denominator) for fraction in fractions) 
+        lcm = ProbFraction.calcLCM(denominators)
+        return (tuple(fraction.numerator*(lcm//fraction.denominator) for fraction in fractions), lcm)
 
 # constant unity instance to ease definition of other instances by multiplication
 ProbFraction.one = ProbFraction(1)

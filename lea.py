@@ -28,7 +28,7 @@ import sys
 from itertools import islice
 from collections import namedtuple
 from .prob_fraction import ProbFraction
-from .toolbox import calcGCD, easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip, isclose
+from .toolbox import easyMin, easyMax, readCSVFilename, readCSVFile, dict, zip, isclose
 
 class Lea(object):
     
@@ -283,70 +283,6 @@ class Lea(object):
         else:    
             lea1 = Blea.if_(reqCondLea,self.given(curCondLea).getAlea(sorting=False),self.given(~curCondLea).getAlea(sorting=False))
         return lea1.getAlea()
-        
-    def withCondProb(self,condLea,givenCondLea,pNum,pDen):
-        ''' [DEPRECATED: use Lea.revisedWithCPT instead]
-            returns a new Alea instance from current distribution,
-            such that pNum/pDen is the probability that condLea is true
-            given that givenCondLea is True, under the constraint that
-            the returned distribution keeps prior probabilities of condLea
-            and givenCondLea unchanged
-        '''
-        if not (0 <= pNum <= pDen):
-            raise Lea.Error("%d/%d is outside the probability range [0,1]"%(pNum,pDen))
-        condLea = Lea.coerce(condLea)
-        givenCondLea = Lea.coerce(givenCondLea)
-        # max 2x2 distribution (True,True), (True,False), (False,True), (True,True)
-        # prior joint probabilities, non null probability
-        d = self.map(lambda v:(condLea.isTrue(),givenCondLea.isTrue())).getAlea()
-        e = dict(d._genVPs())
-        eTT = e.get((True,True),0)
-        eFT = e.get((False,True),0)
-        eTF = e.get((True,False),0)
-        eFF = e.get((False,False),0)
-        nCondLeaTrue = eTT + eTF
-        nCondLeaFalse = eFT + eFF
-        nGivenCondLeaTrue = eTT + eFT
-        # new joint probabilities
-        nTT = nGivenCondLeaTrue*pNum
-        nFT = nGivenCondLeaTrue*(pDen-pNum)
-        nTF = nCondLeaTrue*pDen - nTT
-        nFF = nCondLeaFalse*pDen - nFT
-        # feasibility checks
-        if eTT == 0 and nTT > 0:
-            raise Lea.Error("unfeasible: probability shall remain 0")
-        if eFT == 0 and nFT > 0:
-            raise Lea.Error("unfeasible: probability shall remain 1")
-        if eTF == 0 and nTF > 0:
-            raise Lea.Error("unfeasible: probability shall remain %d/%d"%(nCondLeaTrue,nGivenCondLeaTrue)) 
-        if eFF == 0 and nFF > 0:
-            msg = "unfeasible"
-            if nGivenCondLeaTrue >= nCondLeaTrue:
-                msg += ": probability shall remain %d/%d"%(nGivenCondLeaTrue-nCondLeaTrue,nGivenCondLeaTrue)
-            raise Lea.Error(msg)
-        if nTF < 0 or nFF < 0:
-            pDenMin = nGivenCondLeaTrue
-            pNumMin = max(0,nGivenCondLeaTrue-nCondLeaFalse)
-            pDenMax = nGivenCondLeaTrue
-            pNumMax = min(pDenMax,nCondLeaTrue)
-            gMin = calcGCD(pNumMin,pDenMin)
-            gMax = calcGCD(pNumMax,pDenMax)
-            pNumMin //= gMin 
-            pDenMin //= gMin 
-            pNumMax //= gMax 
-            pDenMax //= gMax
-            raise Lea.Error("unfeasible: probability shall be in the range [%d/%d,%d/%d]"%(pNumMin,pDenMin,pNumMax,pDenMax))
-        w = { (True  , True ) : nTT,
-              (True  , False) : nTF,
-              (False , True ) : nFT,
-              (False , False) : nFF }
-        m = 1
-        for r in e.values():
-            m *= r      
-        # factors to be applied on current probabilities
-        # depending on the truth value of (condLea,givenCondLea) on each value
-        w2 = dict((cg,w[cg]*(m//ecg)) for (cg,ecg) in e.items())
-        return Alea.fromValFreqs(*((v,p*w2[(condLea.isTrue(),givenCondLea.isTrue())]) for (v,p) in self.genVPs()))
 
     def given(self,*evidences):
         ''' returns a new Ilea instance representing the current distribution

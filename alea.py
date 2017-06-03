@@ -657,13 +657,18 @@ class Alea(Lea):
             p = (p*mean) / v
         return Alea.fromValFreqs(*valFreqs)
 
-    def asString(self,kind='.',nbDecimals=None,histoSize=100):
+    __DISPLAY_KINDS = (None, '/', '.', '%', '-', '/-', '.-', '%-')
+
+    def asString(self,kind=None,nbDecimals=6,histoSize=100):
         ''' returns a string representation of probability distribution self;
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value with its
-            probability in a format depending of given kind, which is string among
-            '.', '%', '-', '/-', '.-', '%-';
+            probability in a format depending of given kind, which is either None
+            (default) or a string among
+                '/', '.', '%', '-', '/-', '.-', '%-';
             the probabilities are displayed as
+            - if kind is None   : as they are stored
+            - if kind[0] is '/' : rational numbers "n/d" or "0" or "1"
             - if kind[0] is '.' : decimals with given nbDecimals digits
             - if kind[0] is '%' : percentage decimals with given nbDecimals digits
             - if kind[0] is '-' : histogram bar made up of repeated '-', such that
@@ -673,28 +678,37 @@ class Alea(Lea):
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used
         '''
-        if kind not in ('.', '%', '-', '/-', '.-', '%-'):
-            raise Lea.Error("invalid display format '%s'"%kind)
+        if kind not in Alea.__DISPLAY_KINDS:
+            raise Lea.Error("invalid display format '%s'; should be among %s"%(kind,Alea.__DISPLAY_KINDS))
         valueStrings = tuple(str(v) for v in self._vs)
         ps = self._ps
         vm = max(len(v) for v in valueStrings)
         linesIter = (v.rjust(vm)+' : ' for v in valueStrings)
-        probRepresentation = kind[0]
-        withHisto = kind[-1] == '-'
-        if probRepresentation == '.':
-            if nbDecimals is None:
-                fmt = "%s%s"
-            else:
+        if kind is None:
+            linesIter = (line+str(p) for (line,p) in zip(linesIter,ps))
+        else:
+            probRepresentation = kind[0]
+            withHisto = kind[-1] == '-'
+            if probRepresentation == '/':
+                (pnums,pdenom) = ProbFraction.convertToSameDenom(tuple(Fraction(p) for p in ps))
+                pnumSum = sum(pnums)
+                if pnumSum != pdenom:
+                   (pnums,pdenom) = ProbFraction.convertToSameDenom(tuple(Fraction(pnum,pnumSum) for pnum in pnums))
+                pStrings = tuple(str(pnum) for pnum in pnums)
+                pnumSizeMax = len(str(max(pnum for pnum in pnums)))
+                if pdenom == 1:
+                    den = ''
+                else:
+                    den = '/%d' % pdenom
+                linesIter = (line+pString.rjust(pnumSizeMax)+den for (line,pString) in zip(linesIter,pStrings))
+            elif probRepresentation == '.':
                 fmt = "%%s%%.%df" % nbDecimals
-            linesIter = (fmt%(line,p) for (line,p) in zip(linesIter,ps))
-        elif probRepresentation == '%':
-            if nbDecimals is None:
-                fmt = "%s%s %%"
-            else:
+                linesIter = (fmt%(line,p) for (line,p) in zip(linesIter,ps))
+            elif probRepresentation == '%':
                 fmt = "%%s%%%d.%df %%%%" % (4+nbDecimals,nbDecimals)
-            linesIter = (fmt%(line,100.*p) for (line,p) in zip(linesIter,ps))
-        if withHisto:
-            linesIter = (line+' '+int(0.5+(p)*histoSize)*'-' for (line,p) in zip(linesIter,ps))
+                linesIter = (fmt%(line,100.*p) for (line,p) in zip(linesIter,ps))
+            if withHisto:
+                linesIter = (line+' '+int(0.5+(p)*histoSize)*'-' for (line,p) in zip(linesIter,ps))
         return '\n'.join(linesIter)
 
     def __str__(self):
@@ -905,7 +919,7 @@ class Alea(Lea):
     def randomDraw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
             in a random order respecting the probabilities
-            (the higher probability of a value, the most likely the value will be in the
+            (the higher probability of a value, the more likely the value will be in the
              beginning of the sequence)
             if n > 0, then only n different values will be drawn
             if sorted is True, then the returned tuple is sorted
@@ -972,13 +986,15 @@ class Alea(Lea):
     indicatorMethodNames = ('P','Pf','mean','meanF','var','varF','std','stdF','mode','entropy',
                             'relEntropy','redundancy','information')
 
-    # dicitionary used in P method
-    __downcastProbClass = dict(Fraction = ProbFraction,
-                               Decimal  = ProbDecimal)
+    # dictionary used in P method
+    __downcastProbClass = dict({Fraction: ProbFraction,
+                                Decimal : ProbDecimal})
 
     def P(self):
-        ''' returns the probability of True, expressed in the probability type used in self
-            or downcasted if possible (Fraction -> ProbFraction, Decimal -> ProbDecimal)
+        ''' returns the probability that self is True;
+            the probability is expressed in the probability type used in self,
+            possibly downcasted for convenience (Fraction -> ProbFraction,
+            Decimal -> ProbDecimal);
             raises an exception if some value in the distribution is not boolean
             (note that this is NOT the case with self.p(True))
             WARNING: this method is called without parentheses
@@ -990,10 +1006,11 @@ class Alea(Lea):
         return p
 
     def Pf(self):
-        ''' returns the probability of True, expressed as a float between 0.0 and 1.0;
+        ''' returns the probability that self is True;
+            the probability is expressed as a float between 0.0 and 1.0;
+            raises an exception if the probability type is no convertible to float
             raises an exception if some value in the distribution is not boolean
             (this is NOT the case with self.p(True))
-            raises an exception if the probability type is no convertible to float
             WARNING: this method is called without parentheses
         '''
         return float(self._p(True,checkValType=True))

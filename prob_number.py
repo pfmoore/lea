@@ -45,7 +45,7 @@ class ProbNumber(object):
             raises an Exception if the value is not in the probability range, from 0 to 1
         '''
         self.check()
-        return self.getBaseClass().__str__(self)
+        return self._getBaseClass().__str__(self)
     
     # overwrites representation method
     __repr__ = __str__
