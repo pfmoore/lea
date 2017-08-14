@@ -197,4 +197,6 @@ class StateAlea(Alea):
         ''' returns a tuple containing n state objects representing a random sequence
             starting from self and obeying the transition probabilities defined in the chain
         '''
+        if n is not None:
+            n = int(n)
         return tuple(islice(self.genRandomSeq(),n))

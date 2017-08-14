@@ -1406,7 +1406,7 @@ class Lea(object):
         '''
         if n is None:
             return self.getAlea().randomVal()
-        return tuple(islice(self.randomIter(),n))
+        return tuple(islice(self.randomIter(),int(n)))
 
     def randomDraw(self,n=None,sorted=False):
         ''' evaluates the distribution, then,
