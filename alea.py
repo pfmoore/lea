@@ -720,7 +720,11 @@ class Alea(Lea):
             increasing order; otherwise, an arbitrary order is used;
             called on evaluation of "str(self)" and "repr(self)"
         '''
-        return self.asString()
+        if all(isinstance(p,Fraction) for p in self._ps):
+            kind = '/'
+        else:
+            kind = None
+        return self.asString(kind)
           
     def asFloat(self,nbDecimals=6):
         ''' returns a string representation of probability distribution self;
