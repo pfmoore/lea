@@ -2,7 +2,7 @@
 
 [comment]: <> (![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png))
 
-**NEW**: May, 2017 - [Lea 2.3](http://pypi.python.org/pypi/lea/2.3.4) is there!
+**NEW**: August, 2017 - [Lea 2.3.5](http://pypi.python.org/pypi/lea/2.3.5) is there!
 See [installation instructions](https://bitbucket.org/piedenis/lea/wiki/Installation).
 
 ## What is Lea?
