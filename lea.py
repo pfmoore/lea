@@ -564,7 +564,9 @@ class Lea(object):
         # after prepending orderingLeas to self, the Alea returned by new() is sorted with orderingLeas;
         # then, extracting self (index -1) allows generating self's (v,p) pairs in the expected order;
         # these shall be used to create a new Alea, keeping the values in that order (no sort)
-        return Alea._fromValFreqsOrdered(*Lea.cprod(*orderingLeas).cprod(self).new()[-1].genVPs())
+        sortedLea = Lea.cprod(*orderingLeas).cprod(self).new()[-1]
+        sortedLea._initCalc()
+        return Alea._fromValFreqsOrdered(*sortedLea.genVPs())
 
     def isAnyOf(self,*values):
         ''' returns a boolean probability distribution
