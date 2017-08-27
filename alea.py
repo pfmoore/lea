@@ -34,7 +34,7 @@ from random import random
 from bisect import bisect_left, bisect_right
 from itertools import combinations, combinations_with_replacement
 from math import exp, factorial
-from .toolbox import log2, memoize, zip, next, dict, defaultdict, makeTuple
+from .toolbox import log2, memoize, zip, next, dict, defaultdict, makeTuple, readCSVFile, readCSVFilename
 
 import operator
 
