@@ -252,7 +252,7 @@ class Alea(Lea):
              elements; these could be simple counters for example)
         '''
         probType = Alea._probType
-        return Alea._fromValFreqsDict(dict((v,probType(p)) for (v,p) in valueFreqs),**kwargs)
+        return Alea._fromValFreqsDict(dict((v,probType(p)) for (v,p) in probDict.items()),**kwargs)
 
     @staticmethod
     def fromVals(*vals,**kwargs):
@@ -382,46 +382,52 @@ class Alea(Lea):
                 raise Lea.Error("probability strictly greater than 1")
 
     @staticmethod
-    def _binaryDistribution(p1,v1,v2):
-        # TODO: check this
-        p1 = Alea._probType(p1)
+    def _binaryDistribution(v1,v2,pn1,pd1=None):
+        ''' static method, returns an Alea instance representing a boolean
+            probability distribution giving v1 with probability pn1 and v2
+            with complementary probability;
+            if pd1 is not None, then the probability of True is pn/pd
+        '''
+        p1 = Alea._probType(pn1)
+        if pd1 is not None:
+            p1 /= Alea._probType(pd1)
         Alea._checkProb(p1)
         if p1 == 1:
             (vs,ps) = ((v1,),(1,))
         elif p1 == 0:
             (vs,ps) = ((v2,),(1,))
         else:
-            #p1 = Alea._probType(p1)
             (vs,ps) = ((v1,v2),(p1,Alea._probOne-p1))
         return Alea(vs,ps,normalization=False)
 
     @staticmethod
-    def boolProb(p):
-        return Alea._binaryDistribution(p,True,False)
-
-    @staticmethod
-    def bernoulli(p):
-        ''' static method, returns an Alea instance representing a bernoulli
-            distribution giving 1 with probability pNum/pDen and 0 with
-            complementary probability;
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
+    def boolProb(pn,pd=None):
+        ''' static method, returns an Alea instance representing a boolean
+            probability distribution giving True with probability pn and 0
+            with complementary probability;
+            if pd is not None, then the probability of True is pn/pd
         '''
-        return Alea._binaryDistribution(p,1,0)
+        return Alea._binaryDistribution(True,False,pn,pd)
 
     @staticmethod
-    def binom(n,p):
+    def bernoulli(pn,pd=None):
+        ''' static method, returns an Alea instance representing a bernoulli
+            distribution giving 1 with probability pn and 0 with complementary
+            probability;
+            if pd is not None, then the probability of 1 is pn/pd
+        '''
+        return Alea._binaryDistribution(1,0,pn,pd)
+
+    @staticmethod
+    def binom(n,pn,pd=None):
         ''' static method, returns an Alea instance representing a binomial
             distribution giving the number of successes among a number n of
-            independent experiments, each having probability pNum/pDen of success;
-            if pDen is None, then pNum expresses the probability as a float,
-            a string, a Python's Fraction or a Decimal instance, in the same
-            way as Fraction constructor; for strings, percentages are also
-            allowed using the '%' suffix
+            independent experiments, each having probability pn of success;
+            if pd is not None, then the probability of success is pn/pd;
+            note: the binom method generalizes the bernoulli method:
+            binom(1,pn,pd) = bernoulli(pn,pd)
         '''
-        return Alea.bernoulli(p).times(n)
+        return Alea.bernoulli(pn,pd).times(n)
 
     @staticmethod
     def interval(fromVal,toVal,frac=False):
