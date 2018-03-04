@@ -4,7 +4,7 @@
     blea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2016 Pierre Denis
+Copyright 2013-2017 Pierre Denis
 
 This file is part of Lea.
 
@@ -44,118 +44,118 @@ class Blea(Lea):
      ANDing all conditions pairwise shall give "certain false" distributions
     '''
 
-    __slots__ = ('_ileas','_condClea')
+    __slots__ = ('_ileas','_cond_clea')
     
     def __init__(self,*ileas,**kwargs):
         Lea.__init__(self)
         self._ileas = ileas
-        # _condLea is used only by _genOneRandomMC method
-        self._condClea = None
+        # _cond_lea is used only by _gen_one_random_mc method
+        self._cond_clea = None
 
-    __argNamesOfBuildMeth = frozenset(('priorLea','autoElse','check'))
+    __arg_names_of_build_meth = frozenset(('prior_lea','auto_else','check'))
 
     @staticmethod
     def build(*clauses,**kwargs):
-        ''' see Lea.buildCPT method        
+        ''' see Lea.build_cpt method        
         '''
-        argNames = frozenset(kwargs.keys())
-        unknownArgNames = argNames - Blea.__argNamesOfBuildMeth
-        if len(unknownArgNames) > 0:
-            raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknownArgNames)),tuple(Blea._argNamesOfBuildMeth)))
-        priorLea = kwargs.get('priorLea',None)
-        autoElse = kwargs.get('autoElse',False)
+        arg_names = frozenset(kwargs.keys())
+        unknown_arg_names = arg_names - Blea.__arg_names_of_build_meth
+        if len(unknown_arg_names) > 0:
+            raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknown_arg_names)),tuple(Blea._arg_names_of_build_meth)))
+        prior_lea = kwargs.get('prior_lea',None)
+        auto_else = kwargs.get('auto_else',False)
         check = kwargs.get('check',True)
-        elseClauseResults = tuple(result for (cond,result) in clauses if cond is None)
-        if len(elseClauseResults) > 1:
+        else_clause_results = tuple(result for (cond,result) in clauses if cond is None)
+        if len(else_clause_results) > 1:
             raise Lea.Error("impossible to define more than one 'else' clause")
-        if len(elseClauseResults) == 1:
-            if priorLea is not None:
+        if len(else_clause_results) == 1:
+            if prior_lea is not None:
                 raise Lea.Error("impossible to define together prior probabilities and 'else' clause")
-            if autoElse:
-                raise Lea.Error("impossible to have autoElse=True and 'else' clause")                
-            elseClauseResult = elseClauseResults[0]
-        elif autoElse:
-            if priorLea is not None:
-                raise Lea.Error("impossible to define together prior probabilities and autoElse=True")
+            if auto_else:
+                raise Lea.Error("impossible to have auto_else=True and 'else' clause")                
+            else_clause_result = else_clause_results[0]
+        elif auto_else:
+            if prior_lea is not None:
+                raise Lea.Error("impossible to define together prior probabilities and auto_else=True")
             # take uniform distribution on all values found in clause's results (principle of indifference)
-            elseClauseResult = Lea.fromVals(*frozenset(val for (cond,result) in clauses for val in Lea.coerce(result).vals()))
+            else_clause_result = Lea.from_vals(*frozenset(val for (cond,result) in clauses for val in Lea.coerce(result).vals()))
         else:
-            elseClauseResult = None
+            else_clause_result = None
         # get clause conditions and results, excepting 'else' clause, after coercion to Lea instances
-        normClauses = ((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
-        (condLeas,resLeas) = tuple(zip(*normClauses))
+        norm_clauses = ((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
+        (cond_leas,res_leas) = tuple(zip(*norm_clauses))
         # check that conditions are disjoint
         if check:
-            clea_ = Clea(*condLeas)
-            clea_._initCalc()
-            if any(v.count(True) > 1 for (v,_) in clea_.genVPs()):
+            clea_ = Clea(*cond_leas)
+            clea_._init_calc()
+            if any(v.count(True) > 1 for (v,_) in clea_.gen_vp()):
                 raise Lea.Error("clause conditions are not disjoint")
         # build the OR of all given conditions, excepting 'else'
-        orCondsLea = Lea.reduce(or_,condLeas,True)
-        if priorLea is not None:
-            # prior distribution: determine elseClauseResult
-            if check and orCondsLea.isTrue():
-                # TODO check priorLea equivalent to self
+        or_conds_lea = Lea.reduce(or_,cond_leas,True)
+        if prior_lea is not None:
+            # prior distribution: determine else_clause_result
+            if check and or_conds_lea.is_true():
+                # TODO check prior_lea equivalent to self
                 raise Lea.Error("forbidden to define prior probabilities for complete clause set")
-            (pTrue,count) = orCondsLea._p(True)
-            pFalse = count - pTrue
-            priorAleaDict = dict(priorLea.getAlea().vps())
-            priorAleaCount = sum(priorAleaDict.values())
-            normAleaDict = dict(Lea.fromSeq(resLeas).flat().getAlea().vps())
-            normAleaCount = sum(normAleaDict.values())
-            valuesSet = frozenset(chain(priorAleaDict.keys(),normAleaDict.keys()))
+            (p_true,count) = or_conds_lea._p(True)
+            p_false = count - p_true
+            prior_alea_dict = dict(prior_lea.get_alea().vps())
+            prior_alea_count = sum(prior_alea_dict.values())
+            norm_alea_dict = dict(Lea.from_seq(res_leas).flat().get_alea().vps())
+            norm_alea_count = sum(norm_alea_dict.values())
+            values_set = frozenset(chain(prior_alea_dict.keys(),norm_alea_dict.keys()))
             vps = []
-            for value in valuesSet:
-                 priorP = priorAleaDict.get(value,0)
-                 condP = normAleaDict.get(value,0)
-                 p = priorP*count*normAleaCount - condP*pTrue*priorAleaCount
-                 if not(0 <= p <= pFalse*normAleaCount*priorAleaCount):
+            for value in values_set:
+                 prior_p = prior_alea_dict.get(value,0)
+                 cond_p = norm_alea_dict.get(value,0)
+                 p = prior_p*count*norm_alea_count - cond_p*p_true*prior_alea_count
+                 if not(0 <= p <= p_false*norm_alea_count*prior_alea_count):
                      # Infeasible : probability represented by p goes outside range from 0 to 1
-                     priorPFraction = ProbFraction(priorP,priorAleaCount)
-                     lowerPFraction = ProbFraction(condP*pTrue,count*normAleaCount)
-                     upperPFraction = ProbFraction(condP*pTrue+pFalse*normAleaCount,count*normAleaCount)
-                     raise Lea.Error("prior probability of '%s' is %s, outside the range [ %s , %s ]"%(value,priorPFraction,lowerPFraction,upperPFraction))
+                     prior_p_fraction = ProbFraction(prior_p,prior_alea_count)
+                     lower_p_fraction = ProbFraction(cond_p*p_true,count*norm_alea_count)
+                     upper_p_fraction = ProbFraction(cond_p*p_true+p_false*norm_alea_count,count*norm_alea_count)
+                     raise Lea.Error("prior probability of '%s' is %s, outside the range [ %s , %s ]"%(value,prior_p_fraction,lower_p_fraction,upper_p_fraction))
                  vps.append((value,p))
-            elseClauseResult = Lea.fromValFreqs(*vps)
-        elif elseClauseResult is None:
+            else_clause_result = Lea.from_val_freqs(*vps)
+        elif else_clause_result is None:
             # no 'else' clause: check that clause set is complete
-            if check and not orCondsLea.isTrue():
-                raise Lea.Error("incomplete clause set requires 'else' clause or autoElse=True or priorLea=...")
-        if elseClauseResult is not None:
+            if check and not or_conds_lea.is_true():
+                raise Lea.Error("incomplete clause set requires 'else' clause or auto_else=True or prior_lea=...")
+        if else_clause_result is not None:
             # add the else clause
-            elseCondLea = ~orCondsLea
-            ## other equivalent statement: elseCondLea = Lea.reduce(and_,(~condLea for condLea in condLeas))
-            elseClauseResult = Lea.coerce(elseClauseResult)
-            resLeas += (elseClauseResult,)
-            condLeas += (elseCondLea,)
-            # note that orCondsLea is NOT extended with orCondsLea |= elseCondLea
-            # so, in case of else clause (and only in this case), orCondsLea is NOT certainly true
+            else_cond_lea = ~or_conds_lea
+            ## other equivalent statement: else_cond_lea = Lea.reduce(and_,(~cond_lea for cond_lea in cond_leas))
+            else_clause_result = Lea.coerce(else_clause_result)
+            res_leas += (else_clause_result,)
+            cond_leas += (else_cond_lea,)
+            # note that or_conds_lea is NOT extended with or_conds_lea |= else_cond_lea
+            # so, in case of else clause (and only in this case), or_conds_lea is NOT certainly true
         # build a Blea, providing a sequence of new Ileas for each of the clause 
-        return Blea(*(Ilea(resLea,(condLea,)) for (resLea,condLea) in zip(resLeas,condLeas)))
+        return Blea(*(Ilea(res_lea,(cond_lea,)) for (res_lea,cond_lea) in zip(res_leas,cond_leas)))
 
-    def _getLeaChildren(self):
+    def _get_lea_children(self):
         return self._ileas
     
-    def _clone(self,cloneTable):
-        return Blea(*(iLea.clone(cloneTable) for iLea in self._ileas))
+    def _clone(self,clone_table):
+        return Blea(*(i_lea.clone(clone_table) for i_lea in self._ileas))
 
-    def _genVPs(self):
-        for iLea in self._ileas:
-            for vp in iLea.genVPs():
+    def _gen_vp(self):
+        for i_lea in self._ileas:
+            for vp in i_lea.gen_vp():
                 yield vp
 
-    def _genOneRandomMC(self):
-        if self._condClea is None:
-            # _condAlea is a cartesian product of all Alea leaves present in CPT conditions;
-            condAleaLeavesSet = frozenset(aleaLeaf for ilea in self._ileas                             \
-                                                   for aleaLeaf in ilea._condLeas[0].getAleaLeavesSet())
-            self._condClea = Clea(*condAleaLeavesSet)
+    def _gen_one_random_mc(self):
+        if self._cond_clea is None:
+            # _cond_alea is a cartesian product of all Alea leaves present in CPT conditions;
+            cond_alea_leaves_set = frozenset(alea_leaf for ilea in self._ileas                             \
+                                                   for alea_leaf in ilea._cond_leas[0].get_alea_leaves_set())
+            self._cond_clea = Clea(*cond_alea_leaves_set)
         # the first for loop binds a random value on each Alea instances refered in CPT conditions
-        for _ in self._condClea._genOneRandomMC():
+        for _ in self._cond_clea._gen_one_random_mc():
             # here, there will be at most one ilea having condition that evaluates to True,
             # regarding the random binding that has been made 
-            for iLea in self._ileas:
-                for v in iLea._genOneRandomMCNoExc():
-                    if v is not iLea:
+            for i_lea in self._ileas:
+                for v in i_lea._gen_one_random_mc_no_exc():
+                    if v is not i_lea:
                         # the current ilea is the one having the condition that evaluates to True
                         yield v

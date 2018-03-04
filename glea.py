@@ -4,7 +4,7 @@
     glea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -35,26 +35,26 @@ class Glea(Lea):
     distribution for all the values returned by calls to all the functions.
     '''
     
-    __slots__ = ('_cleaFuncAndArgs',)
+    __slots__ = ('_clea_func_and_args',)
 
-    def __init__(self,cleaFuncAndArgs):
+    def __init__(self,clea_func_and_args):
         Lea.__init__(self)
-        self._cleaFuncAndArgs = cleaFuncAndArgs
+        self._clea_func_and_args = clea_func_and_args
 
     @staticmethod
-    def build(leaFunc,args):
-        return Glea(Clea(leaFunc,Clea(*args)))
+    def build(lea_func,args):
+        return Glea(Clea(lea_func,Clea(*args)))
 
-    def _getLeaChildren(self):
-        return (self._cleaFuncAndArgs,)
+    def _get_lea_children(self):
+        return (self._clea_func_and_args,)
 
-    def _clone(self,cloneTable):
-        return Glea(self._cleaFuncAndArgs.clone(cloneTable))
+    def _clone(self,clone_table):
+        return Glea(self._clea_func_and_args.clone(clone_table))
 
-    def _genVPs(self):
-        for ((f,args),p) in self._cleaFuncAndArgs.genVPs():
+    def _gen_vp(self):
+        for ((f,args),p) in self._clea_func_and_args.gen_vp():
             yield (f(*args),p)
 
-    def _genOneRandomMC(self):
-        for (f,args) in self._cleaFuncAndArgs._genOneRandomMC():
+    def _gen_one_random_mc(self):
+        for (f,args) in self._clea_func_and_args._gen_one_random_mc():
             yield f(*args)

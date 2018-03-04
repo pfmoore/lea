@@ -4,7 +4,7 @@
     prob_decimal.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -48,19 +48,19 @@ class ProbDecimal(ProbNumber,Decimal):
             the range is verified when string representation is required
             (method str) or by explicit call to check() method 
         '''
-        isPercentage = False
+        is_percentage = False
         if isinstance(val, str):
             val = val.strip()
             if val.endswith('%'):
                 val = Decimal(val[:-1])
-                isPercentage = True
+                is_percentage = True
         decimal = Decimal(val)
-        if isPercentage:
+        if is_percentage:
             decimal /= 100
-        return ProbDecimal._fromDecimal(decimal)
+        return ProbDecimal._from_decimal(decimal)
     
     @staticmethod         
-    def _fromDecimal(decimal):
+    def _from_decimal(decimal):
         ''' static method, returns a ProbDecimal numerically equivalent to
             the given Decimal instance;
             if decimal is not an instance of Decimal then it is returned
@@ -80,28 +80,28 @@ class ProbDecimal(ProbNumber,Decimal):
             value = ProbDecimal(value)
         return value
         
-    def __coerceFunc(f):
+    def __coerce_func(f):
         ''' internal utility function
             returns a function returning a ProbDecimal
             equivalent to the given function f returning Decimal
         '''
-        return lambda *x: ProbDecimal._fromDecimal(f(*x))
+        return lambda *x: ProbDecimal._from_decimal(f(*x))
      
     # overloading arithmetic magic methods of Decimal
     # to convert Decimal result into ProbDecimal result
     # Note: do not overwrite __floordiv__, __rfloordiv__, __pow__
     # since these methods do not return Decimal instances
-    __pos__      = __coerceFunc(Decimal.__pos__)
-    __neg__      = __coerceFunc(Decimal.__neg__)
-    __pow__      = __coerceFunc(Decimal.__pow__)
-    __add__      = __coerceFunc(Decimal.__add__)
-    __radd__     = __coerceFunc(Decimal.__radd__)
-    __sub__      = __coerceFunc(Decimal.__sub__)
-    __rsub__     = __coerceFunc(Decimal.__rsub__)
-    __mul__      = __coerceFunc(Decimal.__mul__)
-    __rmul__     = __coerceFunc(Decimal.__rmul__)
-    __truediv__  = __coerceFunc(Decimal.__truediv__)
-    __rtruediv__ = __coerceFunc(Decimal.__rtruediv__)
+    __pos__      = __coerce_func(Decimal.__pos__)
+    __neg__      = __coerce_func(Decimal.__neg__)
+    __pow__      = __coerce_func(Decimal.__pow__)
+    __add__      = __coerce_func(Decimal.__add__)
+    __radd__     = __coerce_func(Decimal.__radd__)
+    __sub__      = __coerce_func(Decimal.__sub__)
+    __rsub__     = __coerce_func(Decimal.__rsub__)
+    __mul__      = __coerce_func(Decimal.__mul__)
+    __rmul__     = __coerce_func(Decimal.__rmul__)
+    __truediv__  = __coerce_func(Decimal.__truediv__)
+    __rtruediv__ = __coerce_func(Decimal.__rtruediv__)
 
     # Python 2 compatibility
     __div__ = __truediv__

@@ -4,7 +4,7 @@
     toolbox.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -31,7 +31,7 @@ from functools import wraps
 import sys
 import csv
 '''
-def calcGCD(a,b):
+def calc_gcd(a,b):
     '' returns the greatest common divisor between the given integer arguments
     ''
     while a > 0:
@@ -50,12 +50,12 @@ except ImportError:
         '''
         return log(x,2)
 
-def makeTuple(v):
+def make_tuple(v):
     ''' returns a tuple with v as unique element
     '''    
     return (v,)
     
-def easyMin(*args):
+def easy_min(*args):
     ''' returns the minimum element of given args
         Note: if only one arg, it is returned (unlike Python's min function)
     '''
@@ -63,7 +63,7 @@ def easyMin(*args):
         return args[0]
     return min(args)
 
-def easyMax(*args):
+def easy_max(*args):
     ''' returns the maximum element of given args
         Note: if only one arg, it is returned (unlike Python's max function)
     '''
@@ -71,7 +71,7 @@ def easyMax(*args):
         return args[0]
     return max(args)
 
-def genPairs(seq):
+def gen_pairs(seq):
     ''' generates as tuples all the pairs from the elements of given sequence seq
     '''
     tuple1 = tuple(seq)
@@ -85,7 +85,7 @@ def genPairs(seq):
         tail = tuple1[1:]
         for a in tail:
             yield (head,a)
-        for pair in genPairs(tail):
+        for pair in gen_pairs(tail):
             yield pair
                 
 # Python 2 / 3 dependencies
@@ -130,7 +130,7 @@ else:
 
 def memoize(f):
    ''' returns a memoized version of the given instance method f;
-       requires that the instance has a _cachesByFunc attribute
+       requires that the instance has a _caches_by_func attribute
        referring to a dictionary;
        can be used as a decorator
        note: not usable on functions and static methods
@@ -138,10 +138,10 @@ def memoize(f):
    @wraps(f)
    def wrapper(obj,*args):
        # retrieve the cache for method f
-       cache = obj._cachesByFunc.get(f)
+       cache = obj._caches_by_func.get(f)
        if cache is None:
            # first call to obj.f(...) -> build a new cache for f
-           cache = obj._cachesByFunc[f] = dict()
+           cache = obj._caches_by_func[f] = dict()
        elif args in cache:
            # obj.f(*args) already called in the past -> returns the cached result
            return cache[args]
@@ -150,36 +150,36 @@ def memoize(f):
        return res
    return wrapper
 
-def strToBool(bStr):
-    ''' returns True  if bStr is '1', 't', 'true', 'y' or 'yes' (case insentive)
-                False if bStr is '0', 'f', 'false', 'n' or 'no' (case insentive)
+def str_to_bool(b_str):
+    ''' returns True  if b_str is '1', 't', 'true', 'y' or 'yes' (case insentive)
+                False if b_str is '0', 'f', 'false', 'n' or 'no' (case insentive)
         raise ValueError exception in other cases
     '''
-    bStr = bStr.lower()
-    if bStr in ('t','true','1','y','yes'):
+    b_str = b_str.lower()
+    if b_str in ('t','true','1','y','yes'):
         return True
-    if bStr in ('f','false','0','n','no'):
+    if b_str in ('f','false','0','n','no'):
         return False
-    raise ValueError("invalid boolean litteral '%s'"%bStr)
+    raise ValueError("invalid boolean litteral '%s'"%b_str)
 
-def readCSVFilename(csvFilename,colNames=None,dialect='excel',**fmtparams):
-    ''' same as readCSVFile method, except that it takes a filename instead
+def read_csv_filename(csv_filename,col_names=None,dialect='excel',**fmtparams):
+    ''' same as read_csv_file method, except that it takes a filename instead
         of an open file (i.e. the method opens itself the file for reading);
-        see readCSVFile doc for more details
+        see read_csv_file doc for more details
     '''
-    with open(csvFilename,'rU') as csvFile:
-        return readCSVFile(csvFile,colNames,dialect,**fmtparams)
+    with open(csv_filename,'r_u') as csv_file:
+        return read_csv_file(csv_file,col_names,dialect,**fmtparams)
 
-def readCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
-    ''' returns a tuple (attrNames,dataFreq) from the data read in the given CSV file
-        * attrNames is a tuplewith the attribute names found in the header row 
-        * dataFreq is a list of tuples (tupleValue,count) for each CSV row 
-          with tupleValue containing read fields and count the positive integer
+def read_csv_file(csv_file,col_names=None,dialect='excel',**fmtparams):
+    ''' returns a tuple (attr_names,data_freq) from the data read in the given CSV file
+        * attr_names is a tuplewith the attribute names found in the header row 
+        * data_freq is a list of tuples (tuple_value,count) for each CSV row 
+          with tuple_value containing read fields and count the positive integer
           giving the probability weight of this row;
         the arguments follow the same semantics as those of Python's csv.reader
         method, which supports different CSV formats
         see doc in https://docs.python.org/2/library/csv.html
-        * if colNames is None, then the fields found in the first read row of the CSV
+        * if col_names is None, then the fields found in the first read row of the CSV
           file provide information on the attributes: each field is made up of a name,
           which shall be a valid identifier, followed by an optional 3-characters type
           code among  
@@ -192,7 +192,7 @@ def readCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
           this field; for example, using the comma delimiter (default), the first row
           in the CSV file could be:
               name,age{i},heigth{f},married{b}
-        * if colNames is not None, then colNames shall be a sequence of strings giving
+        * if col_names is not None, then col_names shall be a sequence of strings giving
           attribute information as described above, e.g.
               ('name','age{i}','heigth{f}','married{b}')
           it assumed that there is NO header row in the CSV file
@@ -211,61 +211,61 @@ def readCSVFile(csvFile,colNames=None,dialect='excel',**fmtparams):
         same row multiple times
     '''
     # read the CSV file
-    attrNames = []
-    convFunctions = []
-    countAttrIdx = None
-    fieldsPerRowIter = csv.reader(csvFile,dialect,**fmtparams)
-    if colNames is None:
+    attr_names = []
+    conv_functions = []
+    count_attr_idx = None
+    fields_per_row_iter = csv.reader(csv_file,dialect,**fmtparams)
+    if col_names is None:
         # parse the header row
-        colNames = next(fieldsPerRowIter)
-    # if colNames is not None, it is assumed that there is no header row in the CSV file
-    for (colIdx,colName) in enumerate(colNames):
-        colName = colName.strip()
-        if colName.endswith('{#}'):
-            if countAttrIdx is not None:
+        col_names = next(fields_per_row_iter)
+    # if col_names is not None, it is assumed that there is no header row in the CSV file
+    for (col_idx,col_name) in enumerate(col_names):
+        col_name = col_name.strip()
+        if col_name.endswith('{#}'):
+            if count_attr_idx is not None:
                 raise ValueError("count column ('{#}') must be unique in CSV header line")
-            countAttrIdx = colIdx
+            count_attr_idx = col_idx
         else:
-            hasSuffix = True
-            convFunction = None    
-            if colName.endswith('{b}'):
-                convFunction = strToBool
-            elif colName.endswith('{i}'):
-                convFunction = int
-            elif colName.endswith('{f}'):
-                convFunction = float
-            elif not colName.endswith('{s}'):
-                hasSuffix = False
-            if hasSuffix:
-                attrName = colName[:-3].strip()
+            has_suffix = True
+            conv_function = None    
+            if col_name.endswith('{b}'):
+                conv_function = str_to_bool
+            elif col_name.endswith('{i}'):
+                conv_function = int
+            elif col_name.endswith('{f}'):
+                conv_function = float
+            elif not col_name.endswith('{s}'):
+                has_suffix = False
+            if has_suffix:
+                attr_name = col_name[:-3].strip()
             else:
-                attrName = colName
-            attrNames.append(attrName)
-            convFunctions.append(convFunction)
+                attr_name = col_name
+            attr_names.append(attr_name)
+            conv_functions.append(conv_function)
     # parse the data rows
-    fieldsPerRow = tuple(fieldsPerRowIter)
-    dataFreq = []
-    for fields in fieldsPerRow:
-        if countAttrIdx is None:
+    fields_per_row = tuple(fields_per_row_iter)
+    data_freq = []
+    for fields in fields_per_row:
+        if count_attr_idx is None:
             # no 'count' field: each read row has a count of 1 
             count = 1
         else:
             # 'count' field: extract the count value from the fields
-            count = int(fields.pop(countAttrIdx))
+            count = int(fields.pop(count_attr_idx))
         # conversion of read fields according to optional given types
-        convFields = []
-        for (field,convFunction) in zip(fields,convFunctions):
-            if convFunction is None:
-                convField = field
+        conv_fields = []
+        for (field,conv_function) in zip(fields,conv_functions):
+            if conv_function is None:
+                conv_field = field
             else:
                 if field == '':
                     # empty value translated as Python's None 
-                    convField = None
+                    conv_field = None
                 else:
-                    convField = convFunction(field)
-            convFields.append(convField)
-        dataFreq.append((tuple(convFields),count))
-    return (attrNames,dataFreq)
+                    conv_field = conv_function(field)
+            conv_fields.append(conv_field)
+        data_freq.append((tuple(conv_fields),count))
+    return (attr_names,data_freq)
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
     ''' returns True iff float a and b are almost equal

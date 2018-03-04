@@ -4,7 +4,7 @@
     rlea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -31,24 +31,24 @@ class Rlea(Lea):
     Rlea is a Lea subclass, which instance has other Lea instances as values.
     '''
     
-    __slots__ = ('_leaOfLeas',)
+    __slots__ = ('_lea_of_leas',)
 
-    def __init__(self,leaOfLeas):
+    def __init__(self,lea_of_leas):
         Lea.__init__(self)
-        self._leaOfLeas = leaOfLeas
+        self._lea_of_leas = lea_of_leas
 
-    def _getLeaChildren(self):
-        return (self._leaOfLeas,)
+    def _get_lea_children(self):
+        return (self._lea_of_leas,)
 
-    def _clone(self,cloneTable):
-        return Rlea(self._leaOfLeas.clone(cloneTable))
+    def _clone(self,clone_table):
+        return Rlea(self._lea_of_leas.clone(clone_table))
 
-    def _genVPs(self):
-        for (lea1,p1) in self._leaOfLeas.genVPs():
-            for (v,p2) in lea1.genVPs():
+    def _gen_vp(self):
+        for (lea1,p1) in self._lea_of_leas.gen_vp():
+            for (v,p2) in lea1.gen_vp():
                 yield (v,p1*p2)
 
-    def _genOneRandomMC(self):
-        for leaArg in self._leaOfLeas._genOneRandomMC():
-            for v in leaArg._genOneRandomMC():
+    def _gen_one_random_mc(self):
+        for lea_arg in self._lea_of_leas._gen_one_random_mc():
+            for v in lea_arg._gen_one_random_mc():
                 yield v

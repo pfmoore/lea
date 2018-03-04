@@ -4,7 +4,7 @@
     prob_fraction.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -54,10 +54,10 @@ class ProbFraction(ProbNumber,Fraction):
                 numerator = Fraction(numerator[:-1])
                 denominator = 100
         fraction = Fraction(numerator,denominator)        
-        return ProbFraction._fromFraction(fraction)
+        return ProbFraction._from_fraction(fraction)
     
     @staticmethod         
-    def _fromFraction(fraction):
+    def _from_fraction(fraction):
         ''' static method, returns a ProbFraction numerically equivalent to
             the given Fraction instance;
             if fraction is not an instance of Fraction then it is returned
@@ -77,28 +77,28 @@ class ProbFraction(ProbNumber,Fraction):
             value = ProbFraction(value)
         return value
         
-    def __coerceFunc(f):
+    def __coerce_func(f):
         ''' internal utility function
             returns a function returning a ProbFraction
             equivalent to the given function f returning Fraction
         '''
-        return lambda *x: ProbFraction._fromFraction(f(*x))
+        return lambda *x: ProbFraction._from_fraction(f(*x))
      
     # overloading arithmetic magic methods of Fraction
     # to convert Fraction result into ProbFraction result
     # Note: do not overwrite __floordiv__, __rfloordiv__, __pow__
     # since these methods do not return Fraction instances
-    __pos__      = __coerceFunc(Fraction.__pos__)
-    __neg__      = __coerceFunc(Fraction.__neg__)
-    __pow__      = __coerceFunc(Fraction.__pow__)
-    __add__      = __coerceFunc(Fraction.__add__)
-    __radd__     = __coerceFunc(Fraction.__radd__)
-    __sub__      = __coerceFunc(Fraction.__sub__)
-    __rsub__     = __coerceFunc(Fraction.__rsub__)
-    __mul__      = __coerceFunc(Fraction.__mul__)
-    __rmul__     = __coerceFunc(Fraction.__rmul__)
-    __truediv__  = __coerceFunc(Fraction.__truediv__)
-    __rtruediv__ = __coerceFunc(Fraction.__rtruediv__)
+    __pos__      = __coerce_func(Fraction.__pos__)
+    __neg__      = __coerce_func(Fraction.__neg__)
+    __pow__      = __coerce_func(Fraction.__pow__)
+    __add__      = __coerce_func(Fraction.__add__)
+    __radd__     = __coerce_func(Fraction.__radd__)
+    __sub__      = __coerce_func(Fraction.__sub__)
+    __rsub__     = __coerce_func(Fraction.__rsub__)
+    __mul__      = __coerce_func(Fraction.__mul__)
+    __rmul__     = __coerce_func(Fraction.__rmul__)
+    __truediv__  = __coerce_func(Fraction.__truediv__)
+    __rtruediv__ = __coerce_func(Fraction.__rtruediv__)
 
     # Python 2 compatibility
     __div__ = __truediv__
@@ -106,28 +106,28 @@ class ProbFraction(ProbNumber,Fraction):
 
 
     @staticmethod
-    def calcLCM(values):
+    def calc_lcm(values):
         ''' returns the least common multiple among the given sequence of integers;
             assumes that all values are strictly positive
         '''
         values0 = tuple(frozenset(values))
         values1 = list(values0)
         while len(set(values1)) > 1:
-            minVal = min(values1)
-            idx = values1.index(minVal)
+            min_val = min(values1)
+            idx = values1.index(min_val)
             values1[idx] += values0[idx]
         return values1[0]
 
     @staticmethod
-    def convertToSameDenom(fractions):
+    def convert_to_same_denom(fractions):
         ''' static method, returns a tuple of integers
             which are the numerators of given sequence of fractions,
             after conversion to a common denominator  
         '''
         denominators = tuple(fraction.denominator for fraction in fractions)
         if len(denominators) == 0:
-            raise ProbFraction.Error('getProbWeights requires at least one fraction')
-        lcm = ProbFraction.calcLCM(denominators)
+            raise ProbFraction.Error('get_prob_weights requires at least one fraction')
+        lcm = ProbFraction.calc_lcm(denominators)
         return (tuple(fraction.numerator*(lcm//fraction.denominator) for fraction in fractions), lcm)
 
 # constant unity instance to ease definition of other instances by multiplication

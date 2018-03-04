@@ -4,7 +4,7 @@
     leapp_compiler.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -54,36 +54,36 @@ class LeappCompiler(object):
     '''
 
     @staticmethod
-    def compileLeaFile(leaFilename):
-        f = open(leaFilename)
-        leaMultilineStatement = f.read()
+    def compile_lea_file(lea_filename):
+        f = open(lea_filename)
+        lea_multiline_statement = f.read()
         f.close()
-        pMultilineStatement = 'from lea import *\n\n'
-        pMultilineStatement += LeappTranslator.getTarget00(leaMultilineStatement)
-        return pMultilineStatement
+        p_multiline_statement = 'from lea import *\n\n'
+        p_multiline_statement += LeappTranslator.get_target00(lea_multiline_statement)
+        return p_multiline_statement
 
     @staticmethod
-    def execPythonStatement(pStatement,leaFilename):
-        code = compile(pStatement+'\n',leaFilename,'exec')
+    def exec_python_statement(p_statement,lea_filename):
+        code = compile(p_statement+'\n',lea_filename,'exec')
         exec(code)
             
     @staticmethod
-    def compileAndExecLeaFile(leaFilename):
-        pMultilineStatement = LeappCompiler.compileLeaFile(leaFilename)
-        LeappCompiler.execPythonStatement(pMultilineStatement,leaFilename)
+    def compile_and_exec_lea_file(lea_filename):
+        p_multiline_statement = LeappCompiler.compile_lea_file(lea_filename)
+        LeappCompiler.exec_python_statement(p_multiline_statement,lea_filename)
 
     @staticmethod
-    def compileAndWriteLeaFile(leaFilename,force=False):
-        pMultilineStatement = LeappCompiler.compileLeaFile(leaFilename)
-        pythonFilename = os.path.splitext(leaFilename)[0] + '.py'
-        if force or not os.path.exists(pythonFilename):
-            canWrite = True
+    def compile_and_write_lea_file(lea_filename,force=False):
+        p_multiline_statement = LeappCompiler.compile_lea_file(lea_filename)
+        python_filename = os.path.splitext(lea_filename)[0] + '.py'
+        if force or not os.path.exists(python_filename):
+            can_write = True
         else:
-            res = input("overwrite %s (y/n)? "%pythonFilename)
-            canWrite = res.strip().lower() == 'y'
-        if canWrite:         
-            pMultilineStatement = PY_FILE_HEADER%(pythonFilename,lea.license.VER,leaFilename) + pMultilineStatement
-            f = open(pythonFilename,'w')
-            f.write(pMultilineStatement)
+            res = input("overwrite %s (y/n)? "%python_filename)
+            can_write = res.strip().lower() == 'y'
+        if can_write:         
+            p_multiline_statement = PY_FILE_HEADER%(python_filename,lea.license.VER,lea_filename) + p_multiline_statement
+            f = open(python_filename,'w')
+            f.write(p_multiline_statement)
             f.close()
-            print("'%s' written"%pythonFilename)
+            print("'%s' written"%python_filename)

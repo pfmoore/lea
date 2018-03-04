@@ -4,7 +4,7 @@
     clea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -34,17 +34,17 @@ class Clea(Lea):
     each (v1,...,vn) tuple with probability product P1(v1)...Pn(vn).
     '''
     
-    __slots__ = ('_leaArgs',)
+    __slots__ = ('_lea_args',)
 
     def __init__(self,*args):
         Lea.__init__(self)
-        self._leaArgs = tuple(Lea.coerce(arg) for arg in args)
+        self._lea_args = tuple(Lea.coerce(arg) for arg in args)
 
-    def _getLeaChildren(self):
-        return self._leaArgs
+    def _get_lea_children(self):
+        return self._lea_args
     
-    def _clone(self,cloneTable):
-        return Clea(*(leaArg.clone(cloneTable) for leaArg in self._leaArgs))
+    def _clone(self,clone_table):
+        return Clea(*(lea_arg.clone(clone_table) for lea_arg in self._lea_args))
 
     @staticmethod
     def prod(gs):
@@ -55,14 +55,14 @@ class Clea(Lea):
                 for x in gs[-1]():
                     yield xs + (x,)
 
-    def _genVPs(self):
-        for vps in Clea.prod(tuple(leaArg.genVPs for leaArg in self._leaArgs)):
+    def _gen_vp(self):
+        for vps in Clea.prod(tuple(lea_arg.gen_vp for lea_arg in self._lea_args)):
             v = tuple(v for (v,p) in vps)
             p = 1
             for (v1,p1) in vps:
                 p *= p1
             yield (v,p)
 
-    def _genOneRandomMC(self):
-        for v in Clea.prod(tuple(leaArg._genOneRandomMC for leaArg in self._leaArgs)):
+    def _gen_one_random_mc(self):
+        for v in Clea.prod(tuple(lea_arg._gen_one_random_mc for lea_arg in self._lea_args)):
             yield v

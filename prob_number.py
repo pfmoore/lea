@@ -4,7 +4,7 @@
     prob_number.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -38,27 +38,27 @@ class ProbNumber(object):
         ''' raises an Exception if the decimal is not in the probability range, from 0 to 1
         '''
         if not (0 <= self <= 1):
-            raise ProbNumber.Error("%s is not a valid probability (between 0 and 1)"%self.getBaseClass().__str__(self))
+            raise ProbNumber.Error("%s is not a valid probability (between 0 and 1)"%self.get_base_class().__str__(self))
 
     def __str__(self):
         ''' returns a string representation of self
             raises an Exception if the value is not in the probability range, from 0 to 1
         '''
         self.check()
-        return self._getBaseClass().__str__(self)
+        return self._get_base_class().__str__(self)
     
     # overwrites representation method
     __repr__ = __str__
 
-    def simplify(self,toFloat=False):
-        ''' if toFloat is False (default): returns  self
-            if toFloat is True: returns self converted to float
+    def simplify(self,to_float=False):
+        ''' if to_float is False (default): returns  self
+            if to_float is True: returns self converted to float
         '''
-        if toFloat:
+        if to_float:
             return float(self)
         return self
 
-    def _getBaseClass(self):
+    def _get_base_class(self):
         ''' returns the second parent class of self,
             assuming that self's class inherits also from ProbNumber
             (multiple inheritance); the returned class is then a sibling
@@ -66,21 +66,21 @@ class ProbNumber(object):
         '''
         return self.__class__.__bases__[1]
 
-    def asBaseClassInstance(self):
+    def as_base_class_instance(self):
         ''' returns self converted to the parent base class of self
             assuming that self's class inherits also from ProbNumber
             (multiple inheritance); the class of returned instance
             is then a sibling class of ProbNumber
         '''
-        return self._getBaseClass()(self)
+        return self._get_base_class()(self)
 
-    def asFloat(self):
+    def as_float(self):
         ''' returns float string representation of self
             note: to get float number, use float(self) 
         '''
         return str(float(self))
 
-    def asPct(self):
+    def as_pct(self):
         ''' returns float percentage string representation of self
         '''
         return "%f %%" % float(self*100)

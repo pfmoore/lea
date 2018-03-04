@@ -4,7 +4,7 @@
     __init__.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2016 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -27,4 +27,4 @@ from .leaf import *
 __all__ = ( # objects defined in lea.lea module
             'Lea', 'V', 'VP', 'B', 'P', 'Pf', 'X', 'f_1', 'ProbFraction',
             # objects defined in lea.leaf module
-            'die', 'dice', 'diceSeq', 'D6', 'flip', 'cardRank', 'cardSuite', 'card')
+            'die', 'dice', 'dice_seq', 'D6', 'flip', 'card_rank', 'card_suite', 'card')

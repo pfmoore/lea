@@ -4,7 +4,7 @@
     leapp.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -40,33 +40,33 @@ if __name__=='__main__':
         # no argument : start leapp console
         from .leapp_console import LeappConsole
         import platform
-        leappConsole = LeappConsole()
+        leapp_console = LeappConsole()
         print ("[running on Python %s]"%platform.python_version())
-        print (license.licenseText)
+        print (license.license_text)
         print ('Welcome in Leapp console!')
-        leappConsole.startCmdLoop()
+        leapp_console.start_cmd_loop()
         print ()
     else:
         # argument(s) present : compile files into Python statements then,
         # if '-c' given, write Python statements .py files
         # otherwise, execute Python statements 
         from .leapp_compiler import LeappCompiler
-        firstArg = sys.argv[1]
-        if firstArg.startswith('-'):
-            if firstArg not in ('-c','-cf'):
-                print ("ERROR: unknown option '%s'"%firstArg)
+        first_arg = sys.argv[1]
+        if first_arg.startswith('-'):
+            if first_arg not in ('-c','-cf'):
+                print ("ERROR: unknown option '%s'"%first_arg)
                 sys.exit(-1)                
-        isCompile = firstArg.startswith('-c')
-        force = firstArg == '-cf'
-        if isCompile:
-            leaFilenamesArgIdx = 2
+        is_compile = first_arg.startswith('-c')
+        force = first_arg == '-cf'
+        if is_compile:
+            lea_filenames_arg_idx = 2
         else:
-            leaFilenamesArgIdx = 1
-        leaFilenames = sys.argv[leaFilenamesArgIdx:]
-        processLeaFile = LeappCompiler.compileAndWriteLeaFile if isCompile else LeappCompiler.compileAndExecLeaFile
-        if isCompile:
-            for leaFilename in leaFilenames:
-                LeappCompiler.compileAndWriteLeaFile(leaFilename,force)
+            lea_filenames_arg_idx = 1
+        lea_filenames = sys.argv[lea_filenames_arg_idx:]
+        process_lea_file = LeappCompiler.compile_and_write_lea_file if is_compile else LeappCompiler.compile_and_exec_lea_file
+        if is_compile:
+            for lea_filename in lea_filenames:
+                LeappCompiler.compile_and_write_lea_file(lea_filename,force)
         else:
-            for leaFilename in leaFilenames:
-                LeappCompiler.compileAndExecLeaFile(leaFilename)
+            for lea_filename in lea_filenames:
+                LeappCompiler.compile_and_exec_lea_file(lea_filename)

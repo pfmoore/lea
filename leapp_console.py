@@ -4,7 +4,7 @@
     leapp_console.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -51,60 +51,60 @@ class LeappConsole(object):
     Lea module and executed on the-fly.
     '''
         
-    __slots__ = ( 'locals', 'debug', 'prompt1', 'prompt2', 'promptD')
+    __slots__ = ( 'locals', 'debug', 'prompt1', 'prompt2', 'prompt_d')
     
     def __init__(self):
         self.locals = locals()
         self.debug = DEBUG
         self.prompt1 = PROMPT1
         self.prompt2 = PROMPT2
-        self.promptD = PROMPTD
-        self.execPythonStatement('_leapp = self')
-        self.execPythonStatement('del self')
-        self.execPythonStatement('from lea import *')
+        self.prompt_d = PROMPTD
+        self.exec_python_statement('_leapp = self')
+        self.exec_python_statement('del self')
+        self.exec_python_statement('from lea import *')
 
     class Error(Exception):
         pass
 
-    def execLeappTranslatorMultilineStatement(self,rMultilineStatement):
-        pMultilineStatement = LeappTranslator.getTarget00(rMultilineStatement)
+    def exec_leapp_translator_multiline_statement(self,r_multiline_statement):
+        p_multiline_statement = LeappTranslator.get_target00(r_multiline_statement)
         if self.debug:
-            print (self.promptD+('\n'+self.promptD).join(pMultilineStatement.split('\n')))
-        self.execPythonStatement(pMultilineStatement)
+            print (self.prompt_d+('\n'+self.prompt_d).join(p_multiline_statement.split('\n')))
+        self.exec_python_statement(p_multiline_statement)
 
-    def execPythonStatement(self,pStatement):
-        if len(pStatement) > 0:
-            code = compile(pStatement+'\n','<leapp>','single')
+    def exec_python_statement(self,p_statement):
+        if len(p_statement) > 0:
+            code = compile(p_statement+'\n','<leapp>','single')
             exec (code,self.locals)
 
-    def inputMultilineStatement(self):
-        readLines = []
+    def input_multiline_statement(self):
+        read_lines = []
         prompt = self.prompt1
         while True:
-            readLine = input(prompt).rstrip()
-            if len(readLine) == 0:
+            read_line = input(prompt).rstrip()
+            if len(read_line) == 0:
                 break
-            lastChar = readLine[-1]
-            if lastChar == ':' and len(readLine) > 1:
-                readLine += '\n'
-            elif lastChar == '\\':
-                readLine = readLine[:-1]
-            readLines.append(readLine)
-            if len(readLine) <= 1 or lastChar not in CONTINUATION_LINE_CHARS:
+            last_char = read_line[-1]
+            if last_char == ':' and len(read_line) > 1:
+                read_line += '\n'
+            elif last_char == '\\':
+                read_line = read_line[:-1]
+            read_lines.append(read_line)
+            if len(read_line) <= 1 or last_char not in CONTINUATION_LINE_CHARS:
                 break
             prompt = self.prompt2
-        return ''.join(readLines)    
+        return ''.join(read_lines)    
 
-    def startCmdLoop(self):
+    def start_cmd_loop(self):
         from .lea import Lea
         while True:
             try:
-                rMultilineStatement = self.inputMultilineStatement()
+                r_multiline_statement = self.input_multiline_statement()
             except EOFError:
                 break
             try:
                 try:
-                    self.execLeappTranslatorMultilineStatement(rMultilineStatement)
+                    self.exec_leapp_translator_multiline_statement(r_multiline_statement)
                 except:
                     if self.debug:
                         traceback.print_exc()

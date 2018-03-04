@@ -4,7 +4,7 @@
     flea1.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2016 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -33,24 +33,24 @@ class Flea1(Lea):
     for all the values returned by the function.
     '''
     
-    __slots__ = ('_f','_leaArg')
+    __slots__ = ('_f','_lea_arg')
 
-    def __init__(self,f,leaArg):
+    def __init__(self,f,lea_arg):
         Lea.__init__(self)
         self._f = f
-        self._leaArg = leaArg
+        self._lea_arg = lea_arg
 
-    def _getLeaChildren(self):
-        return (self._leaArg,)
+    def _get_lea_children(self):
+        return (self._lea_arg,)
 
-    def _clone(self,cloneTable):
-        return Flea1(self._f,self._leaArg.clone(cloneTable))    
+    def _clone(self,clone_table):
+        return Flea1(self._f,self._lea_arg.clone(clone_table))    
 
-    def _genVPs(self):
+    def _gen_vp(self):
         f = self._f
-        for (v,p) in self._leaArg.genVPs():
+        for (v,p) in self._lea_arg.gen_vp():
             yield (f(v),p)
 
-    def _genOneRandomMC(self):
-        for v in self._leaArg._genOneRandomMC():
+    def _gen_one_random_mc(self):
+        for v in self._lea_arg._gen_one_random_mc():
             yield self._f(v)

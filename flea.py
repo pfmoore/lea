@@ -4,7 +4,7 @@
     flea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -35,29 +35,29 @@ class Flea(Lea):
     distribution for all the values returned by the function.
     '''
     
-    __slots__ = ('_f','_cleaArgs')
+    __slots__ = ('_f','_clea_args')
 
-    def __init__(self,f,cleaArgs):
+    def __init__(self,f,clea_args):
         Lea.__init__(self)
         self._f = f
-        self._cleaArgs = cleaArgs
+        self._clea_args = clea_args
     
     @staticmethod
     def build(f,args):
         return Flea(f,Clea(*args))
 
-    def _getLeaChildren(self):
-        return (self._cleaArgs,)
+    def _get_lea_children(self):
+        return (self._clea_args,)
 
-    def _clone(self,cloneTable):
-        return Flea(self._f,self._cleaArgs.clone(cloneTable))    
+    def _clone(self,clone_table):
+        return Flea(self._f,self._clea_args.clone(clone_table))    
 
-    def _genVPs(self):
+    def _gen_vp(self):
         f = self._f
-        for (args,p) in self._cleaArgs.genVPs():
+        for (args,p) in self._clea_args.gen_vp():
             yield (f(*args),p)
 
-    def _genOneRandomMC(self):
+    def _gen_one_random_mc(self):
         f = self._f
-        for args in self._cleaArgs._genOneRandomMC():
+        for args in self._clea_args._gen_one_random_mc():
             yield f(*args)

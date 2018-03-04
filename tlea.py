@@ -4,7 +4,7 @@
     tlea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -35,47 +35,47 @@ class Tlea(Lea):
     possible value of C to a specific Lea instance.
     '''
 
-    __slots__ = ('_leaC','_leaDict','_defaultLea')
+    __slots__ = ('_lea_c','_lea_dict','_default_lea')
 
-    def __init__(self,leaC,leaDict,defaultLea=Lea._DUMMY_VAL):
-        if isinstance(leaDict,defaultdict):
-            raise Lea.Error('defaultdict not supported for Tlea, use defaultLea argument instead')
+    def __init__(self,lea_c,lea_dict,default_lea=Lea._DUMMY_VAL):
+        if isinstance(lea_dict,defaultdict):
+            raise Lea.Error('defaultdict not supported for Tlea, use default_lea argument instead')
         Lea.__init__(self)
-        self._leaC = Lea.coerce(leaC)
-        self._leaDict = dict((c,Lea.coerce(lea1)) for (c,lea1) in leaDict.items())
-        if defaultLea is Lea._DUMMY_VAL:
-            self._defaultLea = Lea._DUMMY_VAL
+        self._lea_c = Lea.coerce(lea_c)
+        self._lea_dict = dict((c,Lea.coerce(lea1)) for (c,lea1) in lea_dict.items())
+        if default_lea is Lea._DUMMY_VAL:
+            self._default_lea = Lea._DUMMY_VAL
         else:
-            self._defaultLea = Lea.coerce(defaultLea)
-            self._leaDict = defaultdict(lambda:self._defaultLea,self._leaDict)
+            self._default_lea = Lea.coerce(default_lea)
+            self._lea_dict = defaultdict(lambda:self._default_lea,self._lea_dict)
 
-    def _getLeaChildren(self):
-        leaChildren = [self._leaC]
-        for lea1 in self._leaDict.values():
-            leaChildren.append(lea1)
-        if self._defaultLea is not Lea._DUMMY_VAL:
-            leaChildren.append(self._defaultLea)
-        return leaChildren
+    def _get_lea_children(self):
+        lea_children = [self._lea_c]
+        for lea1 in self._lea_dict.values():
+            lea_children.append(lea1)
+        if self._default_lea is not Lea._DUMMY_VAL:
+            lea_children.append(self._default_lea)
+        return lea_children
 
-    def _clone(self,cloneTable):
-        return Tlea(self._leaC.clone(cloneTable),dict((v,lea1.clone(cloneTable)) for (v,lea1) in leaDict),self._defaultLea.clone(cloneTable))
+    def _clone(self,clone_table):
+        return Tlea(self._lea_c.clone(clone_table),dict((v,lea1.clone(clone_table)) for (v,lea1) in lea_dict),self._default_lea.clone(clone_table))
 
-    def _genVPs(self):
-        leaDict = self._leaDict
-        for (vc,pc) in self._leaC.genVPs():
+    def _gen_vp(self):
+        lea_dict = self._lea_dict
+        for (vc,pc) in self._lea_c.gen_vp():
             try:
-                leaV = leaDict[vc]
+                lea_v = lea_dict[vc]
             except KeyError:
                 raise Lea.Error("missing value '%s' in CPT"%vc)
-            for (vd,pd) in leaV.genVPs():
+            for (vd,pd) in lea_v.gen_vp():
                 yield (vd,pc*pd)
 
-    def _genOneRandomMC(self):
-        leaDict = self._leaDict
-        for vc in self._leaC._genOneRandomMC():
+    def _gen_one_random_mc(self):
+        lea_dict = self._lea_dict
+        for vc in self._lea_c._gen_one_random_mc():
             try:
-                leaV = leaDict[vc]
+                lea_v = lea_dict[vc]
             except KeyError:
                 raise Lea.Error("missing value '%s' in CPT"%vc)
-            for vd in leaV._genOneRandomMC():
+            for vd in lea_v._gen_one_random_mc():
                 yield vd

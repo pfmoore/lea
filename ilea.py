@@ -4,7 +4,7 @@
     ilea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -36,32 +36,32 @@ class Ilea(Lea):
     a given distribution <Vi,p(Vi|C)>, assuming that a given condition C is verified (see Blea class).
     '''
 
-    __slots__ = ('_lea1','_condLeas')
+    __slots__ = ('_lea1','_cond_leas')
 
-    def __init__(self,lea1,condLeas):
+    def __init__(self,lea1,cond_leas):
         Lea.__init__(self)
         self._lea1 = lea1
-        self._condLeas = tuple(condLeas)
+        self._cond_leas = tuple(cond_leas)
 
-    def _getLeaChildren(self):
-        return (self._lea1,) + self._condLeas
+    def _get_lea_children(self):
+        return (self._lea1,) + self._cond_leas
     
-    def _clone(self,cloneTable):
-        return Ilea(self._lea1.clone(cloneTable),(condLea.clone(cloneTable) for condLea in self._condLeas))
+    def _clone(self,clone_table):
+        return Ilea(self._lea1.clone(clone_table),(cond_lea.clone(clone_table) for cond_lea in self._cond_leas))
 
     @staticmethod
-    def _genTrueP(condLeas):
+    def _gen_true_p(cond_leas):
         ''' generates probabilities of True for ANDing the given conditions 
             this uses short-circuit evaluation
         '''
-        if len(condLeas) == 0:
+        if len(cond_leas) == 0:
             # empty condition: evaluated as True (seed of recursion)
             yield 1
         else:
-            for (cv0,p0) in condLeas[0].genVPs():
+            for (cv0,p0) in cond_leas[0].gen_vp():
                 if cv0 is True:
                     # the first condition is true, for some binding of variables
-                    for p1 in Ilea._genTrueP(condLeas[1:]):
+                    for p1 in Ilea._gen_true_p(cond_leas[1:]):
                         # the full condition is true, for some binding of variables
                         yield p0*p1
                 elif cv0 is False:
@@ -71,38 +71,38 @@ class Ilea(Lea):
                     # neither True, nor False -> error
                     raise Lea.Error("boolean expression expected")
     
-    def _genVPs(self):
-        for cp in Ilea._genTrueP(self._condLeas):
+    def _gen_vp(self):
+        for cp in Ilea._gen_true_p(self._cond_leas):
             # the AND of conditions is true, for some binding of variables
             # yield value-probability pairs of _lea1, given this binding
-            for (v,p) in self._lea1.genVPs():
+            for (v,p) in self._lea1.gen_vp():
                 yield (v,cp*p)
 
-    def _genOneRandomTrueCond(self,condLeas,withException):
-        if len(condLeas) == 0:
+    def _gen_one_random_true_cond(self,cond_leas,with_exception):
+        if len(cond_leas) == 0:
             # empty condition: evaluated as True (seed of recursion)
             yield None
         else:
-            for cv in condLeas[0]._genOneRandomMC():
+            for cv in cond_leas[0]._gen_one_random_mc():
                 if cv is True:
-                    for v in self._genOneRandomTrueCond(condLeas[1:],withException):
+                    for v in self._gen_one_random_true_cond(cond_leas[1:],with_exception):
                         yield v
                 elif cv is False:
-                    if withException:
+                    if with_exception:
                         raise Lea._FailedRandomMC()
                     yield self
                 else:
                     raise Lea.Error("boolean expression expected")
 
-    def _genOneRandomMC(self):
-        for _ in self._genOneRandomTrueCond(self._condLeas,True):
-            for v in self._lea1._genOneRandomMC():
+    def _gen_one_random_mc(self):
+        for _ in self._gen_one_random_true_cond(self._cond_leas,True):
+            for v in self._lea1._gen_one_random_mc():
                 yield v
 
-    def _genOneRandomMCNoExc(self):
-        for u in self._genOneRandomTrueCond(self._condLeas,False):
+    def _gen_one_random_mc_no_exc(self):
+        for u in self._gen_one_random_true_cond(self._cond_leas,False):
             if u is not self: 
-                for v in self._lea1._genOneRandomMC():
+                for v in self._lea1._gen_one_random_mc():
                     yield v
 
     def lr(self):
@@ -114,10 +114,10 @@ class Ilea(Lea):
             an exception is raised;
             an exception is raised also if H is certainly true or certainly false      
         '''
-        lrN = self.P
-        lrD = self._lea1.given(~Lea.reduce(and_,self._condLeas,False)).P
-        if lrD == 0:
-            if lrN == 0:
+        lr_n = self.P
+        lr_d = self._lea1.given(~Lea.reduce(and_,self._cond_leas,False)).P
+        if lr_d == 0:
+            if lr_n == 0:
                 raise Lea.Error("undefined likelihood ratio")
             return float('inf') 
-        return float(lrN) / float(lrD)
+        return float(lr_n) / float(lr_d)

@@ -4,7 +4,7 @@
     flea2.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2017 Pierre Denis
+Copyright 2013-2018 Pierre Denis
 
 This file is part of Lea.
 
@@ -33,27 +33,27 @@ class Flea2(Lea):
     probability distribution for all the values returned by the function.
     '''
     
-    __slots__ = ('_f','_leaArg1','_leaArg2')
+    __slots__ = ('_f','_lea_arg1','_lea_arg2')
 
     def __init__(self,f,arg1,arg2):
         Lea.__init__(self)
         self._f = f
-        self._leaArg1 = Lea.coerce(arg1)
-        self._leaArg2 = Lea.coerce(arg2)
+        self._lea_arg1 = Lea.coerce(arg1)
+        self._lea_arg2 = Lea.coerce(arg2)
 
-    def _getLeaChildren(self):
-        return (self._leaArg1,self._leaArg2)
+    def _get_lea_children(self):
+        return (self._lea_arg1,self._lea_arg2)
 
-    def _clone(self,cloneTable):
-        return Flea2(self._f,self._leaArg1.clone(cloneTable),self._leaArg2.clone(cloneTable))    
+    def _clone(self,clone_table):
+        return Flea2(self._f,self._lea_arg1.clone(clone_table),self._lea_arg2.clone(clone_table))    
 
-    def _genVPs(self):
+    def _gen_vp(self):
         f = self._f
-        for (v1,p1) in self._leaArg1.genVPs():
-            for (v2,p2) in self._leaArg2.genVPs():
+        for (v1,p1) in self._lea_arg1.gen_vp():
+            for (v2,p2) in self._lea_arg2.gen_vp():
                 yield (f(v1,v2),p1*p2)
 
-    def _genOneRandomMC(self):
-        for v1 in self._leaArg1._genOneRandomMC():
-            for v2 in self._leaArg2._genOneRandomMC():
+    def _gen_one_random_mc(self):
+        for v1 in self._lea_arg1._gen_one_random_mc():
+            for v2 in self._lea_arg2._gen_one_random_mc():
                 yield self._f(v1,v2)
