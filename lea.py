@@ -351,27 +351,39 @@ class Lea(object):
         leas = (self,) + lea_args
         lea = Lea.from_seq(range(len(leas)))
         return Blea.build(*((lea==i,lea_arg) for (i,lea_arg) in enumerate(leas)))
-    
-    def map(self,f,args=()):
+
+    def map(self,f,*args):
         ''' returns a new Flea instance representing the distribution obtained
             by applying the given function f, taking values of self distribution
-            as first argument and given args tuple as following arguments (expanded);
+            as first argument and optional given args as following arguments;
             requires that f is a n-ary function with 1 <= n = len(args)+1 
             note: f can be also a Lea instance, with functions as values
         '''
         return Flea.build(f,(self,)+args)
 
-    def map_seq(self,f,args=()):
+    def map_seq(self,f,*args):
         ''' returns a new Flea instance representing the distribution obtained
             by applying the given function f on each element of each value
-            of self distribution; if args is not empty, then it is expanded
-            and added as f arguments
+            of self distribution; optional given args are added as f's
+            following arguments;
             requires that f is a n-ary function with 1 <= n = len(args)+1 
             requires that self's values are sequences
             returned distribution values are tuples
             note: f can be also a Lea instance, with functions as values
         '''
         return self.map(lambda v: tuple(f(e,*args) for e in v))
+
+    @staticmethod
+    def func_wrapper(f):
+        ''' returns a wrapper function on given f function, mimicking f with
+            Lea instances as arguments;
+            note: this can be used as a decorator
+        '''
+        def wrapper(*args):
+            return Flea.build(f,args)
+        wrapper.__name__ = 'lea_wrapper_on__' + f.__name__
+        wrapper.__doc__ = f.__doc__ + "\nThe present function wraps '%s' so to work with Lea instances as arguments." % f.__name__
+        return wrapper
 
     def as_joint(self,*attr_names):
         ''' returns a new Alea instance representing a joint probability distribution
