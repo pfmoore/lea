@@ -26,7 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 VER = "3.0.0.alpha.0"
 
 license_text = '''\
-Lea %s Copyright (C) 2013-2017 Pierre Denis
+Lea %s Copyright (C) 2013-2018 Pierre Denis
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.
 For more details, see COPYING and COPYING.LESSER files.''' % VER

@@ -30,14 +30,6 @@ The module toolbox provides general functions and constants needed by Lea classe
 from functools import wraps
 import sys
 import csv
-'''
-def calc_gcd(a,b):
-    '' returns the greatest common divisor between the given integer arguments
-    ''
-    while a > 0:
-        (a,b) = (b%a,a)
-    return b
-'''
 
 try:
     # log2 function available in Python 3.3+

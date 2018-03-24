@@ -356,7 +356,7 @@ class Lea(object):
         ''' returns a new Flea instance representing the distribution obtained
             by applying the given function f, taking values of self distribution
             as first argument and optional given args as following arguments;
-            requires that f is a n-ary function with 1 <= n = len(args)+1 
+            requires that f is a n-ary function with 1 <= n = len(args)+1;
             note: f can be also a Lea instance, with functions as values
         '''
         return Flea.build(f,(self,)+args)
@@ -366,9 +366,9 @@ class Lea(object):
             by applying the given function f on each element of each value
             of self distribution; optional given args are added as f's
             following arguments;
-            requires that f is a n-ary function with 1 <= n = len(args)+1 
-            requires that self's values are sequences
-            returned distribution values are tuples
+            requires that f is a n-ary function with 1 <= n = len(args)+1;
+            requires that self's values are sequences;
+            the values of returned distribution are tuples
             note: f can be also a Lea instance, with functions as values
         '''
         return self.map(lambda v: tuple(f(e,*args) for e in v))
@@ -377,7 +377,13 @@ class Lea(object):
     def func_wrapper(f):
         ''' returns a wrapper function on given f function, mimicking f with
             Lea instances as arguments;
-            note: this can be used as a decorator
+            the returned wrapper function has the same number of arguments
+            as f and expects for argument #i
+            - either an object of the type expected by f for argument #i
+            - or a Lea instance with values of that type;
+            the returned wrapper function, when called, returns a Lea instance
+            having values of the type returned by f;
+            note: Lea.func_wrapper can be used as a function decorator
         '''
         def wrapper(*args):
             return Flea.build(f,args)
