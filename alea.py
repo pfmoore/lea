@@ -60,6 +60,8 @@ class Alea(Lea):
 
     @staticmethod
     def _simplify(p,to_float=False):
+        # TODO doc
+        # TODO allow user to set own function
         if hasattr(p,'factor'):
             p = p.factor()
         elif to_float:
@@ -94,8 +96,14 @@ class Alea(Lea):
 
     @staticmethod
     def set_prob_type(prob_type_code):
-        # TODO remove check_probability
-        Alea.check_probability = True
+        ''' static method allowing to change the representation of probability
+            values for newly created Lea instances, according to the given
+            prob_type_code:
+            - 'f' -> float (instance of Python's float) - default
+            - 'r' -> rational (instance of Python's fractions.Fraction)
+            - 'd' -> decimal (instance of Python's decimal.Decimal)
+            - 's' -> symbolic (instance of a sympy class)
+        '''
         if prob_type_code == 'f':
             prob_type = float
         elif prob_type_code == 'r':
@@ -110,7 +118,6 @@ class Alea(Lea):
                         return Symbol(s)
                     return s
             prob_type = ProbSymbol
-            Alea.check_probability = False
         else:
             raise Lea.Error("unknown probability type code '%s', should be 'f', 'r', 'd' or 's'"%prob_type_code)
         Alea.init(prob_type)
@@ -123,12 +130,11 @@ class Alea(Lea):
     empty_tuple = None
 
     prob_type_code = None
-    _prob_one = None
     _prob_type = None
 
     @staticmethod
     def init(prob_type):
-        Alea._prob_one = prob_type(1)
+        # TODO doc
         Alea._prob_type = prob_type
         Alea.true  = Alea.coerce(True)
         Alea.false = Alea.coerce(False)
@@ -146,7 +152,6 @@ class Alea(Lea):
             as unique value, with a probability of 1.
         '''
         if not isinstance(value,Lea):
-            #return Alea((value,),(Alea._prob_one,),normalization=False)
             return Alea((value,),(1,),normalization=False)
         return value
 
@@ -160,25 +165,6 @@ class Alea(Lea):
         new_alea._cumul = self._cumul
         new_alea._inv_cumul = self._inv_cumul
         return new_alea
-
-    '''
-    Not used in Lea 3
-    @staticmethod
-    def from_val_freqs_dict_gen(prob_dict):
-        '' static method, returns an Alea instance representing a distribution
-            for the given prob_dict dictionary of {val:prob}, where prob is an integer number,
-            a floating-point number or a fraction (Fraction or ProbFraction instance)
-            so that each value val has probability proportional to prob to occur
-            any value with null probability is ignored (hence not stored)
-            the values are sorted if possible (i.e. no exception on sort), 
-            otherwise, the order of values is unspecified; 
-            if the sequence is empty, then an exception is raised
-        ''
-        prob_fractions = tuple(ProbFraction.coerce(prob) for prob in prob_dict.values())
-        # TODO Check positive
-        prob_weights = ProbFraction.get_prob_weights(prob_fractions)
-        return Alea.from_val_freqs_dict(dict(zip(prob_dict.keys(),prob_weights)))
-    '''
 
     __contructor_arg_names = frozenset(('ordered','sorting','normalization','check','frac'))
 
@@ -274,8 +260,6 @@ class Alea(Lea):
         '''
         # TODO: could add decimal
         #frac = kwargs.get('frac',False)
-        #one = ProbFraction.one if frac else 1.0
-        #prob_one = Alea._prob_one
         return Alea.from_val_freqs(*((val,1) for val in vals),**kwargs)
 
     @staticmethod
@@ -287,27 +271,6 @@ class Alea(Lea):
             for detailed description, refer to the doc of this method
         '''
         return Alea.from_vals(*vals,**kwargs)
-    '''
-    @staticmethod
-    def from_val_freqs(*value_freqs,**kwargs):
-        '' static method, returns an Alea instance representing a distribution
-            for the given sequence of (v,p) tuples, where p is the
-            probability of v or some number proportional to this probability;
-            if the same v occurs multiple times, then the associated p are summed
-            together;
-            if the sequence is empty, then an exception is raised;
-            for treatment of optional kwargs keywords arguments, see doc of
-            Alea.from_val_freqs_dict;
-        ''
-        (ordered,sorting,normalization,check) = Alea._parsed_kwargs(kwargs)
-        if ordered:
-            return Alea._from_val_freqs_ordered(*value_freqs,**kwargs)
-        prob_type = Alea._prob_type
-        prob_dict = defaultdict(prob_type)
-        for (value,freq) in value_freqs:
-            prob_dict[value] += prob_type(freq)
-        return Alea.from_val_freqs_dict(prob_dict,**kwargs)
-    '''
 
     @staticmethod
     def from_val_freqs(*value_freqs,**kwargs):
@@ -342,15 +305,6 @@ class Alea(Lea):
             prob_dict[value] += freq
         return Alea._from_val_freqs_dict(prob_dict,**kwargs)
 
-    '''
-    @staticmethod
-    def from_val_freqs_dict_args(**prob_dict):
-        '' static method, same as from_val_freqs_dict, excepting that the dictionary
-            is passed in a **kwargs style
-        ''
-        return Alea.from_val_freqs_dict(prob_dict)
-    '''
-
     @staticmethod
     def _from_val_freqs_ordered(*value_freqs, **kwargs):
         ''' static method, returns an Alea instance representing a distribution
@@ -371,15 +325,23 @@ class Alea(Lea):
             raise Lea.Error("duplicate values")
         return Alea(vs,ps,normalization)
 
-    check_probability = True
-
     @staticmethod
     def _check_prob(p):
-        if Alea.check_probability:
-            if p < 0:
-                raise Lea.Error("negative probability")
-            if p > 1:
-                raise Lea.Error("probability strictly greater than 1")
+        ''' static method checking that given p is a valid probability value,
+            i.e. in the range [0,1];
+            if comparisons are infeasible on p, then p is assumed to be a
+            symbolic probability and is considered valid;
+            raise Lea.Error exception if invalid
+        '''
+        try:
+            is_valid = 0 <= p <= 1
+        except:
+            # comparisons are infeasible: we assume that p is a symbolic
+            # probability, the range check cannot be enforced
+            is_valid = True
+        if not is_valid:
+            raise Lea.Error("invalid probability value %s"%p)
+
 
     @staticmethod
     def _binary_distribution(v1,v2,pn1,pd1=None):
@@ -397,7 +359,7 @@ class Alea(Lea):
         elif p1 == 0:
             (vs,ps) = ((v2,),(1,))
         else:
-            (vs,ps) = ((v1,v2),(p1,Alea._prob_one-p1))
+            (vs,ps) = ((v1,v2),(p1,1-p1))
         return Alea(vs,ps,normalization=False)
 
     @staticmethod
