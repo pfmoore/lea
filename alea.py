@@ -28,24 +28,22 @@ from .flea2 import Flea2
 from .prob_number import ProbNumber
 from .prob_fraction import ProbFraction
 from .prob_decimal import ProbDecimal
+from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, read_csv_filename
 from fractions import Fraction
 from decimal import Decimal
 from random import random
 from bisect import bisect_left, bisect_right
 from itertools import combinations, combinations_with_replacement
 from math import exp, factorial
-from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, read_csv_filename
-
 import operator
-
-# try to import matplotlib package, required by plot() method
-# if missing, no error is reported until plot is called
 try:
-    import matplotlib.pyplot as plt
-    # switch on interactive mode, so the control is back to console as soon as a chart is displayed
-    plt.ion()
+    import sympy
+    # sympy module installed
 except:
-    pass
+    # sympy module not installed
+    sympy = None
+# note that matplotlib is imported (if available) in the plot method
+
 
 class Alea(Lea):
     
@@ -58,15 +56,98 @@ class Alea(Lea):
 
     __slots__ = ('_vs','_ps','_cumul','_inv_cumul','_random_iter','_caches_by_func')
 
+    # dictionary used in P method
+    __downcast_prob_class = dict( {Fraction : ProbFraction,
+                                   Decimal  : ProbDecimal })
+    
+    # class or function used by default to convert each probability given in
+    # an Alea constructor method ; if None and if no prob_type arg is
+    # specified in the constructore, then each probability is stored as-is
+    _prob_type = None
+
+    # function used to simplify symbolic probability expressions to be
+    # displayed (see _simplify and Alea.__init__ methods)
+    _symbolic_simplify_function = sympy and sympy.factor
+    
+    @staticmethod
+    def prob_symbol(arg):
+        ''' static method; if given arg is a string, then
+               returns a sympy Symbol, having arg as name
+            otherwise,
+               returns arg (which could incidentally be sympy Symbol)
+        '''
+        if isinstance(arg,str):
+            return sympy.Symbol(arg)
+        return arg 
+
     @staticmethod
     def _simplify(p,to_float=False):
-        # TODO doc
-        # TODO allow user to set own function
-        if hasattr(p,'factor'):
-            p = p.factor()
-        elif to_float:
-            p = float(p)
+        ''' static method, tries to simplify the given probability p
+            if given p is a sympy Expr, then
+                returns the simplified probability using
+                    Alea._symbolic_simplify_function
+            otherwise, if to_float is True, then
+                returns p converted to float
+            otherwise,
+                returns p unchanged
+        '''
+        if sympy is not None and isinstance(p,sympy.Expr):
+            return Alea._symbolic_simplify_function(p)
+        if to_float:
+            return float(p)
         return p
+    
+    @staticmethod
+    def _get_prob_type(prob_type):
+        ''' returns the class or function associated to given code,
+            this class or function is applied to convert each probability
+            given in an Alea constructor method;
+            if prob_type is a callable object, then it is returned as such
+            if prob_type is None, then current prob_type configured by
+               Alea.set_prob_type is returned
+            otherwise, the given prob_type is a code interpreted as follows:
+            - 'f' -> float (instance of Python's float) - default
+            - 'r' -> rational (instance of Python's fractions.Fraction)
+            - 'd' -> decimal (instance of Python's decimal.Decimal)
+            - 's' -> symbolic (instance of a sympy Symbol)
+            requires that a prob_type is None or a callable or a code among
+            the ones given above
+        '''
+        if prob_type is None:
+            return Alea._prob_type
+        if not isinstance(prob_type,str):
+            if not callable(prob_type):
+                raise Lea.Error("given prob_type '%s' is not a probability type code and it is not callable"%prob_type)
+            return prob_type
+        if prob_type == 'f':
+            return float
+        if prob_type == 'r':
+            return Fraction
+        if prob_type == 'd':
+            return Decimal
+        if prob_type == 's':
+            if sympy is None:
+                raise Lea.Error("prob_type 's' requires the sympy module, which seems to be not installed")            
+            return Alea.prob_symbol
+        raise Lea.Error("unknown probability type code '%s', should be 'f', 'r', 'd' or 's'"%prob_type)
+
+    @staticmethod
+    def set_prob_type(prob_type):
+        ''' static method allowing to change the representation of probability
+            values for newly created Lea instances, according to the given
+            prob_type
+            if prob_type is a callable object, then it is set as such
+            otherwise, the given prob_type is a code interpreted as follows:
+            - 'f' -> float (instance of Python's float) - default
+            - 'r' -> rational (instance of Python's fractions.Fraction)
+            - 'd' -> decimal (instance of Python's decimal.Decimal)
+            - 's' -> symbolic (instance of a sympy Symbol)
+            requires that a prob_type is a callable or a code among the ones
+            given above
+        '''
+        if prob_type is None:
+            raise Lea.Error("Alea.set_prob_type requires an argument that is not None")
+        Alea._prob_type = Alea._get_prob_type(prob_type)
 
     def __init__(self,vs,ps,normalization=True):
         ''' initializes Alea instance's attributes
@@ -83,8 +164,8 @@ class Alea(Lea):
         self._vs = tuple(vs)
         if normalization:
             p_sum = sum(ps)
-            if hasattr(p_sum,'factor'):
-                self._ps = tuple((p/p_sum).factor() for p in ps)
+            if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
+                self._ps = tuple(Alea._symbolic_simplify_function(p/p_sum) for p in ps)
             else:
                 self._ps = tuple(p/p_sum for p in ps)
         else:
@@ -94,88 +175,84 @@ class Alea(Lea):
         self._random_iter = self._create_random_iter()
         self._caches_by_func = dict()
 
-    @staticmethod
-    def set_prob_type(prob_type_code):
-        ''' static method allowing to change the representation of probability
-            values for newly created Lea instances, according to the given
-            prob_type_code:
-            - 'f' -> float (instance of Python's float) - default
-            - 'r' -> rational (instance of Python's fractions.Fraction)
-            - 'd' -> decimal (instance of Python's decimal.Decimal)
-            - 's' -> symbolic (instance of a sympy class)
-        '''
-        if prob_type_code == 'f':
-            prob_type = float
-        elif prob_type_code == 'r':
-            prob_type = Fraction
-        elif prob_type_code == 'd':
-            prob_type = Decimal
-        elif prob_type_code == 's':
-            from sympy import symbols, Symbol
-            class ProbSymbol(Symbol):
-                def __new__(cls, s=0):
-                    if isinstance(s,str):
-                        return Symbol(s)
-                    return s
-            prob_type = ProbSymbol
-        else:
-            raise Lea.Error("unknown probability type code '%s', should be 'f', 'r', 'd' or 's'"%prob_type_code)
-        Alea.init(prob_type)
-        Alea.prob_type_code = prob_type_code
-
-    # Constants representing certain values (Alea static attributes)
-    true = None
-    false = None
-    zero = None
-    empty_tuple = None
-
-    prob_type_code = None
-    _prob_type = None
-
-    @staticmethod
-    def init(prob_type):
-        # TODO doc
-        Alea._prob_type = prob_type
-        Alea.true  = Alea.coerce(True)
-        Alea.false = Alea.coerce(False)
-        Alea.zero  = Alea.coerce(0)
-        Alea.empty_tuple = Alea.coerce(())
-
+    
     # constructor methods
     # -------------------
+
+    # call tree of Alea constructor methods ([S] means static method):
+    #
+    #   __init__
+    #    <-- coerce [S]
+    #    <-- _from_val_freqs_dict [S]
+    #         <-- from_val_freqs_dict [S]
+    #         <-- _from_val_freqs [S]
+    #              <-- from_val_freqs [S]
+    #                   <-- from_vals [S]
+    #                        <-- from_seq [S]
+    #                             <-- from_pandas_df [S]
+    #                        <-- interval [S]
+    #                   <-- from_csv_filename [S]
+    #                   <-- from_csv_file [S]
+    #                   <-- _selections
+    #                        <-- draw_sorted_with_replacement
+    #                        <-- draw_sorted_without_replacement
+    #                   <-- poisson
+    #    <-- _from_val_freqs_ordered [S]
+    #         <-- _from_val_freqs  [S]
+    #              <-- ... (see above)
+    #         <-- draw_without_replacement
+    #              <-- draw_sorted_without_replacement
+    #    <-- _binary_distribution [S]
+    #         <-- bool_prob [S]
+    #         <-- bernoulli [S]
+    #              <-- binom [S]
 
     @staticmethod
     def coerce(value):
         ''' static method, returns a Lea instance corresponding the given value:
             if the value is a Lea instance, then it is returned
-            otherwise, an Alea instance is returned, with given value
+            otherwise, a new Alea instance is returned, with given value
             as unique value, with a probability of 1.
         '''
         if not isinstance(value,Lea):
+            # build a singleton value, with probability 1
+            ## note: do not put something else than 1, as integer,
+            ## which is the highest arithmetic class in class hierarchy
             return Alea((value,),(1,),normalization=False)
         return value
 
-    def new(self):
-        ''' returns a new Alea instance which is an independent shallow copy of self;
+    def new(self,prob_type=None):
+        ''' returns a new Alea instance, which represents the same probability
+            distribution as self but for another event, independent from self
+            if prob_type is None,
+               then the returned Alea instance is a shallow copy of self
+                    (values and probabilities data are shared);
+               otherwise, the returned Alea instance is new with probabilities
+                    converted according to prob_type (see doc of
+                    Alea.set_prob_type)
             note that the present method overloads Lea.new to be more efficient
         '''
-        # note that the new Alea instance shares the immutable _vs and _ps attributes of self
-        new_alea = Alea(self._vs,self._ps,normalization=False)
-        # it can share also the mutable _cumul and _inv_cumul attributes of self (lists)
-        new_alea._cumul = self._cumul
-        new_alea._inv_cumul = self._inv_cumul
-        return new_alea
+        if prob_type is None:
+            # note that the new Alea instance shares the immutable _vs and _ps attributes of self
+            new_alea = Alea(self._vs,self._ps,normalization=False)
+            # it can share also the mutable _cumul and _inv_cumul attributes of self (lists)
+            new_alea._cumul = self._cumul
+            new_alea._inv_cumul = self._inv_cumul
+            return new_alea
+        prob_type = Alea._get_prob_type(prob_type)
+        return Alea(self._vs,(prob_type(p) for p in self._ps),normalization=False)
 
-    __contructor_arg_names = frozenset(('ordered','sorting','normalization','check','frac'))
+    __contructor_arg_names = frozenset(('ordered', 'sorting', 'normalization', 'check', 'frac', 'prob_type'))
 
     @staticmethod
     def _parsed_kwargs(kwargs):
-        ''' return (ordered,sorting,normalization,check) tuple, with values found
-            in the given kwargs dictionary (keywords); for missing keywords,
-            the default values are False, True, True, True, respectively, except
+        ''' return (ordered,sorting,normalization,check,prob_type) tuple,
+            with values found in the given kwargs dictionary (keywords);
+            for missing keywords, the default values are
+            False, True, True, True, None, respectively, except
             if ordered=True and sorting is missing, then sorting=False;
-            requires that the given kwargs dictionary contains no other keywords
-            than those defined above;
+            requires that the given kwargs dictionary contains no other
+            keywords than those defined above;
             requires that ordered and sorting are not set to True together
         '''
         arg_names = frozenset(kwargs.keys())
@@ -185,13 +262,14 @@ class Alea(Lea):
         ordered = kwargs.get('ordered',False)
         normalization = kwargs.get('normalization',True)
         check = kwargs.get('check',True)
+        prob_type = kwargs.get('prob_type')
         if ordered and 'sorting' not in kwargs:
             sorting = False
         else:
             sorting = kwargs.get('sorting',True)
             if ordered and sorting:
                 raise Lea.Error("ordered and sorting arguments cannot be set to True together")
-        return (ordered,sorting,normalization,check)
+        return (ordered,sorting,normalization,check,prob_type)
 
     @staticmethod
     def _from_val_freqs_dict(prob_dict,**kwargs):
@@ -208,7 +286,7 @@ class Alea(Lea):
             (in such case, it's not mandatory to have true probabilities for ps
              elements; these could be simple counters for example)
         '''
-        (ordered,sorting,normalization,check) = Alea._parsed_kwargs(kwargs)
+        (ordered,sorting,normalization,_,_) = Alea._parsed_kwargs(kwargs)
         if ordered:
             raise Lea.Error("cannot keep order of dictionary keys")
         vps = list(prob_dict.items())
@@ -237,7 +315,8 @@ class Alea(Lea):
             (in such case, it's not mandatory to have true probabilities for ps
              elements; these could be simple counters for example)
         '''
-        prob_type = Alea._prob_type
+        #prob_type = Alea._prob_type
+        prob_type = Alea._get_prob_type(kwargs.get('prob_type'))
         return Alea._from_val_freqs_dict(dict((v,prob_type(p)) for (v,p) in prob_dict.items()),**kwargs)
 
     @staticmethod
@@ -283,8 +362,13 @@ class Alea(Lea):
             for treatment of optional kwargs keywords arguments, see doc of
             Alea.from_val_freqs_dict;
         '''
-        prob_type = Alea._prob_type
-        return Alea._from_val_freqs(*((v,prob_type(p)) for (v,p) in value_freqs),**kwargs)
+        #prob_type = Alea._prob_type
+        prob_type = Alea._get_prob_type(kwargs.get('prob_type'))
+        if prob_type is None:
+            gen_vps = value_freqs
+        else:
+            gen_vps = ((v,prob_type(p)) for (v,p) in value_freqs)    
+        return Alea._from_val_freqs(*gen_vps,**kwargs)
 
     @staticmethod
     def _from_val_freqs(*value_freqs,**kwargs):
@@ -297,7 +381,7 @@ class Alea(Lea):
             for treatment of optional kwargs keywords arguments, see doc of
             Alea.from_val_freqs_dict;
         '''
-        (ordered,sorting,normalization,check) = Alea._parsed_kwargs(kwargs)
+        (ordered,_,_,_,_) = Alea._parsed_kwargs(kwargs)
         if ordered:
             return Alea._from_val_freqs_ordered(*value_freqs, **kwargs)
         prob_dict = defaultdict(int)
@@ -306,7 +390,7 @@ class Alea(Lea):
         return Alea._from_val_freqs_dict(prob_dict,**kwargs)
 
     @staticmethod
-    def _from_val_freqs_ordered(*value_freqs, **kwargs):
+    def _from_val_freqs_ordered(*value_freqs,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of (val,freq) tuples, where freq is a natural
             number so that each value is taken with the given frequency
@@ -318,7 +402,7 @@ class Alea(Lea):
             * check (default: True): if True and if a value occurs multiple
             times, then an exception is raised;        
         '''
-        (ordered,sorting,normalization,check) = Alea._parsed_kwargs(kwargs)
+        (_,_,normalization,check,_) = Alea._parsed_kwargs(kwargs)
         (vs,ps) = zip(*value_freqs)
         # check duplicates
         if check and len(frozenset(vs)) < len(vs):
@@ -342,46 +426,48 @@ class Alea(Lea):
         if not is_valid:
             raise Lea.Error("invalid probability value %s"%p)
 
-
     @staticmethod
-    def _binary_distribution(v1,v2,pn1,pd1=None):
+    def _binary_distribution(v1,v2,pn1,pd1=None,prob_type=None):
         ''' static method, returns an Alea instance representing a boolean
             probability distribution giving v1 with probability pn1 and v2
             with complementary probability;
             if pd1 is not None, then the probability of True is pn/pd
         '''
-        p1 = Alea._prob_type(pn1)
+        prob_type = Alea._get_prob_type(prob_type)
+        p1 = prob_type(pn1)
         if pd1 is not None:
-            p1 /= Alea._prob_type(pd1)
+            p1 /= prob_type(pd1)
         Alea._check_prob(p1)
         if p1 == 1:
-            (vs,ps) = ((v1,),(1,))
+            #(vs,ps) = ((v1,),(1,))
+            (vs,ps) = ((v1,),(p1,))
         elif p1 == 0:
-            (vs,ps) = ((v2,),(1,))
+            #(vs,ps) = ((v2,),(1,))
+            (vs,ps) = ((v2,),(1-p1,))
         else:
             (vs,ps) = ((v1,v2),(p1,1-p1))
         return Alea(vs,ps,normalization=False)
 
     @staticmethod
-    def bool_prob(pn,pd=None):
+    def bool_prob(pn,pd=None,prob_type=None):
         ''' static method, returns an Alea instance representing a boolean
             probability distribution giving True with probability pn and 0
             with complementary probability;
             if pd is not None, then the probability of True is pn/pd
         '''
-        return Alea._binary_distribution(True,False,pn,pd)
+        return Alea._binary_distribution(True,False,pn,pd,prob_type)
 
     @staticmethod
-    def bernoulli(pn,pd=None):
+    def bernoulli(pn,pd=None,prob_type=None):
         ''' static method, returns an Alea instance representing a bernoulli
             distribution giving 1 with probability pn and 0 with complementary
             probability;
             if pd is not None, then the probability of 1 is pn/pd
         '''
-        return Alea._binary_distribution(1,0,pn,pd)
+        return Alea._binary_distribution(1,0,pn,pd,prob_type)
 
     @staticmethod
-    def binom(n,pn,pd=None):
+    def binom(n,pn,pd=None,prob_type=None):
         ''' static method, returns an Alea instance representing a binomial
             distribution giving the number of successes among a number n of
             independent experiments, each having probability pn of success;
@@ -389,14 +475,14 @@ class Alea(Lea):
             note: the binom method generalizes the bernoulli method:
             binom(1,pn,pd) = bernoulli(pn,pd)
         '''
-        return Alea.bernoulli(pn,pd).times(n)
+        return Alea.bernoulli(pn,pd,prob_type).times(n)
 
     @staticmethod
-    def interval(from_val,to_val,frac=False):
+    def interval(from_val,to_val,frac=False,prob_type=None):
         ''' static method, returns an Alea instance representing a uniform probability
             distribution, for all the integers in the interval [from_val,to_val]
         '''
-        return Alea.from_vals(*range(from_val,to_val+1),frac=frac)
+        return Alea.from_vals(*range(from_val,to_val+1),frac=frac,prob_type=prob_type)
 
     @staticmethod
     def from_csv_filename(csv_filename,col_names=None,dialect='excel',**fmtparams):
@@ -406,8 +492,11 @@ class Alea(Lea):
             instead of an open file (i.e. the method opens itself the file for reading);
             see Alea.from_csv_file doc for more details
         '''
+        # TODO review this
+        kwargs = dict((k,v) for (k,v) in fmtparams.items() if k in Alea.__contructor_arg_names)
+        fmtparams = dict((k,v) for (k,v) in fmtparams.items() if k not in kwargs)
         (attr_names,data_freq) = read_csv_filename(csv_filename,col_names,dialect,**fmtparams)
-        return Alea.from_val_freqs(*data_freq).as_joint(*attr_names)
+        return Alea.from_val_freqs(*data_freq,**kwargs).as_joint(*attr_names)
 
     @staticmethod
     def from_csv_file(csv_file,col_names=None,dialect='excel',**fmtparams):
@@ -447,11 +536,14 @@ class Alea(Lea):
             to define non-uniform probability distribution, as alternative to repeating the
             same row multiple times
         '''
+        # TODO review this
+        kwargs = dict((k,v) for (k,v) in fmtparams.items() if k in Alea.__contructor_arg_names)
+        fmtparams = dict((k,v) for (k,v) in fmtparams.items() if k not in kwargs)
         (attr_names,data_freq) = read_csv_file(csv_file,col_names,dialect,**fmtparams)
-        return Alea.from_val_freqs(*data_freq).as_joint(*attr_names)
+        return Alea.from_val_freqs(*data_freq,**kwargs).as_joint(*attr_names)
 
     @staticmethod
-    def from_pandas_df(dataframe,index_col_name=None):
+    def from_pandas_df(dataframe,index_col_name=None,**kwargs):
         ''' static method, returns an Alea instance representing the joint probability
             distribution from the given pandas dataframe;
             the attribute names of the distribution are those of the column of the
@@ -469,7 +561,7 @@ class Alea(Lea):
         else:
             values_iter = dataframe.itertuples()
             attr_names = (index_col_name,) + attr_names
-        return Alea.from_seq(values_iter).as_joint(*attr_names)
+        return Alea.from_seq(values_iter,**kwargs).as_joint(*attr_names)
 
     def times(self,n,op=operator.add):
         ''' returns a new Alea instance representing the current distribution
@@ -580,7 +672,7 @@ class Alea(Lea):
             assumes that n >= 0
         '''
         if n == 0:
-            return Alea.empty_tuple
+            return Alea.coerce((),prob_type=self._ps[0].__class__)
         return self.map(make_tuple).times(n)
 
     def draw_without_replacement(self,n):
@@ -593,12 +685,11 @@ class Alea(Lea):
             is raised
         '''
         if n == 0:
-            return Alea.empty_tuple
+            return Alea.coerce((),prob_type=self._ps[0].__class__)
         if len(self._vs) == 1:
             if n > 1:
                 raise Lea.Error("number of values to draw exceeds the number of possible values")
-            #return Alea(((self._vs[0],),),(1,))
-            return Alea.coerce((self._vs[0],))
+            return Alea.coerce((self._vs[0],),prob_type=self._ps[0].__class__)
         alea2s = tuple(Alea._from_val_freqs_ordered(*tuple((v0, p0) for (v0, p0) in self.vps() if v0 != v), check=False).draw_without_replacement(n - 1) for v in self._vs)
         vps = []
         for (v,p,alea2) in zip(self._vs,self._ps,alea2s):
@@ -611,7 +702,8 @@ class Alea(Lea):
             distribution having the given mean; the distribution is approximated by
             the finite set of values that have probability > precision
             (i.e. low/high values with too small probabilities are dropped);
-            the probabilities are stored as float
+            the probabilities are stored as float, whatever the current probability
+            type configured
         '''
         val_freqs = []
         p = exp(-mean)
@@ -747,27 +839,32 @@ class Alea(Lea):
                flip.plot(fname='flip.png',savefig_args=dict(bbox_inches='tight'),color='green')
             the method requires matplotlib package; an exception is raised if it is not installed
         '''
+        # try to import matplotlib package, required by plot() method
         try:
-            plt
+            import matplotlib.pyplot as plt
         except:
             raise Lea.Error("the plot() method requires the matplotlib package")
-        if fname is None:
-            # no file specified: erase the current chart, if any
-            plt.clf()
         else:
-            # file specified: switch off interactive mode
-            plt.ioff()
-        plt.bar(range(len(self._vs)),self.pmf(),tick_label=self._vs,align='center',**bar_args)
-        plt.ylabel('Probability')
-        if title is not None:
-            plt.title(title)
-        if fname is None:
-            # no file specified: display the chart on screen
-            plt.show()
-        else:
-            # file specified: save chart on file, using given parameters and switch back interactive mode
-            plt.savefig(fname,**savefig_args)
+            # switch on interactive mode, so the control is back to console as soon as a chart is displayed
             plt.ion()
+            if fname is None:
+                # no file specified: erase the current chart, if any
+                plt.clf()
+            else:
+                # file specified: switch off interactive mode
+                plt.ioff()
+            plt.bar(range(len(self._vs)),self.pmf(),tick_label=self._vs,align='center',**bar_args)
+            plt.ylabel('Probability')
+            if title is not None:
+                plt.title(title)
+            if fname is None:
+                # no file specified: display the chart on screen
+                plt.show()
+            else:
+                # file specified: save chart on file, using given parameters and switch back interactive mode
+                plt.savefig(fname,**savefig_args)
+                # TODO needed?
+                plt.ion()
 
     def get_alea_leaves_set(self):
         ''' returns a set containing all the Alea leaves in the tree having the root self
@@ -839,7 +936,7 @@ class Alea(Lea):
         if p1 is None:
             # val is absent form self: the probability is null, casted in the type of the last probability found
             p1 = 0 * p
-        return p1
+        return Alea._simplify(p1)
 
     def cumul(self):
         ''' returns a list with the probabilities p that self <= value ;
@@ -957,10 +1054,6 @@ class Alea(Lea):
 
     indicator_method_names = ('P','Pf','mean','mean_f','var','var_f','std','std_f','mode','entropy',
                             'rel_entropy','redundancy','information')
-
-    # dictionary used in P method
-    __downcast_prob_class = dict({Fraction: ProbFraction,
-                                Decimal : ProbDecimal})
 
     def P(self):
         ''' returns the probability that self is True;
@@ -1152,7 +1245,11 @@ class Alea(Lea):
         n = len(self._vs)
         if n == 1:
             return 0.0
-        return min(1.0,self.entropy/log2(n))
+        res = self.entropy / log2(n)
+        try:
+            return min(1.0,res)
+        except TypeError:
+            return res
 
     def redundancy(self):
         ''' returns the redundancy of self;

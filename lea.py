@@ -498,7 +498,7 @@ class Lea(object):
 
     def p(self,val=None):
         ''' returns a ProbFraction instance representing the probability of given value val,
-            from 0/1 to 1/1
+            from 0 to 1
             if val is None, then a tuple is returned with the probabilities of each value,
             in the same order as defined on values (call vals method to get this 
             ordered sequence)
