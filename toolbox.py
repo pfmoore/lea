@@ -159,7 +159,7 @@ def read_csv_filename(csv_filename,col_names=None,dialect='excel',**fmtparams):
         of an open file (i.e. the method opens itself the file for reading);
         see read_csv_file doc for more details
     '''
-    with open(csv_filename,'r_u') as csv_file:
+    with open(csv_filename,'rU') as csv_file:
         return read_csv_file(csv_file,col_names,dialect,**fmtparams)
 
 def read_csv_file(csv_file,col_names=None,dialect='excel',**fmtparams):
