@@ -25,19 +25,19 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .lea import *
 
-def die(nb_faces):
+def die(nb_faces,prob_type=None):
     ''' returns an Alea instance representing the value obtained by throwing
         a fair die with faces marked from 1 to nb_faces
     '''
-    return Lea.interval(1,nb_faces)
+    return Lea.interval(1,nb_faces,prob_type=prob_type)
 
-def dice(nb_dice,nb_faces):
+def dice(nb_dice,nb_faces,prob_type=None):
     ''' returns an Alea instance representing the total value obtained by
         throwing nb_dice independent fair dice with faces marked from 1 to nb_faces
     '''
-    return die(nb_faces).times(nb_dice)
+    return die(nb_faces,prob_type).times(nb_dice)
 
-def dice_seq(nb_dice,nb_faces,sorted=True):
+def dice_seq(nb_dice,nb_faces,sorted=True,prob_type=None):
     ''' returns an Alea instance representing the individual results obtained by
         throwing nb_dice independent fair dice with faces marked from 1 to nb_faces
         (each value is a tuple with nb_dice elements)
@@ -51,7 +51,7 @@ def dice_seq(nb_dice,nb_faces,sorted=True):
     ##    die(nb_faces).times_tuple(nb_dice).map(lambda v: tuple(sorted(v))).get_alea()
     ## gives same results but is ineffecient as nb_dice and nb_faces grows
     ## the fast function used here is due to Paul Moore
-    return die(nb_faces).draw(nb_dice,sorted=sorted,replacement=True)
+    return die(nb_faces,prob_type).draw(nb_dice,sorted=sorted,replacement=True)
 
 
 # D6 represents the value obtained by throwing a fair die with 6 faces

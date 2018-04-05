@@ -454,67 +454,72 @@ class Lea(object):
             inner values of these Lea instances  
         '''
         return Rlea(self)
-    '''
-    @staticmethod
-    def coerce(value):
-        '' static method, returns a Lea instance corresponding the given value:
-            if the value is a Lea instance, then it is returned
-            otherwise, an Alea instance is returned, with given value
-            as unique (certain) value
-        ''
-        if not isinstance(value,Lea):
-            return Alea((value,),(1,))
-        return value
-    '''
 
+    # TODO review two following methods
     def equiv(self,other,prec=None):
         ''' returns True iff self and other represent the same probability distribution,
-            i.e. they have the same probability for each of their value
-            returns False otherwise
+            i.e. they have the same probability for each of their value;
+            returns False otherwise;
+            the probabilities are compared strictly (see Lea.equiv_f method for
+            comparisons tolerant to rounding errors)
         '''
         other = Lea.coerce(other)
         # absolute equality required -> quick test
         # frozenset(...) is used to avoid any dependency on the order of values
-        return frozenset(self.vps()) == frozenset(other.vps())
+        return frozenset(self.gen_raw_vps()) == frozenset(other.gen_raw_vps())
 
-    def equiv_f(self,other): #prec=sys.float_info.epsilon):
+    def equiv_f(self,other):
         ''' returns True iff self and other represent the same probability distribution,
             i.e. they have the same probability for each of their value
-            returns False otherwise
+            returns False otherwise;
+            the probabilities are compared using the math.isclose function,
+            so to be tolerant to rounding errors
         '''
         other = Lea.coerce(other)
-        vps1 = tuple(self.vps())
-        vps2Dict = dict(other.vps())
+        vps1 = tuple(self.gen_raw_vps())
+        vps2Dict = dict(other.gen_raw_vps())
         if len(vps1) != len(vps2Dict):
             return False
         for (v1,p1) in vps1:
             p2 = vps2Dict.get(v1)
             if p2 is None:
                 return False
-            #if abs(p1-p2) > prec:
             if not isclose(p1,p2):
                 return False
         return True
 
-    def p(self,val=None):
+    def p(self,val):
         ''' returns a ProbFraction instance representing the probability of given value val,
             from 0 to 1
-            if val is None, then a tuple is returned with the probabilities of each value,
-            in the same order as defined on values (call vals method to get this 
-            ordered sequence)
         '''
-        if val is None:
-            return tuple(self.ps())
-        return self._p(val)
- 
-    def vps(self):
+        return Alea._downcast(self._p(val))
+
+    def gen_raw_vps(self):
+        ''' generates, after evaluation of the probability distribution self,
+            tuples (v,p) where v is a value of self
+            and p is the associated probability weight (integer > 0);
+            the sequence follows the order defined on values;
+            note that there is NO binding, contrarily to _gen_vp method
+        '''
+        return self.get_alea()._gen_vp()
+    
+    # TODO
+    def gen_vps(self):
         ''' generates, after evaluation of the probability distribution self,
             tuples (v,p) where v is a value of self
             and p is the associated probability weight (integer > 0);
             the sequence follows the order defined on values
             not that there is NO binding, contrarily to _gen_vp method
         '''
-        return self.get_alea().vps()
+        return ((v,Alea._downcast(p)) for (v,p) in self.get_alea()._gen_vp())
+
+    def vps(self):
+        ''' returns, after evaluation of the probability distribution self,
+            a tuple with tuples (v,p) where v is a value of self
+            and p is the associated probability weight (integer > 0);
+            the sequence follows the order defined on values
+        '''
+        return tuple(self.gen_vps())
 
     def vals(self):
         ''' returns a tuple with values of self
@@ -524,19 +529,21 @@ class Lea(object):
         '''
         return self.get_alea()._vs
 
+    # TODO
     def ps(self):
         ''' returns a tuple with probability weights (integer > 0) of self
             the sequence follows the increasing order defined on values
             if order is undefined (e.g. complex numbers), then the order is
             arbitrary but fixed from call to call
         '''
-        return self.get_alea()._ps
+        return tuple(Alea._downcast(p) for p in self.get_alea()._ps)
         
     def support(self):
         ''' same as vals method
         '''
         return self.vals()
-              
+
+    # TODO
     def pmf(self,val=None):
         ''' probability mass function
             returns the probability of the given value val, as a floating point number
@@ -545,23 +552,29 @@ class Lea(object):
             in the same order as defined on values (call vals method to get this 
             ordered sequence)
         '''
-        # TODO: float vs frac , see cdf
-        if val is None:
-            return tuple(float(p) for p in self.ps())
-        return self._p(val)
+        if val is not None:
+            return self.p(val)
+        return tuple(self.ps())
 
+    # TODO
     def cdf(self,val=None):
         ''' cumulative distribution function
             returns the probability that self's value is less or equal to the given value val,
             as a floating point number from 0.0 to 1.0
             if val is None, then a tuple is returned with the probabilities of each value,
             in the same order as defined on values (call vals method to get this 
-            ordered sequence); the last probability is always 1.0 
+            ordered sequence); the last probability is always 1
+        '''
         '''
         if val is None:
             return tuple(self.cumul()[1:])
         return self.get_alea().p_cumul(val)
+        '''
+        if val is None:
+            return tuple(Alea._downcast(p) for p in self.get_alea().cumul()[1:])
+        return Alea._downcast(self.get_alea().p_cumul(val))
 
+    # TODO doc
     def _p(self,val,check_val_type=False):
         ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
             where
@@ -571,6 +584,7 @@ class Lea(object):
             if check_val_type is True, then raises an exception if some value in the
             distribution has a type different from val's
         '''
+        #return self.get_alea()._p(val,check_val_type)
         return self.get_alea()._p(val,check_val_type)
 
     def sort_by(self,*ordering_leas):
@@ -1259,22 +1273,20 @@ class Lea(object):
         '''
         self._init_calc()
         return sum(1 for vp in self.gen_vp())
-    
+
     def is_true(self):
         ''' returns True iff the value True has probability 1;
                     False otherwise;
             raises exception if some value is not boolean
         '''
-        (n,d) = self._p(True,check_val_type=True) 
-        return n == d
+        return self._p(True,check_val_type=True) == 1
 
     def is_feasible(self):
         ''' returns True iff the value True has a non-null probability;
                     False otherwise;
             raises exception if some value is not boolean
         '''
-        (n,d) = self._p(True,check_val_type=True)
-        return n > 0
+        return self._p(True,check_val_type=True) > 0
         
     def as_string(self,kind='/',nb_decimals=6,chart_size=100):
         ''' returns, after evaluation of the probability distribution self, a string
@@ -1372,14 +1384,18 @@ class Lea(object):
             self._alea = self.new(**kwargs)
         return self._alea
 
-    def new(self,**kwargs):
+    def new(self,prob_type=-1,**kwargs):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
-            if self is an Alea, then it returns a clone of itself (independent)
+            if self is an Alea, then it returns a clone of itself representing an independent event;
+            the probability type used in the returned instance depends on given prob_type:
+            if prob_type is -1, then the probability type is the same as self's
+            otherwise, the probability type is defined using prob_type (see doc of Alea.set_prob_type);
             note that the present method is overloaded in Alea class, to be more efficient
         '''
         self._init_calc()
-        return Alea._from_val_freqs(*tuple(self.gen_vp()),**kwargs)
+        return Alea.from_val_freqs(*tuple(self.gen_vp()),prob_type=prob_type,**kwargs)
 
+    # TODO
     def cumul(self):
         ''' evaluates the distribution, then,
             returns a tuple with probability weights p that self <= value ;
@@ -1388,8 +1404,9 @@ class Lea(object):
             order is used, fixed from call to call
             Note : the returned value is cached
         '''
-        return self.get_alea().cumul()
+        return tuple(Alea._downcast(p) for p in self.get_alea().cumul())
         
+    # TODO
     def inv_cumul(self):
         ''' evaluates the distribution, then,
             returns a tuple with the probability weights p that self >= value ;
@@ -1398,7 +1415,7 @@ class Lea(object):
             order is used, fixed from call to call
             Note : the returned value is cached
         '''
-        return self.get_alea().inv_cumul()
+        return tuple(Alea._downcast(p) for p in self.get_alea().inv_cumul())
         
     def random_iter(self):
         ''' evaluates the distribution, then,
@@ -1509,6 +1526,7 @@ class Lea(object):
                     args.append(attr_val.__module__+'.'+attr_val.__name__)
         return ('\n'+indent+'  ').join(args)
 
+# import modules with Lea subclasses
 from .alea import Alea
 from .clea import Clea
 from .ilea import Ilea
@@ -1521,8 +1539,10 @@ from .flea2a import Flea2a
 from .glea import Glea
 from .tlea import Tlea
 
-# init Alea class, with float type by default
-Alea.set_prob_type('f')
+# init Alea class with default 'x' type code: if a probability is expressed as
+# a string, then the target type is inferred from its content
+# - see Alea.prob_any method
+Alea.set_prob_type('x')
 
 # Lea static methods exported from Alea
 Lea.set_prob_type = Alea.set_prob_type
@@ -1566,4 +1586,3 @@ def Pf(lea1):
         this is a convenience function equivalent to lea1.Pf
     '''
     return lea1.Pf
-
