@@ -38,7 +38,7 @@ class ProbNumber(object):
         ''' raises an Exception if the decimal is not in the probability range, from 0 to 1
         '''
         if not (0 <= self <= 1):
-            raise ProbNumber.Error("%s is not a valid probability (between 0 and 1)"%self.get_base_class().__str__(self))
+            raise ProbNumber.Error("%s is not a valid probability (between 0 and 1)"%self._get_base_class().__str__(self))
 
     def __str__(self):
         ''' returns a string representation of self
