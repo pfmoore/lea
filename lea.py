@@ -584,7 +584,6 @@ class Lea(object):
             if check_val_type is True, then raises an exception if some value in the
             distribution has a type different from val's
         '''
-        #return self.get_alea()._p(val,check_val_type)
         return self.get_alea()._p(val,check_val_type)
 
     def sort_by(self,*ordering_leas):
@@ -612,6 +611,15 @@ class Lea(object):
         '''
         return Flea1(lambda v: v not in values,self)
 
+    def subs(self,*args):
+        ''' returns a new Alea instance, equivalent to self where probabilities have been converted
+            by applying subs(*args) on them;
+            this is useful for substituying variables when probabilities are expressesd as sympy
+            expressions (see doc of sympy.Expreesion.subs method);
+            requires that all self's probabiliies have a 'subs' method available
+        '''
+        return Alea(*zip(*((v,p.subs(*args)) for (v,p) in self.gen_raw_vps())),normalization=False)
+
     @staticmethod
     def build_cpt_from_dict(a_cpt_dict,prior_lea=None):
         ''' static method, same as build_cpt, with clauses specified in the a_cpt_dict dictionary
@@ -631,7 +639,6 @@ class Lea(object):
               Lea.build_cpt((cond_lea,then_lea),(None,else_lea))
         '''
         return Tlea(cond_lea,{True:then_lea,False:else_lea})
-        ## before version 2.3: Blea.build((cond_lea,then_lea),(None,else_lea))
 
     def switch(self,lea_dict,default_lea=_DUMMY_VAL):
         ''' returns an instance of Tlea representing a conditional probability table (CPT)
