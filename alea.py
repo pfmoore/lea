@@ -50,15 +50,15 @@ class Alea(Lea):
     
     '''
     Alea is a Lea subclass, which instance is defined by explicit probability distribution data.
-    An Alea instance is defined by given value-probability pairs. The probabilities can be
-    expressed as any object with arithmetic semantic. The main candidates are float, fraction
-    or symbolic expressions
+    An Alea instance is defined by given value-probability pairs, that is an explicit probability
+    mass function (pmf). The probabilities can be expressed as any object with arithmetic semantic.
+    The main candidates are float, fraction or symbolic expressions.
     '''
 
     __slots__ = ('_vs','_ps','_cumul','_inv_cumul','_random_iter','_caches_by_func')
    
     # class or function used by default to convert each probability given in
-    # an Alea constructor method ; if None and if no prob_type arg is
+    # an Alea constructor method; if None and if no prob_type arg is
     # specified in the constructore, then each probability is stored as-is
     _prob_type = None
 
@@ -66,11 +66,10 @@ class Alea(Lea):
     # displayed (see _simplify and Alea.__init__ methods)
     _symbolic_simplify_function = sympy and sympy.factor
 
-    # dictionary used in P method
+    # dictionary used in _downcast method
     __downcast_prob_class = dict( {Fraction : ProbFraction,
                                    Decimal  : ProbDecimal })
 
-    
     @staticmethod
     def prob_symbol(arg):
         ''' static method; if given arg is a string, then
@@ -91,7 +90,7 @@ class Alea(Lea):
             given arg:
             if arg is not a string, then it is returned as-is;
             if arg is a string, then it is tried to be interpreted as
-            Decimal, Fraction or sympy symbol (in that order), the object
+            Decimal, Fraction or sympy symbol, in that order; the object
             of the first succesful type is returned;
         '''
         if not isinstance(arg,str):
@@ -127,7 +126,7 @@ class Alea(Lea):
         return v
 
     @staticmethod
-    def _get_prob_type(prob_type):
+    def get_prob_type(prob_type):
         ''' returns the class or function associated to given code,
             this class or function is applied to convert each probability
             given in an Alea constructor method;
@@ -143,7 +142,7 @@ class Alea(Lea):
                      - see Alea.prob_symb method
             - 'x' -> any: if probability given in a string, then determines
                      the type from it (decimal, rational or symbol) and
-                     convert into it;
+                     converts into that type;
                      otherwise, takes the object as-is
                      - see Alea.prob_any method
             requires that prob_type is -1 or None or a callable or a code
@@ -175,8 +174,8 @@ class Alea(Lea):
     def set_prob_type(prob_type):
         ''' static method allowing to change the representation of probability
             values for newly created Lea instances, according to the given
-            prob_type
-            if prob_type is a callable object, then it is set as such
+            prob_type;
+            if prob_type is a callable object, then it is set as such;
             otherwise, the given prob_type is a code interpreted as follows:
             - 'f' -> float (instance of Python's float) - default
             - 'd' -> decimal (instance of Python's decimal.Decimal)
@@ -193,7 +192,7 @@ class Alea(Lea):
         '''
         if prob_type is None or prob_type == -1:
             raise Lea.Error("Alea.set_prob_type does not allow %s as argument"%prob_type)
-        Alea._prob_type = Alea._get_prob_type(prob_type)
+        Alea._prob_type = Alea.get_prob_type(prob_type)
 
     def __init__(self,vs,ps,normalization=True,prob_type=-1):
         ''' initializes Alea instance's attributes
@@ -210,7 +209,7 @@ class Alea(Lea):
         # for an Alea instance, the alea cache is itself
         self._alea = self
         self._vs = tuple(vs)
-        prob_type_func = Alea._get_prob_type(prob_type)
+        prob_type_func = Alea.get_prob_type(prob_type)
         if prob_type_func is not None:
             ps = (prob_type_func(p) for p in ps)
         if normalization:
@@ -264,7 +263,7 @@ class Alea(Lea):
     @staticmethod
     def coerce(value):
         ''' static method, returns a Lea instance corresponding the given value:
-            if the value is a Lea instance, then it is returned
+            if the value is a Lea instance, then it is returned as-is
             otherwise, a new Alea instance is returned, with given value
             as unique value, with a probability of 1.
         '''
@@ -327,20 +326,28 @@ class Alea(Lea):
 
     @staticmethod
     def from_val_freqs_dict(prob_dict,prob_type=None,**kwargs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given prob_dict dictionary of {val:prob};
-            the method admits two optional boolean argument (in kwargs):
+        ''' static method, returns an Alea instance representing a probability
+            distribution for the given prob_dict dictionary of {val:prob};
+            * prob_type argument allows converting the given probabilities:
+              -1: no conversion;
+              None (default): default conversion, as set by Alea.set_prob_type;
+              other: see doc of Alea.get_prob_type;
+            the method admits three other optional boolean argument (in kwargs):
             * sorting (default:True): if True, then the values for displaying
             the distribution or getting the values will be sorted if possible
             (i.e. no exception on sort); otherwise, or if sorting=False, then
             the order of values is unspecified; 
+            * ordered (default:False): if ordered is True, then the values for
+            displaying the distribution or getting the values will follow the
+            given order (requires that the prob_dict is a
+            collections.OrderedDict);
             * normalization (default:True): if True, then each element
             of the given ps is divided by the sum of all ps before being stored
             (in such case, it's not mandatory to have true probabilities for ps
-            elements; these could be simple counters for example);
-            requires that prob_dict is not empty
-            if ordered is True, requires that the prob_dict is
-            collections.OrderedDict 
+            elements; these could be simple counters, for example);
+            requires that prob_dict is not empty;
+            requires that ordered and sorting are not set to True together
+            
         '''
         (ordered,sorting,normalization,_,_) = Alea._parsed_kwargs(kwargs)
         if ordered and not isinstance(prob_dict,collections.OrderedDict):
@@ -353,7 +360,7 @@ class Alea(Lea):
             except:
                 # no ordering relationship on values (e.g. complex numbers)
                 pass
-        prob_type_func = Alea._get_prob_type(prob_type)
+        prob_type_func = Alea.get_prob_type(prob_type)
         if prob_type_func is not None:
             vps = ((v,prob_type_func(p))for (v,p) in vps)
         return Alea(*zip(*vps),normalization=normalization,prob_type=-1)
@@ -369,7 +376,6 @@ class Alea(Lea):
             the following optional arguments (kwargs) are expected:
              ordered, sorting, normalization, check;
             see doc of Alea.from_val_freqs_dict static method;
-            if the given sequence is empty, then an exception is raised;
             requires at least one vals argument
         '''
         return Alea.from_val_freqs(*((val,1) for val in vals),prob_type=prob_type,**kwargs)
@@ -392,6 +398,10 @@ class Alea(Lea):
             probability of v or some number proportional to this probability;
             if the same v occurs multiple times, then the associated p are summed
             together;
+            prob_type argument allows converting the given probabilities:
+              -1: no conversion;
+              None (default): default conversion, as set by Alea.set_prob_type;
+              other: see doc of Alea.get_prob_type;
             for treatment of optional kwargs keywords arguments, see doc of
             Alea.from_val_freqs_dict;
             requires at least one value_freqs argument
@@ -402,7 +412,7 @@ class Alea(Lea):
         if ordered:
             return Alea._from_val_freqs_ordered(*value_freqs,prob_type=prob_type,**kwargs)
         prob_dict = defaultdict(int)
-        prob_type_func = Alea._get_prob_type(prob_type)
+        prob_type_func = Alea.get_prob_type(prob_type)
         if prob_type_func is None:
             # no probability conversion required
             for (value,freq) in value_freqs:
@@ -419,8 +429,7 @@ class Alea(Lea):
     def _from_val_freqs_ordered(*value_freqs,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given sequence of (val,freq) tuples, where freq is a natural
-            number so that each value is taken with the given frequency
-            the frequencies are reduced by dividing them by their GCD;
+            number so that each value is taken with the given frequency;
             the values will be stored and displayed in the given order (no sort);
             the method admits 2 optional boolean argument (kwargs):
             * check (default: True): if True and if a value occurs multiple
@@ -453,19 +462,18 @@ class Alea(Lea):
             raise Lea.Error("invalid probability value %s"%p)
 
     @staticmethod
-    def _binary_distribution(v1,v2,pn1,pd1=None,prob_type=None):
+    def _binary_distribution(v1,v2,p1,prob_type=None):
         ''' static method, returns an Alea instance representing a boolean
-            probability distribution giving v1 with probability pn1 and v2
-            with complementary probability;
-            if pd1 is not None, then the probability of True is pn/pd;
-            the given prob_type, if not None, allows using a probability
-            type different from the default one (float or any one set by
-            Alea.set_prob_type) - see doc of Alea.set_prob_type
+            probability distribution giving v1 with probability p1 and v2
+            with probability 1-p1;
+            prob_type argument allows converting the given probability p1:
+              -1: no conversion;
+              None (default): default conversion, as set by Alea.set_prob_type;
+              other: see doc of Alea.get_prob_type;
         '''
-        prob_type_func = Alea._get_prob_type(prob_type)
-        p1 = pn1 if prob_type_func is None else prob_type_func(pn1)
-        if pd1 is not None:
-            p1 /= pd1 if prob_type_func is None else prob_type_func(pd1)
+        prob_type_func = Alea.get_prob_type(prob_type)
+        if prob_type_func is not None:
+            p1 = prob_type_func(p1)
         Alea._check_prob(p1)
         if p1 == 1:
             ## note: do not replace p1 by 1, in order to keep the given type
@@ -478,42 +486,42 @@ class Alea(Lea):
         return Alea(vs,ps,normalization=False,prob_type=-1)
 
     @staticmethod
-    def bool_prob(pn,pd=None,prob_type=None):
+    def bool_prob(p,prob_type=None):
         ''' static method, returns an Alea instance representing a boolean
-            probability distribution giving True with probability pn and 0
-            with complementary probability;
-            if pd is not None, then the probability of True is pn/pd;
-            the given prob_type, if not None, allows using a probability
-            type different from the default one (float or any one set by
-            Alea.set_prob_type) - see doc of Alea.set_prob_type
+            probability distribution giving True with probability p and
+            False with probability 1-p;
+            prob_type argument allows converting the given probability p:
+              -1: no conversion;
+              None (default): default conversion, as set by Alea.set_prob_type;
+              other: see doc of Alea.get_prob_type;
         '''
-        return Alea._binary_distribution(True,False,pn,pd,prob_type)
+        return Alea._binary_distribution(True,False,p,prob_type)
 
     @staticmethod
-    def bernoulli(pn,pd=None,prob_type=None):
+    def bernoulli(p,prob_type=None):
         ''' static method, returns an Alea instance representing a bernoulli
-            distribution giving 1 with probability pn and 0 with complementary
-            probability;
-            if pd is not None, then the probability of 1 is pn/pd;
-            the given prob_type, if not None, allows using a probability
-            type different from the default one (float or any one set by
-            Alea.set_prob_type) - see doc of Alea.set_prob_type
+            distribution giving 1 with probability p and 0 with probability
+            1-p;
+            prob_type argument allows converting the given probability p:
+              -1: no conversion;
+              None (default): default conversion, as set by Alea.set_prob_type;
+              other: see doc of Alea.get_prob_type;
         '''
-        return Alea._binary_distribution(1,0,pn,pd,prob_type)
+        return Alea._binary_distribution(1,0,p,prob_type)
 
     @staticmethod
-    def binom(n,pn,pd=None,prob_type=None):
+    def binom(n,p,prob_type=None):
         ''' static method, returns an Alea instance representing a binomial
             distribution giving the number of successes among a number n of
-            independent experiments, each having probability pn of success;
-            if pd is not None, then the probability of success is pn/pd;
+            independent experiments, each having probability p of success;
             note: the binom method generalizes the bernoulli method:
-              binom(1,pn,pd) is the same as bernoulli(pn,pd)
-            the given prob_type, if not None, allows using a probability
-            type different from the default one (float or any one set by
-            Alea.set_prob_type) - see doc of Alea.set_prob_type
+              binom(1,p) is the same as bernoulli(p)
+            prob_type argument allows converting the given probability p:
+              -1: no conversion;
+              None (default): default conversion, as set by Alea.set_prob_type;
+              other: see doc of Alea.get_prob_type;
         '''
-        return Alea.bernoulli(pn,pd,prob_type).times(n)
+        return Alea.bernoulli(p,prob_type).times(n)
 
     @staticmethod
     def interval(from_val,to_val,prob_type=None):
@@ -1090,6 +1098,10 @@ class Alea(Lea):
 
     @staticmethod
     def _downcast(p):
+        ''' returns p or an object equivalent to p, more convenient to display:
+             Fraction -> ProbFraction,
+             Decimal  -> ProbDecimal
+        '''
         downcast_prob_class = Alea.__downcast_prob_class.get(p.__class__)
         if downcast_prob_class is not None:
             p = downcast_prob_class(p)

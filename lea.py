@@ -39,18 +39,16 @@ class Lea(object):
     represents a discrete probability distribution, which associates each value of a set of
     values with the probability that such value occurs.
 
-    A Lea instance can be defined by a sequence of (value,weight), giving the probability weight 
-    of each value. Such probability weights are natural numbers. The actual probability of a
-    given value can be calculated by dividing a weight by the sum of all weights. A Lea instance
-    can be defined also by a sequence of values, their probability weight being their number of
-    occurences in the sequence.
+    A Lea instance can be defined by a sequence of (value,probability), giving the probability 
+    of each value. A Lea instance can be defined also by a sequence of values, the probability
+    of a given value being its frauency in the sequence.
 
     Lea instances can be combined in arithmetic expressions resulting in new Lea instances, by
     obeying the following rules:
 
     - Lea instances can be added, subtracted, multiplied and divided together,
     through +, -, *, /, // operators. The resulting distribution's values and probabilities
-    are determined by combination of operand's values with a sum weighted by probability
+    are determined by combination of operand's values with a sumed by probability
     products (the operation known as 'convolution', for the adition case).
     - Other supported binary arithmetic operators are power (**), modulo (%) and
     divmod function.
@@ -66,8 +64,8 @@ class Lea(object):
     - Boolean distributions can be combined together with AND, OR, XOR, through &, |, ^
     operators, respectively.
 
-    WARNING: the Python's and, or, not, operators shall NOT be used on Lea instances because
-    they do not return any sensible result. Replace:
+    WARNING: the Python's 'and', 'or' and 'not' operators shall NOT be used on Lea instances;
+    this raises an exception. Replace:
            a and b    by    a & b
            a or b     by    a | b
            not a      by    ~ a
@@ -75,8 +73,8 @@ class Lea(object):
     WARNING: in boolean expression involving arithmetic comparisons, the parenthesis
     shall be used, e.g. (a < b) & (b < c)
 
-    WARNING: the augmented comparison (a < b < c) expression shall NOT be used.; it does
-    not return any sensible result (reason: it has the same limitation as 'and' operator).
+    WARNING: the augmented comparison (a < b < c) expression shall NOT be used.; this raises
+    an exception (reason: it has the same limitation as 'and' operator).
 
     Lea instances can be used to generate random values, respecting the given probabilities.
     There are two Lea methods for this purpose:
@@ -87,51 +85,57 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimate_mc method).
 
-    There are nine concrete subclasses to Lea, namely:
+    There are nine concrete subclasses to Lea class, namely:
       Alea, Clea, Flea, Flea1, Flea2, Glea, Ilea, Rlea and Blea.
     
     Each subclass represents a "definition" of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
     Each subclass defines what are the (value,probability) pairs or how they can be generated (see
     _gen_vp method implemented in each Lea subclass). The Lea class acts as a facade, by providing
-    different methods to instantiate these subclasses, so it is usually not needed to instantiate
-    them explicitely. Here is an overview on these subclasses, with their relationships.
+    different sconstrucors (static methods) to instantiate these subclasses, so it is usually not
+    needed to instantiate Lea subcasses explicitely. Here is an overview on these subclasses, with
+    their relationships.
 
     - An Alea instance is defined by explicit value-probability pairs, that is a probability mass
-    function.
+    function (p.m.f.) defined by extension.
 
     Instances of other Lea's subclasses represent probability distributions obtained by operations
-    done on existing Lea instance(s). Any such instance forms a tree structure, having other Lea
-    instances as nodes and Alea instances as leaves. This uses "lazy evaluation": actual (value,
-    probability) pairs are calculated only at the time they are required (e.g. display, query 
-    probability of a given value, etc); then, these are aggregated in a new Alea instance. This 
+    done on existing Lea instance(s). Any such instance forms a direct acyclic graph (DAG) structure,
+    having other Lea instances as nodes and Alea instances as leaves. This uses "lazy evaluation":
+    actual (value,probability) pairs are calculated only at the time they are required (e.g. display,
+    queryprobability of a given value, etc); then, these are aggregated in a new Alea instance. This 
     Alea instance is then cached, as an attribute of the queried Lea instance, for speeding up next
     queries.
     
     Here is a brief presentation of these Lea's subclasses: 
 
-    - Clea provides the cartesian product of a given sequence of Lea instances
-    - Flea applies a given n-ary function to a given sequence of n Lea instances
-    - Flea1 applies a given 1-ary function to a given Lea instance
-    - Flea2 applies a given 2-ary function to two given Lea instances
-    - Glea applies n-ary functions present in a given Lea instance to a given sequence of n Lea instances
-    - Ilea filters the values of a given Lea instance according to a given Lea instance representing a boolean condition (conditional probabilities)
-    - Rlea embeds Lea instances as values of a parent Lea instance 
-    - Blea defines CPT, providing Lea instances corresponding to given conditions (used for bayesian networks)
+    - Clea   provides the cartesian product of a given sequence of Lea instances
+    - Flea   applies a given n-ary function to a given sequence of n Lea instances
+    - Flea1  applies a given 1-ary function to a given Lea instance
+    - Flea2  applies a given 2-ary function to two given Lea instances
+    - Glea   applies n-ary functions present in a given Lea instance to a given sequence of n Lea
+             instances
+    - Ilea   filters the values of a given Lea instance according to a given Lea instance
+             representing a boolean condition (conditional probabilities)
+    - Rlea   embeds Lea instances as values of a parent Lea instance 
+    - Blea   defines CPT, providing Lea instances corresponding to given conditions
+             (used for bayesian networks)
 
-    Note that Flea1 and Flea2 are more efficient alternatives to Flea-based implementation.
+    Note that Flea1 and Flea2 subclasses have more efficient implementation than Flea subclass'.
 
-    WARNING: The following methods are called without parentheses:
-        mean, var, std, mode, entropy, information
+    WARNING: The following methods are called without parentheses (for the sake of ease of use):
+      P, Pf, mean, mean_f, var, var_f, std, std_f, mode, entropy, rel_entropy, redundancy, information
     These are applicable on any Lea instance; these are implemented and documented in the Alea class.
 
     Short design notes:
+    
     Lea uses the "template method" design pattern: the Lea base abstract class calls the following methods,
     which are implemented in each Lea's subclass: _clone, _get_lea_children, _gen_vp and _gen_one_random_mc.
-    Excepting the afore-mentioned estimate_mc method, Lea performs EXACT calculation of probability distributions.
-    It implements an original algorithm, called the "Statues" algorithm, by reference to the game of the same name;
-    this uses a variable binding mechanism that relies on Python's generators. To learn more, see doc of
-    Alea._gen_vp method as well as other Xlea._gen_vp methods implemented in Lea's subclasses. 
+    Excepting the afore-mentioned estimate_mc method, Lea performs EXACT calculation of probability
+    distributions.
+    It implements an original algorithm, called the "Statues" algorithm, by reference to the game of the
+    same name; this uses a variable binding mechanism that relies on Python's generators. To learn more,
+    see doc of Alea._gen_vp method as well as other Xlea._gen_vp methods implemented in Lea's subclasses. 
     '''
 
     class Error(Exception):
@@ -141,12 +145,12 @@ class Lea(object):
         
     class _FailedRandomMC(Exception):
         ''' internal exception representing a failure to get a set of random values that
-            satisfy a given condition in a given number of trials (see '...MC' methods) 
+            satisfy a given condition in a given number of trials (see methods having '..._mc' suffix) 
         '''
         pass
 
     # Lea attributes
-    __slots__ = ('_alea','_val','gen_vp')
+    __slots__ = ('_alea', '_val', 'gen_vp')
 
     # a mutable object, which cannnot appear in Lea's values (not hashable)
     _DUMMY_VAL = []
@@ -177,11 +181,12 @@ class Lea(object):
             this calls _get_lea_children() method implemented in Lea's subclasses;
             this method is overloaded in Alea subclass to stop the recursion
         '''
-        return frozenset(alea_leaf for lea_child in self._get_lea_children() for alea_leaf in lea_child.get_alea_leaves_set())
+        return frozenset(alea_leaf for lea_child in self._get_lea_children()
+                                   for alea_leaf in lea_child.get_alea_leaves_set())
 
     # constructor methods
     # -------------------
-             
+    # TODO remove clone methods ???
     def clone(self,clone_table=None):
         ''' returns a deep copy of current Lea, without any value binding;
             if the Lea tree contains multiple references to the same Lea instance,
@@ -201,9 +206,9 @@ class Lea(object):
 
     def _gen_bound_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
-            and p is the associated probability weight (integer > 0);
-            this obeys the "binding" mechanism, so if the same variable is referred multiple times in
-            a given expression, then same value will be yielded at each occurrence;
+            and p is the associated probability  (integer > 0);
+            this obeys the "binding" mechanism, so if the same variable is referred multiple
+            times in a given expression, then same value will be yielded at each occurrence;
             "Statues" algorithm:
             before yielding a value v, this value v is bound to the current instance;
             then, if the current calculation requires to get again values on the current
@@ -228,7 +233,7 @@ class Lea(object):
                     # bind value v: this is important if an object calls gen_vp on the same instance
                     # before resuming the present generator (see above)
                     self._val = v
-                    # yield the bound value v with probability weight p
+                    # yield the bound value v with probability p
                     yield (v,p)
             finally:
                 # unbind value v, after all values have been bound or if an exception has been raised
@@ -318,7 +323,7 @@ class Lea(object):
 
     def cprod(self,*args):
         ''' returns a new Clea instance, representing the cartesian product of all
-            arguments (coerced to Lea instances), including self as first argument 
+            arguments, coerced to Lea instances, including self as first argument 
         '''
         return Clea(self,*args)
 
@@ -409,7 +414,7 @@ class Lea(object):
     def draw(self,n,sorted=False,replacement=False):
         ''' returns, after evaluation of the probability distribution self,
             a new Alea instance representing the probability distribution
-            of drawing n elements from self
+            of drawing n elements from self;
             the returned values are tuples with n elements;
             * if sorted is True, then the order of drawing is irrelevant and
                  the tuples are arbitrarily sorted by increasing order;
@@ -455,7 +460,6 @@ class Lea(object):
         '''
         return Rlea(self)
 
-    # TODO review two following methods
     def equiv(self,other,prec=None):
         ''' returns True iff self and other represent the same probability distribution,
             i.e. they have the same probability for each of their value;
@@ -464,16 +468,16 @@ class Lea(object):
             comparisons tolerant to rounding errors)
         '''
         other = Lea.coerce(other)
-        # absolute equality required -> quick test
+        # absolute equality required
         # frozenset(...) is used to avoid any dependency on the order of values
         return frozenset(self.gen_raw_vps()) == frozenset(other.gen_raw_vps())
 
     def equiv_f(self,other):
         ''' returns True iff self and other represent the same probability distribution,
-            i.e. they have the same probability for each of their value
+            i.e. they have the same probability for each of their value;
             returns False otherwise;
             the probabilities are compared using the math.isclose function,
-            so to be tolerant to rounding errors
+            in order to be tolerant to rounding errors
         '''
         other = Lea.coerce(other)
         vps1 = tuple(self.gen_raw_vps())
@@ -489,34 +493,32 @@ class Lea(object):
         return True
 
     def p(self,val):
-        ''' returns a ProbFraction instance representing the probability of given value val,
-            from 0 to 1
+        ''' returns the probability of given value val
         '''
         return Alea._downcast(self._p(val))
 
     def gen_raw_vps(self):
         ''' generates, after evaluation of the probability distribution self,
             tuples (v,p) where v is a value of self
-            and p is the associated probability weight (integer > 0);
+            and p is the associated probability (integer > 0);
             the sequence follows the order defined on values;
             note that there is NO binding, contrarily to _gen_vp method
         '''
         return self.get_alea()._gen_vp()
     
-    # TODO
     def gen_vps(self):
         ''' generates, after evaluation of the probability distribution self,
-            tuples (v,p) where v is a value of self
-            and p is the associated probability weight (integer > 0);
-            the sequence follows the order defined on values
-            not that there is NO binding, contrarily to _gen_vp method
+            tuples (v,p) where v is a value of self and p is the associated
+            probability;
+            the sequence follows the order defined on values;
+            note that there is NO binding, contrarily to _gen_vp method
         '''
         return ((v,Alea._downcast(p)) for (v,p) in self.get_alea()._gen_vp())
 
     def vps(self):
         ''' returns, after evaluation of the probability distribution self,
             a tuple with tuples (v,p) where v is a value of self
-            and p is the associated probability weight (integer > 0);
+            and p is the associated probability;
             the sequence follows the order defined on values
         '''
         return tuple(self.gen_vps())
@@ -529,9 +531,8 @@ class Lea(object):
         '''
         return self.get_alea()._vs
 
-    # TODO
     def ps(self):
-        ''' returns a tuple with probability weights (integer > 0) of self
+        ''' returns a tuple with probability of self
             the sequence follows the increasing order defined on values
             if order is undefined (e.g. complex numbers), then the order is
             arbitrary but fixed from call to call
@@ -543,44 +544,31 @@ class Lea(object):
         '''
         return self.vals()
 
-    # TODO
     def pmf(self,val=None):
-        ''' probability mass function
-            returns the probability of the given value val, as a floating point number
-            from 0.0 to 1.0
+        ''' probability mass function;
+            returns the probability of the given value val;
             if val is None, then a tuple is returned with the probabilities of each value,
             in the same order as defined on values (call vals method to get this 
             ordered sequence)
         '''
-        if val is not None:
-            return self.p(val)
-        return tuple(self.ps())
-
-    # TODO
-    def cdf(self,val=None):
-        ''' cumulative distribution function
-            returns the probability that self's value is less or equal to the given value val,
-            as a floating point number from 0.0 to 1.0
-            if val is None, then a tuple is returned with the probabilities of each value,
-            in the same order as defined on values (call vals method to get this 
-            ordered sequence); the last probability is always 1
-        '''
-        '''
         if val is None:
-            return tuple(self.cumul()[1:])
-        return self.get_alea().p_cumul(val)
+            return tuple(self.ps())
+        return self.p(val)
+
+    def cdf(self,val=None):
+        ''' cumulative distribution function;
+            returns the probability that self's value is less or equal to the given value val;
+            if val is None, then a tuple is returned with the probabilities of each value,
+            in the same order as defined on values (call vals method to get this ordered
+            sequence);
+            note that the last probability is always 1
         '''
         if val is None:
             return tuple(Alea._downcast(p) for p in self.get_alea().cumul()[1:])
         return Alea._downcast(self.get_alea().p_cumul(val))
 
-    # TODO doc
     def _p(self,val,check_val_type=False):
-        ''' returns the probability p/s of the given value val, as a tuple of naturals (p,s)
-            where
-            s is the sum of the probability weights of all values 
-            p is the probability weight of the given value val (from 0 to s)
-            note: the ratio p/s is not reduced
+        ''' returns the probability of the given value val
             if check_val_type is True, then raises an exception if some value in the
             distribution has a type different from val's
         '''
@@ -612,7 +600,7 @@ class Lea(object):
         return Flea1(lambda v: v not in values,self)
 
     def subs(self,*args):
-        ''' returns a new Alea instance, equivalent to self where probabilities have been converted
+        ''' returns a new Alea instance, equivalent to self, where probabilities have been converted
             by applying subs(*args) on them;
             this is useful for substituying variables when probabilities are expressesd as sympy
             expressions (see doc of sympy.Expreesion.subs method);
@@ -701,13 +689,13 @@ class Lea(object):
         ''' 
         return Blea.build(*clauses,prior_lea=self)
 
-    def build_b_nfrom_joint(self,*bn_definition):
+    def build_bn_from_joint(self,*bn_definition):
         ''' returns a named tuple of Lea instances (Alea or Tlea) representing a Bayes
             network with variables stored in attributes A1, ... , An, assuming that self
             is a Lea joint probability distribution having, as values, named tuples
             with the same set of attributes A1, ... , An (such Lea instance is
             returned by as_joint method, for example);
-            each argument of given bn_definition represent a dependency relationship
+            each argument of given bn_definition represents a dependency relationship
             from a set of given variables to one given variable; this is expressed as
             a tuple (src_var_names, tgt_var_name) where src_var_names is a sequence of
             attribute names (strings) identifying 'from' variables and tgt_name is the
@@ -745,7 +733,7 @@ class Lea(object):
             all_vals = Lea.cprod(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).vals()
             missing_vals = frozenset(all_vals) - frozenset(cprod_src_vals)
             if len(missing_vals) > 0:
-                # there are missing conditions: add clauses with each of these conditions associating
+                # there are missing conditions: add c   lauses with each of these conditions associating
                 # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
                 else_result = Lea.from_vals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
@@ -819,7 +807,8 @@ class Lea(object):
             values of current distribution; 
             called on evaluation of "self.attr_name"
             WARNING: the following methods are called without parentheses:
-                         mean, var, std, mode, entropy, information
+                         P, Pf, mean, mean_f, var, var_f, std, std_f, mode,
+                         entropy, rel_entropy, redundancy, information
                      these are applicable on any Lea instance
                      and these are documented in the Alea class
         '''
@@ -1202,7 +1191,7 @@ class Lea(object):
         
     def _gen_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
-            and p is the associated probability weight (integer > 0);
+            and p is the associated probability (integer > 0);
             this obeys the "binding" mechanism, so if the same variable is refered multiple times in
             a given expression, then same value will be yielded at each occurrence;
             Lea._gen_vp method is abstract: it is implemented in all Lea's subclasses
@@ -1402,10 +1391,9 @@ class Lea(object):
         self._init_calc()
         return Alea.from_val_freqs(*tuple(self.gen_vp()),prob_type=prob_type,**kwargs)
 
-    # TODO
     def cumul(self):
         ''' evaluates the distribution, then,
-            returns a tuple with probability weights p that self <= value ;
+            returns a tuple with probabilitys p that self <= value ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
@@ -1413,10 +1401,9 @@ class Lea(object):
         '''
         return tuple(Alea._downcast(p) for p in self.get_alea().cumul())
         
-    # TODO
     def inv_cumul(self):
         ''' evaluates the distribution, then,
-            returns a tuple with the probability weights p that self >= value ;
+            returns a tuple with the probabilitys p that self >= value ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
@@ -1547,7 +1534,7 @@ from .glea import Glea
 from .tlea import Tlea
 
 # init Alea class with default 'x' type code: if a probability is expressed as
-# a string, then the target type is inferred from its content
+# a string, then the target type is determined from its content
 # - see Alea.prob_any method
 Alea.set_prob_type('x')
 
@@ -1574,7 +1561,7 @@ V  = Lea.from_vals
 VP = Lea.from_val_freqs
 B  = Lea.bool_prob
 X  = Lea.cprod
-f_1 = ProbFraction.one
+r1 = ProbFraction.one
 
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for
