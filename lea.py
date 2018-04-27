@@ -544,7 +544,8 @@ class Lea(object):
         '''
         return self.vals()
 
-    def pmf(self,val=None):
+    #TODO: renamed to avoid clash / review these functions
+    def get_pmf(self,val=None):
         ''' probability mass function;
             returns the probability of the given value val;
             if val is None, then a tuple is returned with the probabilities of each value,
@@ -585,7 +586,7 @@ class Lea(object):
         # these shall be used to create a new Alea, keeping the values in that order (no sort)
         sorted_lea = Lea.cprod(*ordering_leas).cprod(self).new()[-1]
         sorted_lea._init_calc()
-        return Alea._from_val_freqs_ordered(*sorted_lea.gen_vp())
+        return Alea._pmf_ordered(sorted_lea.gen_vp())
 
     def is_any_of(self,*values):
         ''' returns a boolean probability distribution
@@ -1389,7 +1390,7 @@ class Lea(object):
             note that the present method is overloaded in Alea class, to be more efficient
         '''
         self._init_calc()
-        return Alea.from_val_freqs(*tuple(self.gen_vp()),prob_type=prob_type,**kwargs)
+        return Alea.pmf(tuple(self.gen_vp()),prob_type=prob_type,**kwargs)
 
     def cumul(self):
         ''' evaluates the distribution, then,
@@ -1543,11 +1544,9 @@ Lea.set_prob_type = Alea.set_prob_type
 Lea.coerce = Alea.coerce
 Lea.from_vals = Alea.from_vals
 Lea.from_seq = Alea.from_seq
-Lea.from_val_freqs = Alea.from_val_freqs
+Lea.pmf = Alea.pmf
 Lea.interval = Alea.interval
 Lea.bool_prob = Alea.bool_prob
-Lea.from_val_freqs_dict = Alea.from_val_freqs_dict
-Lea.from_val_freqs_ordered = Alea._from_val_freqs_ordered
 Lea.from_csv_file = Alea.from_csv_file
 Lea.from_csv_filename = Alea.from_csv_filename
 Lea.from_pandas_df = Alea.from_pandas_df
@@ -1558,10 +1557,8 @@ Lea.poisson = Alea.poisson
 
 # Lea convenience functions (see __init__.py)
 V  = Lea.from_vals
-VP = Lea.from_val_freqs
 B  = Lea.bool_prob
 X  = Lea.cprod
-r1 = ProbFraction.one
 
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for

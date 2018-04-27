@@ -130,5 +130,3 @@ class ProbFraction(ProbNumber,Fraction):
         lcm = ProbFraction.calc_lcm(denominators)
         return (tuple(fraction.numerator*(lcm//fraction.denominator) for fraction in fractions), lcm)
 
-# constant unity instance to ease definition of other instances by multiplication
-ProbFraction.one = ProbFraction(1)

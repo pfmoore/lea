@@ -79,6 +79,9 @@ def gen_pairs(seq):
             yield (head,a)
         for pair in gen_pairs(tail):
             yield pair
+
+def is_dict(d):
+    return isinstance(d,dict)
                 
 # Python 2 / 3 dependencies
 # the following redefines / rebinds the following objects in Python2: 
@@ -91,7 +94,8 @@ def gen_pairs(seq):
 
 # standard input function, zip and dictionary methods as iterators
 from collections import defaultdict
-if sys.version_info.major == 2:
+## note don't use sys.version_info.major because NOK if <= 2.6
+if sys.version_info[0] == 2:
     # Python 2.x
     # the goal of this part is to mimic a Python3 env in a Python2 env
     # rename raw_input method
