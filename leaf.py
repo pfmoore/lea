@@ -58,15 +58,15 @@ def dice_seq(nb_dice,nb_faces,sorted=True,prob_type=None):
 D6 = die(6)
 
 # flip represents a True/False boolean variable with uniform probabilities
-flip = Lea.bool_prob(1/2)
+flip = Lea.bool(1/2)
 
 # card_suite is a random one character symbol representing a card suite among
 # Spades, Hearts, Diamonds and Clubs
-card_suite = Lea.from_seq('SHDC')
+card_suite = Lea.vals(*'SHDC')
 
 # card_rank is a one character symbol representing a one character symbol a
 # card ranks among Ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen and King
-card_rank = Lea.from_seq('A23456789TJQK')
+card_rank = Lea.vals(*'A23456789TJQK')
 
 # card is a random two characters symbol representing a card having a rank
 # and a suite chosen in a standard deck of 52 cards

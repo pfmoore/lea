@@ -109,7 +109,7 @@ class Lea(object):
     
     Here is a brief presentation of these Lea's subclasses: 
 
-    - Clea   provides the cartesian product of a given sequence of Lea instances
+    - Clea   provides the joint of a given sequence of Lea instances
     - Flea   applies a given n-ary function to a given sequence of n Lea instances
     - Flea1  applies a given 1-ary function to a given Lea instance
     - Flea2  applies a given 2-ary function to two given Lea instances
@@ -280,7 +280,7 @@ class Lea(object):
             if p_den is None, then p_num expresses the probability as a Fraction
         '''
         cur_cond_lea = Lea.coerce(cond_lea)
-        req_cond_lea = Lea.bool_prob(p_num,p_den)
+        req_cond_lea = Lea.bool(p_num,p_den)
         if req_cond_lea.is_true():
             lea1 = self.given(cur_cond_lea)
         elif not req_cond_lea.is_feasible():
@@ -316,13 +316,13 @@ class Lea(object):
 
     def times_tuple(self,n):
         ''' returns a new Alea instance with tuples of length n, containing
-            the cartesian product of self with itself repeated n times
+            the joint of self with itself repeated n times
             note: equivalent to self.draw(n,sorted=False,replacement=True)
         '''
         return self.get_alea().draw_with_replacement(n)
 
-    def cprod(self,*args):
-        ''' returns a new Clea instance, representing the cartesian product of all
+    def joint(self,*args):
+        ''' returns a new Clea instance, representing the joint of all
             arguments, coerced to Lea instances, including self as first argument 
         '''
         return Clea(self,*args)
@@ -584,7 +584,7 @@ class Lea(object):
         # after prepending ordering_leas to self, the Alea returned by new() is sorted with ordering_leas;
         # then, extracting self (index -1) allows generating self's (v,p) pairs in the expected order;
         # these shall be used to create a new Alea, keeping the values in that order (no sort)
-        sorted_lea = Lea.cprod(*ordering_leas).cprod(self).new()[-1]
+        sorted_lea = Lea.joint(*ordering_leas).joint(self).new()[-1]
         sorted_lea._init_calc()
         return Alea._pmf_ordered(sorted_lea.gen_vp())
 
@@ -724,20 +724,20 @@ class Lea(object):
             if not isinstance(vars_bn_dict[tgt_var_name],Alea):
                 raise Lea.Error("'%s' is defined as target in more than one BN relationship"%tgt_var_name)
             tgt_var = vars_dict[tgt_var_name]
-            cprod_src_vars = Lea.cprod(*(vars_dict[src_var_name] for src_var_name in src_var_names))
-            cprod_src_vars_bn = Lea.cprod(*(vars_bn_dict[src_var_name] for src_var_name in src_var_names))
+            joint_src_vars = Lea.joint(*(vars_dict[src_var_name] for src_var_name in src_var_names))
+            joint_src_vars_bn = Lea.joint(*(vars_bn_dict[src_var_name] for src_var_name in src_var_names))
             # build CPT clauses (condition,result) from the joint probability distribution
-            cprod_src_vals = cprod_src_vars.vals()
-            clauses = tuple((cprod_src_val,tgt_var.given(cprod_src_vars==cprod_src_val).get_alea(sorting=False)) \
-                             for cprod_src_val in cprod_src_vals)
+            joint_src_vals = joint_src_vars.vals()
+            clauses = tuple((joint_src_val,tgt_var.given(joint_src_vars==joint_src_val).get_alea(sorting=False)) \
+                             for joint_src_val in joint_src_vals)
             # determine missing conditions in the CPT, if any
-            all_vals = Lea.cprod(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).vals()
-            missing_vals = frozenset(all_vals) - frozenset(cprod_src_vals)
+            all_vals = Lea.joint(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).vals()
+            missing_vals = frozenset(all_vals) - frozenset(joint_src_vals)
             if len(missing_vals) > 0:
                 # there are missing conditions: add c   lauses with each of these conditions associating
                 # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
-                else_result = Lea.from_vals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
+                else_result = Lea.vals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
                 clauses += tuple((missing_val,else_result) for missing_val in missing_vals)
             # overwrite the target BN variable (currently independent Alea instance), with a CPT built
             # up from the clauses determined from the joint probability distribution
@@ -745,8 +745,8 @@ class Lea(object):
             # the clauses conditions verify the "truth partioning" rules
             # the ctx_type is 2 for the sake of performance; this is safe since, by construction, the
             # clauses results are Alea instances and clause conditions refer to the same variable,
-            # namely cprod_src_vars_bn
-            vars_bn_dict[tgt_var_name] = cprod_src_vars_bn.switch(dict(clauses))
+            # namely joint_src_vars_bn
+            vars_bn_dict[tgt_var_name] = joint_src_vars_bn.switch(dict(clauses))
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**vars_bn_dict)
@@ -1542,23 +1542,17 @@ Alea.set_prob_type('x')
 # Lea static methods exported from Alea
 Lea.set_prob_type = Alea.set_prob_type
 Lea.coerce = Alea.coerce
-Lea.from_vals = Alea.from_vals
+Lea.vals = Alea.vals
 Lea.from_seq = Alea.from_seq
 Lea.pmf = Alea.pmf
 Lea.interval = Alea.interval
-Lea.bool_prob = Alea.bool_prob
+Lea.bool = Alea.bool
 Lea.from_csv_file = Alea.from_csv_file
 Lea.from_csv_filename = Alea.from_csv_filename
 Lea.from_pandas_df = Alea.from_pandas_df
 Lea.bernoulli = Alea.bernoulli
 Lea.binom = Alea.binom
 Lea.poisson = Alea.poisson
-
-
-# Lea convenience functions (see __init__.py)
-V  = Lea.from_vals
-B  = Lea.bool_prob
-X  = Lea.cprod
 
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for

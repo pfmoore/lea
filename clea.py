@@ -30,8 +30,9 @@ class Clea(Lea):
     '''
     Clea is a Lea subclass, which instance is defined by a given sequence (L1,...Ln)
     of Lea instances; it represents a probability distribution made up from the
-    cartesian product L1 x ... x Ln; assuming independency of events, it associates
-    each (v1,...,vn) tuple with probability product P1(v1)...Pn(vn).
+    joint L1 x ... x Ln; it associates each (v1,...,vn) tuple with probability
+    P((v1,...,vn)) of having jointly (v1,...,vn). If the n events are independent,
+    then P((v1,...,vn)) = product P1(v1) x ... x Pn(vn).
     '''
     
     __slots__ = ('_lea_args',)

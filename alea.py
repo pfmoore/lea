@@ -237,7 +237,7 @@ class Alea(Lea):
     #   __init__
     #    <-- coerce [S]
     #    <-- pmf [S]
-    #         <-- from_vals [S]
+    #         <-- vals [S]
     #         <-- from_seq [S]
     #              <-- from_pandas_df [S]
     #         <-- interval [S]
@@ -253,7 +253,7 @@ class Alea(Lea):
     #         <-- draw_without_replacement
     #              <-- draw_sorted_without_replacement
     #    <-- _binary_distribution [S]
-    #         <-- bool_prob [S]
+    #         <-- bool [S]
     #         <-- bernoulli [S]
     #              <-- binom [S]
 
@@ -421,7 +421,7 @@ class Alea(Lea):
         return Alea(*zip(*vps),normalization=normalization,prob_type=-1)
 
     @staticmethod
-    def from_vals(*values,prob_type=None,**kwargs):
+    def vals(*values,prob_type=None,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given values, so that each value occurrence is
             taken as equiprobable; if each value occurs exactly once, then the
@@ -440,11 +440,11 @@ class Alea(Lea):
         ''' static method, returns an Alea instance representing a distribution
             for the given iterable values (e.g. a list, tuple, iterator, ...);
             this is a convenience method, equivalent to
-              Alea.from_vals(*vals,**kwargs)
-            for detailed description, refer to the doc of Alea.from_vals method;
+              Alea.vals(*vals,**kwargs)
+            for detailed description, refer to the doc of Alea.vals method;
             requires that vals is not empty
         '''
-        return Alea.from_vals(*values,**kwargs)
+        return Alea.vals(*values,**kwargs)
     
     @staticmethod
     def _pmf_ordered(vps,**kwargs):
@@ -507,7 +507,7 @@ class Alea(Lea):
         return Alea(vs,ps,normalization=False,prob_type=-1)
 
     @staticmethod
-    def bool_prob(p,prob_type=None):
+    def bool(p,prob_type=None):
         ''' static method, returns an Alea instance representing a boolean
             probability distribution giving True with probability p and
             False with probability 1-p;
@@ -552,7 +552,7 @@ class Alea(Lea):
             type different from the default one (float or any one set by
             Alea.set_prob_type) - see doc of Alea.set_prob_type
         '''
-        return Alea.from_vals(*range(from_val,to_val+1),prob_type=prob_type)
+        return Alea.vals(*range(from_val,to_val+1),prob_type=prob_type)
 
     @staticmethod
     def from_csv_filename(csv_filename,col_names=None,dialect='excel',**fmtparams):
