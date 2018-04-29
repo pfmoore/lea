@@ -23,8 +23,26 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from .leaf import *
-__all__ = ( # objects defined in lea.lea module
-            'Lea', 'P', 'Pf', 'ProbFraction',
-            # objects defined in lea.leaf module
-            'die', 'dice', 'dice_seq', 'D6', 'flip', 'card_rank', 'card_suite', 'card')
+from .lea import Lea, Alea, P, Pf
+
+# make convenient aliases for public static methods of Lea & Alea classes
+bernoulli = Alea.bernoulli
+binom = Alea.binom
+coerce = Alea.coerce
+cpt = Lea.cpt
+event = Alea.event
+func_wrapper = Lea.func_wrapper
+if_ = Lea.if_
+interval = Alea.interval
+joint = Lea.joint
+joint_entropy = Lea.joint_entropy
+make_vars = Lea.make_vars
+max_of = Lea.max_of
+min_of = Lea.min_of
+pmf = Alea.pmf
+poisson = Alea.poisson
+read_csv_file = Alea.read_csv_file
+read_pandas_df = Alea.read_pandas_df
+reduce = Lea.reduce
+set_prob_type = Alea.set_prob_type
+vals = Alea.vals

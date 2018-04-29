@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
+from .alea import Alea
 
 class Flea2(Lea):
     
@@ -38,8 +39,8 @@ class Flea2(Lea):
     def __init__(self,f,arg1,arg2):
         Lea.__init__(self)
         self._f = f
-        self._lea_arg1 = Lea.coerce(arg1)
-        self._lea_arg2 = Lea.coerce(arg2)
+        self._lea_arg1 = Alea.coerce(arg1)
+        self._lea_arg2 = Alea.coerce(arg2)
 
     def _get_lea_children(self):
         return (self._lea_arg1,self._lea_arg2)

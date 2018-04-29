@@ -23,13 +23,13 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from .lea import *
+from .lea import Alea
 
 def die(nb_faces,prob_type=None):
     ''' returns an Alea instance representing the value obtained by throwing
         a fair die with faces marked from 1 to nb_faces
     '''
-    return Lea.interval(1,nb_faces,prob_type=prob_type)
+    return Alea.interval(1,nb_faces,prob_type=prob_type)
 
 def dice(nb_dice,nb_faces,prob_type=None):
     ''' returns an Alea instance representing the total value obtained by
@@ -58,15 +58,15 @@ def dice_seq(nb_dice,nb_faces,sorted=True,prob_type=None):
 D6 = die(6)
 
 # flip represents a True/False boolean variable with uniform probabilities
-flip = Lea.bool(1/2)
+flip = Alea.event(1/2)
 
 # card_suite is a random one character symbol representing a card suite among
 # Spades, Hearts, Diamonds and Clubs
-card_suite = Lea.vals(*'SHDC')
+card_suite = Alea.vals(*'SHDC')
 
 # card_rank is a one character symbol representing a one character symbol a
 # card ranks among Ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen and King
-card_rank = Lea.vals(*'A23456789TJQK')
+card_rank = Alea.vals(*'A23456789TJQK')
 
 # card is a random two characters symbol representing a card having a rank
 # and a suite chosen in a standard deck of 52 cards

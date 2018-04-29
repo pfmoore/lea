@@ -41,12 +41,12 @@ class Tlea(Lea):
         if isinstance(lea_dict,defaultdict):
             raise Lea.Error('defaultdict not supported for Tlea, use default_lea argument instead')
         Lea.__init__(self)
-        self._lea_c = Lea.coerce(lea_c)
-        self._lea_dict = dict((c,Lea.coerce(lea1)) for (c,lea1) in lea_dict.items())
+        self._lea_c = Alea.coerce(lea_c)
+        self._lea_dict = dict((c,Alea.coerce(lea1)) for (c,lea1) in lea_dict.items())
         if default_lea is Lea._DUMMY_VAL:
             self._default_lea = Lea._DUMMY_VAL
         else:
-            self._default_lea = Lea.coerce(default_lea)
+            self._default_lea = Alea.coerce(default_lea)
             self._lea_dict = defaultdict(lambda:self._default_lea,self._lea_dict)
 
     def _get_lea_children(self):

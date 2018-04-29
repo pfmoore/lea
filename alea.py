@@ -24,7 +24,6 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
-from .flea2 import Flea2
 from .prob_number import ProbNumber
 from .prob_fraction import ProbFraction
 from .prob_decimal import ProbDecimal
@@ -238,11 +237,9 @@ class Alea(Lea):
     #    <-- coerce [S]
     #    <-- pmf [S]
     #         <-- vals [S]
-    #         <-- from_seq [S]
-    #              <-- from_pandas_df [S]
+    #              <-- read_pandas_df [S]
     #         <-- interval [S]
-    #         <-- from_csv_filename [S]
-    #         <-- from_csv_file [S]
+    #         <-- read_csv_file [S]
     #         <-- _selections
     #              <-- draw_sorted_with_replacement
     #              <-- draw_sorted_without_replacement
@@ -253,7 +250,7 @@ class Alea(Lea):
     #         <-- draw_without_replacement
     #              <-- draw_sorted_without_replacement
     #    <-- _binary_distribution [S]
-    #         <-- bool [S]
+    #         <-- event [S]
     #         <-- bernoulli [S]
     #              <-- binom [S]
 
@@ -434,18 +431,7 @@ class Alea(Lea):
             requires at least one vals argument
         '''
         return Alea.pmf(((val,1) for val in values),prob_type=prob_type,**kwargs)
- 
-    @staticmethod
-    def from_seq(values,**kwargs):
-        ''' static method, returns an Alea instance representing a distribution
-            for the given iterable values (e.g. a list, tuple, iterator, ...);
-            this is a convenience method, equivalent to
-              Alea.vals(*vals,**kwargs)
-            for detailed description, refer to the doc of Alea.vals method;
-            requires that vals is not empty
-        '''
-        return Alea.vals(*values,**kwargs)
-    
+  
     @staticmethod
     def _pmf_ordered(vps,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
@@ -507,7 +493,7 @@ class Alea(Lea):
         return Alea(vs,ps,normalization=False,prob_type=-1)
 
     @staticmethod
-    def bool(p,prob_type=None):
+    def event(p,prob_type=None):
         ''' static method, returns an Alea instance representing a boolean
             probability distribution giving True with probability p and
             False with probability 1-p;
@@ -555,24 +541,11 @@ class Alea(Lea):
         return Alea.vals(*range(from_val,to_val+1),prob_type=prob_type)
 
     @staticmethod
-    def from_csv_filename(csv_filename,col_names=None,dialect='excel',**fmtparams):
-        ''' static method, returns an Alea instance representing the joint probability
-            distribution of the data read in the CSV file of the given csv_filename;
-            it is similar to Alea.from_csv_file method, except that it takes a filename
-            instead of an open file (i.e. the method opens itself the file for reading);
-            see Alea.from_csv_file doc for more details
-        '''
-        # Filter out kewords argument targeting Alea constructors (assuming no name collision csv.reader keywords) 
-        kwargs = dict((k,v) for (k,v) in fmtparams.items() if k in Alea.__contructor_arg_names)
-        fmtparams = dict((k,v) for (k,v) in fmtparams.items() if k not in kwargs)
-        (attr_names,data_freq) = read_csv_filename(csv_filename,col_names,dialect,**fmtparams)
-        #return Alea.from_val_freqs(*data_freq,**kwargs).as_joint(*attr_names)
-        return Alea.pmf(data_freq,**kwargs).as_joint(*attr_names)
-
-    @staticmethod
-    def from_csv_file(csv_file,col_names=None,dialect='excel',**fmtparams):
+    def read_csv_file(csv_file,col_names=None,dialect='excel',**fmtparams):
         ''' static method, returns an Alea instance representing the joint probability
             distribution of the data read in the given CSV file;
+            if csv_file is a string, then it is interpreted as a filename,
+            otherwise, csv_file is interpreted as a file object ready to be read;
             the arguments follow the same semantics as those of Python's csv.reader
             method, which supports different CSV formats;
             see doc in https://docs.python.org/2/library/csv.html
@@ -610,12 +583,14 @@ class Alea(Lea):
         # Filter out kewords argument targeting Alea constructors (assuming no name collision csv.reader keywords) 
         kwargs = dict((k,v) for (k,v) in fmtparams.items() if k in Alea.__contructor_arg_names)
         fmtparams = dict((k,v) for (k,v) in fmtparams.items() if k not in kwargs)
-        (attr_names,data_freq) = read_csv_file(csv_file,col_names,dialect,**fmtparams)
-        #return Alea.from_val_freqs(*data_freq,**kwargs).as_joint(*attr_names)
-        return Alea.pmf(data_freq,**kwargs).as_joint(*attr_names)
+        if isinstance(csv_file,str):
+            (attr_names,vps) = read_csv_filename(csv_file,col_names,dialect,**fmtparams)
+        else:            
+            (attr_names,vps) = read_csv_file(csv_file,col_names,dialect,**fmtparams)
+        return Alea.pmf(vps,**kwargs).as_joint(*attr_names)
 
     @staticmethod
-    def from_pandas_df(dataframe,index_col_name=None,**kwargs):
+    def read_pandas_df(dataframe,index_col_name=None,**kwargs):
         ''' static method, returns an Alea instance representing the joint probability
             distribution from the given pandas dataframe;
             the attribute names of the distribution are those of the column of the
@@ -633,27 +608,7 @@ class Alea(Lea):
         else:
             values_iter = dataframe.itertuples()
             attr_names = (index_col_name,) + attr_names
-        return Alea.from_seq(values_iter,**kwargs).as_joint(*attr_names)
-
-    def times(self,n,op=operator.add):
-        ''' returns a new Alea instance representing the current distribution
-            operated n times with itself, through the given binary operator op;
-            if n = 1, then a copy of self is returned;
-            requires that n is strictly positive; otherwise, an exception is
-            raised;
-            note that the implementation uses a fast dichotomic algorithm,
-            instead of a naive approach that scales up badly as n grows
-        '''
-        if n <= 0:
-            raise Lea.Error("times method requires a strictly positive integer")
-        if n == 1:
-            return self.new()
-        (n2,r) = divmod(n,2)
-        alea2 = self.times(n2,op)
-        res_flea2 = Flea2(op,alea2,alea2.new())
-        if r == 1:
-            res_flea2 = Flea2(op,res_flea2,self)
-        return res_flea2.get_alea()
+        return Alea.vals(*values_iter,**kwargs).as_joint(*attr_names)
 
     def is_uniform(self):
         ''' returns True  if the probability distribution is uniform,

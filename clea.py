@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
+from .lea import Alea
 
 class Clea(Lea):
     
@@ -39,7 +40,7 @@ class Clea(Lea):
 
     def __init__(self,*args):
         Lea.__init__(self)
-        self._lea_args = tuple(Lea.coerce(arg) for arg in args)
+        self._lea_args = tuple(Alea.coerce(arg) for arg in args)
 
     def _get_lea_children(self):
         return self._lea_args

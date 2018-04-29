@@ -45,7 +45,7 @@ class Chain(object):
         '''
         object.__init__(self)
         self._state_objs = tuple(state_obj for (state_obj,next_state_lea) in next_state_lea_per_state)
-        self._state_alea_dict = dict((state_obj,StateAlea(Lea.coerce(state_obj),self)) for state_obj in self._state_objs)
+        self._state_alea_dict = dict((state_obj,StateAlea(Alea.coerce(state_obj),self)) for state_obj in self._state_objs)
         self._state = StateAlea(Lea.from_vals(*self._state_objs),self)
         iter_next_state_data = ((self._state==state_obj,next_state_lea) for (state_obj,next_state_lea) in next_state_lea_per_state)
         self._next_state_blea = Blea.build(*iter_next_state_data)
@@ -118,8 +118,7 @@ class Chain(object):
     def get_states(self):
         ''' returns a tuple containing one StateAlea instance per state declared in the chain,
             in the order of their declaration; each instance represents a certain, unique, state
-        ''' 
-        #return tuple(StateAlea(Lea.coerce(state_obj),self) for state_obj in self._state_objs)
+        '''
         return tuple(self._state_alea_dict[state_obj] for state_obj in self._state_objs)
 
     def get_state(self,state_obj_lea):
@@ -142,7 +141,7 @@ class Chain(object):
             raise Lea.Error("next_state method requires a positive value for argument 'n'")
         if from_state is None:
             from_state = self._state
-        state_n = Lea.coerce(from_state).get_alea()
+        state_n = Alea.coerce(from_state).get_alea()
         while n > 0:
             n -= 1
             state_n = self._next_state_blea.given(self._state==state_n).get_alea()

@@ -279,7 +279,7 @@ class Lea(object):
             such that p_num/p_den is the probability that cond_lea is true
             if p_den is None, then p_num expresses the probability as a Fraction
         '''
-        cur_cond_lea = Lea.coerce(cond_lea)
+        cur_cond_lea = Alea.coerce(cond_lea)
         req_cond_lea = Lea.bool(p_num,p_den)
         if req_cond_lea.is_true():
             lea1 = self.given(cur_cond_lea)
@@ -300,7 +300,7 @@ class Lea(object):
             an exception is raised if the evidences contain a non-boolean or
             if they are unfeasible
         '''
-        return Ilea(self,(Lea.coerce(evidence) for evidence in evidences))    
+        return Ilea(self,(Alea.coerce(evidence) for evidence in evidences))    
     
     def times(self,n,op=operator.add):
         ''' returns, after evaluation of the probability distribution self, a new
@@ -312,7 +312,17 @@ class Lea(object):
             note that the implementation uses a fast dichotomic algorithm,
             instead of a naive approach that scales up badly as n grows
         '''
-        return self.get_alea().times(n,op)
+        alea1 = self.get_alea()
+        if n <= 0:
+            raise Lea.Error("times method requires a strictly positive integer")
+        if n == 1:
+            return alea1.new()
+        (n2,r) = divmod(n,2)
+        alea2 = alea1.times(n2,op)
+        res_flea2 = Flea2(op,alea2,alea2.new())
+        if r == 1:
+            res_flea2 = Flea2(op,res_flea2,alea1)
+        return res_flea2.get_alea()
 
     def times_tuple(self,n):
         ''' returns a new Alea instance with tuples of length n, containing
@@ -467,7 +477,7 @@ class Lea(object):
             the probabilities are compared strictly (see Lea.equiv_f method for
             comparisons tolerant to rounding errors)
         '''
-        other = Lea.coerce(other)
+        other = Alea.coerce(other)
         # absolute equality required
         # frozenset(...) is used to avoid any dependency on the order of values
         return frozenset(self.gen_raw_vps()) == frozenset(other.gen_raw_vps())
@@ -479,7 +489,7 @@ class Lea(object):
             the probabilities are compared using the math.isclose function,
             in order to be tolerant to rounding errors
         '''
-        other = Lea.coerce(other)
+        other = Alea.coerce(other)
         vps1 = tuple(self.gen_raw_vps())
         vps2Dict = dict(other.gen_raw_vps())
         if len(vps1) != len(vps2Dict):
@@ -609,13 +619,15 @@ class Lea(object):
         '''
         return Alea(*zip(*((v,p.subs(*args)) for (v,p) in self.gen_raw_vps())),normalization=False)
 
+    '''
     @staticmethod
     def build_cpt_from_dict(a_cpt_dict,prior_lea=None):
-        ''' static method, same as build_cpt, with clauses specified in the a_cpt_dict dictionary
+        '' static method, same as cpt, with clauses specified in the a_cpt_dict dictionary
             {condition:result}
-        '''
+        ''
         return Blea.build(*(a_cpt_dict.items()),prior_lea=prior_lea)
-
+    '''
+        
     @staticmethod
     def if_(cond_lea,then_lea,else_lea):
         ''' static method, returns an instance of Tlea representing the
@@ -624,8 +636,6 @@ class Lea(object):
                    else_lea  otherwise
             this is a convenience method equivalent to 
               cond_lea.switch({True:then_lea,False:else_lea})
-            Note: before ver 2.3, it was equivalent to
-              Lea.build_cpt((cond_lea,then_lea),(None,else_lea))
         '''
         return Tlea(cond_lea,{True:then_lea,False:else_lea})
 
@@ -640,9 +650,9 @@ class Lea(object):
         return Tlea(self,lea_dict,default_lea)
 
     ## note: in PY3, could use:
-    ## def build_cpt(*clauses,prior_lea=None,auto_else=False,check=True):
+    ## def cpt(*clauses,prior_lea=None,auto_else=False,check=True):
     @staticmethod
-    def build_cpt(*clauses,**kwargs):
+    def cpt(*clauses,**kwargs):
         ''' static method, returns an instance of Blea representing the conditional
             probability table (e.g. a node in a Bayes network) from the given clauses;
             each clause is a tuple (condition,result)
@@ -822,70 +832,52 @@ class Lea(object):
         except AttributeError:
             # return new Lea made up of attributes of inner values
             return Flea2(getattr,self,attr_name)
-
-    @staticmethod
-    def fast_max(*args):
-        ''' static method, returns a new Alea instance giving the probabilities to
-            have the maximum value of each combination of the given args;
-            if some elements of args are not Lea instance, then these are coerced
-            to an Lea instance with probability 1;
-            the method uses an efficient algorithm (linear complexity), which is
-            due to Nicky van Foreest; for explanations, see
-            http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
-            Note: unlike most of Lea methods, the distribution returned by Lea.fast_max
-            loses any dependency with given args; this could be important if some args
-            appear in the same expression as Lea.max(...) but outside it, e.g.
-            conditional probability expressions; this limitation can be avoided by
-            using the Lea.max method; however, this last method can be
-            prohibitively slower (exponential complexity)
-        '''
-        alea_args = tuple(Lea.coerce(arg).get_alea() for arg in args)
-        return Alea.fast_extremum(Alea.p_cumul,*alea_args)
-    
-    @staticmethod
-    def fast_min(*args):
-        ''' static method, returns a new Alea instance giving the probabilities to have
-            the minimum value of each combination of the given args;
-            if some elements of args are not Lea instances, then these are coerced
-            to an Alea instance with probability 1;
-            the method uses an efficient algorithm (linear complexity), which is
-            due to Nicky van Foreest; for explanations, see
-            http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
-            Note: unlike most of Lea methods, the distribution returned by Lea.fast_min
-            loses any dependency with given args; this could be important if some args
-            appear in the same expression as Lea.min(...) but outside it, e.g.
-            conditional probability expressions; this limitation can be avoided by
-            using the Lea.min method; however, this last method can be prohibitively
-            slower (exponential complexity)
-        '''
-        alea_args = tuple(Lea.coerce(arg).get_alea() for arg in args)
-        return Alea.fast_extremum(Alea.p_inv_cumul,*alea_args)
         
     @staticmethod
-    def max(*args):
+    def max_of(*args,fast=False):
         ''' static method, returns a new Flea instance giving the probabilities to
             have the maximum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
             to a Lea instance with probability 1;
-            the returned distribution keeps dependencies with args but the 
-            calculation could be prohibitively slow (exponential complexity);
-            for a more efficient implemetation, assuming that dependencies are not
-            needed, see Lea.fast_max method
+            if optional arg fast is False (default),
+                the returned distribution keeps dependencies with args but the 
+                calculation could be prohibitively slow (exponential complexity);
+            if optional arg fast is True,
+                the method uses an efficient algorithm (linear complexity), which is
+                due to Nicky van Foreest; for explanations, see
+                http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
+                however, unlike most of Lea methods, the distribution returned loses
+                any dependency with given args; this could be important if some args
+                appear in the same expression as Lea.max(...) but outside it, e.g.
+                conditional probability expressions
         '''
-        return Flea.build(easy_max,args)
+        if not fast:
+            return Flea.build(easy_max,args)
+        alea_args = tuple(Alea.coerce(arg).get_alea() for arg in args)
+        return Alea.fast_extremum(Alea.p_cumul,*alea_args)
 
     @staticmethod
-    def min(*args):
+    def min_of(*args,fast=False):
         ''' static method, returns a new Flea instance giving the probabilities to
             have the minimum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
             to a Lea instance with probability 1;
-            the returned distribution keeps dependencies with args but the 
-            calculation could be prohibitively slow (exponential complexity);
-            for a more efficient implemetation, assuming that dependencies are not
-            needed, see Lea.fast_min method
+            if optional arg fast is False (default),
+                the returned distribution keeps dependencies with args but the 
+                calculation could be prohibitively slow (exponential complexity);
+            if optional arg fast is True,
+                the method uses an efficient algorithm (linear complexity), which is
+                due to Nicky van Foreest; for explanations, see
+                http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
+                however, unlike most of Lea methods, the distribution returned loses
+                any dependency with given args; this could be important if some args
+                appear in the same expression as Lea.max(...) but outside it, e.g.
+                conditional probability expressions
         '''
-        return Flea.build(easy_min,args)
+        if not fast:
+            return Flea.build(easy_min,args)
+        alea_args = tuple(Alea.coerce(arg).get_alea() for arg in args)
+        return Alea.fast_extremum(Alea.p_inv_cumul,*alea_args)
 
     def __lt__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
@@ -1219,7 +1211,7 @@ class Lea(object):
             without precalculating the exact probability distribution (contrarily to 'random' method);
             nb_tries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
-            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'build_cpt' methods;
+            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
         for _ in range(n):
@@ -1242,7 +1234,7 @@ class Lea(object):
             otherwise, returns a tuple of n such random values;
             nb_tries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
-            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'build_cpt' methods;
+            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
         n1 = 1 if n is None else n
@@ -1259,7 +1251,7 @@ class Lea(object):
             distribution is intractable; the larger the value of n, the better the returned estimation;
             nb_tries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
-            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'build_cpt' methods;
+            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
         return Lea.from_seq(self.random_mc(n,nb_tries))
@@ -1453,7 +1445,7 @@ class Lea(object):
             the returned type is a float or a sympy expression (see doc of
             Alea.entropy)
         '''
-        other = Lea.coerce(other)
+        other = Alea.coerce(other)
         ce = Clea(self,other).entropy - other.entropy
         try:
             return max(0.0,ce)
@@ -1466,7 +1458,7 @@ class Lea(object):
             the returned type is a float or a sympy expression (see doc of
             Alea.entropy)
         '''
-        other = Lea.coerce(other)
+        other = Alea.coerce(other)
         mi = self.entropy + other.entropy - Clea(self,other).entropy
         try:
             return max(0.0,mi)
@@ -1539,20 +1531,7 @@ from .tlea import Tlea
 # - see Alea.prob_any method
 Alea.set_prob_type('x')
 
-# Lea static methods exported from Alea
-Lea.set_prob_type = Alea.set_prob_type
-Lea.coerce = Alea.coerce
-Lea.vals = Alea.vals
-Lea.from_seq = Alea.from_seq
-Lea.pmf = Alea.pmf
-Lea.interval = Alea.interval
-Lea.bool = Alea.bool
-Lea.from_csv_file = Alea.from_csv_file
-Lea.from_csv_filename = Alea.from_csv_filename
-Lea.from_pandas_df = Alea.from_pandas_df
-Lea.bernoulli = Alea.bernoulli
-Lea.binom = Alea.binom
-Lea.poisson = Alea.poisson
+# convenience functions
 
 def P(lea1):
     ''' returns a ProbFraction instance representing the probability for

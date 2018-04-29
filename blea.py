@@ -78,11 +78,11 @@ class Blea(Lea):
             if prior_lea is not None:
                 raise Lea.Error("impossible to define together prior probabilities and auto_else=True")
             # take uniform distribution on all values found in clause's results (principle of indifference)
-            else_clause_result = Lea.from_vals(*frozenset(val for (cond,result) in clauses for val in Lea.coerce(result).vals()))
+            else_clause_result = Lea.from_vals(*frozenset(val for (cond,result) in clauses for val in Alea.coerce(result).vals()))
         else:
             else_clause_result = None
         # get clause conditions and results, excepting 'else' clause, after coercion to Lea instances
-        norm_clauses = ((Lea.coerce(cond),Lea.coerce(result)) for (cond,result) in clauses if cond is not None)
+        norm_clauses = ((Alea.coerce(cond),Alea.coerce(result)) for (cond,result) in clauses if cond is not None)
         (cond_leas,res_leas) = tuple(zip(*norm_clauses))
         # check that conditions are disjoint
         if check:
@@ -125,7 +125,7 @@ class Blea(Lea):
             # add the else clause
             else_cond_lea = ~or_conds_lea
             ## other equivalent statement: else_cond_lea = Lea.reduce(and_,(~cond_lea for cond_lea in cond_leas))
-            else_clause_result = Lea.coerce(else_clause_result)
+            else_clause_result = Alea.coerce(else_clause_result)
             res_leas += (else_clause_result,)
             cond_leas += (else_cond_lea,)
             # note that or_conds_lea is NOT extended with or_conds_lea |= else_cond_lea
