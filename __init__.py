@@ -43,6 +43,6 @@ pmf = Alea.pmf
 poisson = Alea.poisson
 read_csv_file = Alea.read_csv_file
 read_pandas_df = Alea.read_pandas_df
-reduce = Lea.reduce
+reduce_all = Lea.reduce_all
 set_prob_type = Alea.set_prob_type
 vals = Alea.vals

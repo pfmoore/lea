@@ -875,7 +875,7 @@ class Alea(Lea):
             else:
                 # file specified: switch off interactive mode
                 plt.ioff()
-            plt.bar(range(len(self._vs)),self.pmf(),tick_label=self._vs,align='center',**bar_args)
+            plt.bar(range(len(self._vs)),self._ps,tick_label=self._vs,align='center',**bar_args)
             plt.ylabel('Probability')
             if title is not None:
                 plt.title(title)

@@ -26,7 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 import operator
 import sys
 from itertools import islice
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from .prob_fraction import ProbFraction
 from .toolbox import easy_min, easy_max, read_csv_filename, read_csv_file, dict, zip, isclose
 
@@ -338,7 +338,7 @@ class Lea(object):
         return Clea(self,*args)
 
     @staticmethod
-    def reduce(op,args,absorber=None):
+    def reduce_all(op,args,absorber=None):
         ''' static method, returns a new Flea2 instance that join the given args with
             the given function op, from left to right;
             requires that op is a 2-ary function, accepting self's values as arguments;
@@ -480,7 +480,7 @@ class Lea(object):
         other = Alea.coerce(other)
         # absolute equality required
         # frozenset(...) is used to avoid any dependency on the order of values
-        return frozenset(self.gen_raw_vps()) == frozenset(other.gen_raw_vps())
+        return frozenset(self._gen_raw_vps()) == frozenset(other._gen_raw_vps())
 
     def equiv_f(self,other):
         ''' returns True iff self and other represent the same probability distribution,
@@ -490,8 +490,8 @@ class Lea(object):
             in order to be tolerant to rounding errors
         '''
         other = Alea.coerce(other)
-        vps1 = tuple(self.gen_raw_vps())
-        vps2Dict = dict(other.gen_raw_vps())
+        vps1 = tuple(self._gen_raw_vps())
+        vps2Dict = dict(other._gen_raw_vps())
         if len(vps1) != len(vps2Dict):
             return False
         for (v1,p1) in vps1:
@@ -507,7 +507,7 @@ class Lea(object):
         '''
         return Alea._downcast(self._p(val))
 
-    def gen_raw_vps(self):
+    def _gen_raw_vps(self):
         ''' generates, after evaluation of the probability distribution self,
             tuples (v,p) where v is a value of self
             and p is the associated probability (integer > 0);
@@ -516,24 +516,16 @@ class Lea(object):
         '''
         return self.get_alea()._gen_vp()
     
-    def gen_vps(self):
+    def _gen_vps(self):
         ''' generates, after evaluation of the probability distribution self,
             tuples (v,p) where v is a value of self and p is the associated
             probability;
             the sequence follows the order defined on values;
             note that there is NO binding, contrarily to _gen_vp method
         '''
-        return ((v,Alea._downcast(p)) for (v,p) in self.get_alea()._gen_vp())
+        return ((v,Alea._downcast(p)) for (v,p) in self._gen_raw_vps())
 
-    def vps(self):
-        ''' returns, after evaluation of the probability distribution self,
-            a tuple with tuples (v,p) where v is a value of self
-            and p is the associated probability;
-            the sequence follows the order defined on values
-        '''
-        return tuple(self.gen_vps())
-
-    def vals(self):
+    def support(self):
         ''' returns a tuple with values of self
             the sequence follows the increasing order defined on values
             if order is undefined (e.g. complex numbers), then the order is
@@ -548,35 +540,62 @@ class Lea(object):
             arbitrary but fixed from call to call
         '''
         return tuple(Alea._downcast(p) for p in self.get_alea()._ps)
-        
-    def support(self):
-        ''' same as vals method
-        '''
-        return self.vals()
 
+    '''
     #TODO: renamed to avoid clash / review these functions
     def get_pmf(self,val=None):
-        ''' probability mass function;
+        '' probability mass function;
             returns the probability of the given value val;
             if val is None, then a tuple is returned with the probabilities of each value,
             in the same order as defined on values (call vals method to get this 
             ordered sequence)
-        '''
+        ''
         if val is None:
             return tuple(self.ps())
         return self.p(val)
 
     def cdf(self,val=None):
-        ''' cumulative distribution function;
+        '' cumulative distribution function;
             returns the probability that self's value is less or equal to the given value val;
             if val is None, then a tuple is returned with the probabilities of each value,
             in the same order as defined on values (call vals method to get this ordered
             sequence);
             note that the last probability is always 1
-        '''
+        ''
         if val is None:
             return tuple(Alea._downcast(p) for p in self.get_alea().cumul()[1:])
         return Alea._downcast(self.get_alea().p_cumul(val))
+    '''
+
+
+    def pmf_tuple(self):
+        ''' returns, after evaluation of the probability distribution self, the probability
+            mass function of self, as a tuple with tuples (v,P(v));
+            the sequence follows the order defined on values
+        '''
+        return tuple(self._gen_vps())
+
+    def pmf_dict(self):
+        ''' returns, after evaluation of the probability distribution self, the probability
+            mass function of self, as an OrderedDict with v : P(v)) pairs;
+            the sequence follows the order defined on values
+        '''
+        return OrderedDict(self._gen_vps())
+
+    def cdf_tuple(self):
+        ''' returns, after evaluation of the probability distribution self, the cumulative
+            distribution function of self, as a tuple with tuples (v,P(x<=v));
+            the sequence follows the order defined on values
+        '''
+        return tuple((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.get_alea().cumul()[1:]))
+
+    def cdf_dict(self):
+        ''' returns, after evaluation of the probability distribution self, the cumulative
+            distribution function of self, as an OrderedDict with v : P(x<=v)) pairs;
+            the sequence follows the order defined on values
+        '''
+        return OrderedDict((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.get_alea().cumul()[1:]))
+
 
     def _p(self,val,check_val_type=False):
         ''' returns the probability of the given value val
@@ -617,7 +636,7 @@ class Lea(object):
             expressions (see doc of sympy.Expreesion.subs method);
             requires that all self's probabiliies have a 'subs' method available
         '''
-        return Alea(*zip(*((v,p.subs(*args)) for (v,p) in self.gen_raw_vps())),normalization=False)
+        return Alea(*zip(*((v,p.subs(*args)) for (v,p) in self._gen_raw_vps())),normalization=False)
 
     '''
     @staticmethod
