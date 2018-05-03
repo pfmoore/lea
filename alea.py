@@ -628,7 +628,7 @@ class Alea(Lea):
             the efficient combinatorial algorithm is due to Paul Moore
         '''
         # First of all, get the values and weights for the distribution
-        vps = dict(self.gen_raw_vps())
+        vps = dict(self._gen_raw_vps())
         # The total number of permutations of N samples is N!
         permutations = factorial(n)
         # We will calculate the frequency table for the result
@@ -718,10 +718,10 @@ class Alea(Lea):
             if n > 1:
                 raise Lea.Error("number of values to draw exceeds the number of possible values")
             return Alea.coerce((self._vs[0],),prob_type=self._ps[0].__class__)
-        alea2s = tuple(Alea._pmf_ordered(tuple((v0, p0) for (v0, p0) in self.gen_raw_vps() if v0 != v), check=False).draw_without_replacement(n - 1) for v in self._vs)
+        alea2s = tuple(Alea._pmf_ordered(tuple((v0, p0) for (v0, p0) in self._gen_raw_vps() if v0 != v), check=False).draw_without_replacement(n - 1) for v in self._vs)
         vps = []
         for (v,p,alea2) in zip(self._vs,self._ps,alea2s):
-            for (vt,pt) in alea2.gen_raw_vps():
+            for (vt,pt) in alea2._gen_raw_vps():
                 vps.append(((v,)+vt,p*pt))
         return Alea._pmf_ordered(vps, check=False)
 
@@ -1066,9 +1066,9 @@ class Alea(Lea):
         if len(alea_args) == 2:
             (alea_arg1,alea_arg2) = alea_args
             val_freqs_dict = defaultdict(int)
-            for (v,p) in alea_arg1.gen_raw_vps():
+            for (v,p) in alea_arg1._gen_raw_vps():
                 val_freqs_dict[v] = p * cumul_func(alea_arg2,v)
-            for (v,p) in alea_arg2.gen_raw_vps():
+            for (v,p) in alea_arg2._gen_raw_vps():
                 val_freqs_dict[v] += (cumul_func(alea_arg1,v)-alea_arg1._p(v)) * p
             return Alea.pmf(val_freqs_dict)
         return Alea.fast_extremum(cumul_func,alea_args[0],Alea.fast_extremum(cumul_func,*alea_args[1:]))
@@ -1116,7 +1116,7 @@ class Alea(Lea):
         '''
         res = None
         v0 = None
-        for (v,p) in self.gen_raw_vps():
+        for (v,p) in self._gen_raw_vps():
             if v0 is None:
                 v0 = v
             elif res is None:
@@ -1154,7 +1154,7 @@ class Alea(Lea):
         '''
         res = 0
         m = self._mean()
-        for (v,p) in self.gen_raw_vps():
+        for (v,p) in self._gen_raw_vps():
             res += p*(v-m)**2
         return res
 
@@ -1203,7 +1203,7 @@ class Alea(Lea):
             WARNING: this method is called without parentheses
         '''
         max_p = max(self._ps)
-        return tuple(v for (v,p) in self.gen_raw_vps() if p == max_p)
+        return tuple(v for (v,p) in self._gen_raw_vps() if p == max_p)
 
     def information_of(self,val):
         ''' returns a float number representing the information of given val,
@@ -1250,14 +1250,14 @@ class Alea(Lea):
         '''
         res = 0
         try:
-            for (v,p) in self.gen_raw_vps():
+            for (v,p) in self._gen_raw_vps():
                 if p > 0:
                     res -= p*log2(p)
             return res
         except TypeError:
             try:
                 from sympy import log
-                for (v,p) in self.gen_raw_vps():
+                for (v,p) in self._gen_raw_vps():
                     res -= p*log(p)
                 return res / log(2)
             except:
@@ -1306,4 +1306,4 @@ class Alea(Lea):
         if self in refs:
             return self._id() + '*'
         refs.add(self)
-        return self._id() + str(tuple(self.gen_raw_vps()))
+        return self._id() + str(tuple(self._gen_raw_vps()))
