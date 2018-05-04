@@ -32,9 +32,9 @@ from fractions import Fraction
 from decimal import Decimal
 from random import random
 from bisect import bisect_left, bisect_right
-from itertools import combinations, combinations_with_replacement
+import itertools
 from math import exp, factorial
-import operator
+from operator import truediv
 import collections
 try:
     import sympy
@@ -163,10 +163,14 @@ class Alea(Lea):
             return Decimal
         if prob_type == 's':
             if sympy is None:
-                raise Lea.Error("prob_type 's' is not a valid probability value or it is meant as a symbolic name requiring the sympy module, which does not seem to be installed")
-            return Alea.prob_symbol
+                raise Lea.Error("prob_type 's' requires the installation of SymPy module")
+            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
+            ## ("TypeError: unbound method prob_symbol() must be called with Alea instance as first argument (got int instance instead)") 
+            return staticmethod(Alea.prob_symbol)
         if prob_type == 'x':
-            return Alea.prob_any
+            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
+            ## ("TypeError: unbound method prob_any() must be called with Alea instance as first argument (got int instance instead)") 
+            return staticmethod(Alea.prob_any)
         raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%prob_type)
 
     @staticmethod
@@ -217,7 +221,8 @@ class Alea(Lea):
             if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
                 self._ps = tuple(Alea._symbolic_simplify_function(p/p_sum) for p in ps)
             else:
-                self._ps = tuple(p/p_sum for p in ps)
+                ## note: truediv is used to prevent integer division in Python 2.x
+                self._ps = tuple(truediv(p,p_sum) for p in ps)
         else:
             self._ps = tuple(ps)
         if len(self._vs) != len(self._ps):
@@ -371,7 +376,7 @@ class Alea(Lea):
             the order of values is unspecified; 
             * ordered (default:False): if ordered is True, then the values for
             displaying the distribution or getting the values will follow the
-            given order (requires that the prob_dict is a
+            given order (requires that the arg is an iterable or a 
             collections.OrderedDict);
             * normalization (default:True): if True, then each element
             of the given ps is divided by the sum of all ps before being stored
@@ -380,6 +385,7 @@ class Alea(Lea):
             requires that all the given values vi are hashable;
             requires that prob_dict is not empty;
             requires that ordered and sorting are not set to True together
+            requires Python 2.7+ for ordered=True and arg OrderedDict
         '''
         (ordered,sorting,normalization,_,_) = Alea._parsed_kwargs(kwargs)
         if is_dict(arg):
@@ -418,7 +424,7 @@ class Alea(Lea):
         return Alea(*zip(*vps),normalization=normalization,prob_type=-1)
 
     @staticmethod
-    def vals(*values,prob_type=None,**kwargs):
+    def vals(*values,**kwargs):
         ''' static method, returns an Alea instance representing a distribution
             for the given values, so that each value occurrence is
             taken as equiprobable; if each value occurs exactly once, then the
@@ -426,11 +432,11 @@ class Alea(Lea):
             value is equal to 1 / #values; otherwise, the probability of each
             value is equal to its frequency in the sequence;
             the optional arguments (kwargs) are:
-              ordered, sorting, normalization, check;
+              porob_type, ordered, sorting, normalization, check;
             see doc of Alea.from_val_freqs_dict static method;
             requires at least one vals argument
         '''
-        return Alea.pmf(((val,1) for val in values),prob_type=prob_type,**kwargs)
+        return Alea.pmf(((val,1) for val in values),**kwargs)
   
     @staticmethod
     def _pmf_ordered(vps,**kwargs):
@@ -668,8 +674,9 @@ class Alea(Lea):
             elements sorted by increasing order;
             assumes that n >= 0
             the efficient combinatorial algorithm is due to Paul Moore
+            requires Python 2.7+            
         '''
-        return self._selections(n,combinations_with_replacement)
+        return self._selections(n,itertools.combinations_with_replacement)
 
     def draw_sorted_without_replacement(self,n):
         ''' returns a new Alea instance representing the probability distribution
@@ -678,13 +685,13 @@ class Alea(Lea):
             elements sorted by increasing order;
             assumes that 0 <= n <= number of values of self;
             note: if the probability distribution of self is uniform
-            then the results is produced in an efficient way, tanks to the
+            then the results is produced in an efficient way, thanks to the
             combinatorial algorithm of Paul Moore
         '''
         if self.is_uniform():
             # the probability distribution is uniform,
             # the efficient algorithm of Paul Moore can be used
-            return self._selections(n,combinations)
+            return self._selections(n,itertools.combinations)
         else:
             # the probability distribution is not uniform,
             # we use the general algorithm less efficient:

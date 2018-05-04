@@ -27,9 +27,10 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 The module toolbox provides general functions and constants needed by Lea classes 
 '''
 
-from functools import wraps
 import sys
 import csv
+from functools import wraps
+from collections import defaultdict
 
 try:
     # log2 function available in Python 3.3+
@@ -79,9 +80,15 @@ def gen_pairs(seq):
             yield (head,a)
         for pair in gen_pairs(tail):
             yield pair
+            
+## storing standard dict in __std_dict is needed for Python 2.x
+## because dict is rebound (see below)
+__std_dict = dict
 
 def is_dict(d):
-    return isinstance(d,dict)
+    ''' returns True iff given d is a dictionary
+    '''
+    return isinstance(d,__std_dict)
                 
 # Python 2 / 3 dependencies
 # the following redefines / rebinds the following objects in Python2: 
@@ -93,7 +100,6 @@ def is_dict(d):
 # these shall be imported by all modules that uses such names
 
 # standard input function, zip and dictionary methods as iterators
-from collections import defaultdict
 ## note don't use sys.version_info.major because NOK if <= 2.6
 if sys.version_info[0] == 2:
     # Python 2.x

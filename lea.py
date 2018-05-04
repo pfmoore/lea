@@ -26,7 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 import operator
 import sys
 from itertools import islice
-from collections import namedtuple, OrderedDict
+import collections
 from .prob_fraction import ProbFraction
 from .toolbox import easy_min, easy_max, read_csv_filename, read_csv_file, dict, zip, isclose
 
@@ -411,7 +411,7 @@ class Lea(object):
             from the current distribution supposed to have n-tuples as values,
             to be associated with the given n attribute names
         '''
-        NTClass = namedtuple('_',attr_names)
+        NTClass = collections.namedtuple('_',attr_names)
         return self.map(lambda a_tuple: NTClass(*a_tuple)).get_alea()
 
     def is_uniform(self):
@@ -442,6 +442,7 @@ class Lea(object):
              to a combinatorial algorithm proposed by Paul Moore; however, this
              algorithm is NOT used if replacement is False AND the probability
              distribution is NOT uniform.
+            requires Python 2.7+ for the case replacement = sorted = True
         '''
         if n < 0:
             raise Lea.Error("draw method requires a positive integer")
@@ -541,33 +542,6 @@ class Lea(object):
         '''
         return tuple(Alea._downcast(p) for p in self.get_alea()._ps)
 
-    '''
-    #TODO: renamed to avoid clash / review these functions
-    def get_pmf(self,val=None):
-        '' probability mass function;
-            returns the probability of the given value val;
-            if val is None, then a tuple is returned with the probabilities of each value,
-            in the same order as defined on values (call vals method to get this 
-            ordered sequence)
-        ''
-        if val is None:
-            return tuple(self.ps())
-        return self.p(val)
-
-    def cdf(self,val=None):
-        '' cumulative distribution function;
-            returns the probability that self's value is less or equal to the given value val;
-            if val is None, then a tuple is returned with the probabilities of each value,
-            in the same order as defined on values (call vals method to get this ordered
-            sequence);
-            note that the last probability is always 1
-        ''
-        if val is None:
-            return tuple(Alea._downcast(p) for p in self.get_alea().cumul()[1:])
-        return Alea._downcast(self.get_alea().p_cumul(val))
-    '''
-
-
     def pmf_tuple(self):
         ''' returns, after evaluation of the probability distribution self, the probability
             mass function of self, as a tuple with tuples (v,P(v));
@@ -579,8 +553,9 @@ class Lea(object):
         ''' returns, after evaluation of the probability distribution self, the probability
             mass function of self, as an OrderedDict with v : P(v)) pairs;
             the sequence follows the order defined on values
+            requires Python 2.7+
         '''
-        return OrderedDict(self._gen_vps())
+        return collections.OrderedDict(self._gen_vps())
 
     def cdf_tuple(self):
         ''' returns, after evaluation of the probability distribution self, the cumulative
@@ -593,9 +568,9 @@ class Lea(object):
         ''' returns, after evaluation of the probability distribution self, the cumulative
             distribution function of self, as an OrderedDict with v : P(x<=v)) pairs;
             the sequence follows the order defined on values
+            requires Python 2.7+
         '''
-        return OrderedDict((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.get_alea().cumul()[1:]))
-
+        return collections.OrderedDict((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.get_alea().cumul()[1:]))
 
     def _p(self,val,check_val_type=False):
         ''' returns the probability of the given value val
@@ -851,9 +826,11 @@ class Lea(object):
         except AttributeError:
             # return new Lea made up of attributes of inner values
             return Flea2(getattr,self,attr_name)
-        
+
+    ## in PY3, could use
+    ## def max_of(*args,fast=False):
     @staticmethod
-    def max_of(*args,fast=False):
+    def max_of(*args,**kwargs):
         ''' static method, returns a new Flea instance giving the probabilities to
             have the maximum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
@@ -870,13 +847,16 @@ class Lea(object):
                 appear in the same expression as Lea.max(...) but outside it, e.g.
                 conditional probability expressions
         '''
+        fast = kwargs.get('fast',False)
         if not fast:
             return Flea.build(easy_max,args)
         alea_args = tuple(Alea.coerce(arg).get_alea() for arg in args)
         return Alea.fast_extremum(Alea.p_cumul,*alea_args)
 
+    ## in PY3, could use
+    ## def min_of(*args,fast=False):
     @staticmethod
-    def min_of(*args,fast=False):
+    def min_of(*args,**kwargs):
         ''' static method, returns a new Flea instance giving the probabilities to
             have the minimum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
@@ -893,6 +873,7 @@ class Lea(object):
                 appear in the same expression as Lea.max(...) but outside it, e.g.
                 conditional probability expressions
         '''
+        fast = kwargs.get('fast',False)
         if not fast:
             return Flea.build(easy_min,args)
         alea_args = tuple(Alea.coerce(arg).get_alea() for arg in args)
