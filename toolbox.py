@@ -103,7 +103,10 @@ def is_dict(d):
 ## note don't use sys.version_info.major because NOK if <= 2.6
 if sys.version_info[0] == 2:
     # Python 2.x
-    # the goal of this part is to mimic a Python3 env in a Python2 env
+    if sys.version_info[1] < 6:
+        raise Exception("Lea requires Python 2.6+ or 3 to run")
+    # Python 2.6+
+    # the goal of this part is to mimic a Python 3 env in a Python 2.6+ env
     # rename raw_input method
     input = raw_input
     # zip as iterator shall be imported
