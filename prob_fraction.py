@@ -40,21 +40,13 @@ class ProbFraction(ProbNumber,Fraction):
     def __new__(cls, numerator=0, denominator=None):
         ''' returns a new instance of ProbFraction
             following signatures of Fraction constructor
-            + allowing a percentage in numerator as a string 'xxx %'
-              with xxx being a float literal
             Note that the constructor does NOT check that the fraction
             is in the range 0 to 1; this is so to allow intermediate
             results in expressions to go beyond that range;
             the range is verified when string representation is required
             (method str) or by explicit call to check() method 
         '''
-        if isinstance(numerator,str) and denominator is None:
-            numerator = numerator.strip()
-            if numerator.endswith('%'):
-                numerator = Fraction(numerator[:-1])
-                denominator = 100
-        fraction = Fraction(numerator,denominator)        
-        return ProbFraction._from_fraction(fraction)
+        return ProbFraction._from_fraction(Fraction(numerator,denominator))
     
     @staticmethod         
     def _from_fraction(fraction):
