@@ -30,7 +30,7 @@ class Flea2(Lea):
     
     '''
     Flea2 is a Lea subclass, which instance is defined by a given function applied on two given arguments.
-    The function is applied on all elements of cartesian product of the arguments. This results in a new
+    The function is applied on all elements of the joint of the arguments. This results in a new
     probability distribution for all the values returned by the function.
     '''
     

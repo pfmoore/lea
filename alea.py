@@ -433,7 +433,7 @@ class Alea(Lea):
             value is equal to its frequency in the sequence;
             the optional arguments (kwargs) are:
               porob_type, ordered, sorting, normalization, check;
-            see doc of Alea.from_val_freqs_dict static method;
+            see doc of Alea.pmf static method;
             requires at least one vals argument
         '''
         return Alea.pmf(((val,1) for val in values),**kwargs)
@@ -664,7 +664,6 @@ class Alea(Lea):
             for roll in outcome:
                 weight *= vps[roll]
             freq_table.append((outcome,weight))
-        #return Alea.from_val_freqs(*freq_table)
         return Alea.pmf(freq_table)
 
     def draw_sorted_with_replacement(self,n):
@@ -750,7 +749,6 @@ class Alea(Lea):
             t += p
             v += 1
             p = (p*mean) / v
-        #return Alea.from_val_freqs(*val_freqs)
         return Alea.pmf(val_freqs,prob_type)
 
     __DISPLAY_KINDS = (None, '/', '.', '%', '-', '/-', '.-', '%-')
