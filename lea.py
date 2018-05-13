@@ -613,15 +613,6 @@ class Lea(object):
         '''
         return Alea(*zip(*((v,p.subs(*args)) for (v,p) in self._gen_raw_vps())),normalization=False)
 
-    '''
-    @staticmethod
-    def build_cpt_from_dict(a_cpt_dict,prior_lea=None):
-        '' static method, same as cpt, with clauses specified in the a_cpt_dict dictionary
-            {condition:result}
-        ''
-        return Blea.build(*(a_cpt_dict.items()),prior_lea=prior_lea)
-    '''
-        
     @staticmethod
     def if_(cond_lea,then_lea,else_lea):
         ''' static method, returns an instance of Tlea representing the
