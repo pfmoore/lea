@@ -38,7 +38,7 @@ class Rlea(Lea):
         self._lea_of_leas = lea_of_leas
 
     def _get_lea_children(self):
-        return (self._lea_of_leas,)
+        return (self._lea_of_leas,) + self._lea_of_leas.support()
 
     def _clone(self,clone_table):
         return Rlea(self._lea_of_leas.clone(clone_table))

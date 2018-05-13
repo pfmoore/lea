@@ -78,7 +78,7 @@ class Blea(Lea):
             if prior_lea is not None:
                 raise Lea.Error("impossible to define together prior probabilities and auto_else=True")
             # take uniform distribution on all values found in clause's results (principle of indifference)
-            else_clause_result = Lea.from_vals(*frozenset(val for (cond,result) in clauses for val in Alea.coerce(result).vals()))
+            else_clause_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in Alea.coerce(result).support()))
         else:
             else_clause_result = None
         # get clause conditions and results, excepting 'else' clause, after coercion to Lea instances
@@ -97,26 +97,23 @@ class Blea(Lea):
             if check and or_conds_lea.is_true():
                 # TODO check prior_lea equivalent to self
                 raise Lea.Error("forbidden to define prior probabilities for complete clause set")
-            (p_true,count) = or_conds_lea._p(True)
-            p_false = count - p_true
-            prior_alea_dict = dict(prior_lea.get_alea().vps())
-            prior_alea_count = sum(prior_alea_dict.values())
-            norm_alea_dict = dict(Lea.from_seq(res_leas).flat().get_alea().vps())
-            norm_alea_count = sum(norm_alea_dict.values())
+            p_true = or_conds_lea._p(True)
+            p_false = 1 - p_true
+            prior_alea_dict = dict(prior_lea.get_alea()._gen_vp())
+            norm_alea_dict = dict(Alea.vals(*res_leas).flat().get_alea()._gen_vp())
             values_set = frozenset(chain(prior_alea_dict.keys(),norm_alea_dict.keys()))
             vps = []
             for value in values_set:
                  prior_p = prior_alea_dict.get(value,0)
                  cond_p = norm_alea_dict.get(value,0)
-                 p = prior_p*count*norm_alea_count - cond_p*p_true*prior_alea_count
-                 if not(0 <= p <= p_false*norm_alea_count*prior_alea_count):
+                 p = prior_p - cond_p*p_true
+                 if not(0 <= p <= p_false):
                      # Infeasible : probability represented by p goes outside range from 0 to 1
-                     prior_p_fraction = ProbFraction(prior_p,prior_alea_count)
-                     lower_p_fraction = ProbFraction(cond_p*p_true,count*norm_alea_count)
-                     upper_p_fraction = ProbFraction(cond_p*p_true+p_false*norm_alea_count,count*norm_alea_count)
-                     raise Lea.Error("prior probability of '%s' is %s, outside the range [ %s , %s ]"%(value,prior_p_fraction,lower_p_fraction,upper_p_fraction))
+                     lower_p = cond_p * p_true
+                     upper_p = cond_p*p_true + p_false
+                     raise Lea.Error("prior probability of '%s' is %s, outside the range [ %s , %s ]"%(value,prior_p,lower_p,upper_p))
                  vps.append((value,p))
-            else_clause_result = Lea.from_val_freqs(*vps)
+            else_clause_result = Alea.pmf(vps)
         elif else_clause_result is None:
             # no 'else' clause: check that clause set is complete
             if check and not or_conds_lea.is_true():
