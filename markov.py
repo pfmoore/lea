@@ -25,7 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .lea import Lea
 from .alea import Alea
-from .blea import Blea
+from .tlea import Tlea
 from .toolbox import zip, dict
 from itertools import islice, tee
 
@@ -35,7 +35,7 @@ class Chain(object):
     and given probabilities of transition from state to state.    
     '''
 
-    __slots__ = ('_state_objs','_state_alea_dict','_state','_next_state_blea')
+    __slots__ = ('_next_state_lea_per_state','_state_objs','_state_alea_dict','_state','_next_state_tlea')
     
     def __init__(self,next_state_lea_per_state):
         ''' initializes Chain instance's attributes; 
@@ -44,11 +44,11 @@ class Chain(object):
             giving probabilities of transition from state_obj to each state object 
         '''
         object.__init__(self)
-        self._state_objs = tuple(state_obj for (state_obj,next_state_lea) in next_state_lea_per_state)
+        self._next_state_lea_per_state = tuple(next_state_lea_per_state)
+        self._state_objs = tuple(state_obj for (state_obj,_) in self._next_state_lea_per_state)
         self._state_alea_dict = dict((state_obj,StateAlea(Alea.coerce(state_obj),self)) for state_obj in self._state_objs)
-        self._state = StateAlea(Lea.from_vals(*self._state_objs),self)
-        iter_next_state_data = ((self._state==state_obj,next_state_lea) for (state_obj,next_state_lea) in next_state_lea_per_state)
-        self._next_state_blea = Blea.build(*iter_next_state_data)
+        self._state = StateAlea(Alea.vals(*self._state_objs),self)
+        self._next_state_tlea = Tlea(self._state,dict(self._next_state_lea_per_state))
 
     @staticmethod
     def from_matrix(state_objs,*trans_probs_per_state):
@@ -59,7 +59,7 @@ class Chain(object):
             where trans_probs is the sequence of probability weights of transition from
             state_obj to each declared state, in the order of their declarations 
         '''
-        next_state_leas = (Alea.from_val_freqs(*zip(state_objs,trans_probs)) for (state_obj,trans_probs) in trans_probs_per_state)
+        next_state_leas = (Alea.pmf(zip(state_objs,trans_probs)) for (state_obj,trans_probs) in trans_probs_per_state)
         next_state_lea_per_state = tuple(zip(state_objs,next_state_leas))
         return Chain(next_state_lea_per_state)
 
@@ -81,37 +81,19 @@ class Chain(object):
             next_state_objs.append(to_state_obj)
         next_state_name_and_objs = list(next_state_objs_dict.items())
         next_state_name_and_objs.sort()
-        next_state_lea_per_state = tuple((state_obj,Alea.from_vals(*next_state_objs)) for (state_obj,next_state_objs) in next_state_name_and_objs)
+        next_state_lea_per_state = tuple((state_obj,Alea.vals(*next_state_objs)) for (state_obj,next_state_objs) in next_state_name_and_objs)
         return Chain(next_state_lea_per_state)        
-
-    def __str(self,format_func):
-        ''' returns a string representation of the Markov chain
-            with each state S followed by the indented representation of probability distribution
-            of transition from S to next state
-            format_func is a function to represent probability distribution, taking a Lea instance
-            as argument and returning a string 
-        '''
-        next_state_leas = (next_state_i_lea._lea1 for next_state_i_lea in self._next_state_blea._i_leas)
-        formatted_next_state_leas = ('  -> ' + next_state_lea.map(str) for next_state_lea in next_state_leas)
-        return '\n'.join('%s\n%s'%(state_obj,format_func(formatted_next_state_lea)) for (state_obj,formatted_next_state_lea) in zip(self._state_objs,formatted_next_state_leas))
-
-    def as_float(self):
-        ''' same as __str__ but the probabilities are given in decimal representation 
-        '''        
-        return self.__str(Lea.as_float)
-
-    def as_pct(self):
-        ''' same as __str__ but the probabilities are given in percentage representation 
-        '''        
-        return self.__str(Lea.as_pct)
 
     def __str__(self):
         ''' returns a string representation of the Markov chain
             with each state S followed by the indented representation of probability distribution
             of transition from S to next state
-            the probabilities are given in fraction representation 
         '''        
-        return self.__str(Lea.__str__)
+        next_state_leas = (next_state for (_,next_state) in self._next_state_lea_per_state)
+        formatted_next_state_leas = ('  -> ' + next_state_lea.map(str) for next_state_lea in next_state_leas)
+        return '\n'.join('%s\n%s'%(state_obj,formatted_next_state_lea)
+                         for (state_obj,formatted_next_state_lea)
+                         in zip(self._state_objs,formatted_next_state_leas))
         
     __repr__ = __str__
 
@@ -144,7 +126,7 @@ class Chain(object):
         state_n = Alea.coerce(from_state).get_alea()
         while n > 0:
             n -= 1
-            state_n = self._next_state_blea.given(self._state==state_n).get_alea()
+            state_n = self._next_state_tlea.given(self._state==state_n).get_alea()
         return StateAlea(state_n,self)
 
     def state_given(self,cond_lea):
@@ -173,7 +155,7 @@ class StateAlea(Alea):
             corresponding to the probability distribution given in state_obj_lea
             and referring to the given chain, instance of Chain 
         '''
-        Alea.__init__(self,*zip(*state_obj_lea.get_alea().vps()))
+        Alea.__init__(self,*zip(*state_obj_lea.get_alea()._gen_vp()))
         self._chain = chain
 
     def next_state(self,n=1):
@@ -199,3 +181,7 @@ class StateAlea(Alea):
         if n is not None:
             n = int(n)
         return tuple(islice(self.gen_random_seq(),n))
+
+# convenience aliases
+chain_from_matrix = Chain.from_matrix
+chain_from_seq = Chain.from_seq
