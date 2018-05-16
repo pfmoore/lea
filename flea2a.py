@@ -29,7 +29,7 @@ class Flea2a(Flea2):
     
     '''
     Flea2a is a Flea2 subclass, which instance is defined by a given function applied on two given Lea arguments
-    with a given "right-absorber" value (i.e. f(x,absorber) = absorber). This gives equivalent results as
+    with a given "left-absorber" value (i.e. f(absorber,x) = absorber). This gives equivalent results as
     Flea2 (without absorber) but these could be more efficient by pruning the tree search. 
     The function is applied on all elements of the joint of the arguments. This results in a new
     probability distribution for all the values returned by the function.
@@ -47,9 +47,9 @@ class Flea2a(Flea2):
     def _gen_vp(self):
         f = self._f
         absorber = self._absorber
-        for (v2,p2) in self._lea_arg2.gen_vp():
-            if v2 is absorber:
-                yield (absorber,p2)
+        for (v1,p1) in self._lea_arg1.gen_vp():
+            if v1 is absorber:
+                yield (absorber,p1)
             else:
-                for (v1,p1) in self._lea_arg1.gen_vp():
+                for (v2,p2) in self._lea_arg2.gen_vp():
                     yield (f(v1,v2),p1*p2)

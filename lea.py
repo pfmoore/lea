@@ -341,18 +341,18 @@ class Lea(object):
             the given function op, from left to right;
             requires that op is a 2-ary function, accepting self's values as arguments;
             requires that args contains at least one element
-            if absorber is not None, then it is considered as a "right-absorber" value
-            (i.e. op(x,absorber) = absorber); this activates a more efficient algorithm
+            if absorber is not None, then it is considered as a "left-absorber" value
+            (i.e. op(absorber,x) = absorber); this activates a more efficient algorithm
             which prunes the tree search as soon as the absorber is met.
         '''
-        args_iter = iter(args)
-        res = next(args_iter)
+        args_rev_iter = iter(reversed(tuple(args)))
+        res = next(args_rev_iter)
         if absorber is None:
-            for arg in args_iter:
-                res = Flea2(op,res,arg)
+            for arg in args_rev_iter:
+                res = Flea2(op,arg,res)
         else:
             for arg in args_iter:
-                res = Flea2a(op,res,arg,absorber)
+                res = Flea2a(op,arg,res,absorber)
         return res
 
     def merge(self,*lea_args):
