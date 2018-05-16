@@ -351,7 +351,7 @@ class Lea(object):
             for arg in args_rev_iter:
                 res = Flea2(op,arg,res)
         else:
-            for arg in args_iter:
+            for arg in args_rev_iter:
                 res = Flea2a(op,arg,res,absorber)
         return res
 
@@ -362,7 +362,7 @@ class Lea(object):
                   Pi(v) is the probability of value v in ((self,)+lea_args)[i]
         '''
         leas = (self,) + lea_args
-        lea = Lea.from_seq(range(len(leas)))
+        lea = Alea.vals(*range(len(leas)))
         return Blea.build(*((lea==i,lea_arg) for (i,lea_arg) in enumerate(leas)))
 
     def map(self,f,*args):
@@ -1198,7 +1198,7 @@ class Lea(object):
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
-        return Lea.from_seq(self.random_mc(n,nb_tries))
+        return Alea.vals(*self.random_mc(n,nb_tries))
     
     def nb_cases(self):
         ''' returns the number of atomic cases evaluated to build the exact probability distribution;
@@ -1396,14 +1396,16 @@ class Lea(object):
         except:
             return ce
 
-    def mutual_information(self,other):
-        ''' returns the mutual information between self and other, expressed
+    @staticmethod
+    def mutual_information(lea1,lea2):
+        ''' returns the mutual information between given arguments, expressed
             in bits;
             the returned type is a float or a sympy expression (see doc of
             Alea.entropy)
         '''
-        other = Alea.coerce(other)
-        mi = self.entropy + other.entropy - Clea(self,other).entropy
+        lea1 = Alea.coerce(lea1)
+        lea2 = Alea.coerce(lea2)
+        mi = lea1.entropy + lea2.entropy - Clea(lea1,lea2).entropy
         try:
             return max(0.0,mi)
         except:

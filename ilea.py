@@ -115,7 +115,7 @@ class Ilea(Lea):
             an exception is raised also if H is certainly true or certainly false      
         '''
         lr_n = self.P
-        lr_d = self._lea1.given(~Lea.reduce(and_,self._cond_leas,False)).P
+        lr_d = self._lea1.given(~Lea.reduce_all(and_,self._cond_leas,False)).P
         if lr_d == 0:
             if lr_n == 0:
                 raise Lea.Error("undefined likelihood ratio")
