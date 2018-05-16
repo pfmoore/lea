@@ -893,6 +893,58 @@ class Alea(Lea):
                 # TODO needed?
                 plt.ion()
 
+    def support(self):
+        ''' returns a tuple with values of self
+            the sequence follows the increasing order defined on values
+            if order is undefined (e.g. complex numbers), then the order is
+            arbitrary but fixed from call to call
+            WARNING: this method is called without parentheses
+        '''
+        return self._vs
+
+    def ps(self):
+        ''' returns a tuple with probability of self
+            the sequence follows the increasing order defined on values
+            if order is undefined (e.g. complex numbers), then the order is
+            arbitrary but fixed from call to call
+            WARNING: this method is called without parentheses
+        '''
+        return tuple(Alea._downcast(p) for p in self._ps)
+
+    def pmf_tuple(self):
+        ''' returns, after evaluation of the probability distribution self, the probability
+            mass function of self, as a tuple with tuples (v,P(v));
+            the sequence follows the order defined on values
+            WARNING: this method is called without parentheses
+        '''
+        return tuple(self._gen_vps())
+
+    def pmf_dict(self):
+        ''' returns, after evaluation of the probability distribution self, the probability
+            mass function of self, as an OrderedDict with v : P(v)) pairs;
+            the sequence follows the order defined on values
+            requires Python 2.7+
+            WARNING: this method is called without parentheses
+        '''
+        return collections.OrderedDict(self._gen_vps())
+
+    def cdf_tuple(self):
+        ''' returns, after evaluation of the probability distribution self, the cumulative
+            distribution function of self, as a tuple with tuples (v,P(x<=v));
+            the sequence follows the order defined on values
+            WARNING: this method is called without parentheses
+        '''
+        return tuple((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
+
+    def cdf_dict(self):
+        ''' returns, after evaluation of the probability distribution self, the cumulative
+            distribution function of self, as an OrderedDict with v : P(x<=v)) pairs;
+            the sequence follows the order defined on values
+            requires Python 2.7+
+            WARNING: this method is called without parentheses
+        '''
+        return collections.OrderedDict((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
+
     def get_alea_leaves_set(self):
         ''' returns a set containing all the Alea leaves in the tree having the root self
             in the present case of Alea instance, it returns the singleton set with self as element
@@ -1082,7 +1134,8 @@ class Alea(Lea):
 
     indicator_method_names = ('P', 'Pf', 'mean', 'mean_f', 'var', 'var_f',
                               'std', 'std_f', 'mode', 'entropy',
-                              'rel_entropy', 'redundancy', 'information')
+                              'rel_entropy', 'redundancy', 'information',
+                              'support', 'ps', 'pmf_tuple', 'pmf_dict', 'cdf_tuple', 'cdf_dict',)
 
     @staticmethod
     def _downcast(p):

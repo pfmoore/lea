@@ -124,7 +124,8 @@ class Lea(object):
     Note that Flea1 and Flea2 subclasses have more efficient implementation than Flea subclass'.
 
     WARNING: The following methods are called without parentheses (for the sake of ease of use):
-      P, Pf, mean, mean_f, var, var_f, std, std_f, mode, entropy, rel_entropy, redundancy, information
+      P, Pf, mean, mean_f, var, var_f, std, std_f, mode, entropy, rel_entropy, redundancy, information,
+      support, ps, pmf_tuple, pmf_dict, cdf_tuple, cdf_dict
     These are applicable on any Lea instance; these are implemented and documented in the Alea class.
 
     Short design notes:
@@ -274,20 +275,17 @@ class Lea(object):
         self._reset_gen_vp()
         self._set_gen_vp()
 
-    def with_prob(self,cond_lea,p_num,p_den=None):
-        ''' returns a new Alea instance from current distribution,
-            such that p_num/p_den is the probability that cond_lea is true
-            if p_den is None, then p_num expresses the probability as a Fraction
+    def given_prob(self,cond_lea,p):
+        ''' returns a new Lea instance from current distribution,
+            such that given p is the probability that cond_lea is true
         '''
         cur_cond_lea = Alea.coerce(cond_lea)
-        req_cond_lea = Lea.bool(p_num,p_den)
+        req_cond_lea = Alea.event(p)
         if req_cond_lea.is_true():
-            lea1 = self.given(cur_cond_lea)
+            return self.given(cur_cond_lea)
         elif not req_cond_lea.is_feasible():
-            lea1 = self.given(~cur_cond_lea)
-        else:    
-            lea1 = Blea.if_(req_cond_lea,self.given(cur_cond_lea).get_alea(sorting=False),self.given(~cur_cond_lea).get_alea(sorting=False))
-        return lea1.get_alea()
+            return self.given(~cur_cond_lea)
+        return Lea.if_(req_cond_lea,self.given(cur_cond_lea).get_alea(sorting=False),self.given(~cur_cond_lea).get_alea(sorting=False))
 
     def given(self,*evidences):
         ''' returns a new Ilea instance representing the current distribution
@@ -526,52 +524,6 @@ class Lea(object):
         '''
         return ((v,Alea._downcast(p)) for (v,p) in self._gen_raw_vps())
 
-    def support(self):
-        ''' returns a tuple with values of self
-            the sequence follows the increasing order defined on values
-            if order is undefined (e.g. complex numbers), then the order is
-            arbitrary but fixed from call to call
-        '''
-        return self.get_alea()._vs
-
-    def ps(self):
-        ''' returns a tuple with probability of self
-            the sequence follows the increasing order defined on values
-            if order is undefined (e.g. complex numbers), then the order is
-            arbitrary but fixed from call to call
-        '''
-        return tuple(Alea._downcast(p) for p in self.get_alea()._ps)
-
-    def pmf_tuple(self):
-        ''' returns, after evaluation of the probability distribution self, the probability
-            mass function of self, as a tuple with tuples (v,P(v));
-            the sequence follows the order defined on values
-        '''
-        return tuple(self._gen_vps())
-
-    def pmf_dict(self):
-        ''' returns, after evaluation of the probability distribution self, the probability
-            mass function of self, as an OrderedDict with v : P(v)) pairs;
-            the sequence follows the order defined on values
-            requires Python 2.7+
-        '''
-        return collections.OrderedDict(self._gen_vps())
-
-    def cdf_tuple(self):
-        ''' returns, after evaluation of the probability distribution self, the cumulative
-            distribution function of self, as a tuple with tuples (v,P(x<=v));
-            the sequence follows the order defined on values
-        '''
-        return tuple((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.get_alea().cumul()[1:]))
-
-    def cdf_dict(self):
-        ''' returns, after evaluation of the probability distribution self, the cumulative
-            distribution function of self, as an OrderedDict with v : P(x<=v)) pairs;
-            the sequence follows the order defined on values
-            requires Python 2.7+
-        '''
-        return collections.OrderedDict((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.get_alea().cumul()[1:]))
-
     def _p(self,val,check_val_type=False):
         ''' returns the probability of the given value val
             if check_val_type is True, then raises an exception if some value in the
@@ -722,17 +674,17 @@ class Lea(object):
             joint_src_vars = Lea.joint(*(vars_dict[src_var_name] for src_var_name in src_var_names))
             joint_src_vars_bn = Lea.joint(*(vars_bn_dict[src_var_name] for src_var_name in src_var_names))
             # build CPT clauses (condition,result) from the joint probability distribution
-            joint_src_vals = joint_src_vars.vals()
+            joint_src_vals = joint_src_vars.support
             clauses = tuple((joint_src_val,tgt_var.given(joint_src_vars==joint_src_val).get_alea(sorting=False)) \
                              for joint_src_val in joint_src_vals)
             # determine missing conditions in the CPT, if any
-            all_vals = Lea.joint(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).vals()
+            all_vals = Lea.joint(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).support
             missing_vals = frozenset(all_vals) - frozenset(joint_src_vals)
             if len(missing_vals) > 0:
                 # there are missing conditions: add c   lauses with each of these conditions associating
                 # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
-                else_result = Lea.vals(*frozenset(val for (cond,result) in clauses for val in result.vals()))
+                else_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in result.support))
                 clauses += tuple((missing_val,else_result) for missing_val in missing_vals)
             # overwrite the target BN variable (currently independent Alea instance), with a CPT built
             # up from the clauses determined from the joint probability distribution
@@ -804,7 +756,8 @@ class Lea(object):
             called on evaluation of "self.attr_name"
             WARNING: the following methods are called without parentheses:
                          P, Pf, mean, mean_f, var, var_f, std, std_f, mode,
-                         entropy, rel_entropy, redundancy, information
+                         entropy, rel_entropy, redundancy, information,
+                         support, ps, pmf_tuple, pmf_dict, cdf_tuple, cdf_dict
                      these are applicable on any Lea instance
                      and these are documented in the Alea class
         '''
