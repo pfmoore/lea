@@ -120,4 +120,4 @@ class Ilea(Lea):
             if lr_n == 0:
                 raise Lea.Error("undefined likelihood ratio")
             return float('inf') 
-        return float(lr_n) / float(lr_d)
+        return lr_n / lr_d
