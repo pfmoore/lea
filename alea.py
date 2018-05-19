@@ -200,13 +200,18 @@ class Alea(Lea):
     def __init__(self,vs,ps,normalization=True,prob_type=-1):
         ''' initializes Alea instance's attributes
             vs is a sequence of values
-            ps is a sequence of probabilities (same size and order as ps)
-            if normalization argument is True (default), then each element
-            of the given ps is divided by the sum of all ps before being stored
-            (in such case, it's not mandatory to have true probabilities for ps
-            elements; these could be simple counters for example)
+            ps is a sequence of probabilities (same length and order as ps)
+            if normalization argument is True (default), then probabilites ps are
+            updated before being stored to ensure that their sum equals 1:
+            * if one probability is None, then it is replaced by
+               1 - sum(not None elements of ps)
+            * otherwise, each probability p is is replaced by p / sum(ps)
+              (in such case, it's not mandatory to have true probabilities for ps
+               elements; these could be simple counters for example)
             if prob_type is different from -1, then the given probabilities ps
-            are converted using prob_type, as documented in Alea.set_prob_type
+            are converted using prob_type, as documented in Alea.set_prob_type;
+            requires that there is maximum one None probability if normalization;
+            requires that vs and ps have same length
         '''
         Lea.__init__(self)
         # for an Alea instance, the alea cache is itself
@@ -214,17 +219,23 @@ class Alea(Lea):
         self._vs = tuple(vs)
         prob_type_func = Alea.get_prob_type(prob_type)
         if prob_type_func is not None:
-            ps = (prob_type_func(p) for p in ps)
+            ps = (None if p is None else prob_type_func(p) for p in ps)
         if normalization:
             ps = tuple(ps)
-            p_sum = sum(ps)
-            if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
-                self._ps = tuple(Alea._symbolic_simplify_function(p/p_sum) for p in ps)
+            nb_none = ps.count(None)
+            if nb_none > 1:
+                raise Lea.Error("for normalization, no more than one single probability can be None")
+            if nb_none == 1:
+                p_sum = sum(p for p in ps if p is not None)
+                Alea._check_prob(p_sum)
+                idx_none = ps.index(None)
+                ps = ps[:idx_none] + (1-p_sum,) + ps[idx_none+1:]
             else:
-                ## note: truediv is used to prevent integer division in Python 2.x
-                self._ps = tuple(truediv(p,p_sum) for p in ps)
-        else:
-            self._ps = tuple(ps)
+                p_sum = sum(ps)
+                ps = (truediv(p,p_sum) for p in ps)
+            if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
+                ps = (Alea._symbolic_simplify_function(p) for p in ps)
+        self._ps = tuple(ps)
         if len(self._vs) != len(self._ps):
             raise Lea.Error("number of values (%d) different from number of probabilities (%d)"%(len(self._vs),len(self._ps)))
         self._cumul = [0]
