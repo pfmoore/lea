@@ -131,7 +131,7 @@ class Lea(object):
     Short design notes:
     
     Lea uses the "template method" design pattern: the Lea base abstract class calls the following methods,
-    which are implemented in each Lea's subclass: _clone, _get_lea_children, _gen_vp and _gen_one_random_mc.
+    which are implemented in each Lea's subclass: _get_lea_children, _gen_vp and _gen_one_random_mc.
     Excepting the afore-mentioned estimate_mc method, Lea performs EXACT calculation of probability
     distributions.
     It implements an original algorithm, called the "Statues" algorithm, by reference to the game of the
@@ -187,23 +187,6 @@ class Lea(object):
 
     # constructor methods
     # -------------------
-    # TODO remove clone methods ???
-    def clone(self,clone_table=None):
-        ''' returns a deep copy of current Lea, without any value binding;
-            if the Lea tree contains multiple references to the same Lea instance,
-            then it is cloned only once and the references are copied in the cloned tree
-            (the clone_table dictionary serves this purpose);
-            the method calls the _clone() method implemented in Lea's subclasses
-        '''
-        if clone_table is None:
-            clone_table = dict()
-        cloned_lea = clone_table.get(self)
-        if cloned_lea is None:
-            cloned_lea = self._clone(clone_table)
-            clone_table[self] = cloned_lea
-            if self._alea is not None:
-                cloned_lea._alea = self._alea.clone(clone_table)
-        return cloned_lea
 
     def _gen_bound_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
@@ -401,7 +384,8 @@ class Lea(object):
         def wrapper(*args):
             return Flea.build(f,args)
         wrapper.__name__ = 'lea_wrapper_on__' + f.__name__
-        wrapper.__doc__ = f.__doc__ + "\nThe present function wraps '%s' so to work with Lea instances as arguments." % f.__name__
+        wrapper.__doc__ = ("" if f.__doc__ is None else f.__doc__) \
+                          + "\nThe present function wraps '%s' so to work with Lea instances as arguments." % f.__name__
         return wrapper
 
     def as_joint(self,*attr_names):
@@ -1116,16 +1100,7 @@ class Lea(object):
             Lea._get_lea_children method is abstract: it is implemented in all Lea's subclasses
         '''
         raise NotImplementedError("missing method '%s._get_lea_children(self)'"%(self.__class__.__name__))
-
-    def _clone(self,clone_table):
-        ''' returns a deep copy of current Lea, without any value binding;
-            if the Lea tree contains multiple references to the same Lea instance,
-            then it is cloned only once and the references are copied in the cloned tree
-            (the clone_table dictionary serves this purpose);
-            Lea._clone method is abstract: it is implemented in all Lea's subclasses
-        '''
-        raise NotImplementedError("missing method '%s._clone(self,clone_table)'"%(self.__class__.__name__))
-        
+       
     def _gen_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability (integer > 0);

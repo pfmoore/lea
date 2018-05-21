@@ -41,9 +41,6 @@ class Flea2a(Flea2):
         Flea2.__init__(self,f,arg1,arg2)
         self._absorber = absorber
 
-    def _clone(self,clone_table):
-        return Flea2a(self._f,self._lea_arg1.clone(clone_table),self._lea_arg2.clone(clone_table),self._absorber)    
-
     def _gen_vp(self):
         f = self._f
         absorber = self._absorber

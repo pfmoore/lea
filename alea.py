@@ -966,10 +966,6 @@ class Alea(Lea):
         # Alea instance has no children
         return ()
 
-    def _clone(self,clone_table):
-        # note that the new Alea instance shares the immutable _vs and _ps attributes of self
-        return Alea(self._vs,self._ps,normalization=False,prob_type=-1)
-
     def _gen_vp(self):
         ''' generates tuples (v,p) where v is a value of self
             and p is the associated probability;

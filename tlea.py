@@ -57,9 +57,6 @@ class Tlea(Lea):
             lea_children.append(self._default_lea)
         return lea_children
 
-    def _clone(self,clone_table):
-        return Tlea(self._lea_c.clone(clone_table),dict((v,lea1.clone(clone_table)) for (v,lea1) in lea_dict),self._default_lea.clone(clone_table))
-
     def _gen_vp(self):
         lea_dict = self._lea_dict
         for (vc,pc) in self._lea_c.gen_vp():

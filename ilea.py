@@ -46,9 +46,6 @@ class Ilea(Lea):
     def _get_lea_children(self):
         return (self._lea1,) + self._cond_leas
     
-    def _clone(self,clone_table):
-        return Ilea(self._lea1.clone(clone_table),(cond_lea.clone(clone_table) for cond_lea in self._cond_leas))
-
     @staticmethod
     def _gen_true_p(cond_leas):
         ''' generates probabilities of True for ANDing the given conditions 
