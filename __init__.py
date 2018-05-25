@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea, Alea, P, Pf
+from .license import VER as __version__
 
 # make convenient aliases for public static methods of Lea & Alea classes
 bernoulli = Alea.bernoulli
