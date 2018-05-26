@@ -486,27 +486,27 @@ class Alea(Lea):
             raise Lea.Error("invalid probability value %s"%p)
 
     @staticmethod
-    def _binary_distribution(v1,v2,p1,prob_type=None):
+    def _binary_distribution(v1,v2,p2,prob_type=None):
         ''' static method, returns an Alea instance representing a boolean
-            probability distribution giving v1 with probability p1
-            and v2 with probability 1-p1;
-            prob_type argument allows converting the probabilities p1 and 1-p1:
+            probability distribution giving v1 with probability 1-p2
+            and v2 with probability p2;
+            prob_type argument allows converting the probabilities p2 and 1-p2:
               -1: no conversion;
               None (default): default conversion, as set by Alea.set_prob_type;
               other: see doc of Alea.get_prob_type;
         '''
         prob_type_func = Alea.get_prob_type(prob_type)
         if prob_type_func is not None:
-            p1 = prob_type_func(p1)
-        Alea._check_prob(p1)
-        if p1 == 1:
-            ## note: do not replace p1 by 1, in order to keep the given type
-            (vs,ps) = ((v1,),(p1,))
-        elif p1 == 0:
-            ## note: do not replace 1-p1 by 1, in order to keep the given type
-            (vs,ps) = ((v2,),(1-p1,))
+            p2 = prob_type_func(p2)
+        Alea._check_prob(p2)
+        if p2 == 1:
+            ## note: do not replace p2 by 1, in order to keep the given type
+            (vs,ps) = ((v2,),(p2,))
+        elif p2 == 0:
+            ## note: do not replace 1-p2 by 1, in order to keep the given type
+            (vs,ps) = ((v1,),(1-p2,))
         else:
-            (vs,ps) = ((v1,v2),(p1,1-p1))
+            (vs,ps) = ((v1,v2),(1-p2,p2))
         return Alea(vs,ps,normalization=False,prob_type=-1)
 
     @staticmethod
@@ -519,7 +519,7 @@ class Alea(Lea):
               None (default): default conversion, as set by Alea.set_prob_type;
               other: see doc of Alea.get_prob_type;
         '''
-        return Alea._binary_distribution(True,False,p,prob_type)
+        return Alea._binary_distribution(False,True,p,prob_type)
 
     @staticmethod
     def bernoulli(p,prob_type=None):
@@ -531,7 +531,7 @@ class Alea(Lea):
               None (default): default conversion, as set by Alea.set_prob_type;
               other: see doc of Alea.get_prob_type;
         '''
-        return Alea._binary_distribution(1,0,p,prob_type)
+        return Alea._binary_distribution(0,1,p,prob_type)
 
     @staticmethod
     def binom(n,p,prob_type=None):
