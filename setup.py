@@ -51,14 +51,18 @@ setup( name = 'lea',
           "Topic :: Education",
           "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)"
        ],
-       long_description = '''Lea is a Python package aiming at working with discrete probability distributions in an intuitive way. It allows you to model a broad range of random phenomenons, like dice throwing, coin tossing, gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, ... Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
+       long_description = '''Lea is a Python module aiming at working with discrete probability distributions in an intuitive way.
 
-Lea also provides advanced functions that target Probabilistic Programming (PP); these include conditional probabilities, Bayes inference and Markov chains.
+It allows you modeling a broad range of random phenomenons: gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, ... Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
 
-To install this beta version of Lea, type the following command:
+Lea also provides advanced functions and Probabilistic Programming (PP) features; these include conditional probabilities, JPD, CPT, BN, Markov chains and symbolic computation.
+
+Lea can be used for AI, machine learning, education, ...
+
+To install Lea {0}, type the following command:
 ::
 
-  pip install lea==%s
+  pip install lea=={0}
 
-Please go on project home page for a comprehensive documentation.''' % VER
+Please go on Lea project page (beside) for a comprehensive documentation.'''.format(VER)
       )
