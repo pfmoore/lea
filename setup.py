@@ -53,7 +53,7 @@ setup( name = 'lea',
        ],
        long_description = '''Lea is a Python module aiming at working with discrete probability distributions in an intuitive way.
 
-It allows you modeling a broad range of random phenomenons: gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, ... Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
+It allows you modeling a broad range of random phenomena: gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, ... Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
 
 Lea also provides advanced functions and Probabilistic Programming (PP) features; these include conditional probabilities, JPD, CPT, BN, Markov chains and symbolic computation.
 
