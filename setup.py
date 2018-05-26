@@ -40,6 +40,17 @@ setup( name = 'lea',
        packages = [ 'lea' ],
        package_dir = {'lea': ''},
        data_files = [(join(get_python_lib(),'lea'), [ 'COPYING', 'COPYING.LESSER' ] ) ],
+       classifiers=[
+          "Development Status :: 4 - Beta",
+          "Programming Language :: Python :: 2.6",
+          "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3",
+          "Topic :: Utilities",
+          "Topic :: Scientific/Engineering :: Artificial Intelligence",
+          "Topic :: Scientific/Engineering :: Mathematics",
+          "Topic :: Education",
+          "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)"
+       ],
        long_description = '''Lea is a Python package aiming at working with discrete probability distributions in an intuitive way. It allows you to model a broad range of random phenomenons, like dice throwing, coin tossing, gambling, weather, finance, etc. More generally, Lea may be used for any finite set of discrete values having known probability: numbers, booleans, date/times, symbols, ... Each probability distribution is modeled as a plain object, which can be named, displayed, queried or processed to produce new probability distributions.
 
 Lea also provides advanced functions that target Probabilistic Programming (PP); these include conditional probabilities, Bayes inference and Markov chains.
@@ -49,5 +60,5 @@ To install this beta version of Lea, type the following command:
 
   pip install lea==%s
 
-Please go on project home page below for a comprehensive documentation.''' % VER
+Please go on project home page for a comprehensive documentation.''' % VER
       )
