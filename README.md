@@ -29,6 +29,7 @@ Let's start by modeling a biased coin and make a random sample of 10 throws:
 
 []()
 ```python
+import lea
 flip1 = lea.pmf({ 'Head': 0.75, 'Tail': 0.25 })
 print(flip1)
 # -> Head : 0.75
@@ -131,25 +132,25 @@ print (flips_symbolic)
 
 The above examples show only a very, very small subset of Lea 3 capabilities. To learn more, you can read:
 
-  * [Lea 3 Tutorial [1/3]](Lea3_Tutorial_1) - basics: building/displaying pmf, arithmetic, random sampling, conditional probabilities, …
-  * [Lea 3 Tutorial [2/3]](Lea3_Tutorial_2) - standard distributions, joint distributions, Bayesian networks, Markov chains, changing probability representation, …
-  * [Lea 3 Tutorial [3/3]](Lea3_Tutorial_3) - plotting, drawing without replacement, machine learning, information theory, MC estimation, symbolic computation, …
-  * [Lea 3 Examples](Lea3_Examples)
+  * [Lea 3 Tutorial [1/3]](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_1) - basics: building/displaying pmf, arithmetic, random sampling, conditional probabilities, …
+  * [Lea 3 Tutorial [2/3]](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_2) - standard distributions, joint distributions, Bayesian networks, Markov chains, changing probability representation, …
+  * [Lea 3 Tutorial [3/3]](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_3) - plotting, drawing without replacement, machine learning, information theory, MC estimation, symbolic computation, …
+  * [Lea 3 Examples](http://bitbucket.org/piedenis/lea/wiki/Lea3_Examples)
 
-Note that Lea 2 tutorials are still available [here](Home) although these are no longer maintained. You can also get Lea 2 presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
+Note that Lea 2 tutorials are still available [here](http://bitbucket.org/piedenis/lea/wiki/Home) although these are no longer maintained. You can also get Lea 2 presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
 
 * [Lea, a probability engine in Python](https://drive.google.com/open?id=0B1_ICcQCs7geUld1eE1CWGhEVEk) - presented at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/)
 * [Probabilistic Programming with Lea](https://drive.google.com/open?id=0B1_ICcQCs7gebF9uVGdNdG1nR0E) - presented at [PyCon Ireland 15](https://python.ie/pycon-2015/)
 
 ## On the algorithm …
 
-The very beating heart of Lea resides in the _Statues_ algorithm, which is used for almost all probability calculations. If you want to understand how this algorithm works, then you may read [the short introduction](Lea3_Tutorial_3#markdown-header-the-statues-algorithm) or have a look at [MicroLea](https://bitbucket.org/piedenis/microlea), an independent Python implementation that is much shorter and much simpler than Lea. For a more academic description, the paper "Probabilistic Inference Using Generators" (-LINK TO ADD!-) presents the algorithm in a general and language-independent manner.
+The very beating heart of Lea resides in the _Statues_ algorithm, which is used for almost all probability calculations. If you want to understand how this algorithm works, then you may read a [short introduction](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_3#markdown-header-the-statues-algorithm) or have a look at [MicroLea](https://bitbucket.org/piedenis/microlea), an independent Python implementation that is much shorter and much simpler than Lea. For a more academic description, the paper "Probabilistic Inference Using Generators" (-LINK TO ADD!-) presents the algorithm in a general and language-independent manner.
 
 ---
 
 # Bugs / enhancements / feedback / references …
 
-If you have enhancements to propose or if you discover bugs, you are kindly invited to [create an issue on bitbucket Lea page](https://bitbucket.org/piedenis/lea/issues). All issues will be answered!
+If you have enhancements to propose or if you discover bugs, you are kindly invited to [create an issue on bitbucket Lea page](http://bitbucket.org/piedenis/lea/issues). All issues will be answered!
 
 Don't hesitate to send your comments, questions, … to [pie.denis@skynet.be](mailto:pie.denis@skynet.be), in English or French. You are welcome / _bienvenus_ !
 
