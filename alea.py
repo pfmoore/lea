@@ -164,13 +164,9 @@ class Alea(Lea):
         if prob_type == 's':
             if sympy is None:
                 raise Lea.Error("prob_type 's' requires the installation of SymPy module")
-            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
-            ## ("TypeError: unbound method prob_symbol() must be called with Alea instance as first argument (got int instance instead)") 
-            return staticmethod(Alea.prob_symbol)
+            return Alea.prob_symbol
         if prob_type == 'x':
-            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
-            ## ("TypeError: unbound method prob_any() must be called with Alea instance as first argument (got int instance instead)") 
-            return staticmethod(Alea.prob_any)
+            return Alea.prob_any
         raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%prob_type)
 
     @staticmethod
