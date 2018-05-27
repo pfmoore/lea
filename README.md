@@ -1,8 +1,8 @@
 # Lea - Discrete probability distributions in Python
 
-[comment]: <> (![Lea2_logo.png] (https://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png))
+[comment]: <> (![Lea2_logo.png] (http://bitbucket.org/repo/BpoAoj/images/719424726-Lea2_logo.png))
 
-**NEW**: May, 2018 - [Lea 3.0.0.beta.1](http://pypi.org/project/lea/3.0.0.beta.1) is there!
+**NEW**: May, 2018 - [Lea 3.0.0.beta.2](http://pypi.org/project/lea/3.0.0.beta.2) is there!
 
 ## What is Lea?
 
@@ -31,7 +31,7 @@ Let's start by modeling a biased coin and make a random sample of 10 throws:
 ```python
 import lea
 flip1 = lea.pmf({ 'Head': 0.75, 'Tail': 0.25 })
-print(flip1)
+print (flip1)
 # -> Head : 0.75
 #    Tail : 0.25
 print (flip1.random(10))
@@ -69,7 +69,7 @@ print (P((flips == 'Tail-Tail').given(flip2 == 'Tail')))
 print (flip1.given(flips == 'Head-Tail'))
 # -> Head : 1.0
 ```
-With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies. Based on such feature, Lea can do advanced probabilistic inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](https://en.wikipedia.org/wiki/Bayesian_network) is easily modeled in a couple of lines:
+With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies. Based on such feature, Lea can do advanced probabilistic inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is easily modeled in a couple of lines:
 
 []()
 ```python
@@ -139,12 +139,12 @@ The above examples show only a very, very small subset of Lea 3 capabilities. To
 
 Note that Lea 2 tutorials are still available [here](http://bitbucket.org/piedenis/lea/wiki/Home) although these are no longer maintained. You can also get Lea 2 presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
 
-* [Lea, a probability engine in Python](https://drive.google.com/open?id=0B1_ICcQCs7geUld1eE1CWGhEVEk) - presented at [FOSDEM 15/Python devroom](https://fosdem.org/2015/schedule/track/python/)
-* [Probabilistic Programming with Lea](https://drive.google.com/open?id=0B1_ICcQCs7gebF9uVGdNdG1nR0E) - presented at [PyCon Ireland 15](https://python.ie/pycon-2015/)
+* [Lea, a probability engine in Python](http://drive.google.com/open?id=0B1_ICcQCs7geUld1eE1CWGhEVEk) - presented at [FOSDEM 15/Python devroom](http://fosdem.org/2015/schedule/track/python/)
+* [Probabilistic Programming with Lea](http://drive.google.com/open?id=0B1_ICcQCs7gebF9uVGdNdG1nR0E) - presented at [PyCon Ireland 15](http://python.ie/pycon-2015/)
 
 ## On the algorithm …
 
-The very beating heart of Lea resides in the _Statues_ algorithm, which is used for almost all probability calculations. If you want to understand how this algorithm works, then you may read a [short introduction](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_3#markdown-header-the-statues-algorithm) or have a look at [MicroLea](https://bitbucket.org/piedenis/microlea), an independent Python implementation that is much shorter and much simpler than Lea. For a more academic description, the paper "Probabilistic Inference Using Generators" (-LINK TO ADD!-) presents the algorithm in a general and language-independent manner.
+The very beating heart of Lea resides in the _Statues_ algorithm, which is used for almost all probability calculations. If you want to understand how this algorithm works, then you may read a [short introduction](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_3#markdown-header-the-statues-algorithm) or have a look at [MicroLea](http://bitbucket.org/piedenis/microlea), an independent Python implementation that is much shorter and much simpler than Lea. For a more academic description, the paper "Probabilistic Inference Using Generators" (-LINK TO ADD!-) presents the algorithm in a general and language-independent manner.
 
 ---
 
