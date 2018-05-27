@@ -1,6 +1,10 @@
-from lea import Lea, D6
-from lea import ProbFraction as PF
+import lea
+from lea.prob_fraction import ProbFraction as PF
+from lea.leaf import D6
 import pytest
+
+# All tests are made using fraction representation, in order to ease comparison
+lea.set_prob_type('r')
 
 def test_times_commutativity():
     """See issue #3 on bitbucket"""
@@ -10,78 +14,78 @@ def test_times_commutativity():
 
 def test_withprob():
     """See issues #8 and #15 on Bitbucket"""
-    dU = D6.withProb(D6>=5,1,2)
+    dU = D6.given_prob(D6>=5,PF(1,2))
     assert dU.p(5) == PF(2,8)
-    assert dU.equiv(Lea.fromValFreqs((1,1),(2,1),(3,1),(4,1),(5,2),(6,2)))
+    assert dU.equiv(lea.pmf(((1,1),(2,1),(3,1),(4,1),(5,2),(6,2))))
 
 def test_infeasible_cpt():
     """See issue #13 on Bitbucket"""
-    a = Lea.fromSeq("xy")
-    always_s = Lea.buildCPT((a == a, 's'), (None, 't'))
-    never_s = Lea.buildCPT((a != a, 's'), (None, 't'))
+    a = lea.vals(*"xy")
+    always_s = lea.cpt((a == a, 's'), (None, 't'))
+    never_s = lea.cpt((a != a, 's'), (None, 't'))
     assert always_s.equiv('s')
     assert never_s.equiv('t')
 
 def test_cpt_refactoring():
     """See issues #9 and #11 on Bitbucket"""
-    x = Lea.boolProb(1,3)
-    y = Lea.boolProb(1,4)
-    z1 = Lea.buildCPT(
-            (~x & ~y, Lea.boolProb(1,5)),
-            (~x &  y, Lea.boolProb(1,7)),
-            ( x & ~y, Lea.boolProb(1,2)),
-            ( x &  y, Lea.boolProb(1,2)),
+    x = lea.event(PF(1,3))
+    y = lea.event(PF(1,4))
+    z1 = lea.cpt(
+            (~x & ~y, lea.event(PF(1,5))),
+            (~x &  y, lea.event(PF(1,7))),
+            ( x & ~y, lea.event(PF(1,2))),
+            ( x &  y, lea.event(PF(1,2))),
         )
-    z2 = Lea.buildCPT(
-            (~x & ~y, Lea.boolProb(1,5)),
-            (~x &  y, Lea.boolProb(1,7)),
-            ( x     , Lea.boolProb(1,2)),
+    z2 = lea.cpt(
+            (~x & ~y, lea.event(PF(1,5))),
+            (~x &  y, lea.event(PF(1,7))),
+            ( x     , lea.event(PF(1,2))),
         )
-    z0 = Lea.buildCPT(
-            (~y, Lea.boolProb(1,5)),
-            ( y, Lea.boolProb(1,7)),
+    z0 = lea.cpt(
+            (~y, lea.event(PF(1,5))),
+            ( y, lea.event(PF(1,7))),
         )
-    z3 = Lea.buildCPT(
+    z3 = lea.cpt(
             (~x, z0),
-            ( x, Lea.boolProb(1,2)),
+            ( x, lea.event(PF(1,2))),
         )
     assert z2.equiv(z1)
     assert z3.equiv(z1)
 
 def test_draw_nonuniform():
     """See issue #19 on bitbucket"""
-    h = Lea.fromValFreqs(("A",3),("B",2),("C",1))
-    expected = Lea.fromValFreqs(
+    h = lea.pmf((("A",3),("B",2),("C",1)))
+    expected = lea.pmf((
             (('A', 'B'), 20),
             (('A', 'C'), 10),
             (('B', 'A'), 15),
             (('B', 'C'),  5),
             (('C', 'A'),  6),
             (('C', 'B'),  4),
-        )
+        ))
     assert h.draw(2).equiv(expected)
 
 def test_joint():
     """See issue #20 on bitbucket"""
-    joint = Lea.fromValFreqs(((1,2),10), ((1,3),9), ((2,2),8)).asJoint('A','B')
+    joint = lea.pmf((((1,2),10), ((1,3),9), ((2,2),8))).as_joint('A','B')
     assert joint.p((1,2)) == PF(10,27)
-    assert joint.pmf((1,2)) == 10.0 / 27.0
+    assert float(joint.p((1,2))) == 10.0 / 27.0
 
 def test_check_bool():
     """See issue #24 on bitbucket"""
-    mixed = Lea.fromVals(True,False,12)
-    with pytest.raises(Lea.Error):
-        mixed.isTrue()
-    with pytest.raises(Lea.Error):
-        mixed.isFeasible()
-    with pytest.raises(Lea.Error):
+    mixed = lea.vals(True,False,12)
+    with pytest.raises(lea.Lea.Error):
+        mixed.is_true()
+    with pytest.raises(lea.Lea.Error):
+        mixed.is_feasible()
+    with pytest.raises(lea.Lea.Error):
         mixed.P
-    with pytest.raises(Lea.Error):
+    with pytest.raises(lea.Lea.Error):
         mixed.Pf
 
 def test_given_times():
     """See issue #28 on bitbucket"""
-    flip = Lea.fromVals(0,1)
+    flip = lea.vals(0,1)
     flip4 = flip.times(4)
-    expected = Lea.fromValFreqs((0,1), (1,4), (2,6))
+    expected = lea.pmf(((0,1), (1,4), (2,6)))
     assert flip4.given(flip4<=2).equiv(expected)

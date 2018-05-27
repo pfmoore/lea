@@ -1,4 +1,5 @@
-from lea import ProbFraction as PF
+from lea.prob_fraction import ProbFraction as PF
+from lea.prob_number import ProbNumber
 from fractions import Fraction
 from decimal import Decimal
 import sys
@@ -22,22 +23,9 @@ def test_pf_as_str():
     pf5 = PF("   0.123456789000 ")
     assert pf5 == PF(123456789,1000000000)
 
-def test_pf_as_pct():
-    """Test creating from a percentage"""
-    pf1 = PF("0%")
-    assert pf1 == PF(0)
-    pf2 = PF("50%")
-    assert pf2 == PF(1,2)
-    pf3 = PF("100%")
-    assert pf3 == PF(1)
-    pf4 = PF("12.3456789 %")
-    assert pf4 == PF(123456789,1000000000)
-    pf5 = PF("   12.3456789000    % ")
-    assert pf5 == PF(123456789,1000000000)
-
 def test_pf_from_fraction():
     """Test creating from a fraction"""
-    pf = PF._fromFraction(Fraction(3, 4))
+    pf = PF._from_fraction(Fraction(3, 4))
     assert pf == PF(3,4)
 
 def test_pf_from_decimal():
@@ -126,19 +114,19 @@ def test_check():
     PF(1,2).check()
     PF(1,1).check()
     PF(0,1).check()
-    with pytest.raises(PF.Error):
+    with pytest.raises(ProbNumber.Error):
         PF(2,1).check()
-    with pytest.raises(PF.Error):
+    with pytest.raises(ProbNumber.Error):
         PF(-1,1).check()
 
 def test_float_str():
     """Check we can get a float representation of a ProbFraction"""
-    assert isinstance(PF(1,2).asFloat(), str)
-    assert PF(1,2).asFloat() == "0.5"
+    assert isinstance(PF(1,2).as_float(), str)
+    assert PF(1,2).as_float() == "0.5"
 
 def test_pct_str():
     """Check we can get a percentage representation of a ProbFraction"""
-    pct = PF(1,2).asPct()
+    pct = PF(1,2).as_pct()
     assert isinstance(pct, str)
     # Don't check the exact representation, just that it looks right
     assert pct.endswith('%')
@@ -149,13 +137,6 @@ def test_string_rep():
     # Depends on the string representation of Fraction
     assert str(PF(1,2)) == str(Fraction(1,2))
     # Fractions outside [0,1] raise an error
-    with pytest.raises(PF.Error):
+    with pytest.raises(ProbNumber.Error):
         str(PF(3,2))
 
-def test_prob_weights():
-    """Check calculation of probability weights"""
-    weights = PF.getProbWeights([PF(1,2), PF(1,3), PF(1,6)])
-    assert weights == (3, 2, 1)
-    # Trying to get the weights of a 0-length list raises an error
-    with pytest.raises(PF.Error):
-        PF.getProbWeights([])
