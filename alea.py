@@ -439,7 +439,7 @@ class Alea(Lea):
             value is equal to 1 / #values; otherwise, the probability of each
             value is equal to its frequency in the sequence;
             the optional arguments (kwargs) are:
-              porob_type, ordered, sorting, normalization, check;
+              prob_type, ordered, sorting, normalization, check;
             see doc of Alea.pmf static method;
             requires at least one vals argument
         '''
@@ -738,6 +738,7 @@ class Alea(Lea):
                 vps.append(((v,)+vt,p*pt))
         return Alea._pmf_ordered(vps, check=False)
 
+    @staticmethod
     def poisson(mean,precision=1e-20,prob_type=None):
         ''' static method, returns an Alea instance representing a Poisson probability
             distribution having the given mean; the distribution is approximated by
