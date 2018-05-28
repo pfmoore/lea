@@ -1139,7 +1139,8 @@ class Alea(Lea):
     indicator_method_names = ('P', 'Pf', 'mean', 'mean_f', 'var', 'var_f',
                               'std', 'std_f', 'mode', 'entropy',
                               'rel_entropy', 'redundancy', 'information',
-                              'support', 'ps', 'pmf_tuple', 'pmf_dict', 'cdf_tuple', 'cdf_dict',)
+                              'support', 'ps', 'p_sum', 'pmf_tuple', 'pmf_dict',
+                              'cdf_tuple', 'cdf_dict',)
 
     @staticmethod
     def _downcast(p):
@@ -1151,6 +1152,21 @@ class Alea(Lea):
         if downcast_prob_class is not None:
             p = downcast_prob_class(p)
         return p
+
+    def p_sum(self):
+        ''' returns the sum of all probabilities of self;
+            the result is expressed in the probability type used in self,
+            possibly downcasted for convenience (Fraction -> ProbFraction,
+            Decimal -> ProbDecimal);
+            note: the result is supposed to be 1 (expressed in some type)
+            BUT it could be different:
+            - due to float rounding-errors
+            - due to an explicit normalization=False argument 
+            WARNING: this method is called without parentheses
+        '''
+        ## note that the following expression is NOK for unorderable types (e.g. complex)
+        ##   self.p_cumul(self._vs[-1])
+        return Alea._downcast(Alea._simplify(sum(self._ps)))
 
     def P(self):
         ''' returns the probability that self is True;

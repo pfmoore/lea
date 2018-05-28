@@ -125,7 +125,7 @@ class Lea(object):
 
     WARNING: The following methods are called without parentheses (for the sake of ease of use):
       P, Pf, mean, mean_f, var, var_f, std, std_f, mode, entropy, rel_entropy, redundancy, information,
-      support, ps, pmf_tuple, pmf_dict, cdf_tuple, cdf_dict
+      support, ps, pmf_tuple, pmf_dict, cdf_tuple, cdf_dict, p_sum
     These are applicable on any Lea instance; these are implemented and documented in the Alea class.
 
     Short design notes:
@@ -741,7 +741,8 @@ class Lea(object):
             WARNING: the following methods are called without parentheses:
                          P, Pf, mean, mean_f, var, var_f, std, std_f, mode,
                          entropy, rel_entropy, redundancy, information,
-                         support, ps, pmf_tuple, pmf_dict, cdf_tuple, cdf_dict
+                         support, p_sum, ps, pmf_tuple, pmf_dict, cdf_tuple,
+                         cdf_dict
                      these are applicable on any Lea instance
                      and these are documented in the Alea class
         '''
