@@ -1,9 +1,8 @@
 import lea
+import pytest
 
 # All tests are made using fraction representation, in order to ease comparison
 lea.set_prob_type('r')
-
-import pytest
 
 def test_equiv():
     """Equivalence behaves as expected"""
