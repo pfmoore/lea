@@ -13,11 +13,11 @@ Lea is a Python library aiming at working with discrete probability distribution
   * **discrete probability distributions** - support: any object!
   * **random sampling**
   * **probabilisitic arithmetic**: arithmetic, comparison, logical operators and functions
+  * **Probabilisitc Programming (PP)**, Bayesian reasoning, CPT, BN, JPD, MC sampling, Markov chains, …
   * **standard indicators** + **information theory**
-  * **advanced probabilistic techniques**: Probabilisitc Programming, Bayesian reasoning, CPT, BN, JPD, MC sampling, Markov chains, …
   * **multiple probability representations**: float, decimal, fraction, …
   * **symbolic computation**, using the [SymPy library](http://www.sympy.org)
-  * **exact probabilistic inference** using the _Statues_ algorithm, based on Python generators
+  * **exact probabilistic inference** based on Python generators
   * **comprehensive tutorials** (Wiki)
   * **Python 2.6+ / Python 3** supported
   * **lightweight**, _pure_ Python module
@@ -43,30 +43,33 @@ You can then throw another coin, which has the same bias, and get the probabilit
 []()
 ```python
 flip2 = flip1.new()
-flips = flip1 + '-' + flip2
+flips = lea.joint(flip1,flip2)
 print (flips)
-# -> Head-Head : 0.5625
-#    Head-Tail : 0.1875
-#    Tail-Head : 0.1875
-#    Tail-Tail : 0.0625
-print (P(flips == 'Head-Tail'))
+# -> ('Head', 'Head') : 0.5625
+#    ('Head', 'Tail') : 0.1875
+#    ('Tail', 'Head') : 0.1875
+#    ('Tail', 'Tail') : 0.0625
+print (flips.count('Head'))
+# -> 0 : 0.0625
+#    1 : 0.375
+#    2 : 0.5625
+print (P(flips == ('Head', 'Tail')))
 # -> 0.1875
-print (P(flips <= 'Head-Tail'))
-# -> 0.75
 print (P(flip1 == flip2))
 # -> 0.625
+print (P(flip1 != flip2))
+# -> 0.375
 ```
-
 You can also calculate conditional probabilities, based on given information or assumptions:
 
 []()
 ```python
 print (flips.given(flip2 == 'Tail'))
-# -> Head-Tail : 0.75
-#    Tail-Tail : 0.25
-print (P((flips == 'Tail-Tail').given(flip2 == 'Tail')))
+# -> ('Head', 'Tail') : 0.75
+#    ('Tail', 'Tail') : 0.25
+print (P((flips == ('Tail', 'Tail')).given(flip2 == 'Tail')))
 # -> 0.25
-print (flip1.given(flips == 'Head-Tail'))
+print (flip1.given(flips == ('Head', 'Tail')))
 # -> Head : 1.0
 ```
 With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies. Based on such feature, Lea can do advanced probabilistic inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is easily modeled in a couple of lines:
@@ -95,36 +98,36 @@ print (P(grassWet.given(sprinkler & ~rain)))
 print (P(grassWet.given(~sprinkler & ~rain)))
 # -> 0.0
 ```
-
 The floating-point number type is a standard although limited way to represent probabilities. Lea 3 proposes alternative representations, which can be more expressive for some domain and which are very easy to set. For example, you could use fractions: 
 
 []()
 ```python
-flip1_fractions = lea.pmf({ 'Head': '75/100', 'Tail': '25/100' })
-flip2_fractions = flip1_fractions.new()
-flips_fractions = flip1_fractions + '-' + flip2_fractions
-print (flips_fractions)
-# -> Head-Head : 9/16
-#    Head-Tail : 3/16
-#    Tail-Head : 3/16
-#    Tail-Tail : 1/16
+flip1_frac = lea.pmf({ 'Head': '75/100', 'Tail': '25/100' })
+flip2_frac = flip1_frac.new()
+flips_frac = lea.joint(flip1_frac,flip2_frac)
+print (flips_frac)
+# -> ('Head', 'Head') : 9/16
+#    ('Head', 'Tail') : 3/16
+#    ('Tail', 'Head') : 3/16
+#    ('Tail', 'Tail') : 1/16
 ```
-
 You could also put variable names, which enables _symbolic computation_ of probabilities (requires [the SymPy library](http://www.sympy.org)):
 
 []()
 ```python
-flip1_symbolic = lea.pmf({ 'Head': 'p', 'Tail': None })
-flip2_symbolic = lea.pmf({ 'Head': 'q', 'Tail': None })
-print (flip1_symbolic)
+flip1_sym = lea.pmf({ 'Head': 'p', 'Tail': None })
+flip2_sym = lea.pmf({ 'Head': 'q', 'Tail': None })
+print (flip1_sym)
 # -> Head : p
 #    Tail : -p + 1
-flips_symbolic = flip1_symbolic + '-' + flip2_symbolic
-print (flips_symbolic)
-# -> Head-Head : p*q
-#    Head-Tail : -p*(q - 1)
-#    Tail-Head : -q*(p - 1)
-#    Tail-Tail : (p - 1)*(q - 1)
+print (P(flip1_sym == flip2_sym))
+# -> 2*p*q - p - q + 1
+flips_sym = lea.joint(flip1_sym,flip2_sym)
+print (flips_sym)
+# -> ('Head', 'Head') : p*q
+#    ('Head', 'Tail') : -p*(q - 1)
+#    ('Tail', 'Head') : -q*(p - 1)
+#    ('Tail', 'Tail') : (p - 1)*(q - 1)
 ```
 ---
 
