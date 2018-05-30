@@ -285,10 +285,11 @@ class Alea(Lea):
             return Alea((value,),(1,),normalization=False,prob_type=prob_type)
         return value
 
-    def new(self,prob_type=-1,sorting=False):
+    def new(self,n=None,prob_type=-1,sorting=False):
         ''' returns a new Alea instance, which represents the same probability
             distribution as self but for another event, independent from the
             event represented by self;
+            * in is not None, then a tuple containing n new independent Alea instances is returned
             * if prob_type is -1,
                then the returned Alea instance is a shallow copy of self
                     (values and probabilities data are shared);
@@ -309,6 +310,8 @@ class Alea(Lea):
             ## it can share also the mutable _cumul and _inv_cumul attributes of self (lists)
             new_alea._cumul = self._cumul
             new_alea._inv_cumul = self._inv_cumul
+        if n is not None:
+            return tuple(new_alea.new() for _ in range(n))
         return new_alea
 
     # keyword arguments available for Alea constructor

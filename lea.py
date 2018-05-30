@@ -1331,16 +1331,20 @@ class Lea(object):
         if check:
             raise Lea.Error("impossible to unbind %s because it depends of other instances"%self._id())
 
-    def new(self,prob_type=-1,sorting=True):
+    def new(self,n=None,prob_type=-1,sorting=True):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
             if self is an Alea, then it returns a clone of itself representing an independent event;
             the probability type used in the returned instance depends on given prob_type:
+            * in is not None, then a tuple containing n new independent Alea instances is returned
             * if prob_type is -1, then the probability type is the same as self's
               otherwise, the probability type is defined using prob_type (see doc of Alea.set_prob_type);
             * sorting allows sorting the value of the returned Alea instance (see Alea.pmf method);
             note that the present method is overloaded in Alea class, to be more efficient
         '''
-        return Alea.pmf(self._calc(),prob_type=prob_type,sorting=sorting)
+        new_alea = Alea.pmf(self._calc(),prob_type=prob_type,sorting=sorting)
+        if n is not None:
+            return tuple(new_alea.new() for _ in range(n))
+        return new_alea
 
     def calc(self,prob_type=-1,sorting=True,bindings=None,memoization=True):
         ''' same as Lea.new method, adding two advanced optional arguments that allow changing the
