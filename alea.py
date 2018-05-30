@@ -285,18 +285,23 @@ class Alea(Lea):
             return Alea((value,),(1,),normalization=False,prob_type=prob_type)
         return value
 
-    def new(self,prob_type=-1):
+    def new(self,prob_type=-1,sorting=False):
         ''' returns a new Alea instance, which represents the same probability
             distribution as self but for another event, independent from the
             event represented by self;
-            if prob_type is -1,
+            * if prob_type is -1,
                then the returned Alea instance is a shallow copy of self
                     (values and probabilities data are shared);
                otherwise, the returned Alea instance has shared values data
                     but has new probabilities converted according to prob_type
-                    (see doc of Alea.set_prob_type)
-            note that the present method overloads Lea.new to be more efficient
+                    (see doc of Alea.set_prob_type);
+            * sorting allows sorting the value of the returned Alea instance
+              (see Alea.pmf method);
+            note that the present method overloads Lea.new to be more efficient;
         '''
+        if sorting:
+            # for sorting, relay to Lea.new, which is less efficient but handles the case correctly 
+            return Lea.new(self,prob_type=prob_type,sorting=True)
         normalization = prob_type != -1
         new_alea = Alea(self._vs,self._ps,normalization=normalization,prob_type=prob_type)
         if prob_type == -1:
@@ -816,8 +821,8 @@ class Alea(Lea):
     def __str__(self):
         ''' returns a string representation of probability distribution self;
             it contains one line per distinct value, separated by a newline character;
-            each line contains the string representation of a value  with its
-            probability expressed as a rational number "n/d" or "0" or "1";
+            each line contains the string representation of a value with its
+            probability expressed according to its type;
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
             called on evaluation of "str(self)" and "repr(self)"
@@ -997,6 +1002,24 @@ class Alea(Lea):
             finally:
                 # unbind value, after the random value has been bound or if an exception has been raised
                 self._val = self
+
+    def _bind(self,v):
+        ''' (re)bind self with given value v;
+            requires that self is an Alea instance (i.e. not dependent of other Lea instances);
+            requires that v is present in the domain of self
+        '''
+        if v not in self._vs:
+            raise Lea.Error("impossible to bind %s with '%s' because it is out of domain"%(self._id(),v))
+        self._val = v
+
+    def _unbind(self,check=True):
+        ''' unbind self;
+            requires that self is an Alea instance (i.e. not dependent of other Lea instances);
+            if check is True, then requires that self is bound
+        '''
+        if check and self._val is self:
+            raise Lea.Error("%s already unbound"%self._id())
+        self._val = self
 
     def _p(self,val,check_val_type=False):
         ''' returns the probability p of the given value val

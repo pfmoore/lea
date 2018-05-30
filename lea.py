@@ -231,32 +231,42 @@ class Lea(object):
         for lea_child in self._get_lea_children():
             lea_child._reset_gen_vp()
 
-    def _set_gen_vp(self):
+    def _set_gen_vp(self,memoization=True):
         ''' prepare calculation of probability distribution by binding self.gen_vp to the most adequate method:
             self.gen_vp is bound
              either on self._gen_vp method, if no binding is required (single occurrence of self in expression)
              or on self._gen_bound_vp method, if binding is required (multiple occurrences of self in expression)
             note: self._gen_bound_vp works in any case but perform unnecessary binding job if self occurrence is
             unique in the evaluated expression
+            * memoization argument: see Lea.calc method
             requires that gen_vp = None for self and all Lea descendants
         '''
         if self.gen_vp is None:
             # first occurrence of self in the expression: use the simplest _gen_vp method
             # this may be overwritten if a second occurrence is found
             self.gen_vp = self._gen_vp
-        elif self.gen_vp == self._gen_vp:
+        elif memoization and self.gen_vp == self._gen_vp:
             # second occurrence of self in the expression: use the _gen_bound_vp method
             self.gen_vp = self._gen_bound_vp
         # treat children recursively, up to Alea instances
         for lea_child in self._get_lea_children():
-            lea_child._set_gen_vp()
+            lea_child._set_gen_vp(memoization)
 
-    def _init_calc(self):
+    def _init_calc(self,bindings=None,memoization=True):
         ''' prepare calculation of probability distribution by binding self.gen_vp to the most adequate method;
             see _set_gen_vp method
         '''
         self._reset_gen_vp()
-        self._set_gen_vp()
+        self._set_gen_vp(memoization)
+        if bindings is not None:
+            for (x,v) in bindings.items():
+                x._bind(v)
+                x.gen_vp = x._gen_bound_vp
+
+    def _finalize_calc(self,bindings):
+        if bindings is not None:
+            for (x,v) in bindings.items():
+                x._unbind(check=False)
 
     def given_prob(self,cond_lea,p):
         ''' returns a new Lea instance from current distribution,
@@ -1176,12 +1186,18 @@ class Lea(object):
         '''
         return Alea.vals(*self.random_mc(n,nb_tries))
     
-    def nb_cases(self):
+    def nb_cases(self,bindings=None,memoization=True):
         ''' returns the number of atomic cases evaluated to build the exact probability distribution;
-            this provides a measure of the complexity of the probability distribution 
+            this provides a measure of the complexity of the probability distribution
+            * bindings argument: see Lea.calc method
+            * memoization argument: see Lea.calc method
         '''
-        self._init_calc()
-        return sum(1 for vp in self.gen_vp())
+        try:
+            self._init_calc(bindings,memoization)
+            return sum(1 for vp in self.gen_vp())
+        finally:
+            self._finalize_calc(bindings)
+    
 
     def is_true(self):
         ''' returns True iff the value True has probability 1;
@@ -1283,26 +1299,82 @@ class Lea(object):
         '''
         self.get_alea().plot(title,fname,savefig_args,**bar_args)
 
-    def get_alea(self,**kwargs):
+    def get_alea(self,sorting=True):
         ''' returns an Alea instance representing the distribution after it has been evaluated;
             if self is an Alea instance, then it returns itself,
             otherwise the newly created Alea is cached : the evaluation occurs only for the first
             call; for successive calls, the cached Alea instance is returned, which is faster 
         '''
         if self._alea is None:
-            self._alea = self.new(**kwargs)
+            self._alea = self.new(sorting=sorting)
         return self._alea
 
-    def new(self,prob_type=-1,**kwargs):
+    def reset(self):
+        ''' erase the Alea cache, so to force the recalculation at next call to get_alea();
+            note: there is no need to call this method, except for freeing memory or for making
+            cleanup after hacking private attributes of Lea instances assumed immutable
+        ''' 
+        self._alea = None
+
+    def _bind(self,v):
+        ''' (re)bind self with given value v;
+            requires that self is an Alea instance (i.e. not dependent of other Lea instances);
+            requires that v is present in the domain of self
+        '''
+        raise Lea.Error("impossible to bind %s because it depends of other instances"%self._id())
+
+    def _unbind(self,check=True):
+        ''' unbind self;
+            requires that self is an Alea instance (i.e. not dependent of other Lea instances);
+            if check is True, then requires that self is bound
+        '''
+        if check:
+            raise Lea.Error("impossible to unbind %s because it depends of other instances"%self._id())
+
+    def new(self,prob_type=-1,sorting=True):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
             if self is an Alea, then it returns a clone of itself representing an independent event;
             the probability type used in the returned instance depends on given prob_type:
-            if prob_type is -1, then the probability type is the same as self's
-            otherwise, the probability type is defined using prob_type (see doc of Alea.set_prob_type);
+            * if prob_type is -1, then the probability type is the same as self's
+              otherwise, the probability type is defined using prob_type (see doc of Alea.set_prob_type);
+            * sorting allows sorting the value of the returned Alea instance (see Alea.pmf method);
             note that the present method is overloaded in Alea class, to be more efficient
         '''
-        self._init_calc()
-        return Alea.pmf(tuple(self.gen_vp()),prob_type=prob_type,**kwargs)
+        return Alea.pmf(self._calc(),prob_type=prob_type,sorting=sorting)
+
+    def calc(self,prob_type=-1,sorting=True,bindings=None,memoization=True):
+        ''' same as Lea.new method, adding two advanced optional arguments that allow changing the
+            behavior of the probabilstic inference algorithm (the "Statues" algorithm):
+            * bindings: if not None, it is a dictionary {a1:v1, a2:v2 ,... } associating some Alea
+              instances a1, a2, ... to specific values v1, v2, ... of their respectives domains;
+              these Alea instances are then temporarily bound for calculating the resulting pmf;
+              this offers an optimization over the self.given(a1==v1, a2==v2, ...) construct,
+              (this last gives the same result but requires browsing the whole v1, v2, ... domains,
+               evaluting the given equalities)
+            * memoization: if False, then no binding is performed by the algorithm, hence reference
+              consistency is no more respected; this option returns WRONG results in all construction
+              refering multiple times to the same instances (e.g. conditional probability and Bayesian
+              reasoning); this option has no real use, excepting demonstrating by absurd the importance
+              of memoization and referential consitency in the Sattues algorithm; note that this option
+              offers NO speedup when evaluting expressions not requiring referential consitency: such
+              cases are already detected and optimize by the calculation pretreatrement (see
+              Lea._init_calc).
+            if bindings defined;
+            - requires that bindings is a dictionary;
+            - requires that keys are all unbound Alea instances;
+            - requires that the bindings values are in the expected domains of associated keys
+        '''
+        return Alea.pmf(self._calc(bindings,memoization),prob_type=prob_type,sorting=sorting)
+
+    def _calc(self,bindings=None,memoization=True):
+        ''' returns a tuple with (v,p) pairs calculated on self, according to the given arguments,
+            as required by Lea.calc method (see doc of this method)
+        '''
+        try:
+            self._init_calc(bindings,memoization)
+            return tuple(self.gen_vp())
+        finally:
+            self._finalize_calc(bindings)
 
     def cumul(self):
         ''' evaluates the distribution, then,
