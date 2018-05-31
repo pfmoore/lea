@@ -1346,29 +1346,35 @@ class Lea(object):
             return tuple(new_alea.new() for _ in range(n))
         return new_alea
 
-    def calc(self,prob_type=-1,sorting=True,bindings=None,memoization=True):
-        ''' same as Lea.new method, adding two advanced optional arguments that allow changing the
+    def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True):
+        ''' same as Lea.new method, adding three advanced optional arguments that allow changing the
             behavior of the probabilstic inference algorithm (the "Statues" algorithm):
-            * bindings: if not None, it is a dictionary {a1:v1, a2:v2 ,... } associating some Alea
-              instances a1, a2, ... to specific values v1, v2, ... of their respectives domains;
-              these Alea instances are then temporarily bound for calculating the resulting pmf;
-              this offers an optimization over the self.given(a1==v1, a2==v2, ...) construct,
-              (this last gives the same result but requires browsing the whole v1, v2, ... domains,
-               evaluting the given equalities)
-            * memoization: if False, then no binding is performed by the algorithm, hence reference
-              consistency is no more respected; this option returns WRONG results in all construction
-              refering multiple times to the same instances (e.g. conditional probability and Bayesian
-              reasoning); this option has no real use, excepting demonstrating by absurd the importance
-              of memoization and referential consitency in the Sattues algorithm; note that this option
-              offers NO speedup when evaluting expressions not requiring referential consitency: such
-              cases are already detected and optimize by the calculation pretreatrement (see
-              Lea._init_calc).
-            if bindings defined;
+            * normalization (default:True): if True, then each probability is divided
+              by the sum of all probabilities before being stored; this division is essential to
+              get exct results in case of conditional probabilities;
+              seeting normalization=False is useful,
+              - tu speed up if the caller guarantee that the probabilities sum is 1
+              - or to get unnormalized probabilities of a subset of a given probability distribution
+            * bindings (default: None): if not None, it is a dictionary {a1:v1, a2:v2 ,... }
+              associating some Alea instances a1, a2, ... to specific values v1, v2, ... of their
+              respectives domains; these Alea instances are then temporarily bound for calculating
+              the resulting pmf; this offers an optimization over the self.given(a1==v1, a2==v2, ...)
+              construct, (this last gives the same result but requires browsing the whole v1, v2, ...
+              domains, evaluting the given equalities)
+            * memoization (default: True): if False, then no binding is performed by the algorithm,
+              hence reference consistency is no more respected; this option returns WRONG results in all
+              construction refering multiple times to the same instances (e.g. conditional probability
+              and Bayesian reasoning); this option has no real use, excepting demonstrating by absurd the
+              importance of memoization and referential consitency in the Sattues algorithm; note that
+              this option offers NO speedup when evaluting expressions not requiring referential
+              consitency: such cases are already detected and optimize by the calculation pretreatrement
+              (see Lea._init_calc).
+            if bindings is defined, then
             - requires that bindings is a dictionary;
             - requires that keys are all unbound Alea instances;
             - requires that the bindings values are in the expected domains of associated keys
         '''
-        return Alea.pmf(self._calc(bindings,memoization),prob_type=prob_type,sorting=sorting)
+        return Alea.pmf(self._calc(bindings,memoization),prob_type=prob_type,sorting=sorting,normalization=normalization)
 
     def _calc(self,bindings=None,memoization=True):
         ''' returns a tuple with (v,p) pairs calculated on self, according to the given arguments,
