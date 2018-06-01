@@ -39,7 +39,7 @@ setup( name = 'lea',
        keywords = ['probability', 'discrete', 'distribution', 'probabilistic programming'],
        packages = [ 'lea' ],
        package_dir = {'lea': ''},
-       data_files = [(join(get_python_lib(),'lea'), [ 'COPYING', 'COPYING.LESSER' ] ) ],
+       data_files = [(join(get_python_lib(),'lea'), [ 'COPYING', 'COPYING.LESSER', 'README.md' ] ) ],
        classifiers=[
           "Development Status :: 4 - Beta",
           "Programming Language :: Python :: 2.6",
