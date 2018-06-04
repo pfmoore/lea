@@ -232,19 +232,28 @@ class Lea(object):
             lea_child._reset_gen_vp()
 
     def _set_gen_vp(self,memoization=True):
-        ''' prepare calculation of probability distribution by binding self.gen_vp to the most adequate method:
-            self.gen_vp is bound
-             either on self._gen_vp method, if no binding is required (single occurrence of self in expression)
-             or on self._gen_bound_vp method, if binding is required (multiple occurrences of self in expression)
-            note: self._gen_bound_vp works in any case but perform unnecessary binding job if self occurrence is
-            unique in the evaluated expression
+        ''' prepare calculation of probability distribution by binding x.gen_vp to the most adequate method,
+            where x is self or any of self descendents: x.gen_vp is bound
+            - to x._gen_vp method, if no binding is required (single occurrence of self in expression and no
+              explicit binding of x)
+            - to x._gen_bound_vp method, if binding is required (multiple occurrences of self in expression
+              or explicit binding of x)
+            note: x._gen_bound_vp works in any case but perform unnecessary binding job if x occurrence is
+            unique in the evaluated expression; hence, the method makes a preprocessing allowing to optimize
+            the pmf calculation
             * memoization argument: see Lea.calc method
             requires that gen_vp = None for self and all Lea descendants
         '''
         if self.gen_vp is None:
-            # first occurrence of self in the expression: use the simplest _gen_vp method
-            # this may be overwritten if a second occurrence is found
-            self.gen_vp = self._gen_vp
+            # first occurrence of self in the expression: 
+            if self._val is self:
+                # self is not bound; use the simplest _gen_vp method
+                # this may be overwritten if a second occurrence is found
+                self.gen_vp = self._gen_vp
+            else:
+                # self is explicitely bound - see observe(...) method or .calc(bindings=...);
+                # use the _gen_bound_vp method to yield the bound value
+                self.gen_vp = self._gen_bound_vp
         elif memoization and self.gen_vp == self._gen_vp:
             # second occurrence of self in the expression: use the _gen_bound_vp method
             self.gen_vp = self._gen_bound_vp
@@ -252,21 +261,33 @@ class Lea(object):
         for lea_child in self._get_lea_children():
             lea_child._set_gen_vp(memoization)
 
+    def is_bound(self):
+        ''' returns True iff self is currently bound
+        '''
+        return self._val is not self
+
     def _init_calc(self,bindings=None,memoization=True):
         ''' prepare calculation of probability distribution by binding self.gen_vp to the most adequate method;
             see _set_gen_vp method
+            if bindings is not None, then it is browsed as a dictionary: each key (Alea instance) is bound
+            to the associated value - eee requirements of Lea.observe.
         '''
         self._reset_gen_vp()
+        # set explicit bindings, if any
+        if bindings is not None:
+            for (x,v) in bindings.items():
+                x.observe(v)
+        # bind gen_vp method to _gen_vp or _gen_bound_vp, for self and its descendants
         self._set_gen_vp(memoization)
-        if bindings is not None:
-            for (x,v) in bindings.items():
-                x._bind(v)
-                x.gen_vp = x._gen_bound_vp
 
-    def _finalize_calc(self,bindings):
+    def _finalize_calc(self,bindings=None):
+        ''' make finalization after pmf calculation, by unbinding all instances bound in
+            _init_calc, supposed to be present in given bindings dictionary
+        '''
         if bindings is not None:
-            for (x,v) in bindings.items():
-                x._unbind(check=False)
+            for x in bindings:
+                ## note: leave check=False because in case of exception _init_calc, the some instances may still be unbound
+                x.free(check=False)
 
     def given_prob(self,cond_lea,p):
         ''' returns a new Lea instance from current distribution,
@@ -1305,8 +1326,13 @@ class Lea(object):
             otherwise the newly created Alea is cached : the evaluation occurs only for the first
             call; for successive calls, the cached Alea instance is returned, which is faster 
         '''
-        if self._alea is None:
-            self._alea = self.new(sorting=sorting)
+        has_explicit_bindings = any((a._val is not a) for a in self.get_alea_leaves_set())
+        if self._alea is None or has_explicit_bindings:
+            new_alea = self.new(sorting=sorting)
+            if has_explicit_bindings:
+                self._alea = None
+                return new_alea
+            self._alea = new_alea
         return self._alea
 
     def reset(self):
@@ -1316,14 +1342,14 @@ class Lea(object):
         ''' 
         self._alea = None
 
-    def _bind(self,v):
+    def observe(self,v):
         ''' (re)bind self with given value v;
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             requires that v is present in the domain of self
         '''
         raise Lea.Error("impossible to bind %s because it depends of other instances"%self._id())
 
-    def _unbind(self,check=True):
+    def free(self,check=True):
         ''' unbind self;
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             if check is True, then requires that self is bound

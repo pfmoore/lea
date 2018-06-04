@@ -391,8 +391,8 @@ class Alea(Lea):
             the method admits three other optional boolean argument (in kwargs):
             * sorting (default:True): if True, then the values for displaying
             the distribution or getting the values will be sorted if possible
-            (i.e. no exception on sort); otherwise, or if sorting=False, then
-            the order of values is unspecified; 
+            (i.e. no exception on sort); otherwise, the order of values is
+            unspecified unless ordered=True;
             * ordered (default:False): if ordered is True, then the values for
             displaying the distribution or getting the values will follow the
             given order (requires that the arg is an iterable or a 
@@ -794,8 +794,15 @@ class Alea(Lea):
         '''
         if kind not in Alea.__DISPLAY_KINDS:
             raise Lea.Error("invalid display format '%s'; should be among %s"%(kind,Alea.__DISPLAY_KINDS))
-        value_strings = tuple(str(v) for v in self._vs)
-        ps = self._ps
+        if self._val is self:
+            # self is not bound (default)
+            vs = self._vs
+            ps = self._ps
+        else:
+            # self is explicitely bound - see observe(...) method or .calc(bindings=...)
+            vs = (self._val,)
+            ps = (1,)
+        value_strings = tuple(str(v) for v in vs)
         vm = max(len(v) for v in value_strings)
         lines_iter = (v.rjust(vm)+' : ' for v in value_strings)
         if kind is None:
@@ -839,6 +846,8 @@ class Alea(Lea):
         else:
             kind = None
         return self.as_string(kind)
+
+    __repr__ = __str__
           
     def as_float(self,nb_decimals=6):
         ''' returns a string representation of probability distribution self;
@@ -1010,7 +1019,7 @@ class Alea(Lea):
                 # unbind value, after the random value has been bound or if an exception has been raised
                 self._val = self
 
-    def _bind(self,v):
+    def observe(self,v):
         ''' (re)bind self with given value v;
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             requires that v is present in the domain of self
@@ -1019,7 +1028,7 @@ class Alea(Lea):
             raise Lea.Error("impossible to bind %s with '%s' because it is out of domain"%(self._id(),v))
         self._val = v
 
-    def _unbind(self,check=True):
+    def free(self,check=True):
         ''' unbind self;
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             if check is True, then requires that self is bound
