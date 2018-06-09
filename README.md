@@ -70,7 +70,7 @@ print (P((flips == ('Tail', 'Tail')).given(flip2 == 'Tail')))
 print (flip1.given(flips == ('Head', 'Tail')))
 # -> Head : 1.0
 ```
-With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies (this is referred in the literature as _probabilistic graphical model_ or _generative model_.). Based on such feature, Lea can build more complex relationships between random variables and perform advanced inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is modeled in a couple of lines:
+With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies (this is referred in the literature as a _probabilistic graphical model_ or a _generative model_). Based on such feature, Lea can build more complex relationships between random variables and perform advanced inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is modeled in a couple of lines:
 
 []()
 ```python
