@@ -70,30 +70,30 @@ print (P((flips == ('Tail', 'Tail')).given(flip2 == 'Tail')))
 print (flip1.given(flips == ('Head', 'Tail')))
 # -> Head : 1.0
 ```
-With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies. Based on such feature, Lea can do advanced probabilistic inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is easily modeled in a couple of lines:
+With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies (this is referred in the literature as _probabilistic graphical model_ or _generative model_.). Based on such feature, Lea can build more complex relationships between random variables and perform advanced inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is modeled in a couple of lines:
 
 []()
 ```python
 rain = lea.event(0.20)
 sprinkler = lea.if_(rain, lea.event(0.01),
                           lea.event(0.40))
-grassWet = lea.joint(sprinkler,rain).switch({ (False,False): False,
-                                              (False,True ): lea.event(0.80),
-                                              (True ,False): lea.event(0.90),
-                                              (True ,True ): lea.event(0.99)})
+grass_wet = lea.joint(sprinkler,rain).switch({ (False,False): False,
+                                               (False,True ): lea.event(0.80),
+                                               (True ,False): lea.event(0.90),
+                                               (True ,True ): lea.event(0.99)})
 ```
 
-This BN can be queried in different ways:
+Then, this Bayesian network can be queried in different ways, including forward or backward reasoning, based on given observations or logical combinations of observations:
 
 []()
 ```python
-print (P(rain.given(grassWet)))
+print (P(rain.given(grass_wet)))
 # -> 0.35768767563227616
-print (P(grassWet.given(rain)))
+print (P(grass_wet.given(rain)))
 # -> 0.8019000000000001
-print (P(grassWet.given(sprinkler & ~rain)))
+print (P(grass_wet.given(sprinkler & ~rain)))
 # -> 0.9000000000000001
-print (P(grassWet.given(~sprinkler & ~rain)))
+print (P(grass_wet.given(~sprinkler & ~rain)))
 # -> 0.0
 ```
 The floating-point number type is a standard although limited way to represent probabilities. Lea 3 proposes alternative representations, which can be more expressive for some domain and which are very easy to set. For example, you could use fractions: 
