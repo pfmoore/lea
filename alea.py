@@ -36,15 +36,23 @@ import itertools
 from math import exp, factorial
 from operator import truediv
 import collections
+
+# try to import optional modules:
+# - Matplotlib
+try:
+    import matplotlib.pyplot as plt
+    # matplotlib module installed
+except:
+    # matplotlib module not installed
+    plt = None
+# - SymPy
 try:
     import sympy
     # sympy module installed
 except:
     # sympy module not installed
     sympy = None
-# note that matplotlib is imported (if available) in the plot method
-
-
+    
 class Alea(Lea):
     
     '''
@@ -896,31 +904,28 @@ class Alea(Lea):
             the method requires matplotlib package; an exception is raised if it is not installed
         '''
         # try to import matplotlib package, required by plot() method
-        try:
-            import matplotlib.pyplot as plt
-        except:
+        if plt is None:
             raise Lea.Error("the plot() method requires the matplotlib package")
+        # switch on interactive mode, so the control is back to console as soon as a chart is displayed
+        plt.ion()
+        if fname is None:
+            # no file specified: erase the current chart, if any
+            plt.clf()
         else:
-            # switch on interactive mode, so the control is back to console as soon as a chart is displayed
+            # file specified: switch off interactive mode
+            plt.ioff()
+        plt.bar(range(len(self._vs)),self._ps,tick_label=self._vs,align='center',**bar_args)
+        plt.ylabel('Probability')
+        if title is not None:
+            plt.title(title)
+        if fname is None:
+            # no file specified: display the chart on screen
+            plt.show()
+        else:
+            # file specified: save chart on file, using given parameters and switch back interactive mode
+            plt.savefig(fname,**savefig_args)
+            # TODO needed?
             plt.ion()
-            if fname is None:
-                # no file specified: erase the current chart, if any
-                plt.clf()
-            else:
-                # file specified: switch off interactive mode
-                plt.ioff()
-            plt.bar(range(len(self._vs)),self._ps,tick_label=self._vs,align='center',**bar_args)
-            plt.ylabel('Probability')
-            if title is not None:
-                plt.title(title)
-            if fname is None:
-                # no file specified: display the chart on screen
-                plt.show()
-            else:
-                # file specified: save chart on file, using given parameters and switch back interactive mode
-                plt.savefig(fname,**savefig_args)
-                # TODO needed?
-                plt.ion()
 
     def support(self):
         ''' returns a tuple with values of self
