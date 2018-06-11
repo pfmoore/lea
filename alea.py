@@ -1165,12 +1165,16 @@ class Alea(Lea):
             return alea_args[0]
         if len(alea_args) == 2:
             (alea_arg1,alea_arg2) = alea_args
-            val_freqs_dict = defaultdict(int)
+            pmf_dict = defaultdict(int)
             for (v,p) in alea_arg1._gen_raw_vps():
-                val_freqs_dict[v] = p * cumul_func(alea_arg2,v)
+                p1 = cumul_func(alea_arg2,v)
+                if p1 != 0:
+                    pmf_dict[v] = p * p1
             for (v,p) in alea_arg2._gen_raw_vps():
-                val_freqs_dict[v] += (cumul_func(alea_arg1,v)-alea_arg1._p(v)) * p
-            return Alea.pmf(val_freqs_dict)
+                p1 = cumul_func(alea_arg1,v) - alea_arg1._p(v)
+                if p1 != 0:
+                    pmf_dict[v] +=  p1 * p
+            return Alea.pmf(pmf_dict)
         return Alea.fast_extremum(cumul_func,alea_args[0],Alea.fast_extremum(cumul_func,*alea_args[1:]))
 
     # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
