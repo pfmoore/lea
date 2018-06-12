@@ -89,6 +89,8 @@ def is_dict(d):
     ''' returns True iff given d is a dictionary
     '''
     return isinstance(d,__std_dict)
+
+numeric_types = (float,int,complex)
                 
 # Python 2 / 3 dependencies
 # the following redefines / rebinds the following objects in Python2: 
@@ -107,6 +109,8 @@ if sys.version_info[0] == 2:
         raise Exception("Lea requires Python 2.6+ or 3 to run")
     # Python 2.6+
     # the goal of this part is to mimic a Python 3 env in a Python 2.6+ env
+    # add long type to numeric types 
+    numeric_types += (long,)
     # rename raw_input method
     input = raw_input
     # zip as iterator shall be imported
@@ -132,6 +136,15 @@ else:
     zip = zip
     next = next
     dict = dict
+
+def indent(str_func,obj,width):
+    ''' retrun a string represention of given object obj obtained
+        by applying given function str_func and justifying on given
+        width; the string is left-justified except if obj is a number
+    ''' 
+    if isinstance(obj,numeric_types):
+        return str_func(obj).rjust(width)
+    return str_func(obj).ljust(width)
 
 def memoize(f):
    ''' returns a memoized version of the given instance method f;

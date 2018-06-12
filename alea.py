@@ -27,7 +27,7 @@ from .lea import Lea
 from .prob_number import ProbNumber
 from .prob_fraction import ProbFraction
 from .prob_decimal import ProbDecimal
-from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, read_csv_filename, is_dict
+from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, read_csv_filename, is_dict, indent
 from fractions import Fraction
 from decimal import Decimal
 from random import random
@@ -810,9 +810,16 @@ class Alea(Lea):
             # self is explicitely bound - see observe(...) method or .calc(bindings=...)
             vs = (self._val,)
             ps = (1,)
-        value_strings = tuple(str(v) for v in vs)
-        vm = max(len(v) for v in value_strings)
-        lines_iter = (v.rjust(vm)+' : ' for v in value_strings)
+        if all(isinstance(v,tuple) for v in vs) and len(frozenset(len(v) for v in vs)) == 1:
+            # values are tuples of same length: perform a tabular display, where column widths depend of the longest elements
+            max_size_per_pos = tuple(max(tuple(len(repr(e)) for e in a)) for a in zip(*vs))
+            lines_iter = ('(%s)' % ', '.join(indent(repr,e,s) for (e,s) in zip(v,max_size_per_pos)) for v in vs)
+        else:
+            # general, non-tabular, display 
+            vm = max(len(str(v)) for v in vs)
+            lines_iter = (indent(str,v,vm) for v in vs)
+        #lines_iter = (v.rjust(vm)+' : ' for v in value_strings)
+        lines_iter = (v+' : ' for v in lines_iter)
         if kind is None:
             lines_iter = (line+str(p) for (line,p) in zip(lines_iter,ps))
         else:
