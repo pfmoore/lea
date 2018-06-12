@@ -818,7 +818,6 @@ class Alea(Lea):
             # general, non-tabular, display 
             vm = max(len(str(v)) for v in vs)
             lines_iter = (indent(str,v,vm) for v in vs)
-        #lines_iter = (v.rjust(vm)+' : ' for v in value_strings)
         lines_iter = (v+' : ' for v in lines_iter)
         if kind is None:
             lines_iter = (line+str(p) for (line,p) in zip(lines_iter,ps))
