@@ -141,8 +141,9 @@ def indent(str_func,obj,width):
     ''' retrun a string represention of given object obj obtained
         by applying given function str_func and justifying on given
         width; the string is left-justified except if obj is a number
-    ''' 
-    if isinstance(obj,numeric_types):
+    '''
+    ## note that bool is a subtype of int, although it shall not be eigtht-justifid as a number
+    if isinstance(obj,numeric_types) and not isinstance(obj,bool):
         return str_func(obj).rjust(width)
     return str_func(obj).ljust(width)
 
