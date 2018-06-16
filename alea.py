@@ -798,7 +798,10 @@ class Alea(Lea):
             if kind[1] is '-', the histogram bars with '-' are appended after 
                                numerical representation of probabilities
             if an order relationship is defined on values, then the values are sorted by 
-            increasing order; otherwise, an arbitrary order is used
+            increasing order; otherwise, an arbitrary order is used;
+            if values are tuples of same length, then these are represented in a tabular
+            format (fixed column width); in the specific cases of named tuple, a header
+            line is prepended with the field names
         '''
         if kind not in Alea.__DISPLAY_KINDS:
             raise Lea.Error("invalid display format '%s'; should be among %s"%(kind,Alea.__DISPLAY_KINDS))
@@ -810,11 +813,24 @@ class Alea(Lea):
             # self is explicitely bound - see observe(...) method or .calc(bindings=...)
             vs = (self._val,)
             ps = (1,)
-        if all(isinstance(v,tuple) for v in vs) and len(frozenset(len(v) for v in vs)) == 1:
-            # values are tuples of same length: perform a tabular display, where column widths depend of the longest elements
-            max_size_per_pos = tuple(max(tuple(len(repr(e)) for e in a)) for a in zip(*vs))
-            lines_iter = ('(%s)' % ', '.join(indent(repr,e,s) for (e,s) in zip(v,max_size_per_pos)) for v in vs)
-        else:
+        header = ''
+        lines_iter = None
+        v0 = vs[0]
+        if isinstance(v0,tuple):
+            v0_class = v0.__class__
+            v0_length = len(v0)
+            if all((v.__class__ is v0_class and len(v) == v0_length) for v in vs):
+                # values are tuples of same length: perform a tabular display, where column widths depend of the longest elements
+                repr_vs = tuple(tuple(repr(e) for e in v) for v in vs)
+                if hasattr(v0_class,'_fields'):
+                    # values are named tuples, of the same class: prepend the field names tuple for header
+                    repr_vs = (v0_class._fields,) + repr_vs
+                # determine max required length per column
+                max_length_per_pos = tuple(max(len(e) for e in a) for a in zip(*repr_vs))
+                if hasattr(v0_class,'_fields'):
+                    header = " %s\n" % ', '.join(indent(str,e,s) for (e,s) in zip(v0._fields,max_length_per_pos))
+                lines_iter = ('(%s)' % ', '.join(indent(repr,e,s) for (e,s) in zip(v,max_length_per_pos)) for v in vs)
+        if lines_iter is None:
             # general, non-tabular, display 
             vm = max(len(str(v)) for v in vs)
             lines_iter = (indent(str,v,vm) for v in vs)
@@ -844,7 +860,7 @@ class Alea(Lea):
                 lines_iter = (fmt%(line,100.*p) for (line,p) in zip(lines_iter,ps))
             if with_histo:
                 lines_iter = (line+' '+int(0.5+(p)*histo_size)*'-' for (line,p) in zip(lines_iter,ps))
-        return '\n'.join(lines_iter)
+        return header + '\n'.join(lines_iter)
 
     def __str__(self):
         ''' returns a string representation of probability distribution self;
