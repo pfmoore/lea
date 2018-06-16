@@ -420,12 +420,13 @@ class Lea(object):
         return wrapper
 
     def as_joint(self,*attr_names):
-        ''' returns a new Alea instance representing a joint probability distribution
-            from the current distribution supposed to have n-tuples as values,
-            to be associated with the given n attribute names
+        ''' returns a new Flea instance by building named tuples from self, which
+            is supposed to have n-tuples as values, using the n given attr_names;
+            note: this is useful to access fields of joint probability distribution
+            by names instead instead of indices
         '''
         NTClass = collections.namedtuple('_',attr_names)
-        return self.map(lambda a_tuple: NTClass(*a_tuple)).get_alea()
+        return self.map(lambda a_tuple: NTClass(*a_tuple))
 
     def is_uniform(self):
         ''' returns, after evaluation of the probability distribution self,
