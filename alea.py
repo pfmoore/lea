@@ -781,7 +781,7 @@ class Alea(Lea):
 
     __DISPLAY_KINDS = (None, '/', '.', '%', '-', '/-', '.-', '%-')
 
-    def as_string(self,kind=None,nb_decimals=6,histo_size=100):
+    def as_string(self,kind=None,nb_decimals=6,histo_size=100,tabular=True):
         ''' returns a string representation of probability distribution self;
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value with its
@@ -799,9 +799,9 @@ class Alea(Lea):
                                numerical representation of probabilities
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
-            if values are tuples of same length, then these are represented in a tabular
-            format (fixed column width); in the specific cases of named tuple, a header
-            line is prepended with the field names
+            if tabular is True (default), then if values are tuples of same length, then
+            these are represented in a tabular format (fixed column width); in the
+            specific cases of named tuple, a header line is prepended with the field names
         '''
         if kind not in Alea.__DISPLAY_KINDS:
             raise Lea.Error("invalid display format '%s'; should be among %s"%(kind,Alea.__DISPLAY_KINDS))
@@ -816,7 +816,7 @@ class Alea(Lea):
         header = ''
         lines_iter = None
         v0 = vs[0]
-        if isinstance(v0,tuple):
+        if tabular and isinstance(v0,tuple):
             v0_class = v0.__class__
             v0_length = len(v0)
             if all((v.__class__ is v0_class and len(v) == v0_length) for v in vs):

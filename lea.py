@@ -1234,15 +1234,17 @@ class Lea(object):
             raises exception if some value is not boolean
         '''
         return self._p(True,check_val_type=True) > 0
-        
-    def as_string(self,kind='/',nb_decimals=6,chart_size=100):
+
+    def as_string(self,kind=None,nb_decimals=6,chart_size=100,tabular=True):
         ''' returns, after evaluation of the probability distribution self, a string
             representation of it;
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value with its
-            probability in a format depending of given kind, which is string among
-            '/', '.', '%', '-', '/-', '.-', '%-'; 
+            probability in a format depending of given kind, which is either None
+            (default) or a string among
+                '/', '.', '%', '-', '/-', '.-', '%-';
             the probabilities are displayed as
+            - if kind is None   : as they are stored
             - if kind[0] is '/' : rational numbers "n/d" or "0" or "1"
             - if kind[0] is '.' : decimals with given nb_decimals digits
             - if kind[0] is '%' : percentage decimals with given nb_decimals digits
@@ -1251,9 +1253,12 @@ class Lea(object):
             if kind[1] is '-', the histogram bars with '-' are appended after 
                                numerical representation of probabilities
             if an order relationship is defined on values, then the values are sorted by 
-            increasing order; otherwise, an arbitrary order is used
-        '''        
-        return self.get_alea().as_string(kind,nb_decimals,chart_size)
+            increasing order; otherwise, an arbitrary order is used;
+            if tabular is True (default), then if values are tuples of same length, then
+            these are represented in a tabular format (fixed column width); in the
+            specific cases of named tuple, a header line is prepended with the field names
+        '''
+        return self.get_alea().as_string(kind,nb_decimals,chart_size,tabular)
 
     def __str__(self):
         ''' returns, after evaluation of the probability distribution self, a string
