@@ -842,9 +842,6 @@ class Alea(Lea):
             with_histo = kind[-1] == '-'
             if prob_representation == '/':
                 (pnums,pdenom) = ProbFraction.convert_to_same_denom(tuple(Fraction(p) for p in ps))
-                pnum_sum = sum(pnums)
-                if pnum_sum != pdenom:
-                   (pnums,pdenom) = ProbFraction.convert_to_same_denom(tuple(Fraction(pnum,pnum_sum) for pnum in pnums))
                 p_strings = tuple(str(pnum) for pnum in pnums)
                 pnum_size_max = len(str(max(pnum for pnum in pnums)))
                 if pdenom == 1:
