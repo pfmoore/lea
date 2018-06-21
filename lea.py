@@ -402,8 +402,8 @@ class Lea(object):
 
     @staticmethod
     def func_wrapper(f):
-        ''' returns a wrapper function on given f function, mimicking f with
-            Lea instances as arguments;
+        ''' static method, returns a wrapper function on given f function,
+            mimicking f with Lea instances as arguments;
             the returned wrapper function has the same number of arguments
             as f and expects for argument #i
             - either an object of the type expected by f for argument #i
@@ -516,6 +516,30 @@ class Lea(object):
             if not isclose(p1,p2):
                 return False
         return True
+
+    @staticmethod
+    def dist_l1(lea1,lea2):
+        ''' static method, returns the L1 distance between the pmf of given (coerced)
+            lea instances;
+            note: assuming that Lea instances are normalized, the result is between 0
+            (iff lea1 and lea2 have same pmf) and 2 ((iff lea1 and lea2 have disjoint
+            supports)
+        '''
+        lea1 = Alea.coerce(lea1)
+        lea2 = Alea.coerce(lea2)        
+        return sum(abs(lea1._p(v)-lea2._p(v)) for v in frozenset(lea1.support+lea2.support))
+
+    @staticmethod
+    def dist_l2(lea1,lea2):
+        ''' static method, returns the L2 distance between the pmf of given (coerced)
+            lea instances;
+            note: assuming that Lea instances are normalized, the result is between 0
+            (iff lea1 and lea2 have same pmf) and sqrt(2) (iff lea1 and lea2 have
+            disjoint singleton supports)
+        '''
+        lea1 = Alea.coerce(lea1)
+        lea2 = Alea.coerce(lea2)        
+        return (sum((lea1._p(v)-lea2._p(v))**2 for v in frozenset(lea1.support+lea2.support))) ** 0.5
 
     def p(self,val):
         ''' returns the probability of given value val
@@ -716,8 +740,8 @@ class Lea(object):
 
     @staticmethod
     def make_vars(obj,tgt_dict,prefix='',suffix=''):
-        ''' retrieve attributes names A1, ... , An of obj and put associations 
-            {V1 : obj.A1, ... , Vn : obj.An} in tgt_dict dictionary
+        ''' static method, retrieve attributes names A1, ... , An of obj and
+            put associations {V1 : obj.A1, ... , Vn : obj.An} in tgt_dict dictionary
             where Vi is a variable name string built as prefix + Ai + suffix;
             obj is
             (a) either a named tuple with attributes A1, ... , An (as returned
@@ -1466,9 +1490,8 @@ class Lea(object):
 
     @staticmethod
     def joint_entropy(*args):
-        ''' returns the joint entropy of arguments, expressed in bits;
-            the returned type is a float or a sympy expression (see doc of
-            Alea.entropy)
+        ''' static method, returns the joint entropy of arguments, expressed in bits;
+            the returned type is a float or a sympy expression (see doc of Alea.entropy)
         '''
         return Clea(*args).entropy
 
@@ -1488,8 +1511,8 @@ class Lea(object):
 
     @staticmethod
     def mutual_information(lea1,lea2):
-        ''' returns the mutual information between given arguments, expressed
-            in bits;
+        ''' static method, returns the mutual information between given arguments,
+            expressed in bits;
             the returned type is a float or a sympy expression (see doc of
             Alea.entropy)
         '''

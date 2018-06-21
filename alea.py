@@ -79,7 +79,7 @@ class Alea(Lea):
 
     @staticmethod
     def prob_symbol(arg):
-        ''' static method; if given arg is a string, then
+        ''' static method, if given arg is a string, then
                returns a sympy Symbol, having arg as name, possibly embedded
                in parentheses if arg is not a valid identifier
             otherwise,
@@ -93,7 +93,7 @@ class Alea(Lea):
 
     @staticmethod
     def prob_any(arg):
-        ''' static method; returns a probability object corresponding to the
+        ''' static method returns a probability object corresponding to the
             given arg:
             if arg is not a string, then it is returned as-is;
             if arg is a string, then it is tried to be interpreted as
@@ -134,9 +134,9 @@ class Alea(Lea):
 
     @staticmethod
     def get_prob_type(prob_type):
-        ''' returns the class or function associated to given code,
-            this class or function is applied to convert each probability
-            given in an Alea constructor method;
+        ''' static method, returns the class or function associated to
+            given code, this class or function is applied to convert
+            each probability given in an Alea constructor method;
             if prob_type is -1, then None is returned;
             if prob_type is a callable object, then it is returned as-is;
             if prob_type is None, then current prob_type configured by
@@ -331,7 +331,7 @@ class Alea(Lea):
 
     @staticmethod
     def _parsed_kwargs(kwargs):
-        ''' returns (ordered,sorting,normalization,check,prob_type) tuple,
+        ''' static method, returns (ordered,sorting,normalization,check,prob_type) tuple,
             with values found in the given kwargs dictionary (keywords);
             for missing keywords, the default values are
             (False, True, True, True, -1), respectively, except
@@ -358,7 +358,7 @@ class Alea(Lea):
 
     @staticmethod
     def _check_not_empty(arg):
-        ''' Verify that the given arg is not empty;
+        ''' static method, verify that the given arg is not empty;
             otherwise raises an exception
         '''
         if len(arg) == 0:
@@ -1211,7 +1211,8 @@ class Alea(Lea):
 
     @staticmethod
     def _downcast(p):
-        ''' returns p or an object equivalent to p, more convenient to display:
+        ''' static method, returns p or an object equivalent to p, more convenient
+            to display:
              Fraction -> ProbFraction,
              Decimal  -> ProbDecimal
         '''
