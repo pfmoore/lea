@@ -1,6 +1,6 @@
 # Lea - Discrete probability distributions in Python
 
-**NEW**: June, 2018 - [Lea 3.0.0.beta.4](http://pypi.org/project/lea/3.0.0.beta.4) is there!
+**NEW**: June, 2018 - [Lea 3.0.0](http://pypi.org/project/lea/3.0.0) is there!
 
 ## What is Lea?
 
@@ -145,7 +145,7 @@ Note that Lea 2 tutorials are still available [here](http://bitbucket.org/pieden
 
 ## On the algorithm …
 
-The very beating heart of Lea resides in the _Statues_ algorithm, which is used for almost all probability calculations. If you want to understand how this algorithm works, then you may read a [short introduction](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_3#markdown-header-the-statues-algorithm) or have a look at [MicroLea](http://bitbucket.org/piedenis/microlea), an independent Python implementation that is much shorter and much simpler than Lea. For a more academic description, the paper "Probabilistic Inference Using Generators" (-LINK TO ADD!-) presents the algorithm in a general and language-independent manner.
+The very beating heart of Lea resides in the _Statues_ algorithm, which is a new exact probabilistic marginalization algorithm used for almost all probability calculations of Lea. If you want to understand how this algorithm works, then you may read a [short introduction](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_3#markdown-header-the-statues-algorithm) or have a look at [MicroLea](http://bitbucket.org/piedenis/microlea), an independent Python implementation that is much shorter and much simpler than Lea. For a more academic description, the paper ["Probabilistic inference using generators - the Statues algorithm"](http://arxiv.org/abs/1806.09997) presents the algorithm in a general and language-independent manner.
 
 ---
 
