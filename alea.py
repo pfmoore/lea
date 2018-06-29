@@ -52,6 +52,15 @@ try:
 except:
     # sympy module not installed
     sympy = None
+# - NumPy
+try:
+    # see usage of np_bool_type in Alea._p method
+    from numpy import bool_ as np_bool_type
+    # NumPy module installed  
+except:
+    # NumPy module not installed
+    np_bool_type = ()
+
     
 class Alea(Lea):
     
@@ -1064,14 +1073,17 @@ class Alea(Lea):
     def _p(self,val,check_val_type=False):
         ''' returns the probability p of the given value val
             if check_val_type is True, then raises an exception if some value
-            in the distribution has a type different from val's
+            in the distribution has a type incompatible with val's
         '''
         p1 = None
         if check_val_type:
             err_val = self  # dummy value
             type_to_check = type(val)
         for (v,p) in self._gen_vp():
-            if check_val_type and not isinstance(v,type_to_check):
+            # check that all values have a common ancestor with val's type;
+            # to avoid spurious error when using numpy, the numpy's bool_ is considered compatible with Python's bool
+            if check_val_type and not isinstance(v,type_to_check) \
+               and not (type_to_check is bool and isinstance(v,np_bool_type)):
                 err_val = v
             if p1 is None and v == val:
                 p1 = p
