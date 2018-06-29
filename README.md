@@ -1,6 +1,6 @@
 # Lea - Discrete probability distributions in Python
 
-**NEW**: June, 2018 - [Lea 3.0.0](http://pypi.org/project/lea/3.0.0) is there!
+**NEW**: June, 2018 - [Lea 3.0.1](http://pypi.org/project/lea/3.0.1) is there!
 
 ## What is Lea?
 
