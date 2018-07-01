@@ -92,7 +92,7 @@ class Lea(object):
     or with references to other Lea instances to be combined together through a given operation.
     Each subclass defines what are the (value,probability) pairs or how they can be generated (see
     _gen_vp method implemented in each Lea subclass). The Lea class acts as a facade, by providing
-    different sconstrucors (static methods) to instantiate these subclasses, so it is usually not
+    different constructors (static methods) to instantiate these subclasses, so it is usually not
     needed to instantiate Lea subcasses explicitely. Here is an overview on these subclasses, with
     their relationships.
 
