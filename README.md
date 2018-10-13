@@ -1,7 +1,5 @@
 # Lea - Discrete probability distributions in Python
 
-**NEW**: June, 2018 - [Lea 3.0.1](http://pypi.org/project/lea/3.0.1) is there!
-
 ## What is Lea?
 
 Lea is a Python library aiming at working with discrete probability distributions in an intuitive way.
@@ -10,8 +8,8 @@ Lea is a Python library aiming at working with discrete probability distribution
 
   * **discrete probability distributions** - support: any object!
   * **random sampling**
-  * **probabilisitic arithmetic**: arithmetic, comparison, logical operators and functions
-  * **Probabilisitc Programming (PP)**, Bayesian reasoning, CPT, BN, JPD, MC sampling, Markov chains, …
+  * **probabilistic arithmetic**: arithmetic, comparison, logical operators and functions
+  * **probabilistic programming (PP)**, Bayesian reasoning, CPT, BN, JPD, MC sampling, Markov chains, …
   * **standard indicators** + **information theory**
   * **multiple probability representations**: float, decimal, fraction, …
   * **symbolic computation**, using the [SymPy library](http://www.sympy.org)
