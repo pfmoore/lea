@@ -233,7 +233,6 @@ class Alea(Lea):
         prob_type_func = Alea.get_prob_type(prob_type)
         if prob_type_func is not None:
             ps = (None if p is None else prob_type_func(p) for p in ps)
-        print(normalization, sympy)
         if normalization:
             ps = tuple(ps)
             nb_none = ps.count(None)
@@ -247,7 +246,6 @@ class Alea(Lea):
             else:
                 p_sum = sum(ps)
                 ps = (truediv(p,p_sum) for p in ps)
-            print(type(p_sum))
             if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
                 ps = (Alea._symbolic_simplify_function(p) for p in ps)
         self._ps = tuple(ps)
