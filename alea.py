@@ -80,7 +80,7 @@ class Alea(Lea):
 
     # function used to simplify symbolic probability expressions to be
     # displayed (see _simplify and Alea.__init__ methods)
-    _symbolic_simplify_function = sympy and sympy.factor
+    _symbolic_simplify_function = sympy and staticmethod(sympy.factor)
 
     # dictionary used in _downcast method
     __downcast_prob_class = dict( {Fraction : ProbFraction,
@@ -181,13 +181,9 @@ class Alea(Lea):
         if prob_type == 's':
             if sympy is None:
                 raise Lea.Error("prob_type 's' requires the installation of SymPy module")
-            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
-            ##       ("TypeError: unbound method prob_symbol() must be called with Alea instance as first argument (got int instance instead)")            
-            return staticmethod(Alea.prob_symbol)
+            return Alea.prob_symbol
         if prob_type == 'x':
-            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
-            ##       ("TypeError: unbound method prob_symbol() must be called with Alea instance as first argument (got int instance instead)")            
-            return staticmethod(Alea.prob_any)
+            return Alea.prob_any
         raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%prob_type)
 
     @staticmethod
@@ -237,6 +233,7 @@ class Alea(Lea):
         prob_type_func = Alea.get_prob_type(prob_type)
         if prob_type_func is not None:
             ps = (None if p is None else prob_type_func(p) for p in ps)
+        print(normalization, sympy)
         if normalization:
             ps = tuple(ps)
             nb_none = ps.count(None)
@@ -250,6 +247,7 @@ class Alea(Lea):
             else:
                 p_sum = sum(ps)
                 ps = (truediv(p,p_sum) for p in ps)
+            print(type(p_sum))
             if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
                 ps = (Alea._symbolic_simplify_function(p) for p in ps)
         self._ps = tuple(ps)
