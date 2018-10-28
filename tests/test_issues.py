@@ -115,3 +115,20 @@ def test_symbol_prob_type():
         _ = lea.pmf(probs, prob_type = 's')
     except ImportError:
         pass
+
+
+def test_symbol_prob_type_with_identifier_check():
+    """
+    No issue number; make sure 's' prob_type works when values might be
+    identifiers.
+    """
+    """No issue number; make sure 's' prob_type works."""
+    try:
+        import sympy  # failure skips the test entirely
+        probs = {
+          'A': 'p',
+          'B': 'q',
+        }
+        _ = lea.pmf(probs, prob_type = 's')
+    except ImportError:
+        pass

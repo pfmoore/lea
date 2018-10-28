@@ -94,8 +94,14 @@ class Alea(Lea):
             otherwise,
                returns arg as-is (which could incidentally be a sympy Symbol)
         '''
+        def isidentifier(s):
+          if hasattr(s, 'isidentifier'):
+            return s.isidentifier()
+          import re, tokenize, keyword
+          return re.match(tokenize.Name + '$', s) and not keyword.iskeyword(s)
+
         if isinstance(arg,str):
-            if not arg.isidentifier():
+            if not isidentifier(arg):
                 arg = "(%s)" % arg
             return sympy.Symbol(arg)
         return arg
