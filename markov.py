@@ -59,7 +59,7 @@ class Chain(object):
             where trans_probs is the sequence of probability weights of transition from
             state_obj to each declared state, in the order of their declarations 
         '''
-        next_state_leas = (Alea.pmf(zip(state_objs,trans_probs)) for (state_obj,trans_probs) in trans_probs_per_state)
+        next_state_leas = (Alea.pmf(zip(state_objs,trans_probs),ordered=True) for (state_obj,trans_probs) in trans_probs_per_state)
         next_state_lea_per_state = tuple(zip(state_objs,next_state_leas))
         return Chain(next_state_lea_per_state)
 
