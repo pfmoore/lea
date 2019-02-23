@@ -90,7 +90,9 @@ class Chain(object):
             of transition from S to next state
         '''        
         next_state_leas = (next_state for (_,next_state) in self._next_state_lea_per_state)
-        formatted_next_state_leas = ('  -> ' + next_state_lea.map(str) for next_state_lea in next_state_leas)
+        ## note: the simpler expression ('  -> ' + next_state_lea.map(str)) works but it reorders the states
+        formatted_next_state_leas = (Alea.pmf(('  -> ' + next_state_lea.map(str))._calc(),ordered=True) 
+                                     for next_state_lea in next_state_leas)
         return '\n'.join('%s\n%s'%(state_obj,formatted_next_state_lea)
                          for (state_obj,formatted_next_state_lea)
                          in zip(self._state_objs,formatted_next_state_leas))
