@@ -143,7 +143,59 @@ class Chain(object):
         '''
         from_state = self._state.given(cond_lea)
         return self.next_state(from_state,n)
+    
+    def matrix(self,from_states=None,to_states=None):
+        ''' returns a tuple of tuples given the probability matrix of transition from given
+            iterable from_states to given iterable to_states;
+            if from_states or to_states is None (default), then it is replaced by all states
+            of Markov chain (so, without arguments, the full transition matrix is returned)
+        '''
+        if from_states is None:
+            from_states = self._state_objs
+        if to_states is None:
+            to_states = self._state_objs
+        return tuple(tuple(next_state_alea._p(to_state) for to_state in to_states)
+                     for (state,next_state_alea) in self._next_state_lea_per_state
+                     if state in from_states)
 
+    def reachable_states(self,from_state,_cur_reachable_states=()):
+        ''' returns a tuple containing the states that can be reached starting from the
+            given from_state
+        '''
+        new_reachable_states = _cur_reachable_states + (from_state,)
+        for (to_state,p) in self._state_alea_dict[from_state].next_state()._gen_raw_vps():
+            if p > 0 and to_state not in new_reachable_states:
+                new_reachable_states += self.reachable_states(to_state,new_reachable_states)
+        return new_reachable_states
+
+    def absorbing_mc_info(self):
+        ''' returns a tuple (is_absorbing,transient_states,absorbing_states,q_matrix,r_matrix)
+            where
+            * is_absorbing     is a boolean telling whether the Markov chain is absorbing
+            * transient_states is a tuple containing the t transient states
+            * absorbing_states is a tuple containing the r absorbing states
+            * q_matrix         is a tuple of tuples given the t x t probability matrix
+                               from transient to transient states
+            * r_matrix         is a tuple of tuples given the t x r probability matrix
+                               from transient to absorbing states
+            notes:
+            - t > 0 iff the Markov chain is absorbing
+            - the order of rows and columns of returned matrices follows the order of the
+              returned transient_states and absorbing_states
+        '''
+        reachable_states_by_state = dict((state,self.reachable_states(state))
+                                         for (state,next_state_alea) in self._next_state_lea_per_state)
+        absorbing_states = tuple(state for (state,reachable_states) in reachable_states_by_state.items()
+                                            if len(reachable_states) == 1 and reachable_states[0] is state)
+        absorbing_states_set = frozenset(absorbing_states)
+        transient_states = tuple(state for (state,reachable_states) in reachable_states_by_state.items()
+                                           if state not in absorbing_states
+                                           and len(absorbing_states_set.intersection(reachable_states)) > 0)
+        is_absorbing = len(self._state_objs) == len(absorbing_states) + len(transient_states)
+        q_matrix = self.matrix(from_states=transient_states,to_states=transient_states)
+        r_matrix = self.matrix(from_states=transient_states,to_states=absorbing_states)
+        return (is_absorbing,transient_states,absorbing_states,q_matrix,r_matrix)
+    
 
 class StateAlea(Alea):
     '''
