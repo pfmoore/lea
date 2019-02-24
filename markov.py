@@ -170,7 +170,7 @@ class Chain(object):
             from_states = self.states
         if to_states is None:
             to_states = self.states
-        return tuple(tuple(nextstate._p(to_state) for to_state in to_states)
+        return tuple(tuple(next_state_alea._p(to_state) for to_state in to_states)
                      for (state,next_state_alea) in self._next_state_lea_per_state
                      if state in from_states)
 
