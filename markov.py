@@ -26,7 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 from .lea import Lea
 from .alea import Alea
 from .tlea import Tlea
-from .toolbox import zip, dict
+from .toolbox import zip, dict, defaultdict
 from itertools import islice, tee
 
 class Chain(object):
@@ -79,18 +79,19 @@ class Chain(object):
     def from_seq(state_seq):
         ''' returns a new Chain instance from given sequence of state objects;
             the probabilities of state transitions are set according to transition
-            frequencies in the given sequence 
+            frequencies in the given sequence;
+            if last state of state_seq does not occur elsewhere in state_seq,
+            then this state is defined arbitrarily as an absorbing state (i.e.
+            its next state is itself with probability 1)
         '''
         (from_state_iter,to_state_iter) = tee(state_seq);
         for _ in to_state_iter:
             break
-        next_states_dict = dict()
+        next_states_dict = defaultdict(list)
         for (from_state,to_state) in zip(from_state_iter,to_state_iter):
-            next_states = next_states_dict.get(from_state)
-            if next_states is None:
-                next_states = []
-                next_states_dict[from_state] = next_states
-            next_states.append(to_state)
+            next_states_dict[from_state].append(to_state)
+        if to_state not in next_states_dict:
+            next_states_dict[to_state].append(to_state)
         next_state_name_and_objs = list(next_states_dict.items())
         next_state_name_and_objs.sort()
         next_state_lea_per_state = tuple((state,Alea.vals(*next_states))
