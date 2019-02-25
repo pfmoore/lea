@@ -174,17 +174,23 @@ class Chain(object):
         return tuple(tuple(next_state_alea._p(to_state) for to_state in to_states)
                      for (state,next_state_alea) in self._next_state_lea_per_state
                      if state in from_states)
-
-    def reachable_states(self,from_state,_cur_reachable_states=()):
+    
+    def reachable_states(self,from_state,_cur_reachable_states=None):
         ''' returns a tuple containing the states that can be reached starting from the
-            given from_state
+            given from_state; the returned states are ordered as defined in the 'states'
+            attribute of the MC
         '''
-        new_reachable_states = _cur_reachable_states + (from_state,)
+        if _cur_reachable_states is None:
+            new_reachable_states = set()
+        else:
+            new_reachable_states = _cur_reachable_states
+        new_reachable_states.add(from_state)
         for (to_state,p) in self._state_alea_dict[from_state].next_state()._gen_raw_vps():
             if p > 0 and to_state not in new_reachable_states:
-                new_reachable_states += self.reachable_states(to_state,new_reachable_states)
-        return new_reachable_states
-
+                self.reachable_states(to_state,new_reachable_states)
+        if _cur_reachable_states is None:
+            return tuple(state for state in self.states if state in new_reachable_states)
+    
     def absorbing_mc_info(self):
         ''' returns a tuple (is_absorbing,transient_states,absorbing_states,q_matrix,r_matrix)
             where
@@ -196,16 +202,17 @@ class Chain(object):
             * r_matrix         is a tuple of tuples given the t x r probability matrix
                                from transient to absorbing states
             notes:
-            - t > 0 iff the Markov chain is absorbing
-            - the order of rows and columns of returned matrices follows the order of the
-              returned transient_states and absorbing_states
+            - t > 0 iff the Markov chain is absorbing;
+            - the returned states in transient_states and absorbing_states are ordered as
+              defined in the 'states' attribute of the MC; the q_matrix and r_matrix matrices
+              follow the same order
         '''
-        reachable_states_by_state = dict((state,self.reachable_states(state))
-                                         for (state,next_state_alea) in self._next_state_lea_per_state)
-        absorbing_states = tuple(state for (state,reachable_states) in reachable_states_by_state.items()
+        reachable_states_by_state = tuple((state,self.reachable_states(state))
+                                          for (state,next_state_alea) in self._next_state_lea_per_state)
+        absorbing_states = tuple(state for (state,reachable_states) in reachable_states_by_state
                                             if len(reachable_states) == 1 and reachable_states[0] is state)
         absorbing_states_set = frozenset(absorbing_states)
-        transient_states = tuple(state for (state,reachable_states) in reachable_states_by_state.items()
+        transient_states = tuple(state for (state,reachable_states) in reachable_states_by_state
                                            if state not in absorbing_states
                                            and len(absorbing_states_set.intersection(reachable_states)) > 0)
         is_absorbing = len(self.states) == len(absorbing_states) + len(transient_states)
