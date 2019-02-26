@@ -29,6 +29,15 @@ from .tlea import Tlea
 from .toolbox import zip, dict, defaultdict
 from itertools import islice, tee
 
+# try to import optional numpy module
+try:
+    import numpy as np
+    # numpy module installed
+except:
+    # numpy module not installed
+    np = None
+
+
 class Chain(object):
     '''
     A Chain instance represents a Markov chain, with a given set of states
@@ -161,19 +170,27 @@ class Chain(object):
         from_state = self.state.given(cond_lea)
         return self.next_state(from_state,n)
     
-    def matrix(self,from_states=None,to_states=None):
-        ''' returns a tuple of tuples given the probability matrix of transition from given
-            iterable from_states to given iterable to_states;
+    def matrix(self,from_states=None,to_states=None,as_array=False):
+        ''' returns the probability matrix of transition from given iterable from_states to
+            given iterable to_states;
             if from_states or to_states is None (default), then it is replaced by all states
-            of Markov chain (so, without arguments, the full transition matrix is returned)
+            of Markov chain (so, without arguments, the full transition matrix is returned);
+            if as_array is False (default), then the matrix is returned as a tuple of tuples
+            otherwise, it is returned as a numpy array (an exception is raised if numpy is
+            not installed)
         '''
         if from_states is None:
             from_states = self.states
         if to_states is None:
             to_states = self.states
-        return tuple(tuple(next_state_alea._p(to_state) for to_state in to_states)
+        res_matrix = tuple(tuple(next_state_alea._p(to_state) for to_state in to_states)
                      for (state,next_state_alea) in self._next_state_lea_per_state
                      if state in from_states)
+        if as_array:
+            if np is None:
+                raise Lea.Error("the matrix() method requires the numpy package")
+            res_matrix = np.array(res_matrix)
+        return res_matrix
     
     def reachable_states(self,from_state,_cur_reachable_states=None):
         ''' returns a tuple containing the states that can be reached starting from the
@@ -191,21 +208,25 @@ class Chain(object):
         if _cur_reachable_states is None:
             return tuple(state for state in self.states if state in new_reachable_states)
     
-    def absorbing_mc_info(self):
-        ''' returns a tuple (is_absorbing,transient_states,absorbing_states,q_matrix,r_matrix)
+    def absorbing_mc_info(self,as_array=False):
+        ''' returns a tuple
+            (is_absorbing, transient_states, absorbing_states, q_matrix, r_matrix, n_matrix)
             where
             * is_absorbing     is a boolean telling whether the Markov chain is absorbing
             * transient_states is a tuple containing the t transient states
             * absorbing_states is a tuple containing the r absorbing states
-            * q_matrix         is a tuple of tuples given the t x t probability matrix
-                               from transient to transient states
-            * r_matrix         is a tuple of tuples given the t x r probability matrix
-                               from transient to absorbing states
+            * q_matrix         is the t x t probability matrix from transient to transient states
+            * r_matrix         is the t x r probability matrix from transient to absorbing states
+            * n_matrix         is the t x t fundamental matrix, defined as inv(I-q_matrix),
+                               calculated only if as_array is True (=None, otherwise)
             notes:
             - t > 0 iff the Markov chain is absorbing;
             - the returned states in transient_states and absorbing_states are ordered as
               defined in the 'states' attribute of the MC; the q_matrix and r_matrix matrices
               follow the same order
+            - if as_array is False (default), then the matrices are returned as a tuple of tuples
+              otherwise, they are returned as numpy arrays (an exception is raised if numpy is
+              not installed)
         '''
         reachable_states_by_state = tuple((state,self.reachable_states(state))
                                           for (state,next_state_alea) in self._next_state_lea_per_state)
@@ -216,9 +237,13 @@ class Chain(object):
                                            if state not in absorbing_states
                                            and len(absorbing_states_set.intersection(reachable_states)) > 0)
         is_absorbing = len(self.states) == len(absorbing_states) + len(transient_states)
-        q_matrix = self.matrix(from_states=transient_states,to_states=transient_states)
-        r_matrix = self.matrix(from_states=transient_states,to_states=absorbing_states)
-        return (is_absorbing,transient_states,absorbing_states,q_matrix,r_matrix)
+        q_matrix = self.matrix(from_states=transient_states,to_states=transient_states,as_array=as_array)
+        r_matrix = self.matrix(from_states=transient_states,to_states=absorbing_states,as_array=as_array)
+        if as_array:
+            n_matrix = np.linalg.inv(np.identity(len(transient_states))-q_matrix)
+        else:
+            n_matrix = None
+        return (is_absorbing,transient_states,absorbing_states,q_matrix,r_matrix,n_matrix)
 
 
 class StateAlea(Alea):
