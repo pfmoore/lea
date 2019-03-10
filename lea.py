@@ -28,7 +28,7 @@ import sys
 from itertools import islice
 import collections
 from .prob_fraction import ProbFraction
-from .toolbox import easy_min, easy_max, read_csv_filename, read_csv_file, dict, zip, isclose
+from .toolbox import min2, max2, read_csv_filename, read_csv_file, dict, zip, isclose
 
 class Lea(object):
     
@@ -816,14 +816,17 @@ class Lea(object):
     ## def max_of(*args,fast=False):
     @staticmethod
     def max_of(*args,**kwargs):
-        ''' static method, returns a new Flea instance giving the probabilities to
-            have the maximum value of each combination of the given args;
+        ''' static method, returns a Lea instance giving the probabilities to have
+            the maximum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
             to a Lea instance with probability 1;
-            if optional arg fast is False (default),
+            if optional arg fast is False (default), then
+                returns a Flea2 instance or, if there is only one argument in args,
+                this argument unchanged; 
                 the returned distribution keeps dependencies with args but the 
                 calculation could be prohibitively slow (exponential complexity);
             if optional arg fast is True,
+                returns an Alea instance;
                 the method uses an efficient algorithm (linear complexity), which is
                 due to Nicky van Foreest; for explanations, see
                 http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
@@ -831,25 +834,33 @@ class Lea(object):
                 any dependency with given args; this could be important if some args
                 appear in the same expression as Lea.max(...) but outside it, e.g.
                 conditional probability expressions
-        '''
+            requires at least one argument in args
+        '''        
         fast = kwargs.get('fast',False)
-        if not fast:
-            return Flea.build(easy_max,args)
-        alea_args = tuple(Alea.coerce(arg).get_alea() for arg in args)
-        return Alea.fast_extremum(Alea.p_cumul,*alea_args)
+        if fast:
+            alea_args = (Alea.coerce(arg).get_alea() for arg in args)
+            return Alea.fast_extremum(Alea.p_cumul,*alea_args)
+        #in PY3, could preferably use (max_lea,*args_tail) = args
+        max_lea = args[0]
+        for arg in args[1:]:
+            max_lea = Flea2(max2,max_lea,arg)
+        return max_lea
 
     ## in PY3, could use
     ## def min_of(*args,fast=False):
     @staticmethod
     def min_of(*args,**kwargs):
-        ''' static method, returns a new Flea instance giving the probabilities to
-            have the minimum value of each combination of the given args;
+        ''' static method, returns a Lea instance giving the probabilities to have
+            the minimum value of each combination of the given args;
             if some elements of args are not Lea instances, then these are coerced
             to a Lea instance with probability 1;
-            if optional arg fast is False (default),
+            if optional arg fast is False (default), then
+                returns a Flea2 instance or, if there is only one argument in args,
+                this argument unchanged; 
                 the returned distribution keeps dependencies with args but the 
                 calculation could be prohibitively slow (exponential complexity);
             if optional arg fast is True,
+                returns an Alea instance;
                 the method uses an efficient algorithm (linear complexity), which is
                 due to Nicky van Foreest; for explanations, see
                 http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
@@ -857,12 +868,17 @@ class Lea(object):
                 any dependency with given args; this could be important if some args
                 appear in the same expression as Lea.max(...) but outside it, e.g.
                 conditional probability expressions
+            requires at least one argument in args
         '''
         fast = kwargs.get('fast',False)
-        if not fast:
-            return Flea.build(easy_min,args)
-        alea_args = tuple(Alea.coerce(arg).get_alea() for arg in args)
-        return Alea.fast_extremum(Alea.p_inv_cumul,*alea_args)
+        if fast:
+            alea_args = (Alea.coerce(arg).get_alea() for arg in args)
+            return Alea.fast_extremum(Alea.p_inv_cumul,*alea_args)
+        #in PY3, could preferably use (min_lea,*args_tail) = args
+        min_lea = args[0]
+        for arg in args[1:]:
+            min_lea = Flea2(min2,min_lea,arg)
+        return min_lea
 
     def __lt__(self,other):
         ''' returns a Flea instance representing the boolean probability distribution
@@ -1243,7 +1259,21 @@ class Lea(object):
             return sum(1 for vp in self.gen_vp())
         finally:
             self._finalize_calc(bindings)
-    
+
+    def is_certain_value(self):
+        ''' returns True iff there is only one possible value, having probability 1
+                    False otherwise
+        '''
+        return len(tuple(None for (_,p) in self._gen_raw_vps() if p > 0)) == 1 
+
+    def get_certain_value(self):
+        ''' returns the value having probability 1
+            requires that such value exists (i.e. self.is_certain_value() returns True)
+        '''
+        vs = tuple(v for (v,p) in self._gen_raw_vps() if p > 0)
+        if len(vs) != 1:
+            raise Lea.Error("multiple values have a non-null probability")
+        return vs[0]
 
     def is_true(self):
         ''' returns True iff the value True has probability 1;

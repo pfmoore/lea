@@ -48,21 +48,21 @@ def make_tuple(v):
     '''    
     return (v,)
     
-def easy_min(*args):
-    ''' returns the minimum element of given args
-        Note: if only one arg, it is returned (unlike Python's min function)
+def min2(a,b):
+    ''' returns the minimum element between given a and b;
+        note: this is supposingly slightly more effecient than using standard Python min function
     '''
-    if len(args) == 1:
-        return args[0]
-    return min(args)
+    if a <= b:
+        return a
+    return b
 
-def easy_max(*args):
-    ''' returns the maximum element of given args
-        Note: if only one arg, it is returned (unlike Python's max function)
+def max2(a,b):
+    ''' returns the maximum element between given a and b;
+        note: this is supposingly slightly more effecient than using standard Python max function
     '''
-    if len(args) == 1:
-        return args[0]
-    return max(args)
+    if a >= b:
+        return a
+    return b
 
 def gen_pairs(seq):
     ''' generates as tuples all the pairs from the elements of given sequence seq
