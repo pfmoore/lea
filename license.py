@@ -4,7 +4,7 @@
     license.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2018 Pierre Denis
+Copyright 2013-2019 Pierre Denis
 
 This file is part of Lea.
 
