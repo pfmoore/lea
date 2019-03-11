@@ -88,8 +88,24 @@ def test_map():
     assert die1.map(parity).equiv(lea.vals("even", "odd"))
     assert die1.map(parity).map(len).equiv(lea.vals(3, 4))
 
-def test_multiarg_map():
+def test_min_of():
     die1 = lea.interval(1, 6)
     die2 = die1.new()
-    dist = lea.min_of(die1,die2)
-    assert dist.equiv(lea.pmf(((1,11), (2,9), (3,7), (4,5), (5,3), (6,1))))
+    die3 = die1.new()
+    assert lea.min_of(die1).equiv(die1)
+    assert lea.min_of(die1,die2).equiv(lea.pmf({1: 11, 2: 9, 3: 7, 4: 5, 5: 3, 6: 1}))
+    assert lea.min_of(die1,die2,die3).equiv(lea.pmf({1: 91, 2: 61, 3: 37, 4: 19, 5: 7, 6: 1}))
+    assert lea.min_of(die1,fast=True).equiv(die1)
+    assert lea.min_of(die1,die2,fast=True).equiv(lea.pmf({1: 11, 2: 9, 3: 7, 4: 5, 5: 3, 6: 1}))
+    assert lea.min_of(die1,die2,die3,fast=True).equiv(lea.pmf({1: 91, 2: 61, 3: 37, 4: 19, 5: 7, 6: 1}))
+        
+def test_max_of():
+    die1 = lea.interval(1, 6)
+    die2 = die1.new()
+    die3 = die1.new()
+    assert lea.max_of(die1).equiv(die1)
+    assert lea.max_of(die1,die2).equiv(lea.pmf({1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11}))
+    assert lea.max_of(die1,die2,die3).equiv(lea.pmf({1: 1, 2: 7, 3: 19, 4: 37, 5: 61, 6: 91}))
+    assert lea.max_of(die1,fast=True).equiv(die1)
+    assert lea.max_of(die1,die2,fast=True).equiv(lea.pmf({1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11}))
+    assert lea.max_of(die1,die2,die3,fast=True).equiv(lea.pmf({1: 1, 2: 7, 3: 19, 4: 37, 5: 61, 6: 91}))
