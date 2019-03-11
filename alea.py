@@ -102,12 +102,12 @@ class Alea(Lea):
 
     @staticmethod
     def prob_any(arg):
-        ''' static method returns a probability object corresponding to the
+        ''' static method, returns a probability object corresponding to the
             given arg:
             if arg is not a string, then it is returned as-is;
             if arg is a string, then it is tried to be interpreted as
             Decimal, Fraction or sympy symbol, in that order; the object
-            of the first succesful type is returned;
+            of the first successful type is returned;
         '''
         if not isinstance(arg,str):
             return arg
@@ -218,11 +218,11 @@ class Alea(Lea):
         ''' initializes Alea instance's attributes
             vs is a sequence of values
             ps is a sequence of probabilities (same length and order as ps)
-            if normalization argument is True (default), then probabilites ps are
+            if normalization argument is True (default), then probabilities ps are
             updated before being stored to ensure that their sum equals 1:
             * if one probability is None, then it is replaced by
                1 - sum(not None elements of ps)
-            * otherwise, each probability p is is replaced by p / sum(ps)
+            * otherwise, each probability p is replaced by p / sum(ps)
               (in such case, it's not mandatory to have true probabilities for ps
                elements; these could be simple counters for example)
             if prob_type is different from -1, then the given probabilities ps
@@ -367,8 +367,8 @@ class Alea(Lea):
 
     @staticmethod
     def _check_not_empty(arg):
-        ''' static method, verify that the given arg is not empty;
-            otherwise raises an exception
+        ''' static method, verifies that the given arg is not empty;
+            otherwise, raises an exception
         '''
         if len(arg) == 0:
             raise Lea.Error("cannot build a probability distribution with no value - maybe due to impossible evidence")        
@@ -397,7 +397,7 @@ class Alea(Lea):
             arg, which is
               either a dictionary { v1:p1, ... , vn:pn }
               or an iterable of pairs (v1,p1), ... , (vn,pn)
-            pi is the probability of occurrence of vi or a number proportinal
+            pi is the probability of occurrence of vi or a number proportional
             to it (see normalization argument below);
             in the iterable case, if the same value v occurs multiple times,
             then the associated p are summed together;
@@ -499,7 +499,7 @@ class Alea(Lea):
             i.e. in the range [0,1];
             if comparisons are infeasible on p, then p is assumed to be a
             symbolic probability and is considered valid;
-            raise Lea.Error exception if invalid
+            raises Lea.Error exception if invalid
         '''
         try:
             is_valid = 0 <= p <= 1
@@ -548,7 +548,7 @@ class Alea(Lea):
 
     @staticmethod
     def bernoulli(p,prob_type=None):
-        ''' static method, returns an Alea instance representing a bernoulli
+        ''' static method, returns an Alea instance representing a Bernoulli
             distribution giving 1 with probability p and 0 with probability
             1-p;
             prob_type argument allows converting the given probability p:
@@ -918,13 +918,13 @@ class Alea(Lea):
 
     def plot(self,title=None,fname=None,savefig_args=dict(),**bar_args):
         ''' produces a matplotlib bar chart representing the probability distribution self
-            with the given title (if not None); the bar chart may be customised by using
+            with the given title (if not None); the bar chart may be customized by using
             named arguments bar_args, which are relayed to matplotlib.pyplot.bar function
             (see doc in http://matplotlib.org/api/pyplot_api.html)
             * if fname is None, then the chart is displayed on screen, in a matplotlib window;
               the previous chart, if any, is erased
             * otherwise, the chart is saved in a file specified by given fname as specified
-              by matplotlib.pyplot.savefig; the file format may be customised by using
+              by matplotlib.pyplot.savefig; the file format may be customized by using
               savefig_args argument, which is a dictionary relayed to matplotlib.pyplot.savefig
               function and containing named arguments expected by this function;
               example:
@@ -1027,7 +1027,7 @@ class Alea(Lea):
     def _gen_one_random_mc(self):
         ''' generates one random value from the current probability distribution,
             WITHOUT precalculating the exact probability distribution (contrarily to 'random' method);
-            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            this obeys the "binding" mechanism, so if the same variable is referred multiple times in
             a given expression, then same value will be yielded at each occurrence; 
             before yielding the random value v, this value v is bound to the current instance;
             then, if the current calculation requires to get again a random value on the current

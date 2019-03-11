@@ -41,15 +41,15 @@ class Lea(object):
 
     A Lea instance can be defined by a sequence of (value,probability), giving the probability 
     of each value. A Lea instance can be defined also by a sequence of values, the probability
-    of a given value being its frauency in the sequence.
+    of a given value being its frequency in the sequence.
 
     Lea instances can be combined in arithmetic expressions resulting in new Lea instances, by
     obeying the following rules:
 
     - Lea instances can be added, subtracted, multiplied and divided together,
     through +, -, *, /, // operators. The resulting distribution's values and probabilities
-    are determined by combination of operand's values with a sumed by probability
-    products (the operation known as 'convolution', for the adition case).
+    are determined by combination of operand's values into sums of probability
+    products (the operation known as 'convolution', for the addition case).
     - Other supported binary arithmetic operators are power (**), modulo (%) and
     divmod function.
     - Unary operators +, - and abs function are supported also.
@@ -78,8 +78,8 @@ class Lea(object):
 
     Lea instances can be used to generate random values, respecting the given probabilities.
     There are two Lea methods for this purpose:
-    - random:   calculates the exact probabiliy distribution, then takes random values 
-    - random_mc: takes random values from atomic probabiliy distribution, then makes the 
+    - random:   calculates the exact probability distribution, then takes random values 
+    - random_mc: takes random values from atomic probability distribution, then makes the 
                 required calculations (Monte-Carlo algorithm)
     The random_mc is suited for complex distributions, when calculation of exact probability
     distribution is intractable. This could be used to provide an estimation of the probability
@@ -93,7 +93,7 @@ class Lea(object):
     Each subclass defines what are the (value,probability) pairs or how they can be generated (see
     _gen_vp method implemented in each Lea subclass). The Lea class acts as a facade, by providing
     different constructors (static methods) to instantiate these subclasses, so it is usually not
-    needed to instantiate Lea subcasses explicitely. Here is an overview on these subclasses, with
+    needed to instantiate Lea subcasses explicitly. Here is an overview on these subclasses, with
     their relationships.
 
     - An Alea instance is defined by explicit value-probability pairs, that is a probability mass
@@ -103,7 +103,7 @@ class Lea(object):
     done on existing Lea instance(s). Any such instance forms a direct acyclic graph (DAG) structure,
     having other Lea instances as nodes and Alea instances as leaves. This uses "lazy evaluation":
     actual (value,probability) pairs are calculated only at the time they are required (e.g. display,
-    queryprobability of a given value, etc); then, these are aggregated in a new Alea instance. This 
+    query probability of a given value, etc); then, these are aggregated in a new Alea instance. This 
     Alea instance is then cached, as an attribute of the queried Lea instance, for speeding up next
     queries.
     
@@ -119,7 +119,7 @@ class Lea(object):
              representing a boolean condition (conditional probabilities)
     - Rlea   embeds Lea instances as values of a parent Lea instance 
     - Blea   defines CPT, providing Lea instances corresponding to given conditions
-             (used for bayesian networks)
+             (used for Bayesian networks)
 
     Note that Flea1 and Flea2 subclasses have more efficient implementation than Flea subclass'.
 
@@ -224,7 +224,7 @@ class Lea(object):
                 self._val = self
 
     def _reset_gen_vp(self):
-        ''' set gen_vp = None on self and all Lea descendants
+        ''' sets gen_vp = None on self and all Lea descendants
         '''
         self.gen_vp = None
         # treat children recursively, up to Alea instances
@@ -232,7 +232,7 @@ class Lea(object):
             lea_child._reset_gen_vp()
 
     def _set_gen_vp(self,memoization=True):
-        ''' prepare calculation of probability distribution by binding x.gen_vp to the most adequate method,
+        ''' prepares calculation of probability distribution by binding x.gen_vp to the most adequate method,
             where x is self or any of self descendents: x.gen_vp is bound
             - to x._gen_vp method, if no binding is required (single occurrence of self in expression and no
               explicit binding of x)
@@ -267,10 +267,10 @@ class Lea(object):
         return self._val is not self
 
     def _init_calc(self,bindings=None,memoization=True):
-        ''' prepare calculation of probability distribution by binding self.gen_vp to the most adequate method;
+        ''' prepares calculation of probability distribution by binding self.gen_vp to the most adequate method;
             see _set_gen_vp method
             if bindings is not None, then it is browsed as a dictionary: each key (Alea instance) is bound
-            to the associated value - eee requirements of Lea.observe.
+            to the associated value - see requirements of Lea.observe.
         '''
         self._reset_gen_vp()
         # set explicit bindings, if any
@@ -281,7 +281,7 @@ class Lea(object):
         self._set_gen_vp(memoization)
 
     def _finalize_calc(self,bindings=None):
-        ''' make finalization after pmf calculation, by unbinding all instances bound in
+        ''' makes finalization after pmf calculation, by unbinding all instances bound in
             _init_calc, supposed to be present in given bindings dictionary
         '''
         if bindings is not None:
@@ -321,7 +321,7 @@ class Lea(object):
             if n = 1, then a copy of self is returned;
             requires that n is strictly positive; otherwise, an exception is
             raised;
-            note that the implementation uses a fast dichotomic algorithm,
+            note that the implementation uses a fast dichotomous algorithm,
             instead of a naive approach that scales up badly as n grows
         '''
         alea1 = self.get_alea()
@@ -423,7 +423,7 @@ class Lea(object):
         ''' returns a new Flea instance by building named tuples from self, which
             is supposed to have n-tuples as values, using the n given attr_names;
             note: this is useful to access fields of joint probability distribution
-            by names instead instead of indices
+            by names instead of indices
         '''
         NTClass = collections.namedtuple('_',attr_names)
         return self.map(lambda a_tuple: NTClass(*a_tuple))
@@ -599,9 +599,9 @@ class Lea(object):
     def subs(self,*args):
         ''' returns a new Alea instance, equivalent to self, where probabilities have been converted
             by applying subs(*args) on them;
-            this is useful for substituying variables when probabilities are expressesd as sympy
+            this is useful for substituting variables when probabilities are expressed as sympy
             expressions (see doc of sympy.Expreesion.subs method);
-            requires that all self's probabiliies have a 'subs' method available
+            requires that all self's probabilities have a 'subs' method available
         '''
         return Alea(*zip(*((v,p.subs(*args)) for (v,p) in self._gen_raw_vps())),normalization=False)
 
@@ -622,7 +622,7 @@ class Lea(object):
             specific Lea instance;
             if default_lea is given, then it provides the Lea instance associated to the
             value(s) of self missing in lea_dict;
-            all dictionary's values and default_lea (if defined) are cast to Lea instances
+            all dictionary's values and default_lea (if defined) are coerced to Lea instances
         '''
         return Tlea(self,lea_dict,default_lea)
 
@@ -691,12 +691,12 @@ class Lea(object):
             the method builds up the 'to' variable of the BN as a CPT calculated from
             each combination of 'from' variables in the joint probability distribution:
             for each such combination C, the distribution of 'to' variable is calculated
-            by marginalisation on the joint probability distribution given the C condition;
+            by marginalization on the joint probability distribution given the C condition;
             possible missing combinations are covered in an 'else' clause on the CPT
             that is defined as a uniform distribution of the values of 'to' variable,
             which are found in the other clauses (principle of indifference);
-            the variables that are never refered as 'to' variable are considered
-            as independent in the BN and are calculated by unconditional marginalisation
+            the variables that are never referred as 'to' variable are considered
+            as independent in the BN and are calculated by unconditional marginalization
             on the joint probability distribution;
             if a variable appears in more than one 'to' variable, then an exception is
             raised (error)
@@ -740,7 +740,7 @@ class Lea(object):
 
     @staticmethod
     def make_vars(obj,tgt_dict,prefix='',suffix=''):
-        ''' static method, retrieve attributes names A1, ... , An of obj and
+        ''' static method, retrieves attributes names A1, ... , An of obj and
             put associations {V1 : obj.A1, ... , Vn : obj.An} in tgt_dict dictionary
             where Vi is a variable name string built as prefix + Ai + suffix;
             obj is
@@ -750,7 +750,7 @@ class Lea(object):
             with the attributes A1, ... , An (such Lea instance is returned by
             as_joint method, for example);
             note: if the caller passes globals() as tgt_dict, then the variables
-            named Vi, refering to obj.Ai, shall be created in its scope, as
+            named Vi, referring to obj.Ai, shall be created in its scope, as
             a side-effect (this is the purpose of the method);
             warning: the method may silently overwrite caller's variables
         '''
@@ -791,7 +791,7 @@ class Lea(object):
             if the attribute name is a distribution indicator, then the distribution
             is evaluated and the indicator method is called; 
             if the attribute name is unknown as a Lea instance's attribute,
-            then returns a Flea instance that shall retrieve the attibute in the
+            then returns a Flea instance that shall retrieve the attribute in the
             values of current distribution; 
             called on evaluation of "self.attr_name"
             WARNING: the following methods are called without parentheses:
@@ -1129,8 +1129,8 @@ class Lea(object):
 
     @staticmethod
     def _check_booleans(op_msg,*vals):
-        ''' static method, raise an exception if any of vals arguments is not boolean;
-            the exception messsage refers to the name of a logical operation given in the op_msg argument
+        ''' static method, raises an exception if any of vals arguments is not boolean;
+            the exception message refers to the name of a logical operation given in the op_msg argument
         '''
         for val in vals:
             if not isinstance(val,bool):
@@ -1177,7 +1177,7 @@ class Lea(object):
     def _gen_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability (integer > 0);
-            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            this obeys the "binding" mechanism, so if the same variable is referred multiple times in
             a given expression, then same value will be yielded at each occurrence;
             Lea._gen_vp method is abstract: it is implemented in all Lea's subclasses
         '''
@@ -1186,7 +1186,7 @@ class Lea(object):
     def _gen_one_random_mc(self):
         ''' generates one random value from the current probability distribution,
             WITHOUT precalculating the exact probability distribution (contrarily to 'random' method);
-            this obeys the "binding" mechanism, so if the same variable is refered multiple times in
+            this obeys the "binding" mechanism, so if the same variable is referred multiple times in
             a given expression, then same value will be yielded at each occurrence; 
             before yielding the random value v, this value v is bound to the current instance;
             then, if the current calculation requires to get again a random value on the current
@@ -1322,7 +1322,7 @@ class Lea(object):
             probability expressed as a rational number "n/d" or "0" or "1";
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
-            called on evalution of "str(self)" and "repr(self)"
+            called on evaluation of "str(self)" and "repr(self)"
         '''        
         return self.get_alea().__str__()
 
@@ -1365,13 +1365,13 @@ class Lea(object):
     def plot(self,title=None,fname=None,savefig_args=dict(),**bar_args):
         ''' produces, after evaluation of the probability distribution self,
             a matplotlib bar chart representing it with the given title (if not None);
-            the bar chart may be customised by using named arguments bar_args, which are
+            the bar chart may be customized by using named arguments bar_args, which are
             relayed to matplotlib.pyplot.bar function
             (see doc in http://matplotlib.org/api/pyplot_api.html)
             * if fname is None, then the chart is displayed on screen, in a matplotlib window;
               the previous chart, if any, is erased
             * otherwise, the chart is saved in a file specified by given fname as specified
-              by matplotlib.pyplot.savefig; the file format may be customised by using
+              by matplotlib.pyplot.savefig; the file format may be customized by using
               savefig_args argument, which is a dictionary relayed to matplotlib.pyplot.savefig
               function and containing named arguments expected by this function;
               example:
@@ -1396,21 +1396,21 @@ class Lea(object):
         return self._alea
 
     def reset(self):
-        ''' erase the Alea cache, so to force the recalculation at next call to get_alea();
+        ''' erases the Alea cache, so to force the recalculation at next call to get_alea();
             note: there is no need to call this method, except for freeing memory or for making
             cleanup after hacking private attributes of Lea instances assumed immutable
         ''' 
         self._alea = None
 
     def observe(self,v):
-        ''' (re)bind self with given value v;
+        ''' (re)binds self with given value v;
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             requires that v is present in the domain of self
         '''
         raise Lea.Error("impossible to bind %s because it depends of other instances"%self._id())
 
     def free(self,check=True):
-        ''' unbind self;
+        ''' unbinds self;
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             if check is True, then requires that self is bound
         '''
@@ -1434,26 +1434,26 @@ class Lea(object):
 
     def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True):
         ''' same as Lea.new method, adding three advanced optional arguments that allow changing the
-            behavior of the probabilstic inference algorithm (the "Statues" algorithm):
+            behavior of the probabilistic inference algorithm (the "Statues" algorithm):
             * normalization (default:True): if True, then each probability is divided
               by the sum of all probabilities before being stored; this division is essential to
-              get exct results in case of conditional probabilities;
-              seeting normalization=False is useful,
-              - tu speed up if the caller guarantee that the probabilities sum is 1
-              - or to get unnormalized probabilities of a subset of a given probability distribution
+              get exact results in case of conditional probabilities;
+              setting normalization=False is useful,
+              - to speed up if the caller guarantee that the probabilities sum is 1
+              - or to get non-normalized probabilities of a subset of a given probability distribution
             * bindings (default: None): if not None, it is a dictionary {a1:v1, a2:v2 ,... }
               associating some Alea instances a1, a2, ... to specific values v1, v2, ... of their
-              respectives domains; these Alea instances are then temporarily bound for calculating
+              respective domains; these Alea instances are then temporarily bound for calculating
               the resulting pmf; this offers an optimization over the self.given(a1==v1, a2==v2, ...)
               construct, (this last gives the same result but requires browsing the whole v1, v2, ...
-              domains, evaluting the given equalities)
+              domains, evaluating the given equalities)
             * memoization (default: True): if False, then no binding is performed by the algorithm,
               hence reference consistency is no more respected; this option returns WRONG results in all
-              construction refering multiple times to the same instances (e.g. conditional probability
+              construction referring multiple times to the same instances (e.g. conditional probability
               and Bayesian reasoning); this option has no real use, excepting demonstrating by absurd the
-              importance of memoization and referential consitency in the Sattues algorithm; note that
-              this option offers NO speedup when evaluting expressions not requiring referential
-              consitency: such cases are already detected and optimize by the calculation pretreatrement
+              importance of memoization and referential consistency in the Statues algorithm; note that
+              this option offers NO speedup when evaluating expressions not requiring referential
+              consistency: such cases are already detected and optimize by the calculation preprocessing
               (see Lea._init_calc).
             if bindings is defined, then
             - requires that bindings is a dictionary;
@@ -1474,7 +1474,7 @@ class Lea(object):
 
     def cumul(self):
         ''' evaluates the distribution, then,
-            returns a tuple with probabilitys p that self <= value ;
+            returns a tuple with probabilities p that self <= value ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call
@@ -1484,7 +1484,7 @@ class Lea(object):
         
     def inv_cumul(self):
         ''' evaluates the distribution, then,
-            returns a tuple with the probabilitys p that self >= value ;
+            returns a tuple with the probabilities p that self >= value ;
             the sequence follows the order defined on values (if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
             order is used, fixed from call to call

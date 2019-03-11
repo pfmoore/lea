@@ -50,7 +50,7 @@ def make_tuple(v):
     
 def min2(a,b):
     ''' returns the minimum element between given a and b;
-        note: this is supposingly slightly more effecient than using standard Python min function
+        note: this is slightly more efficient than using standard Python min function
     '''
     if a <= b:
         return a
@@ -58,7 +58,7 @@ def min2(a,b):
 
 def max2(a,b):
     ''' returns the maximum element between given a and b;
-        note: this is supposingly slightly more effecient than using standard Python max function
+        note: this is slightly more effcient than using standard Python max function
     '''
     if a >= b:
         return a
@@ -119,7 +119,7 @@ if sys.version_info[0] == 2:
     def next(it):
         return it.next()
     # the dictionary classes shall have keys, values, items methods
-    # wich are iterators; note that dictionaries must be created
+    # which are iterators; note that dictionaries must be created
     # with dict() instead of {}
     class dict(dict):
         keys = dict.iterkeys
@@ -138,11 +138,11 @@ else:
     dict = dict
 
 def indent(str_func,obj,width):
-    ''' retrun a string represention of given object obj obtained
+    ''' returns a string representation of given object obj obtained
         by applying given function str_func and justifying on given
         width; the string is left-justified except if obj is a number
     '''
-    ## note that bool is a subtype of int, although it shall not be eigtht-justifid as a number
+    ## note that bool is a subtype of int, although it shall not be right-justified as a number
     if isinstance(obj,numeric_types) and not isinstance(obj,bool):
         return str_func(obj).rjust(width)
     return str_func(obj).ljust(width)
@@ -170,8 +170,8 @@ def memoize(f):
    return wrapper
 
 def str_to_bool(b_str):
-    ''' returns True  if b_str is '1', 't', 'true', 'y' or 'yes' (case insentive)
-                False if b_str is '0', 'f', 'false', 'n' or 'no' (case insentive)
+    ''' returns True  if b_str is '1', 't', 'true', 'y' or 'yes' (case insensitive)
+                False if b_str is '0', 'f', 'false', 'n' or 'no' (case insensitive)
         raise ValueError exception in other cases
     '''
     b_str = b_str.lower()
@@ -191,7 +191,7 @@ def read_csv_filename(csv_filename,col_names=None,dialect='excel',**fmtparams):
 
 def read_csv_file(csv_file,col_names=None,dialect='excel',**fmtparams):
     ''' returns a tuple (attr_names,data_freq) from the data read in the given CSV file
-        * attr_names is a tuplewith the attribute names found in the header row 
+        * attr_names is a tuple with the attribute names found in the header row 
         * data_freq is a list of tuples (tuple_value,count) for each CSV row 
           with tuple_value containing read fields and count the positive integer
           giving the probability weight of this row;

@@ -2,7 +2,7 @@ import lea
 from lea import Pf
 from lea.toolbox import isclose
 
-# test made with dloat representaion for probabilities
+# test made with float representation for probabilities
 lea.set_prob_type('f')
 
 def PF(a,b):
