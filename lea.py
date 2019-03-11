@@ -840,9 +840,9 @@ class Lea(object):
         if fast:
             alea_args = (Alea.coerce(arg).get_alea() for arg in args)
             return Alea.fast_extremum(Alea.p_cumul,*alea_args)
-        #in PY3, could preferably use (max_lea,*args_tail) = args
-        max_lea = args[0]
-        for arg in args[1:]:
+        args_iter = iter(args)
+        max_lea = next(args_iter)
+        for arg in args_iter:
             max_lea = Flea2(max2,max_lea,arg)
         return max_lea
 
@@ -874,9 +874,9 @@ class Lea(object):
         if fast:
             alea_args = (Alea.coerce(arg).get_alea() for arg in args)
             return Alea.fast_extremum(Alea.p_inv_cumul,*alea_args)
-        #in PY3, could preferably use (min_lea,*args_tail) = args
-        min_lea = args[0]
-        for arg in args[1:]:
+        args_iter = iter(args)
+        min_lea = next(args_iter)
+        for arg in args_iter:
             min_lea = Flea2(min2,min_lea,arg)
         return min_lea
 
