@@ -29,6 +29,8 @@ class Rlea(Lea):
     
     '''
     Rlea is a Lea subclass, which instance has other Lea instances as values.
+    An Rlea instance is a "mixture pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
     
     __slots__ = ('_lea_of_leas',)

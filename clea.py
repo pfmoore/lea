@@ -34,6 +34,8 @@ class Clea(Lea):
     joint L1 x ... x Ln; it associates each (v1,...,vn) tuple with probability
     P((v1,...,vn)) of having jointly (v1,...,vn). If the n events are independent,
     then P((v1,...,vn)) = product P1(v1) x ... x Pn(vn).
+    A Clea instance is a "table pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
     
     __slots__ = ('_lea_args',)

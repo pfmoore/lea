@@ -32,6 +32,8 @@ class Flea2(Lea):
     Flea2 is a Lea subclass, which instance is defined by a given function applied on two given arguments.
     The function is applied on all elements of the joint of the arguments. This results in a new
     probability distribution for all the values returned by the function.
+    A Flea2 instance is a "functional pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
     
     __slots__ = ('_f','_lea_arg1','_lea_arg2')

@@ -33,6 +33,8 @@ class Glea(Lea):
     on a given sequence of arguments. The arguments are coerced to Lea instances. All functions are applied
     on all elements of cartesian product of all arguments (see Clea class). This results in a new probability
     distribution for all the values returned by calls to all the functions.
+    A Glea instance is a "multi-functional pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
     
     __slots__ = ('_clea_func_and_args',)

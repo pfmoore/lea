@@ -31,6 +31,8 @@ class Flea1(Lea):
     Flea1 is a Lea subclass, which instance is defined by a given function applied on one given Lea argument.
     The function is applied on all values of the argument. This results in a new probability distribution
     for all the values returned by the function.
+    A Flea1 instance is a "functional pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
     
     __slots__ = ('_f','_lea_arg')

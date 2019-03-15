@@ -34,6 +34,8 @@ class Ilea(Lea):
     which is the AND of given boolean conditions Cj(Vi).
     In the context of a conditional probability table (CPT), each Ilea instance represents
     a given distribution <Vi,p(Vi|C)>, assuming that a given condition C is verified (see Blea class).
+    An Ilea instance is a "conditional pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
 
     __slots__ = ('_lea1','_cond_leas')

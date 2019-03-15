@@ -33,6 +33,8 @@ class Tlea(Lea):
     Tlea is a Lea subclass, which instance represents a conditional probability
     table (CPT) giving a Lea instance C and a dictionary associating each
     possible value of C to a specific Lea instance.
+    A Tlea instance is a "table pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
 
     __slots__ = ('_lea_c','_lea_dict','_default_lea')

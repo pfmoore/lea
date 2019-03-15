@@ -94,10 +94,11 @@ class Lea(object):
     _gen_vp method implemented in each Lea subclass). The Lea class acts as a facade, by providing
     different constructors (static methods) to instantiate these subclasses, so it is usually not
     needed to instantiate Lea subcasses explicitly. Here is an overview on these subclasses, with
-    their relationships.
+    their relationships. We indicate the equivalent type of "p-expression" ("pex" for short) as
+    defined in the paper on the Statues algorithm - see below. 
 
-    - An Alea instance is defined by explicit value-probability pairs, that is a probability mass
-    function (p.m.f.) defined by extension.
+    - An Alea instance (elementary pex) is defined by explicit value-probability pairs, that is a
+    probability mass function (p.m.f.) defined by extension.
 
     Instances of other Lea's subclasses represent probability distributions obtained by operations
     done on existing Lea instance(s). Any such instance forms a direct acyclic graph (DAG) structure,
@@ -107,22 +108,23 @@ class Lea(object):
     Alea instance is then cached, as an attribute of the queried Lea instance, for speeding up next
     queries.
     
-    Here is a brief presentation of these Lea's subclasses: 
+    Here is a brief presentation of these Lea's subclasses.
+    - Clea   (tuple pex) provides the joint of a given sequence of Lea instances
+    - Flea   (functional pex) applies a given n-ary function to a given sequence of n Lea instances
+    - Flea1  (functional pex) applies a given 1-ary function to a given Lea instance
+    - Flea2  (functional pex) applies a given 2-ary function to two given Lea instances
+    - Glea   (multi-functional pex) applies n-ary functions present in a given Lea instance to a
+             given sequence of n Lea instances
+    - Ilea   (conditional pex) filters the values of a given Lea instance according to a given Lea
+             instance representing a boolean condition (conditional probabilities)
+    - Rlea   (mixture pex) embeds Lea instances as values of a parent Lea instance 
+    - Tlea   (table pex) defines CPT by a dictionary associating Lea instances to given values
+    - Blea   (mixture pex) defines CPT by associating Lea instances to conditions
 
-    - Clea   provides the joint of a given sequence of Lea instances
-    - Flea   applies a given n-ary function to a given sequence of n Lea instances
-    - Flea1  applies a given 1-ary function to a given Lea instance
-    - Flea2  applies a given 2-ary function to two given Lea instances
-    - Glea   applies n-ary functions present in a given Lea instance to a given sequence of n Lea
-             instances
-    - Ilea   filters the values of a given Lea instance according to a given Lea instance
-             representing a boolean condition (conditional probabilities)
-    - Rlea   embeds Lea instances as values of a parent Lea instance 
-    - Blea   defines CPT, providing Lea instances corresponding to given conditions
-             (used for Bayesian networks)
-
-    Note that Flea1 and Flea2 subclasses have more efficient implementation than Flea subclass'.
-
+    Note that Flea1 and Flea2 subclasses have more efficient implementation than Flea subclass.
+    Tlea and Blea may be used to define Bayesian networks. Tlea class is the closest to CPT
+    concept since it stores the table in a dictionary. 
+    
     WARNING: The following methods are called without parentheses (for the sake of ease of use):
       P, Pf, mean, mean_f, var, var_f, std, std_f, mode, entropy, rel_entropy, redundancy, information,
       support, ps, pmf_tuple, pmf_dict, cdf_tuple, cdf_dict, p_sum
@@ -136,7 +138,10 @@ class Lea(object):
     distributions.
     It implements an original algorithm, called the "Statues" algorithm, by reference to the game of the
     same name; this uses a variable binding mechanism that relies on Python's generators. To learn more,
-    see doc of Alea._gen_vp method as well as other Xlea._gen_vp methods implemented in Lea's subclasses. 
+    you may read the paper "Probabilistic inference using generators - the Statues algorithm", freely
+    available on http://arxiv.org/abs/1806.09997. The heart of the algorithm is implemented in
+    Alea._gen_vp method as well as other <X>lea._gen_vp methods implemented in Lea's subclasses (see doc
+    of these methods).
     '''
 
     class Error(Exception):
@@ -622,7 +627,7 @@ class Lea(object):
             specific Lea instance;
             if default_lea is given, then it provides the Lea instance associated to the
             value(s) of self missing in lea_dict;
-            all dictionary's values and default_lea (if defined) are coerced to Lea instances
+            all dictionary's values and default_lea (if defined) are coerced to Alea instances
         '''
         return Tlea(self,lea_dict,default_lea)
 

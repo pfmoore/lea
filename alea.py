@@ -69,6 +69,8 @@ class Alea(Lea):
     An Alea instance is defined by given value-probability pairs, that is an explicit probability
     mass function (pmf). The probabilities can be expressed as any object with arithmetic semantic.
     The main candidates are float, fraction or symbolic expressions.
+    An Alea instance is an "elementary pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
 
     __slots__ = ('_vs','_ps','_cumul','_inv_cumul','_random_iter','_caches_by_func')

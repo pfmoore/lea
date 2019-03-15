@@ -42,6 +42,8 @@ class Blea(Lea):
     The set of conditions shall form a partition of the "certain true", i.e.
      ORing  all conditions shall give a "certain true" distribution
      ANDing all conditions pairwise shall give "certain false" distributions
+    A Blea instance is a "misxture pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
 
     __slots__ = ('_ileas','_cond_clea')

@@ -33,6 +33,8 @@ class Flea(Lea):
     of arguments. The arguments are coerced to Lea instances. The function is applied on all elements
     of cartesian product of all arguments (see Clea class). This results in a new probability
     distribution for all the values returned by the function.
+    A Flea instance is a "functional pex", as defined in the paper on Statues algorithm
+    (see http://arxiv.org/abs/1806.09997).
     '''
     
     __slots__ = ('_f','_clea_args')
