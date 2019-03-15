@@ -119,11 +119,14 @@ class Lea(object):
              instance representing a boolean condition (conditional probabilities)
     - Rlea   (mixture pex) embeds Lea instances as values of a parent Lea instance 
     - Tlea   (table pex) defines CPT by a dictionary associating Lea instances to given values
+    - Slea   (NOT DESCRIBED) defines CPT by a function associating Lea instances to given values
     - Blea   (mixture pex) defines CPT by associating Lea instances to conditions
 
     Note that Flea1 and Flea2 subclasses have more efficient implementation than Flea subclass.
-    Tlea and Blea may be used to define Bayesian networks. Tlea class is the closest to CPT
-    concept since it stores the table in a dictionary. 
+    Tlea, Slea and Blea may be used to define Bayesian networks. Tlea class is the closest to CPT
+    concept since it stores the table in a dictionary. Slea allows to define CPT by means of a
+    function, which could be more compact to store than an explicit table; it may be useful in
+    particular for noisy-or and noisy-max models.  
     
     WARNING: The following methods are called without parentheses (for the sake of ease of use):
       P, Pf, mean, mean_f, var, var_f, std, std_f, mode, entropy, rel_entropy, redundancy, information,
@@ -630,6 +633,14 @@ class Lea(object):
             all dictionary's values and default_lea (if defined) are coerced to Alea instances
         '''
         return Tlea(self,lea_dict,default_lea)
+
+    def switch_func(self,f):
+        ''' returns an instance of Slea representing a conditional probability table (CPT)
+            defined by the given function f associating each value of self to a
+            specific Lea instance, if returned value is not a Lea instance, then it is
+            coerced to Alea instance
+        '''
+        return Slea(self,f)
 
     ## note: in PY3, could use:
     ## def cpt(*clauses,prior_lea=None,auto_else=False,check=True):
@@ -1619,6 +1630,7 @@ from .flea2 import Flea2
 from .flea2a import Flea2a
 from .glea import Glea
 from .tlea import Tlea
+from .slea import Slea
 
 # init Alea class with default 'x' type code: if a probability is expressed as
 # a string, then the target type is determined from its content
