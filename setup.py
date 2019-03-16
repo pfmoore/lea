@@ -41,7 +41,7 @@ setup( name = 'lea',
        package_dir = {'lea': ''},
        data_files = [(join(get_python_lib(),'lea'), [ 'COPYING', 'COPYING.LESSER', 'README.md' ] ) ],
        classifiers=[
-          "Development Status :: 5 - Production/Stable",
+          "Development Status ::  4 - Beta",
           "Programming Language :: Python :: 2.6",
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3",
