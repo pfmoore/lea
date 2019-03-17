@@ -788,13 +788,6 @@ class Lea(object):
         '''
         return Glea.build(self,args)
 
-    def __getitem__(self,index):
-        ''' returns a new Flea instance representing the probability distribution
-            obtained by indexing or slicing each value with index
-            called on evaluation of "self[index]"
-        '''
-        return Flea2(operator.getitem,self,index)
-
     def __iter__(self):
         ''' raises en error exception
             called on evaluation of "iter(self)", "tuple(self)", "list(self)"
@@ -896,253 +889,6 @@ class Lea(object):
             min_lea = Flea2(min2,min_lea,arg)
         return min_lea
 
-    def __lt__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            that the values of self are less than the values of other;
-            called on evaluation of "self < other"
-        '''
-        return Flea2(operator.lt,self,other)
-
-    def __le__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            that the values of self are less than or equal to the values of other;
-            called on evaluation of "self <= other"
-        '''
-        return Flea2(operator.le,self,other)
-
-    def __eq__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            that the values of self are equal to the values of other;
-            called on evaluation of "self == other"
-        '''
-        return Flea2(operator.eq,self,other)
-
-    def __hash__(self):
-        return id(self)
-
-    def __ne__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            that the values of self are different from the values of other;
-            called on evaluation of "self != other"
-        '''
-        return Flea2(operator.ne,self,other)
-
-    def __gt__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            that the values of self are greater than the values of other;
-            called on evaluation of "self > other"
-        '''
-        return Flea2(operator.gt,self,other)
-
-    def __ge__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            that the values of self are greater than or equal to the values of other;
-            called on evaluation of "self >= other"
-        '''
-        return Flea2(operator.ge,self,other)
-    
-    def __add__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the addition of the values of self with the values of other;
-            called on evaluation of "self + other"
-        '''
-        return Flea2(operator.add,self,other)
-
-    def __radd__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the addition of the values of other with the values of self;
-            called on evaluation of "other + self"
-        '''
-        return Flea2(operator.add,other,self)
-
-    def __sub__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the subtraction of the values of other from the values of self;
-            called on evaluation of "self - other"
-        '''
-        return Flea2(operator.sub,self,other)
-
-    def __rsub__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the subtraction of the values of self from the values of other;
-            called on evaluation of "other - self"
-        '''
-        return Flea2(operator.sub,other,self)
-
-    def __pos__(self):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from applying the unary positive operator on the values of self;
-            called on evaluation of "+self"
-        '''
-        return Flea1(operator.pos,self)
-
-    def __neg__(self):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from negating the values of self;
-            called on evaluation of "-self"
-        '''
-        return Flea1(operator.neg,self)
-
-    def __mul__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the multiplication of the values of self by the values of other;
-            called on evaluation of "self * other"
-        '''
-        return Flea2(operator.mul,self,other)
-
-    def __rmul__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the multiplication of the values of other by the values of self;
-            called on evaluation of "other * self"
-        '''
-        return Flea2(operator.mul,other,self)
-
-    def __pow__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the powering the values of self with the values of other;
-            called on evaluation of "self ** other"
-        '''
-        return Flea2(operator.pow,self,other)
-
-    def __rpow__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the powering the values of other with the values of self;
-            called on evaluation of "other ** self"
-        '''
-        return Flea2(operator.pow,other,self)
-
-    def __truediv__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the division of the values of self by the values of other;
-            called on evaluation of "self / other"
-        '''
-        return Flea2(operator.truediv,self,other)
-
-    def __rtruediv__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the division of the values of other by the values of self;
-            called on evaluation of "other / self"
-        '''
-        return Flea2(operator.truediv,other,self)
-
-    def __floordiv__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the floor division of the values of self by the values of other;
-            called on evaluation of "self // other"
-        '''
-        return Flea2(operator.floordiv,self,other)
-
-    def __rfloordiv__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the floor division of the values of other by the values of self;
-            called on evaluation of "other // self"
-        '''
-        return Flea2(operator.floordiv,other,self)
-
-    # Python 2 compatibility
-    __div__ = __truediv__
-    __rdiv__ = __rtruediv__
-
-    def __mod__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the modulus of the values of self with the values of other;
-            called on evaluation of "self % other"
-        '''
-        return Flea2(operator.mod,self,other)
-
-    def __rmod__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the modulus of the values of other with the values of self;
-            called on evaluation of "other % self"
-        '''
-        return Flea2(operator.mod,other,self)
-
-    def __divmod__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from applying the function divmod on the values of self and the values of other;
-            called on evaluation of "divmod(self,other)"
-        '''
-        return Flea2(divmod,self,other)
-
-    def __rdivmod__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from applying the function divmod on the values of other and the values of self;
-            called on evaluation of "divmod(other,self)"
-        '''
-        return Flea2(divmod,other,self)
-
-    def __floordiv__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the integer division of the values of self by the values of other;
-            called on evaluation of "self // other"
-        '''
-        return Flea2(operator.floordiv,self,other)
-    
-    def __rfloordiv__(self,other):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from the integer division of the values of other by the values of self;
-            called on evaluation of "other // self"
-        '''
-        return Flea2(operator.floordiv,other,self)
-
-    def __abs__(self):
-        ''' returns a Flea instance representing the probability distribution
-            resulting from applying the abs function on the values of self;
-            called on evaluation of "abs(self)"
-        '''
-        return Flea1(abs,self)
-    
-    def __and__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            resulting from the locical AND between the values of self and the values of other;
-            called on evaluation of "self & other"
-        '''
-        return Flea2(Lea._safe_and,self,other)
-
-    def __rand__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            resulting from the locical AND between the values of other and the values of self;
-            called on evaluation of "other & self"
-        '''
-        return Flea2(Lea._safe_and,other,self)
-
-    def __or__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            resulting from the locical OR between the values of self and the values of other;
-            called on evaluation of "self | other"
-        '''
-        return Flea2(Lea._safe_or,self,other)
-
-    def __ror__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            resulting from the locical OR between the values of other and the values of self;
-            called on evaluation of "other | self"
-        '''
-        return Flea2(Lea._safe_or,other,self)
-
-    def __xor__(self,other):
-        ''' returns a Flea instance representing the boolean probability distribution
-            resulting from the locical XOR between the values of self and the values of other;
-            called on evaluation of "self ^ other"
-        '''
-        return Flea2(Lea._safe_xor,self,other)
-
-    def __invert__(self):
-        ''' returns a Flea instance representing the boolean probability distribution
-            resulting from the locical NOT of the values self;
-            called on evaluation of "~self"
-        '''
-        return Flea1(Lea._safe_not,self)
-
-    def __bool__(self):
-        ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
-            called on evaluation of "bool(self)", "if self:", "while self:", etc
-        '''
-        raise Lea.Error("Lea instance cannot be evaluated as a boolean")
-
-    # Python 2 compatibility
-    __nonzero__ = __bool__
-
     @staticmethod
     def _check_booleans(op_msg,*vals):
         ''' static method, raises an exception if any of vals arguments is not boolean;
@@ -1152,37 +898,122 @@ class Lea(object):
             if not isinstance(val,bool):
                 raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%op_msg) 
 
-    @staticmethod
-    def _safe_and(a,b):
+    # create helper functions for defining magic methods,
+    # these are used only at class creation; these are unbound below
+    
+    def __safe_and(a,b):
         ''' static method, returns a boolean, which is the logical AND of the given boolean arguments; 
             raises an exception if any of arguments is not boolean
         '''
         Lea._check_booleans('AND',a,b)
         return operator.and_(a,b)
 
-    @staticmethod
-    def _safe_or(a,b):
+    def __safe_or(a,b):
         ''' static method, returns a boolean, which is the logical OR of the given boolean arguments; 
             raises an exception if any of arguments is not boolean
         '''
         Lea._check_booleans('OR',a,b)
         return operator.or_(a,b)
 
-    @staticmethod
-    def _safe_xor(a,b):
+    def __safe_xor(a,b):
         ''' static method, returns a boolean, which is the logical XOR of the given boolean arguments; 
             raises an exception if any of arguments is not boolean
         '''
         Lea._check_booleans('XOR',a,b)
         return operator.xor(a,b)
 
-    @staticmethod
-    def _safe_not(a):
+    def __safe_not(a):
         ''' static method, returns a boolean, which is the logical NOT of the given boolean argument; 
             raises an exception if the argument is not boolean
         '''
         Lea._check_booleans('NOT',a)
         return operator.not_(a)    
+
+    def __make_flea1_n(f):
+        ''' returns a method M with one Lea instance argument (self), where M returns a Flea1 applying
+            given function f to self
+            (helper function used internally to do operator overloading of magic methods for unary
+            operators __xxx__)
+        '''
+        return lambda self: Flea1(f,self)
+
+    def __make_flea2_n(f):
+        ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
+            applying given function f to (self,other)
+            (helper function used internally to do operator overloading of magic methods for binary
+            operators __xxx__)
+        '''
+        return lambda self,other: Flea2(f,self,other)
+
+    def __make_flea2_r(f):
+        ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
+            applying given function f to (other,self)
+            (helper function used internally to do operator overloading of magic methods for binary
+            operators __rxxx__)
+        '''
+        return lambda self,other: Flea2(f,other,self)
+  
+    # overloading of arithmetic operators and mathematical functions
+    __pos__       = __make_flea1_n(operator.pos)
+    __neg__       = __make_flea1_n(operator.neg)
+    __abs__       = __make_flea1_n(abs)
+    __add__       = __make_flea2_n(operator.add)
+    __radd__      = __make_flea2_r(operator.add)
+    __sub__       = __make_flea2_n(operator.sub)
+    __rsub__      = __make_flea2_r(operator.sub)
+    __mul__       = __make_flea2_n(operator.mul)
+    __rmul__      = __make_flea2_r(operator.mul)
+    __truediv__   = __make_flea2_n(operator.truediv)
+    __rtruediv__  = __make_flea2_r(operator.truediv)
+    __floordiv__  = __make_flea2_n(operator.floordiv)
+    __rfloordiv__ = __make_flea2_r(operator.floordiv)
+    __mod__       = __make_flea2_n(operator.mod)
+    __rmod__      = __make_flea2_r(operator.mod)
+    __divmod__    = __make_flea2_n(divmod)
+    __rdivmod__   = __make_flea2_r(divmod)
+    __pow__       = __make_flea2_n(operator.pow)
+    __rpow__      = __make_flea2_r(operator.pow)
+    # Python 2 compatibility
+    __div__       = __truediv__
+    __rdiv__      = __rtruediv__
+
+    # overloading of comparison operators
+    __lt__        = __make_flea2_n(operator.lt)
+    __le__        = __make_flea2_n(operator.le)
+    __eq__        = __make_flea2_n(operator.eq)
+    __ne__        = __make_flea2_n(operator.ne)
+    __gt__        = __make_flea2_n(operator.gt)
+    __ge__        = __make_flea2_n(operator.ge)
+
+    # overloading of bitwise operators to emulate boolean operators
+    __invert__    = __make_flea1_n(__safe_not)
+    __and__       = __make_flea2_n(__safe_and)
+    __rand__      = __make_flea2_r(__safe_and)
+    __or__        = __make_flea2_n(__safe_or)
+    __ror__       = __make_flea2_r(__safe_or)
+    __xor__       = __make_flea2_n(__safe_xor)
+    __rxor__      = __make_flea2_r(__safe_xor)
+
+    # overloading of slicing operator
+    __getitem__   = __make_flea2_n(operator.getitem)
+
+    # delete helper functions (used only at class creation)
+    del __make_flea1_n, __make_flea2_n, __make_flea2_r
+
+    # unbind helper functions (used only at class creation)
+    del __safe_and, __safe_or, __safe_xor, __safe_not
+
+    def __hash__(self):
+        return id(self)
+
+    def __bool__(self):
+        ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
+            called on evaluation of "bool(self)", "if self:", "while self:", etc
+        '''
+        raise Lea.Error("Lea instance cannot be evaluated as a boolean")
+
+    # Python 2 compatibility
+    __nonzero__ = __bool__
 
     def _get_lea_children(self):
         ''' returns a tuple containing all the Lea instances children of the current Lea;
