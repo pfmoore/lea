@@ -85,8 +85,8 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimate_mc method).
 
-    There are nine concrete subclasses to Lea class, namely:
-      Alea, Clea, Flea, Flea1, Flea2, Glea, Ilea, Rlea and Blea.
+    There are eleven concrete subclasses to Lea class, namely:
+      Alea, Clea, Flea, Flea1, Flea2, Glea, Ilea, Rlea, Tlea, Slea and Blea.
     
     Each subclass represents a "definition" of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -95,32 +95,30 @@ class Lea(object):
     different constructors (static methods) to instantiate these subclasses, so it is usually not
     needed to instantiate Lea subcasses explicitly. Here is an overview on these subclasses, with
     their relationships. We indicate the equivalent type of "p-expression" ("pex" for short) as
-    defined in the paper on the Statues algorithm - see below. 
+    defined in the paper on the Statues algorithm (see reference below).
 
-    - An Alea instance (elementary pex) is defined by explicit value-probability pairs, that is a
-    probability mass function (p.m.f.) defined by extension.
+    - Alea  (elementary pex) defines probability mass function ("pmf") defined by extension,
+            i.e. explicit (value,P(value)) pairs 
+    - Clea  (tuple pex) provides the joint of a given sequence of Lea instances
+    - Flea  (functional pex) applies a given n-ary function to a given sequence of n Lea instances
+    - Flea1 (functional pex) applies a given 1-ary function to a given Lea instance
+    - Flea2 (functional pex) applies a given 2-ary function to two given Lea instances
+    - Glea  (multi-functional pex) applies n-ary functions present in a given Lea instance to a
+            given sequence of n Lea instances
+    - Ilea  (conditional pex) filters the values of a given Lea instance according to a given Lea
+            instance representing a boolean condition (conditional probabilities)
+    - Rlea  (mixture pex) embeds Lea instances as values of a parent Lea instance 
+    - Tlea  (table pex) defines CPT by a dictionary associating Lea instances to given values
+    - Slea  (NO pex defined yet) defines CPT by a function associating Lea instances to given values
+    - Blea  (mixture+conditional pex) defines CPT by associating Lea instances to conditions
 
-    Instances of other Lea's subclasses represent probability distributions obtained by operations
+    Instances of Lea subclasses other than Alea represent prob. distributions obtained by operations
     done on existing Lea instance(s). Any such instance forms a direct acyclic graph (DAG) structure,
     having other Lea instances as nodes and Alea instances as leaves. This uses "lazy evaluation":
     actual (value,probability) pairs are calculated only at the time they are required (e.g. display,
     query probability of a given value, etc); then, these are aggregated in a new Alea instance. This 
     Alea instance is then cached, as an attribute of the queried Lea instance, for speeding up next
     queries.
-    
-    Here is a brief presentation of these Lea's subclasses.
-    - Clea   (tuple pex) provides the joint of a given sequence of Lea instances
-    - Flea   (functional pex) applies a given n-ary function to a given sequence of n Lea instances
-    - Flea1  (functional pex) applies a given 1-ary function to a given Lea instance
-    - Flea2  (functional pex) applies a given 2-ary function to two given Lea instances
-    - Glea   (multi-functional pex) applies n-ary functions present in a given Lea instance to a
-             given sequence of n Lea instances
-    - Ilea   (conditional pex) filters the values of a given Lea instance according to a given Lea
-             instance representing a boolean condition (conditional probabilities)
-    - Rlea   (mixture pex) embeds Lea instances as values of a parent Lea instance 
-    - Tlea   (table pex) defines CPT by a dictionary associating Lea instances to given values
-    - Slea   (NOT DESCRIBED) defines CPT by a function associating Lea instances to given values
-    - Blea   (mixture pex) defines CPT by associating Lea instances to conditions
 
     Note that Flea1 and Flea2 subclasses have more efficient implementation than Flea subclass.
     Tlea, Slea and Blea may be used to define Bayesian networks. Tlea class is the closest to CPT
