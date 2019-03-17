@@ -292,7 +292,7 @@ class Lea(object):
         '''
         if bindings is not None:
             for x in bindings:
-                ## note: leave check=False because in case of exception _init_calc, the some instances may still be unbound
+                ## note: leave check=False because in case of exception _init_calc, then some instances may still be unbound
                 x.free(check=False)
 
     def given_prob(self,cond_lea,p):
@@ -887,132 +887,6 @@ class Lea(object):
             min_lea = Flea2(min2,min_lea,arg)
         return min_lea
 
-    @staticmethod
-    def _check_booleans(op_msg,*vals):
-        ''' static method, raises an exception if any of vals arguments is not boolean;
-            the exception message refers to the name of a logical operation given in the op_msg argument
-        '''
-        for val in vals:
-            if not isinstance(val,bool):
-                raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%op_msg) 
-
-    # create helper functions for defining magic methods,
-    # these are used only at class creation; these are unbound below
-    
-    def __safe_and(a,b):
-        ''' static method, returns a boolean, which is the logical AND of the given boolean arguments; 
-            raises an exception if any of arguments is not boolean
-        '''
-        Lea._check_booleans('AND',a,b)
-        return operator.and_(a,b)
-
-    def __safe_or(a,b):
-        ''' static method, returns a boolean, which is the logical OR of the given boolean arguments; 
-            raises an exception if any of arguments is not boolean
-        '''
-        Lea._check_booleans('OR',a,b)
-        return operator.or_(a,b)
-
-    def __safe_xor(a,b):
-        ''' static method, returns a boolean, which is the logical XOR of the given boolean arguments; 
-            raises an exception if any of arguments is not boolean
-        '''
-        Lea._check_booleans('XOR',a,b)
-        return operator.xor(a,b)
-
-    def __safe_not(a):
-        ''' static method, returns a boolean, which is the logical NOT of the given boolean argument; 
-            raises an exception if the argument is not boolean
-        '''
-        Lea._check_booleans('NOT',a)
-        return operator.not_(a)    
-
-    def __make_flea1_n(f):
-        ''' returns a method M with one Lea instance argument (self), where M returns a Flea1 applying
-            given function f to self
-            (helper function used internally to do operator overloading of magic methods for unary
-            operators __xxx__)
-        '''
-        return lambda self: Flea1(f,self)
-
-    def __make_flea2_n(f):
-        ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
-            applying given function f to (self,other)
-            (helper function used internally to do operator overloading of magic methods for binary
-            operators __xxx__)
-        '''
-        return lambda self,other: Flea2(f,self,other)
-
-    def __make_flea2_r(f):
-        ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
-            applying given function f to (other,self)
-            (helper function used internally to do operator overloading of magic methods for binary
-            operators __rxxx__)
-        '''
-        return lambda self,other: Flea2(f,other,self)
-  
-    # overloading of arithmetic operators and mathematical functions
-    __pos__       = __make_flea1_n(operator.pos)
-    __neg__       = __make_flea1_n(operator.neg)
-    __abs__       = __make_flea1_n(abs)
-    __add__       = __make_flea2_n(operator.add)
-    __radd__      = __make_flea2_r(operator.add)
-    __sub__       = __make_flea2_n(operator.sub)
-    __rsub__      = __make_flea2_r(operator.sub)
-    __mul__       = __make_flea2_n(operator.mul)
-    __rmul__      = __make_flea2_r(operator.mul)
-    __truediv__   = __make_flea2_n(operator.truediv)
-    __rtruediv__  = __make_flea2_r(operator.truediv)
-    __floordiv__  = __make_flea2_n(operator.floordiv)
-    __rfloordiv__ = __make_flea2_r(operator.floordiv)
-    __mod__       = __make_flea2_n(operator.mod)
-    __rmod__      = __make_flea2_r(operator.mod)
-    __divmod__    = __make_flea2_n(divmod)
-    __rdivmod__   = __make_flea2_r(divmod)
-    __pow__       = __make_flea2_n(operator.pow)
-    __rpow__      = __make_flea2_r(operator.pow)
-    # Python 2 compatibility
-    __div__       = __truediv__
-    __rdiv__      = __rtruediv__
-
-    # overloading of comparison operators
-    __lt__        = __make_flea2_n(operator.lt)
-    __le__        = __make_flea2_n(operator.le)
-    __eq__        = __make_flea2_n(operator.eq)
-    __ne__        = __make_flea2_n(operator.ne)
-    __gt__        = __make_flea2_n(operator.gt)
-    __ge__        = __make_flea2_n(operator.ge)
-
-    # overloading of bitwise operators to emulate boolean operators
-    __invert__    = __make_flea1_n(__safe_not)
-    __and__       = __make_flea2_n(__safe_and)
-    __rand__      = __make_flea2_r(__safe_and)
-    __or__        = __make_flea2_n(__safe_or)
-    __ror__       = __make_flea2_r(__safe_or)
-    __xor__       = __make_flea2_n(__safe_xor)
-    __rxor__      = __make_flea2_r(__safe_xor)
-
-    # overloading of slicing operator
-    __getitem__   = __make_flea2_n(operator.getitem)
-
-    # delete helper functions (used only at class creation)
-    del __make_flea1_n, __make_flea2_n, __make_flea2_r
-
-    # unbind helper functions (used only at class creation)
-    del __safe_and, __safe_or, __safe_xor, __safe_not
-
-    def __hash__(self):
-        return id(self)
-
-    def __bool__(self):
-        ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
-            called on evaluation of "bool(self)", "if self:", "while self:", etc
-        '''
-        raise Lea.Error("Lea instance cannot be evaluated as a boolean")
-
-    # Python 2 compatibility
-    __nonzero__ = __bool__
-
     def _get_lea_children(self):
         ''' returns a tuple containing all the Lea instances children of the current Lea;
             Lea._get_lea_children method is abstract: it is implemented in all Lea's subclasses
@@ -1446,6 +1320,132 @@ class Lea(object):
                 elif hasattr(attr_val,'__call__'):
                     args.append(attr_val.__module__+'.'+attr_val.__name__)
         return ('\n'+indent+'  ').join(args)
+
+    def __hash__(self):
+        return id(self)
+
+    def __bool__(self):
+        ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
+            called on evaluation of "bool(self)", "if self:", "while self:", etc
+        '''
+        raise Lea.Error("Lea instance cannot be evaluated as a boolean")
+
+    # Python 2 compatibility
+    __nonzero__ = __bool__
+    @staticmethod
+    def _check_booleans(op_msg,*vals):
+        ''' static method, raises an exception if any of vals arguments is not boolean;
+            the exception message refers to the name of a logical operation given in the op_msg argument
+        '''
+        for val in vals:
+            if not isinstance(val,bool):
+                raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%op_msg) 
+
+    # create helper functions for defining magic methods,
+    # these are used only at class creation; these are unbound below
+    
+    def __safe_and(a,b):
+        ''' static method, returns a boolean, which is the logical AND of the given boolean arguments; 
+            raises an exception if any of arguments is not boolean
+        '''
+        Lea._check_booleans('AND',a,b)
+        return operator.and_(a,b)
+
+    def __safe_or(a,b):
+        ''' static method, returns a boolean, which is the logical OR of the given boolean arguments; 
+            raises an exception if any of arguments is not boolean
+        '''
+        Lea._check_booleans('OR',a,b)
+        return operator.or_(a,b)
+
+    def __safe_xor(a,b):
+        ''' static method, returns a boolean, which is the logical XOR of the given boolean arguments; 
+            raises an exception if any of arguments is not boolean
+        '''
+        Lea._check_booleans('XOR',a,b)
+        return operator.xor(a,b)
+
+    def __safe_not(a):
+        ''' static method, returns a boolean, which is the logical NOT of the given boolean argument; 
+            raises an exception if the argument is not boolean
+        '''
+        Lea._check_booleans('NOT',a)
+        return operator.not_(a)    
+
+    def __make_flea1_n(f):
+        ''' returns a method M with one Lea instance argument (self), where M returns a Flea1 applying
+            given function f to self
+            (helper function used internally to do operator overloading of magic methods for unary
+            operators __xxx__)
+        '''
+        return lambda self: Flea1(f,self)
+
+    def __make_flea2_n(f):
+        ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
+            applying given function f to (self,other)
+            (helper function used internally to do operator overloading of magic methods for binary
+            operators __xxx__)
+        '''
+        return lambda self,other: Flea2(f,self,other)
+
+    def __make_flea2_r(f):
+        ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
+            applying given function f to (other,self)
+            (helper function used internally to do operator overloading of magic methods for binary
+            operators __rxxx__)
+        '''
+        return lambda self,other: Flea2(f,other,self)
+  
+    # overloading of arithmetic operators and mathematical functions
+    __pos__       = __make_flea1_n(operator.pos)
+    __neg__       = __make_flea1_n(operator.neg)
+    __abs__       = __make_flea1_n(abs)
+    __add__       = __make_flea2_n(operator.add)
+    __radd__      = __make_flea2_r(operator.add)
+    __sub__       = __make_flea2_n(operator.sub)
+    __rsub__      = __make_flea2_r(operator.sub)
+    __mul__       = __make_flea2_n(operator.mul)
+    __rmul__      = __make_flea2_r(operator.mul)
+    __truediv__   = __make_flea2_n(operator.truediv)
+    __rtruediv__  = __make_flea2_r(operator.truediv)
+    __floordiv__  = __make_flea2_n(operator.floordiv)
+    __rfloordiv__ = __make_flea2_r(operator.floordiv)
+    __mod__       = __make_flea2_n(operator.mod)
+    __rmod__      = __make_flea2_r(operator.mod)
+    __divmod__    = __make_flea2_n(divmod)
+    __rdivmod__   = __make_flea2_r(divmod)
+    __pow__       = __make_flea2_n(operator.pow)
+    __rpow__      = __make_flea2_r(operator.pow)
+    # Python 2 compatibility
+    __div__       = __truediv__
+    __rdiv__      = __rtruediv__
+
+    # overloading of comparison operators
+    __lt__        = __make_flea2_n(operator.lt)
+    __le__        = __make_flea2_n(operator.le)
+    __eq__        = __make_flea2_n(operator.eq)
+    __ne__        = __make_flea2_n(operator.ne)
+    __gt__        = __make_flea2_n(operator.gt)
+    __ge__        = __make_flea2_n(operator.ge)
+
+    # overloading of bitwise operators to emulate boolean operators
+    __invert__    = __make_flea1_n(__safe_not)
+    __and__       = __make_flea2_n(__safe_and)
+    __rand__      = __make_flea2_r(__safe_and)
+    __or__        = __make_flea2_n(__safe_or)
+    __ror__       = __make_flea2_r(__safe_or)
+    __xor__       = __make_flea2_n(__safe_xor)
+    __rxor__      = __make_flea2_r(__safe_xor)
+
+    # overloading of slicing operator
+    __getitem__   = __make_flea2_n(operator.getitem)
+
+    # delete helper functions (used only at class creation)
+    del __make_flea1_n, __make_flea2_n, __make_flea2_r
+
+    # unbind helper functions (used only at class creation)
+    del __safe_and, __safe_or, __safe_xor, __safe_not
+
 
 # import modules with Lea subclasses
 from .alea import Alea
