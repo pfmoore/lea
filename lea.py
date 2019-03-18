@@ -922,7 +922,8 @@ class Lea(object):
             without precalculating the exact probability distribution (contrarily to 'random' method);
             nb_tries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
-            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
+            is (referring to) an Ilea, Tlea, Slea or Blea instance, i.e. returned 'given', 'switch',
+            'switch_func' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
         for _ in range(n):
@@ -1378,7 +1379,10 @@ class Lea(object):
             (helper function used internally to do operator overloading of magic methods for unary
             operators __xxx__)
         '''
-        return lambda self: Flea1(f,self)
+        def func(self):            
+            return Flea1(f,self)
+        func.__doc__ = "returns Flea1 instance applying %s function on (self), for function/operator overloading" % f.__name__
+        return func
 
     def __make_flea2_n(f):
         ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
@@ -1386,7 +1390,10 @@ class Lea(object):
             (helper function used internally to do operator overloading of magic methods for binary
             operators __xxx__)
         '''
-        return lambda self,other: Flea2(f,self,other)
+        def func(self,other):
+            return Flea2(f,self,other)
+        func.__doc__ = "returns Flea2 instance applying %s function on (self,other), for function/operator overloading" % f.__name__
+        return func
 
     def __make_flea2_r(f):
         ''' returns a method M with two Lea instance arguments (self,other), where M returns a Flea2
@@ -1394,7 +1401,10 @@ class Lea(object):
             (helper function used internally to do operator overloading of magic methods for binary
             operators __rxxx__)
         '''
-        return lambda self,other: Flea2(f,other,self)
+        def func(self,other):            
+            return Flea2(f,other,self)
+        func.__doc__ = "returns Flea2 instance applying %s function on (other,self), for function/operator overloading" % f.__name__  
+        return func
   
     # overloading of arithmetic operators and mathematical functions
     __pos__       = __make_flea1_n(operator.pos)
@@ -1443,9 +1453,6 @@ class Lea(object):
     # delete helper functions (used only at class creation)
     del __make_flea1_n, __make_flea2_n, __make_flea2_r
 
-    # unbind helper functions (used only at class creation)
-    del __safe_and, __safe_or, __safe_xor, __safe_not
-
 
 # import modules with Lea subclasses
 from .alea import Alea
@@ -1469,19 +1476,22 @@ Alea.set_prob_type('x')
 # convenience functions
 
 def P(lea1):
-    ''' returns a ProbFraction instance representing the probability for
-        lea1 to be True, expressed in the type used in lea1 definition;
+    ''' returns the probability that given lea1 is True;
+        the probability is expressed in the probability type used in lea1,
+        possibly downcasted for convenience (Fraction -> ProbFraction,
+        Decimal -> ProbDecimal);
         raises an exception if some value in the distribution is not boolean
-        (this is NOT the case with lea1.p(True));
+        (note that this is NOT the case with lea1.p(True));
         this is a convenience function equivalent to lea1.P
     '''
     return lea1.P
 
 def Pf(lea1):
-    ''' returns a ProbFraction instance representing the probability for
-        lea1 to be True, expressed as a float between 0.0 and 1.0;
+    ''' returns the probability that given lea1 is True;
+        the probability is expressed as a float between 0.0 and 1.0;
+        raises an exception if the probability type is no convertible to float
         raises an exception if some value in the distribution is not boolean
-        (this is NOT the case with lea1.p(True));
+        (note this is NOT the case with lea1.p(True));
         this is a convenience function equivalent to lea1.Pf
     '''
     return lea1.Pf
