@@ -92,7 +92,7 @@ class Alea(Lea):
     def prob_symbol(arg):
         ''' static method, if given arg is a string, then
                returns a sympy Symbol, having arg as name, possibly embedded
-               in parentheses if arg is not a valid identifier
+               in parentheses if arg is not a valid identifier;
             otherwise,
                returns arg as-is (which could incidentally be a sympy Symbol)
         '''
@@ -297,7 +297,7 @@ class Alea(Lea):
             otherwise, a new Alea instance is returned, with given value
             as unique value, with a probability of 1.
             if prob_type is -1,
-               then the returned Alea instance has integer 1 as probability
+               then the returned Alea instance has integer 1 as probability;
                otherwise, the returned Alea instance has probability 1
                converted according to prob_type (see doc of Alea.set_prob_type)
         '''
@@ -640,7 +640,7 @@ class Alea(Lea):
             the attribute names of the distribution are those of the column of the
             given dataframe; the first field in each item of the dataframe is assumed
             to be the index; its treatment depends on given index_col_name:
-            if index_col_name is None, then this index field is ignored
+            if index_col_name is None, then this index field is ignored;
             otherwise, it is put in the joint distribution with index_col_name as
             attribute name
         '''
@@ -668,7 +668,7 @@ class Alea(Lea):
             the order of the elements of each built tuple is irrelevant: each tuple
             represents any permutation of its elements; the actual order of the
             elements of each tuple shall be the one defined by gen_selector;
-            assumes that n >= 0
+            assumes that n >= 0;
             the efficient combinatorial algorithm is due to Paul Moore
         '''
         # First of all, get the values and weights for the distribution
@@ -709,8 +709,8 @@ class Alea(Lea):
             of drawing n elements from self WITH replacement, whatever the order
             of drawing these elements; the returned values are tuples with n
             elements sorted by increasing order;
-            assumes that n >= 0
-            the efficient combinatorial algorithm is due to Paul Moore
+            assumes that n >= 0;
+            the efficient combinatorial algorithm is due to Paul Moore;
             requires Python 2.7+            
         '''
         return self._selections(n,itertools.combinations_with_replacement)
@@ -721,7 +721,7 @@ class Alea(Lea):
             of drawing these elements; the returned values are tuples with n
             elements sorted by increasing order;
             assumes that 0 <= n <= number of values of self;
-            note: if the probability distribution of self is uniform
+            note: if the probability distribution of self is uniform,
             then the results is produced in an efficient way, thanks to the
             combinatorial algorithm of Paul Moore
         '''
@@ -751,8 +751,8 @@ class Alea(Lea):
         ''' returns a new Alea instance representing the probability distribution
             of drawing n elements from self WITHOUT replacement, taking the order
             of drawing into account; the returned values are tuples with n elements
-            put in the order of their drawing
-            assumes that n >= 0
+            put in the order of their drawing;
+            assumes that n >= 0;
             requires that n <= number of values of self, otherwise an exception
             is raised
         '''
@@ -807,7 +807,7 @@ class Alea(Lea):
             - if kind[0] is '-' : histogram bar made up of repeated '-', such that
                                   a bar length of histo_size represents a probability 1 
             if kind[1] is '-', the histogram bars with '-' are appended after 
-                               numerical representation of probabilities
+                               numerical representation of probabilities;
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
             if tabular is True (default), then if values are tuples of same length, then
@@ -912,7 +912,7 @@ class Alea(Lea):
             it contains one line per distinct value, separated by a newline character;
             each line contains the string representation of a value with its
             probability expressed as a histogram bar made up of repeated '-',
-            such that a bar length of given size represents a probability 1
+            such that a bar length of given size represents a probability 1;
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
         '''
@@ -922,7 +922,7 @@ class Alea(Lea):
         ''' produces a matplotlib bar chart representing the probability distribution self
             with the given title (if not None); the bar chart may be customized by using
             named arguments bar_args, which are relayed to matplotlib.pyplot.bar function
-            (see doc in http://matplotlib.org/api/pyplot_api.html)
+            (see doc in http://matplotlib.org/api/pyplot_api.html);
             * if fname is None, then the chart is displayed on screen, in a matplotlib window;
               the previous chart, if any, is erased
             * otherwise, the chart is saved in a file specified by given fname as specified
@@ -959,18 +959,18 @@ class Alea(Lea):
 
     def support(self):
         ''' returns a tuple with values of self
-            the sequence follows the increasing order defined on values
+            the sequence follows the increasing order defined on values;
             if order is undefined (e.g. complex numbers), then the order is
-            arbitrary but fixed from call to call
+            arbitrary but fixed from call to call;
             WARNING: this method is called without parentheses
         '''
         return self._vs
 
     def ps(self):
         ''' returns a tuple with probability of self
-            the sequence follows the increasing order defined on values
+            the sequence follows the increasing order defined on values;
             if order is undefined (e.g. complex numbers), then the order is
-            arbitrary but fixed from call to call
+            arbitrary but fixed from call to call;
             WARNING: this method is called without parentheses
         '''
         return tuple(Alea._downcast(p) for p in self._ps)
@@ -978,7 +978,7 @@ class Alea(Lea):
     def pmf_tuple(self):
         ''' returns, after evaluation of the probability distribution self, the probability
             mass function of self, as a tuple with tuples (v,P(v));
-            the sequence follows the order defined on values
+            the sequence follows the order defined on values;
             WARNING: this method is called without parentheses
         '''
         return tuple(self._gen_vps())
@@ -986,8 +986,8 @@ class Alea(Lea):
     def pmf_dict(self):
         ''' returns, after evaluation of the probability distribution self, the probability
             mass function of self, as an OrderedDict with v : P(v)) pairs;
-            the sequence follows the order defined on values
-            requires Python 2.7+
+            the sequence follows the order defined on values;
+            requires Python 2.7+;
             WARNING: this method is called without parentheses
         '''
         return collections.OrderedDict(self._gen_vps())
@@ -995,7 +995,7 @@ class Alea(Lea):
     def cdf_tuple(self):
         ''' returns, after evaluation of the probability distribution self, the cumulative
             distribution function of self, as a tuple with tuples (v,P(x<=v));
-            the sequence follows the order defined on values
+            the sequence follows the order defined on values;
             WARNING: this method is called without parentheses
         '''
         return tuple((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
@@ -1003,8 +1003,8 @@ class Alea(Lea):
     def cdf_dict(self):
         ''' returns, after evaluation of the probability distribution self, the cumulative
             distribution function of self, as an OrderedDict with v : P(x<=v)) pairs;
-            the sequence follows the order defined on values
-            requires Python 2.7+
+            the sequence follows the order defined on values;
+            requires Python 2.7+;
             WARNING: this method is called without parentheses
         '''
         return collections.OrderedDict((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
@@ -1073,7 +1073,7 @@ class Alea(Lea):
         self._val = self
 
     def _p(self,val,check_val_type=False):
-        ''' returns the probability p of the given value val
+        ''' returns the probability p of the given value val;
             if check_val_type is True, then raises an exception if some value
             in the distribution has a type incompatible with val's
         '''
@@ -1101,7 +1101,7 @@ class Alea(Lea):
             there is one element more than number of values; the first element is 0, then
             the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
-            order is used, fixed from call to call
+            order is used, fixed from call to call;
             Note: the returned list is cached
         '''
         if len(self._cumul) == 1:
@@ -1117,7 +1117,7 @@ class Alea(Lea):
             there is one element more than number of values; the first element is 0, then
             the sequence follows the order defined on values; if an order relationship is defined
             on values, then the tuples follows their increasing order; otherwise, an arbitrary
-            order is used, fixed from call to call
+            order is used, fixed from call to call;
             Note: the returned list is cached
         '''
         if len(self._inv_cumul) == 0:
@@ -1148,10 +1148,10 @@ class Alea(Lea):
         
     def random_draw(self,n=None,sorted=False):
         ''' if n is None, returns a tuple with all the values of the distribution,
-            in a random order respecting the probabilities
+            in a random order respecting the probabilities;
             (the higher probability of a value, the more likely the value will be in the
-             beginning of the sequence)
-            if n > 0, then only n different values will be drawn
+             beginning of the sequence);
+            if n > 0, then only n different values will be drawn;
             if sorted is True, then the returned tuple is sorted
         '''
         if n is None:
@@ -1176,14 +1176,14 @@ class Alea(Lea):
     
     @memoize
     def p_cumul(self,val):
-        ''' returns, as an integer, the probability that self <= val
+        ''' returns, as an integer, the probability that self <= val;
             note that it is not required that val is in the support of self
         '''
         return self.cumul()[bisect_right(self._vs,val)] 
 
     @memoize
     def p_inv_cumul(self,val):
-        ''' returns, as an integer, the probability that self >= val
+        ''' returns, as an integer, the probability that self >= val;
             note that it is not required that val is in the support of self
         '''
         return self.inv_cumul()[bisect_left(self._vs,val)] 
@@ -1240,10 +1240,10 @@ class Alea(Lea):
             the result is expressed in the probability type used in self,
             possibly downcasted for convenience (Fraction -> ProbFraction,
             Decimal -> ProbDecimal);
-            note: the result is supposed to be 1 (expressed in some type)
+            note: the result is supposed to be 1 (expressed in some type);
             BUT it could be different:
             - due to float rounding-errors
-            - due to an explicit normalization=False argument 
+            - due to an explicit normalization=False argument;
             WARNING: this method is called without parentheses
         '''
         ## note that the following expression is NOK for unorderable types (e.g. complex)
@@ -1256,7 +1256,7 @@ class Alea(Lea):
             possibly downcasted for convenience (Fraction -> ProbFraction,
             Decimal -> ProbDecimal);
             raises an exception if some value in the distribution is not boolean
-            (note that this is NOT the case with self.p(True))
+            (note that this is NOT the case with self.p(True));
             WARNING: this method is called without parentheses
         '''
         return Alea._downcast(self._p(True,check_val_type=True))
@@ -1264,9 +1264,9 @@ class Alea(Lea):
     def Pf(self):
         ''' returns the probability that self is True;
             the probability is expressed as a float between 0.0 and 1.0;
-            raises an exception if the probability type is no convertible to float
-            raises an exception if some value in the distribution is not boolean
-            (this is NOT the case with self.p(True))
+            raises an exception if the probability type is no convertible to float;
+            raises an exception if some value in the distribution is not boolean;
+            (this is NOT the case with self.p(True));
             WARNING: this method is called without parentheses
         '''
         return float(self._p(True,check_val_type=True))
@@ -1298,13 +1298,13 @@ class Alea(Lea):
             4 - the sum of values calculated in 3 can be divided by a float
                 or an integer;
             if any of these conditions is not met, then the result depends of the
-            value class implementation (likely, raised exception)
+            value class implementation (likely, raised exception);
             WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._mean(),False)
 
     def mean_f(self):
-        ''' same as mean method but with conversion to float or simplification of symbolic expression
+        ''' same as mean method but with conversion to float or simplification of symbolic expression;
             WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._mean(),True)
@@ -1331,7 +1331,7 @@ class Alea(Lea):
         return Alea._simplify(self._var(),False)
 
     def var_f(self):
-        ''' same as var method but with conversion to float or simplification of symbolic expression
+        ''' same as var method but with conversion to float or simplification of symbolic expression;
             WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._var(),True)
@@ -1345,14 +1345,14 @@ class Alea(Lea):
 
     def std(self):
         ''' returns the standard deviation of the probability distribution
-            requires that the requirements of the var method are met
+            requires that the requirements of the var method are met;
             WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._std(),False)
 
     def std_f(self):
         ''' same as std method but with conversion to float or simplification
-            of symbolic expression
+            of symbolic expression;
             WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._std(),True)
@@ -1376,13 +1376,13 @@ class Alea(Lea):
 
     def cov_f(self,lea1):
         ''' same as cov method but with conversion to float or simplification
-            of symbolic expression
+            of symbolic expression;
         '''
         return Alea._simplify(self._cov(lea1),True)
 
     def mode(self):
         ''' returns a tuple with the value(s) of the probability distribution
-            having the highest probability
+            having the highest probability;
             WARNING: this method is called without parentheses
         '''
         max_p = max(self._ps)
@@ -1394,9 +1394,9 @@ class Alea(Lea):
                log2(P(self==val))
             assuming that probability of val is (convertible to) float;
             if probability of val is a sympy expression, then the returned
-            object is the information of val as a sympy expression
-            raises an exception if given val is impossible
-            raises an exception if probability of given val is neither
+            object is the information of val as a sympy expression;
+            raises an exception if given val is impossible;
+            raises an exception if probability of given val is neither;
             convertible to float nor a sympy expression
         '''
         p = self._p(val)
@@ -1416,7 +1416,7 @@ class Alea(Lea):
             assuming that self is a boolean distribution;
             the returned type is a float or a sympy expression (see doc of
             Alea.entropy);
-            raises an exception if self is certainly false
+            raises an exception if self is certainly false;
             WARNING: this method is called without parentheses
         '''
         return self.information_of(True)
@@ -1426,9 +1426,9 @@ class Alea(Lea):
             if all probabilities are (convertible to) float, then the entropy
             is returned as a float;
             if any probability is a sympy expression, then the entropy is
-            returned as a sympy expression
+            returned as a sympy expression;
             raises an exception if some probabilities are neither convertible
-            to float nor a sympy expression
+            to float nor a sympy expression;
             WARNING: this method is called without parentheses
         '''
         res = 0
@@ -1447,13 +1447,13 @@ class Alea(Lea):
                 raise Lea.Error("cannot calculate logarithm on given probability types")
 
     def rel_entropy(self):
-        ''' returns the relativz entropy of self;
+        ''' returns the relative entropy of self;
             if all probabilities are (convertible to) float, then the relative
             entropy is returned as a float between 0.0 and 1.0;
             if any probability is a sympy expression, then the relative entropy
             is returned as a sympy expression;
             raises an exception if some probabilities are neither convertible
-            to float nor a sympy expression
+            to float nor a sympy expression;
             WARNING: this method is called without parentheses
         '''
         n = len(self._vs)
@@ -1472,7 +1472,7 @@ class Alea(Lea):
             if any probability is a sympy expression, then the redundancy
             is returned as a sympy expression;
             raises an exception if some probabilities are neither convertible
-            to float nor a sympy expression
+            to float nor a sympy expression;
             WARNING: this method is called without parentheses
         '''
         return 1.0 - self.rel_entropy
