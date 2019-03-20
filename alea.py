@@ -157,7 +157,7 @@ class Alea(Lea):
             - 'd' -> decimal (instance of Python's decimal.Decimal)
             - 'r' -> rational (instance of Python's fractions.Fraction)
             - 's' -> symbolic (instance of a sympy Symbol)
-                     - see Alea.prob_symb method
+                     - see Alea.prob_symbol method
             - 'x' -> any: if probability given in a string, then determines
                      the type from it (decimal, rational or symbol) and
                      converts into that type;
@@ -203,7 +203,7 @@ class Alea(Lea):
             - 'd' -> decimal (instance of Python's decimal.Decimal)
             - 'r' -> rational (instance of Python's fractions.Fraction)
             - 's' -> symbolic (instance of a sympy Symbol)
-                     - see Alea.prob_symb method
+                     - see Alea.prob_symbol method
             - 'x' -> any: if probability given in a string, then determines
                      the type from it (decimal, rational or symbol) and
                      convert into it;

@@ -8,28 +8,6 @@
 <font color="#000000" face="helvetica, arial"><big><big><strong>Lea v3.1 - API</strong></big></big></font></td>
 </table>
 
-<tr bgcolor="#ffffff">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<hr>
-<font color="#000000" face="helvetica, arial" size=1.5>
-Copyright 2013-2019 Pierre Denis<br><br>
-
-This file is part of Lea.
-
-Lea is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Lea is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with Lea. If not, see http://www.gnu.org/licenses/.
-</font></td></tr>
-<hr>
 <br>
 The present page provides the documentation of the Lea v3.1 Python module:
 <ul>
@@ -68,7 +46,7 @@ divmod&nbsp;function.<br>
 -&nbsp;Unary&nbsp;operators&nbsp;+,&nbsp;-&nbsp;and&nbsp;abs&nbsp;function&nbsp;are&nbsp;supported&nbsp;also.<br>
 -&nbsp;The&nbsp;Python's&nbsp;operator&nbsp;precedence&nbsp;rules,&nbsp;with&nbsp;the&nbsp;parenthesis&nbsp;overrules,&nbsp;are&nbsp;fully<br>
 respected.<br>
--&nbsp;Any&nbsp;object&nbsp;X,&nbsp;which&nbsp;is&nbsp;not&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;involved&nbsp;as&nbsp;argument&nbsp;of&nbsp;an<br>
+-&nbsp;Any&nbsp;<a href="builtins.html#object">object</a>&nbsp;X,&nbsp;which&nbsp;is&nbsp;not&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;involved&nbsp;as&nbsp;argument&nbsp;of&nbsp;an<br>
 expression&nbsp;containing&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;is&nbsp;coerced&nbsp;to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
 having&nbsp;X&nbsp;has&nbsp;sole&nbsp;value,&nbsp;with&nbsp;probability&nbsp;1&nbsp;(i.e.&nbsp;occurrence&nbsp;of&nbsp;X&nbsp;is&nbsp;certain).<br>
 -&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;can&nbsp;be&nbsp;compared&nbsp;together,&nbsp;through&nbsp;==,&nbsp;!=,&nbsp;&lt;,&nbsp;&lt;=,&nbsp;&gt;,&nbsp;&gt;=&nbsp;operators.<br>
@@ -111,7 +89,7 @@ their&nbsp;relationships.&nbsp;We&nbsp;indicate&nbsp;the&nbsp;equivalent&nbsp;ty
 defined&nbsp;in&nbsp;the&nbsp;paper&nbsp;on&nbsp;the&nbsp;Statues&nbsp;algorithm&nbsp;(see&nbsp;reference&nbsp;below).<br>
 &nbsp;<br>
 -&nbsp;Alea&nbsp;&nbsp;(elementary&nbsp;pex)&nbsp;defines&nbsp;probability&nbsp;mass&nbsp;function&nbsp;("pmf")&nbsp;defined&nbsp;by&nbsp;extension,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i.e.&nbsp;explicit&nbsp;(value,P(value))&nbsp;pairs&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i.e.&nbsp;explicit&nbsp;(value,<a href="#-P">P</a>(value))&nbsp;pairs&nbsp;<br>
 -&nbsp;Clea&nbsp;&nbsp;(tuple&nbsp;pex)&nbsp;provides&nbsp;the&nbsp;joint&nbsp;of&nbsp;a&nbsp;given&nbsp;sequence&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;instances<br>
 -&nbsp;Flea&nbsp;&nbsp;(functional&nbsp;pex)&nbsp;applies&nbsp;a&nbsp;given&nbsp;n-ary&nbsp;function&nbsp;to&nbsp;a&nbsp;given&nbsp;sequence&nbsp;of&nbsp;n&nbsp;<a href="#Lea">Lea</a>&nbsp;instances<br>
 -&nbsp;Flea1&nbsp;(functional&nbsp;pex)&nbsp;applies&nbsp;a&nbsp;given&nbsp;1-ary&nbsp;function&nbsp;to&nbsp;a&nbsp;given&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
@@ -154,9 +132,11 @@ It&nbsp;implements&nbsp;an&nbsp;original&nbsp;algorithm,&nbsp;called&nbsp;the&nb
 same&nbsp;name;&nbsp;this&nbsp;uses&nbsp;a&nbsp;variable&nbsp;binding&nbsp;mechanism&nbsp;that&nbsp;relies&nbsp;on&nbsp;Python's&nbsp;generators.&nbsp;To&nbsp;learn&nbsp;more,<br>
 you&nbsp;may&nbsp;read&nbsp;the&nbsp;paper&nbsp;"Probabilistic&nbsp;inference&nbsp;using&nbsp;generators&nbsp;-&nbsp;the&nbsp;Statues&nbsp;algorithm",&nbsp;freely<br>
 available&nbsp;on&nbsp;<a href="http://arxiv.org/abs/1806.09997">http://arxiv.org/abs/1806.09997</a>.&nbsp;The&nbsp;heart&nbsp;of&nbsp;the&nbsp;algorithm&nbsp;is&nbsp;implemented&nbsp;in<br>
-Alea._gen_vp&nbsp;method&nbsp;as&nbsp;well&nbsp;as&nbsp;other&nbsp;&lt;X&gt;lea._gen_vp&nbsp;methods&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>'s&nbsp;subclasses&nbsp;(see&nbsp;doc<br>
-of&nbsp;these&nbsp;methods).<br>&nbsp;</tt></td></tr>
+<a href="#Lea">Lea</a>._gen_bound_vp&nbsp;method&nbsp;(aka&nbsp;GENATOMS&nbsp;in&nbsp;the&nbsp;paper)&nbsp;and&nbsp;&lt;X&gt;lea._gen_vp&nbsp;methods&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>'s<br>
+subclasses&nbsp;(aka&nbsp;GENATOMSBYTYPE&nbsp;in&nbsp;the&nbsp;paper);&nbsp;the&nbsp;final&nbsp;collection&nbsp;and&nbsp;condensation&nbsp;is&nbsp;done&nbsp;by<br>
+<a href="#Lea">Lea</a>.calc&nbsp;method&nbsp;(aka&nbsp;MARG&nbsp;in&nbsp;the&nbsp;paper),&nbsp;which&nbsp;uses&nbsp;and&nbsp;<a href="#Lea">Lea</a>._calc&nbsp;and&nbsp;Alea.pmf&nbsp;methods.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
+
 <td width="100%">Methods defined here:<br>
 
 <dl><dt><a name="Alea-P"><strong>P</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;self&nbsp;is&nbsp;True;<br>
@@ -1090,7 +1070,7 @@ otherwise,&nbsp;the&nbsp;given&nbsp;prob_type&nbsp;is&nbsp;a&nbsp;code&nbsp;inte
 -&nbsp;'d'&nbsp;-&gt;&nbsp;decimal&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;decimal.Decimal)<br>
 -&nbsp;'r'&nbsp;-&gt;&nbsp;rational&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;fractions.Fraction)<br>
 -&nbsp;'s'&nbsp;-&gt;&nbsp;symbolic&nbsp;(instance&nbsp;of&nbsp;a&nbsp;sympy&nbsp;Symbol)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;see&nbsp;Alea.prob_symb&nbsp;method<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;see&nbsp;Alea.prob_symbol&nbsp;method<br>
 -&nbsp;'x'&nbsp;-&gt;&nbsp;any:&nbsp;if&nbsp;probability&nbsp;given&nbsp;in&nbsp;a&nbsp;string,&nbsp;then&nbsp;determines<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;type&nbsp;from&nbsp;it&nbsp;(decimal,&nbsp;rational&nbsp;or&nbsp;symbol)&nbsp;and<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;convert&nbsp;into&nbsp;it;<br>
@@ -1111,4 +1091,29 @@ see&nbsp;doc&nbsp;of&nbsp;Alea.pmf&nbsp;static&nbsp;method;<br>
 requires&nbsp;at&nbsp;least&nbsp;one&nbsp;vals&nbsp;argument</tt></dd></dl>
 
 </td></tr></table>
+
+
+<tr bgcolor="#ffffff">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<hr>
+<font color="#000000" face="helvetica, arial" size=1.5>
+Copyright 2013-2019 Pierre Denis<br><br>
+
+This file is part of Lea.
+
+Lea is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Lea is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Lea. If not, see http://www.gnu.org/licenses/.
+</font></td></tr>
+<hr>
+
 </body></html>

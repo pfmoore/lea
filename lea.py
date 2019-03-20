@@ -141,8 +141,9 @@ class Lea(object):
     same name; this uses a variable binding mechanism that relies on Python's generators. To learn more,
     you may read the paper "Probabilistic inference using generators - the Statues algorithm", freely
     available on http://arxiv.org/abs/1806.09997. The heart of the algorithm is implemented in
-    Alea._gen_vp method as well as other <X>lea._gen_vp methods implemented in Lea's subclasses (see doc
-    of these methods).
+    Lea._gen_bound_vp method (aka GENATOMS in the paper) and <X>lea._gen_vp methods implemented in Lea's
+    subclasses (aka GENATOMSBYTYPE in the paper); the final collection and condensation is done by
+    Lea.calc method (aka MARG in the paper), which uses and Lea._calc and Alea.pmf methods.
     '''
 
     class Error(Exception):
