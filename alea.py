@@ -1489,4 +1489,9 @@ class Alea(Lea):
         if self in refs:
             return self._id() + '*'
         refs.add(self)
-        return self._id() + str(tuple(self._gen_raw_vps()))
+        vps = tuple(self._gen_raw_vps())
+        res = "%s <%s" % (self._id(),vps[0])
+        if len(vps) >= 2:
+            res += ', ...'
+        res += '>'
+        return res
