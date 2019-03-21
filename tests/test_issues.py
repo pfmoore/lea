@@ -89,3 +89,45 @@ def test_given_times():
     flip4 = flip.times(4)
     expected = lea.pmf(((0,1), (1,4), (2,6)))
     assert flip4.given(flip4<=2).equiv(expected)
+
+
+def test_sympy_expressions():
+    """No issue number; make sure sympy classes work."""
+    try:
+        from sympy.core.numbers import Rational
+        v = Rational(1, 4)
+        probs = {
+          'A': v,
+          'B': None,
+        }
+        _ = lea.pmf(probs, prob_type = -1)
+    except ImportError:
+        pass
+
+def test_symbol_prob_type():
+    """No issue number; make sure 's' prob_type works."""
+    try:
+        import sympy  # failure skips the test entirely
+        probs = {
+          'A': 1,
+          'B': None,
+        }
+        _ = lea.pmf(probs, prob_type = 's')
+    except ImportError:
+        pass
+
+
+def test_symbol_prob_type_with_identifier_check():
+    """
+    No issue number; make sure 's' prob_type works when values might be
+    identifiers.
+    """
+    try:
+        import sympy  # failure skips the test entirely
+        probs = {
+          'A': 'p',
+          'B': 'q',
+        }
+        _ = lea.pmf(probs, prob_type = 's')
+    except ImportError:
+        pass

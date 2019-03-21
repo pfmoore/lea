@@ -82,7 +82,7 @@ class Alea(Lea):
 
     # function used to simplify symbolic probability expressions to be
     # displayed (see _simplify and Alea.__init__ methods)
-    _symbolic_simplify_function = sympy and sympy.factor
+    _symbolic_simplify_function = sympy and staticmethod(sympy.factor)
 
     # dictionary used in _downcast method
     __downcast_prob_class = dict( {Fraction : ProbFraction,
@@ -96,8 +96,14 @@ class Alea(Lea):
             otherwise,
                returns arg as-is (which could incidentally be a sympy Symbol)
         '''
+        def isidentifier(s):
+          if hasattr(s, 'isidentifier'):
+            return s.isidentifier()
+          import re, tokenize, keyword
+          return re.match(tokenize.Name + '$', s) and not keyword.iskeyword(s)
+
         if isinstance(arg,str):
-            if not arg.isidentifier():
+            if not isidentifier(arg):
                 arg = "(%s)" % arg
             return sympy.Symbol(arg)
         return arg
@@ -183,13 +189,9 @@ class Alea(Lea):
         if prob_type == 's':
             if sympy is None:
                 raise Lea.Error("prob_type 's' requires the installation of SymPy module")
-            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
-            ##       ("TypeError: unbound method prob_symbol() must be called with Alea instance as first argument (got int instance instead)")            
-            return staticmethod(Alea.prob_symbol)
+            return Alea.prob_symbol
         if prob_type == 'x':
-            ## note: staticmethod(...) is a trick to avoid error on the caller in Python 2.x
-            ##       ("TypeError: unbound method prob_symbol() must be called with Alea instance as first argument (got int instance instead)")            
-            return staticmethod(Alea.prob_any)
+            return Alea.prob_any
         raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%prob_type)
 
     @staticmethod
