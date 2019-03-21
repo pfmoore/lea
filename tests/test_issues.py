@@ -131,3 +131,24 @@ def test_symbol_prob_type_with_identifier_check():
         _ = lea.pmf(probs, prob_type = 's')
     except ImportError:
         pass
+
+def test_symbol_prob_type_with_identifier_check_2():
+    """
+    No issue number; make sure automatic type detection works when values
+    might be identifiers (without specifying prob_type='s')
+    """
+    try:
+        import sympy  # failure skips the test entirely
+        # reset permanent prob_type to automatic type detection mode
+        lea.set_prob_type('x')
+        try:
+            probs = {
+              'A': 'p',
+              'B': 'q',
+            }
+            _ = lea.pmf(probs)
+        finally:
+            lea.set_prob_type('r')
+    except ImportError:
+        pass
+
