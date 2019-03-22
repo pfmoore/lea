@@ -78,7 +78,9 @@ class Alea(Lea):
     # class or function used by default to convert each probability given in
     # an Alea constructor method; if None and if no prob_type arg is
     # specified in the constructore, then each probability is stored as-is
-    _prob_type = None
+    ## this is embedded in a list to circumvent a problem occuring only in Python 2.7
+    ## i.e. functions assigned directly to this attribute becomes instance methods 
+    _prob_type = [None]
 
     # function used to simplify symbolic probability expressions to be
     # displayed (see _simplify and Alea.__init__ methods)
@@ -173,7 +175,7 @@ class Alea(Lea):
             among the ones given above
         '''
         if prob_type is None:
-            return Alea._prob_type
+            return Alea._prob_type[0]
         if prob_type == -1:
             return None
         if not isinstance(prob_type,str):
@@ -216,7 +218,7 @@ class Alea(Lea):
         '''
         if prob_type is None or prob_type == -1:
             raise Lea.Error("Alea.set_prob_type does not allow %s as argument"%prob_type)
-        Alea._prob_type = Alea.get_prob_type(prob_type)
+        Alea._prob_type[0] = Alea.get_prob_type(prob_type)
 
     def __init__(self,vs,ps,normalization=True,prob_type=-1):
         ''' initializes Alea instance's attributes
