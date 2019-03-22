@@ -27,7 +27,8 @@ from .lea import Lea
 from .prob_number import ProbNumber
 from .prob_fraction import ProbFraction
 from .prob_decimal import ProbDecimal
-from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, read_csv_filename, is_dict, indent
+from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, \
+                     read_csv_filename, is_dict, indent, is_identifier
 from fractions import Fraction
 from decimal import Decimal
 from random import random
@@ -98,14 +99,8 @@ class Alea(Lea):
             otherwise,
                returns arg as-is (which could incidentally be a sympy Symbol)
         '''
-        def isidentifier(s):
-          if hasattr(s, 'isidentifier'):
-            return s.isidentifier()
-          import re, tokenize, keyword
-          return re.match(tokenize.Name + '$', s) and not keyword.iskeyword(s)
-
         if isinstance(arg,str):
-            if not isidentifier(arg):
+            if not is_identifier(arg):
                 arg = "(%s)" % arg
             return sympy.Symbol(arg)
         return arg

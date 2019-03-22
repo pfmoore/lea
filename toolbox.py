@@ -129,6 +129,12 @@ if sys.version_info[0] == 2:
         keys = defaultdict.iterkeys
         values = defaultdict.itervalues
         items = defaultdict.iteritems
+    # function replacing str.isidentifier, missing in Python 2.x
+    import re, tokenize, keyword
+    def is_identifier(s):
+        if hasattr(s, 'isidentifier'):
+            return s.isidentifier()
+        return re.match(tokenize.Name + '$', s) and not keyword.iskeyword(s)
 else:
     # Python 3.x
     # the following trick is needed to be able to import the names
@@ -136,6 +142,9 @@ else:
     zip = zip
     next = next
     dict = dict
+    # function replacing str.isidentifier method (see above)    
+    def is_identifier(s):
+        return s.isidentifier()
 
 def indent(str_func,obj,width):
     ''' returns a string representation of given object obj obtained
