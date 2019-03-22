@@ -132,8 +132,6 @@ if sys.version_info[0] == 2:
     # function replacing str.isidentifier, missing in Python 2.x
     import re, tokenize, keyword
     def is_identifier(s):
-        if hasattr(s, 'isidentifier'):
-            return s.isidentifier()
         return re.match(tokenize.Name + '$', s) and not keyword.iskeyword(s)
 else:
     # Python 3.x
