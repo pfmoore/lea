@@ -5,26 +5,519 @@
 <table width="100%" cellspacing=0 cellpadding=0 border=0 summary="heading">
 <tr bgcolor="#ffffff">
 <td valign=>
-<font color="#000000" face="helvetica, arial"><big><big><strong>Lea v3.1 - API</strong></big></big></font></td>
+<font color="#000000" face="helvetica, arial"><big><big><big><big><strong>Lea v3.1</strong></big></big></big></big></font></td>
 </table>
 
 <br>
 The present page provides the documentation of the Lea v3.1 Python module:
 <ul>
-<li>the <a href="#Lea">Lea class</a>, with methods accessible on Lea instances</li>
-<li>the <a href="#Functions">functions</a> directly accessible in the module; these include constructors</li>
+<li> the <a href="#lea_module">lea</a> module:
+<ul>
+<li>the <a href="#Functions">functions</a> directly accessible in the lea module; these include the constructors,</li>
+<li>the <a href="#Lea">Lea class</a>, with methods accessible on Lea instances,</li>
+</ul>
+<li>the <a href="#Markov">lea.markov module</a>: classes and functions accessible on lea.markov module.</li>
 </ul>
 Note that some of the functions are just aliases for Lea or Alea static methods (Alea is a subclass of Lea, representing elementary probability distibutions defined by their pmf).
 <br>
-<br>
 <hr>
+<a name="lea_module">
+<h1>lea module</h1>
+</a>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffffff">
+<td colspan=1 valign=top>
+<strong><a href="#Functions">Functions<a> of lea module:</strong>
+<br>
+<a href="#-P">P</a>&nbsp;&nbsp;
+<a href="#-Pf">Pf</a>&nbsp;&nbsp;
+<a href="#Alea-bernoulli">bernoulli</a>&nbsp;&nbsp;
+<a href="#Alea-binom">binom</a>&nbsp;&nbsp;
+<a href="#Alea-coerce">coerce</a>&nbsp;&nbsp;
+<a href="#Lea-cpt">cpt</a>&nbsp;&nbsp;
+<a href="#Lea-dist_l1">dist_l1</a>&nbsp;&nbsp;
+<a href="#Lea-dist_l2">dist_l2</a>&nbsp;&nbsp;
+<a href="#Alea-event">event</a>&nbsp;&nbsp;
+<a href="#Lea-func_wrapper">func_wrapper</a>&nbsp;&nbsp;
+<a href="#Lea-if_">if_</a>&nbsp;&nbsp;
+<a href="#Alea-interval">interval</a>&nbsp;&nbsp;
+<a href="#Lea-joint">joint</a><br>
+<a href="#Lea-make_vars">make_vars</a>&nbsp;&nbsp;
+<a href="#Lea-max_of">max_of</a>&nbsp;&nbsp;
+<a href="#Lea-min_of">min_of</a>&nbsp;&nbsp;
+<a href="#Lea-mutual_information">mutual_information</a>&nbsp;&nbsp;
+<a href="#Alea-pmf">pmf</a>&nbsp;&nbsp;
+<a href="#Alea-poisson">poisson</a>&nbsp;&nbsp;
+<a href="#Alea-read_csv_file">read_csv_file</a>&nbsp;&nbsp;
+<a href="#Alea-read_pandas_df">read_pandas_df</a><br>
+<a href="#Lea-reduce_all">reduce_all</a>&nbsp;&nbsp;
+<a href="#Alea-set_prob_type">set_prob_type</a>&nbsp;&nbsp;
+<a href="#Alea-vals">vals</a><br>
+<br>
+<strong>Methods of <a href="#Lea">Lea</a> instance:</strong><br>
+<a href="#Alea-P">P</a>&nbsp;&nbsp;
+<a href="#Alea-Pf">Pf</a>&nbsp;&nbsp;
+<a href="#Lea-__abs__">__abs__</a>&nbsp;&nbsp;
+<a href="#Lea-__add__">__add__</a>&nbsp;&nbsp;
+<a href="#Lea-__and__">__and__</a>&nbsp;&nbsp;
+<a href="#Lea-__bool__">__bool__</a>&nbsp;&nbsp;
+<a href="#Lea-__call__">__call__</a>&nbsp;&nbsp;
+<a href="#Lea-__div__">__div__</a>&nbsp;&nbsp;
+<a href="#Lea-__divmod__">__divmod__</a>&nbsp;&nbsp;
+<a href="#Lea-__eq__">__eq__</a><br>
+<a href="#Lea-__floordiv__">__floordiv__</a>&nbsp;&nbsp;
+<a href="#Lea-__ge__">__ge__</a>&nbsp;&nbsp;
+<a href="#Lea-__getattribute__">__getattribute__</a>&nbsp;&nbsp;
+<a href="#Lea-__getitem__">__getitem__</a>&nbsp;&nbsp;
+<a href="#Lea-__gt__">__gt__</a>&nbsp;&nbsp;
+<a href="#Lea-__hash__">__hash__</a>&nbsp;&nbsp;
+<a href="#Lea-__init__">__init__</a>&nbsp;&nbsp;
+<a href="#Lea-__invert__">__invert__</a><br>
+<a href="#Lea-__iter__">__iter__</a>&nbsp;&nbsp;
+<a href="#Lea-__le__">__le__</a>&nbsp;&nbsp;
+<a href="#Lea-__lt__">__lt__</a>&nbsp;&nbsp;
+<a href="#Lea-__mod__">__mod__</a>&nbsp;&nbsp;
+<a href="#Lea-__mul__">__mul__</a>&nbsp;&nbsp;
+<a href="#Lea-__ne__">__ne__</a>&nbsp;&nbsp;
+<a href="#Lea-__neg__">__neg__</a>&nbsp;&nbsp;
+<a href="#Lea-__nonzero__">__nonzero__</a>&nbsp;&nbsp;
+<a href="#Lea-__or__">__or__</a><br>
+<a href="#Lea-__pos__">__pos__</a>&nbsp;&nbsp;
+<a href="#Lea-__pow__">__pow__</a>&nbsp;&nbsp;
+<a href="#Lea-__radd__">__radd__</a>&nbsp;&nbsp;
+<a href="#Lea-__rand__">__rand__</a>&nbsp;&nbsp;
+<a href="#Lea-__rdiv__">__rdiv__</a>&nbsp;&nbsp;
+<a href="#Lea-__rdivmod__">__rdivmod__</a>&nbsp;&nbsp;
+<a href="#Lea-__repr__">__repr__</a>&nbsp;&nbsp;
+<a href="#Lea-__rfloordiv__">__rfloordiv__</a><br>
+<a href="#Lea-__rmod__">__rmod__</a>&nbsp;&nbsp;
+<a href="#Lea-__rmul__">__rmul__</a>&nbsp;&nbsp;
+<a href="#Lea-__ror__">__ror__</a>&nbsp;&nbsp;
+<a href="#Lea-__rpow__">__rpow__</a>&nbsp;&nbsp;
+<a href="#Lea-__rsub__">__rsub__</a>&nbsp;&nbsp;
+<a href="#Lea-__rtruediv__">__rtruediv__</a>&nbsp;&nbsp;
+<a href="#Lea-__rxor__">__rxor__</a>&nbsp;&nbsp;
+<a href="#Lea-__str__">__str__</a><br>
+<a href="#Lea-__sub__">__sub__</a>&nbsp;&nbsp;
+<a href="#Lea-__truediv__">__truediv__</a>&nbsp;&nbsp;
+<a href="#Lea-__xor__">__xor__</a><br>
+<a href="#Lea-as_float">as_float</a>&nbsp;&nbsp;
+<a href="#Lea-as_joint">as_joint</a>&nbsp;&nbsp;
+<a href="#Lea-as_pct">as_pct</a>&nbsp;&nbsp;
+<a href="#Lea-as_string">as_string</a>&nbsp;&nbsp;
+<a href="#Lea-build_bn_from_joint">build_bn_from_joint</a>&nbsp;&nbsp;
+<a href="#Lea-calc">calc</a>&nbsp;&nbsp;
+<a href="#Alea-cdf_dict">cdf_dict</a>&nbsp;&nbsp;
+<a href="#Alea-cdf_tuple">cdf_tuple</a><br>
+<a href="#Lea-cond_entropy">cond_entropy</a>&nbsp;&nbsp;
+<a href="#Lea-cumul">cumul</a>&nbsp;&nbsp;
+<a href="#Lea-draw">draw</a>&nbsp;&nbsp;
+<a href="#Alea-entropy">entropy</a>&nbsp;&nbsp;
+<a href="#Lea-equiv">equiv</a>&nbsp;&nbsp;
+<a href="#Lea-equiv_f">equiv_f</a>&nbsp;&nbsp;
+<a href="#Lea-estimate_mc">estimate_mc</a>&nbsp;&nbsp;
+<a href="#Lea-flat">flat</a>&nbsp;&nbsp;
+<a href="#Lea-free">free</a><br>
+<a href="#Lea-gen_random_mc">gen_random_mc</a>&nbsp;&nbsp;
+<a href="#Lea-get_alea">get_alea</a>&nbsp;&nbsp;
+<a href="#Lea-get_alea_leaves_set">get_alea_leaves_set</a>&nbsp;&nbsp;
+<a href="#Lea-get_certain_value">get_certain_value</a>&nbsp;&nbsp;
+<a href="#Lea-given">given</a>&nbsp;&nbsp;
+<a href="#Lea-given_prob">given_prob</a>&nbsp;&nbsp;
+<a href="#Lea-histo">histo</a><br>
+<a href="#Alea-information">information</a>&nbsp;&nbsp;
+<a href="#Lea-information_of">information_of</a>&nbsp;&nbsp;
+<a href="#Lea-internal">internal</a>&nbsp;&nbsp;
+<a href="#Lea-inv_cumul">inv_cumul</a>&nbsp;&nbsp;
+<a href="#Lea-is_any_of">is_any_of</a>&nbsp;&nbsp;
+<a href="#Lea-is_bound">is_bound</a>&nbsp;&nbsp;
+<a href="#Lea-is_certain_value">is_certain_value</a><br>
+<a href="#Lea-is_feasible">is_feasible</a>&nbsp;&nbsp;
+<a href="#Lea-is_none_of">is_none_of</a>&nbsp;&nbsp;
+<a href="#Lea-is_true">is_true</a>&nbsp;&nbsp;
+<a href="#Lea-is_uniform">is_uniform</a>&nbsp;&nbsp;
+<a href="#Lea-joint">joint</a>&nbsp;&nbsp;
+<a href="#Lea-lr">lr</a>&nbsp;&nbsp;
+<a href="#Lea-map">map</a>&nbsp;&nbsp;
+<a href="#Lea-map_seq">map_seq</a>&nbsp;&nbsp;
+<a href="#Alea-mean">mean</a>&nbsp;&nbsp;
+<a href="#Alea-mean_f">mean_f</a>&nbsp;&nbsp;
+<a href="#Lea-merge">merge</a><br>
+<a href="#Alea-mode">mode</a>&nbsp;&nbsp;
+<a href="#Lea-nb_cases">nb_cases</a>&nbsp;&nbsp;
+<a href="#Lea-new">new</a>&nbsp;&nbsp;
+<a href="#Lea-observe">observe</a>&nbsp;&nbsp;
+<a href="#Lea-p">p</a>&nbsp;&nbsp;
+<a href="#Alea-p_sum">p_sum</a>&nbsp;&nbsp;
+<a href="#Lea-plot">plot</a>&nbsp;&nbsp;
+<a href="#Alea-pmf_dict">pmf_dict</a>&nbsp;&nbsp;
+<a href="#Alea-pmf_tuple">pmf_tuple</a>&nbsp;&nbsp;
+<a href="#Alea-ps">ps</a>&nbsp;&nbsp;
+<a href="#Lea-random">random</a><br>
+<a href="#Lea-random_draw">random_draw</a>&nbsp;&nbsp;
+<a href="#Lea-random_iter">random_iter</a>&nbsp;&nbsp;
+<a href="#Lea-random_mc">random_mc</a>&nbsp;&nbsp;
+<a href="#Alea-redundancy">redundancy</a>&nbsp;&nbsp;
+<a href="#Alea-rel_entropy">rel_entropy</a>&nbsp;&nbsp;
+<a href="#Lea-reset">reset</a>&nbsp;&nbsp;
+<a href="#Lea-revised_with_cpt">revised_with_cpt</a><br>
+<a href="#Lea-sort_by">sort_by</a>&nbsp;&nbsp;
+<a href="#Lea-subs">subs</a>&nbsp;&nbsp;
+<a href="#Alea-std">std</a>&nbsp;&nbsp;
+<a href="#Alea-std_f">std_f</a>&nbsp;&nbsp;
+<a href="#Alea-support">support</a>&nbsp;&nbsp;
+<a href="#Lea-switch">switch</a>&nbsp;&nbsp;
+<a href="#Lea-switch_func">switch_func</a>&nbsp;&nbsp;
+<a href="#Lea-times">times</a>&nbsp;&nbsp;
+<a href="#Lea-times_tuple">times_tuple</a>&nbsp;&nbsp;
+<a href="#Alea-var">var</a>&nbsp;&nbsp;
+<a href="#Alea-var_f">var_f</a><br>
+<br>
+<strong>Static methods of <a href="#Lea">Lea</a> class (not aliased as functions):</strong><br>
+<a href="#Lea-joint_entropy">joint_entropy</a><br><br>
+</table>
+
+<hr>
+
+Lea is a Python library for dealing with discrete probability distributions in a simple way.<br><br>
+
+Lea allows you modeling a broad range of random phenomena, like gambling, weather, finance, etc. It lets you define random variables with given probability distributions on any Python object; then, these random variables can be combined together using usual arithmetic, comparison, logical operators, joints, conditional probability and even user-defined functions. Lea can then calculate the probability distributions on these derived random variables; it provides also usual probability indicators (e.g. the mean and the variance) and measures from information theory (e.g. the entropy). Generation of random samples can be performed on any probability distribution, even non-uniform. Advanced functions let you build up probabilistic models using joint probability distributions (JPD), conditional probability tables (CPT), Bayes networks and Markov chains. Lea is definitely a toolkit for probabilistic programming.<br><br>
+
+Lea is designed to be easy to use, putting the focus on the expressiveness of the models and hiding as much as possible the underlying mathematics. It can be used as a toolkit for teaching probability theory and probabilistic programming.<br><br>
+
+Lea offers different ways to represent probabilities, including floating-point numbers, fractions and even symbolic variables (thanks to <a href="http://www.sympy.org">SymPy</a> library). You can easily switch from one representation to another. Whatever the probability representation, the same calculation algorithm is used, producing results with the probability type you've chosen.<br><br>
+
+The probability calculation in Lea is performed through an original algorithm, the <a href="http://arxiv.org/abs/1806.09997">Statues algorithm</a>, which is based on generators and variable binding. This algorithm performs exact calculation. The implementation has been tuned to optimize the CPU. However, should the combinatorial become prohibitively large, an approximate algorithm based on Monte-Carlo sampling is also available.<br><br>
+
+Lea is a pure Python library. Most of the functions do not require installation of other packages. For advanced functions however, you may take advantage of the following optional libraries (these are automatically detected and integrated when you use Lea): <a href="http://matplotlib.org">matplotlib</a> for plotting histograms, <a href="http://www.sympy.org">SymPy</a> for symbolic calculations and <a href="http://pandas.pydata.org">pandas</a> for building joint probability distributions. Note that these three libraries are part of the <a href="http://www.anaconda.com">Anaconda</a> distribution; so, if you install Lea within your Anaconda environment, then you have access to all Lea features without worrying about installation.<br><br>
+
+Lea runs on Python 2.6, 2.7 or 3.x.<br><br>
+
+Lea is available under LGPL license.
+</td></tr>
+</table>
+
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#dddddd">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<a name="Functions">
+<font color="#000000" face="helvetica, arial"><big><strong>Functions of lea module</strong></big></font></td></tr>
+<tr><td bgcolor="#dddddd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>&nbsp;</td>
+<td width="100%">
+<dl>
+<br>
+<dt><a name="-P"><strong>P</strong></a>(lea1)</dt><dd>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;given&nbsp;lea1&nbsp;is&nbsp;True;<br>
+the&nbsp;probability&nbsp;is&nbsp;expressed&nbsp;in&nbsp;the&nbsp;probability&nbsp;type&nbsp;used&nbsp;in&nbsp;lea1,<br>
+possibly&nbsp;downcasted&nbsp;for&nbsp;convenience&nbsp;(Fraction&nbsp;-&gt;&nbsp;ProbFraction,<br>
+Decimal&nbsp;-&gt;&nbsp;ProbDecimal);<br>
+raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;in&nbsp;the&nbsp;distribution&nbsp;is&nbsp;not&nbsp;boolean<br>
+(note&nbsp;that&nbsp;this&nbsp;is&nbsp;NOT&nbsp;the&nbsp;case&nbsp;with&nbsp;lea1.p(True));<br>
+this&nbsp;is&nbsp;a&nbsp;convenience&nbsp;function&nbsp;equivalent&nbsp;to&nbsp;lea1.P</dd></dl>
+
+<dl><dt><a name="-Pf"><strong>Pf</strong></a>(lea1)</dt><dd>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;given&nbsp;lea1&nbsp;is&nbsp;True;<br>
+the&nbsp;probability&nbsp;is&nbsp;expressed&nbsp;as&nbsp;a&nbsp;float&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0;<br>
+raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;no&nbsp;convertible&nbsp;to&nbsp;float<br>
+raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;in&nbsp;the&nbsp;distribution&nbsp;is&nbsp;not&nbsp;boolean<br>
+(this&nbsp;is&nbsp;NOT&nbsp;the&nbsp;case&nbsp;with&nbsp;lea1.p(True));<br>
+this&nbsp;is&nbsp;a&nbsp;convenience&nbsp;function&nbsp;equivalent&nbsp;to&nbsp;lea1.Pf</dd></dl>
+
+<dl><dt><a name="Alea-bernoulli"><strong>bernoulli</strong></a>(p, prob_type=None)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;Bernoulli<br>
+distribution&nbsp;giving&nbsp;1&nbsp;with&nbsp;probability&nbsp;p&nbsp;and&nbsp;0&nbsp;with&nbsp;probability<br>
+1-p;<br>
+prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probability&nbsp;p:<br>
+&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
+&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
+&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;</dd></dl>
+
+<dl><dt><a name="Alea-binom"><strong>binom</strong></a>(n, p, prob_type=None)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;binomial<br>
+distribution&nbsp;giving&nbsp;the&nbsp;number&nbsp;of&nbsp;successes&nbsp;among&nbsp;a&nbsp;number&nbsp;n&nbsp;of<br>
+independent&nbsp;experiments,&nbsp;each&nbsp;having&nbsp;probability&nbsp;p&nbsp;of&nbsp;success;<br>
+note:&nbsp;the&nbsp;binom&nbsp;method&nbsp;generalizes&nbsp;the&nbsp;bernoulli&nbsp;method:<br>
+&nbsp;&nbsp;<a href="#Alea-binom">binom</a>(1,p)&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;<a href="#Alea-bernoulli">bernoulli</a>(p)<br>
+prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probability&nbsp;p:<br>
+&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
+&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
+&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;</dd></dl>
+
+<dl><dt><a name="Alea-coerce"><strong>coerce</strong></a>(value, prob_type=-1)</dt><dd>returns&nbsp;a&nbsp;<a href="lea.lea.html#Lea">Lea</a>&nbsp;instance&nbsp;corresponding&nbsp;to&nbsp;the<br>
+given&nbsp;value:<br>
+if&nbsp;the&nbsp;value&nbsp;is&nbsp;a&nbsp;<a href="lea.lea.html#Lea">Lea</a>&nbsp;instance,&nbsp;then&nbsp;it&nbsp;is&nbsp;returned&nbsp;as-is<br>
+otherwise,&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned,&nbsp;with&nbsp;given&nbsp;value<br>
+as&nbsp;unique&nbsp;value,&nbsp;with&nbsp;a&nbsp;probability&nbsp;of&nbsp;1.<br>
+if&nbsp;prob_type&nbsp;is&nbsp;-1,<br>
+&nbsp;&nbsp;&nbsp;then&nbsp;the&nbsp;returned&nbsp;Alea&nbsp;instance&nbsp;has&nbsp;integer&nbsp;1&nbsp;as&nbsp;probability<br>
+&nbsp;&nbsp;&nbsp;otherwise,&nbsp;the&nbsp;returned&nbsp;Alea&nbsp;instance&nbsp;has&nbsp;probability&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;converted&nbsp;according&nbsp;to&nbsp;prob_type&nbsp;(see&nbsp;doc&nbsp;of&nbsp;Alea.set_prob_type)</dd></dl>
+
+<dl><dt><a name="Lea-cpt"><strong>cpt</strong></a>(*clauses, **kwargs)</dt><dd>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional<br>
+probability&nbsp;table&nbsp;(e.g.&nbsp;a&nbsp;node&nbsp;in&nbsp;a&nbsp;Bayes&nbsp;network)&nbsp;from&nbsp;the&nbsp;given&nbsp;clauses;<br>
+each&nbsp;clause&nbsp;is&nbsp;a&nbsp;tuple&nbsp;(condition,result)<br>
+where&nbsp;condition&nbsp;is&nbsp;a&nbsp;boolean&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;boolean&nbsp;distribution<br>
+&nbsp;&nbsp;and&nbsp;result&nbsp;is&nbsp;a&nbsp;value&nbsp;or&nbsp;<a href="#Lea">Lea</a>&nbsp;distribution&nbsp;representing&nbsp;the&nbsp;result<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assuming&nbsp;that&nbsp;condition&nbsp;is&nbsp;true<br>
+the&nbsp;conditions&nbsp;from&nbsp;all&nbsp;clauses&nbsp;shall&nbsp;be&nbsp;mutually&nbsp;exclusive<br>
+if&nbsp;a&nbsp;clause&nbsp;contains&nbsp;None&nbsp;as&nbsp;condition,&nbsp;then&nbsp;it&nbsp;is&nbsp;considered&nbsp;as&nbsp;a&nbsp;'else'<br>
+condition;<br>
+the&nbsp;method&nbsp;supports&nbsp;three&nbsp;optional&nbsp;named&nbsp;arguments:<br>
+&nbsp;'prior_lea',&nbsp;'auto_else',&nbsp;'check'&nbsp;and&nbsp;'ctx_type';<br>
+'prior_lea'&nbsp;and&nbsp;'auto_else'&nbsp;are&nbsp;mutually&nbsp;exclusive,&nbsp;they&nbsp;require&nbsp;the&nbsp;absence<br>
+of&nbsp;an&nbsp;'else'&nbsp;clause&nbsp;(otherwise,&nbsp;an&nbsp;exception&nbsp;is&nbsp;raised);&nbsp;<br>
+*&nbsp;if&nbsp;prior_lea&nbsp;argument&nbsp;is&nbsp;specified,&nbsp;then&nbsp;the&nbsp;'else'&nbsp;clause&nbsp;is&nbsp;calculated<br>
+so&nbsp;that&nbsp;the&nbsp;prior_lea&nbsp;is&nbsp;returned&nbsp;for&nbsp;the&nbsp;unconditional&nbsp;case<br>
+*&nbsp;if&nbsp;auto_else&nbsp;argument&nbsp;is&nbsp;specified&nbsp;as&nbsp;True,&nbsp;then&nbsp;the&nbsp;'else'&nbsp;clause&nbsp;is<br>
+calculated&nbsp;so&nbsp;that&nbsp;a&nbsp;uniform&nbsp;probability&nbsp;distribution&nbsp;is&nbsp;returned&nbsp;for<br>
+the&nbsp;condition&nbsp;cases&nbsp;not&nbsp;covered&nbsp;in&nbsp;given&nbsp;clauses&nbsp;(principle&nbsp;of&nbsp;indifference);<br>
+the&nbsp;values&nbsp;are&nbsp;retrieved&nbsp;from&nbsp;the&nbsp;results&nbsp;found&nbsp;in&nbsp;given&nbsp;clauses<br>
+*&nbsp;if&nbsp;check&nbsp;argument&nbsp;is&nbsp;specified&nbsp;as&nbsp;False,&nbsp;then&nbsp;NO&nbsp;checks&nbsp;are&nbsp;made&nbsp;on&nbsp;the&nbsp;given<br>
+clauses&nbsp;(see&nbsp;below);&nbsp;this&nbsp;can&nbsp;significantly&nbsp;increase&nbsp;performances,&nbsp;as&nbsp;the&nbsp;<br>
+set&nbsp;of&nbsp;clauses&nbsp;or&nbsp;variables&nbsp;become&nbsp;large;&nbsp;<br>
+by&nbsp;default&nbsp;(check&nbsp;arg&nbsp;absent&nbsp;or&nbsp;set&nbsp;to&nbsp;True),&nbsp;checks&nbsp;are&nbsp;made&nbsp;on&nbsp;clause<br>
+conditions&nbsp;to&nbsp;ensure&nbsp;that&nbsp;they&nbsp;form&nbsp;a&nbsp;partition:<br>
+&nbsp;&nbsp;1)&nbsp;the&nbsp;clause&nbsp;conditions&nbsp;shall&nbsp;be&nbsp;mutually&nbsp;disjoint,&nbsp;i.e.&nbsp;no&nbsp;subset<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;conditions&nbsp;shall&nbsp;be&nbsp;true&nbsp;together;<br>
+&nbsp;&nbsp;2)&nbsp;if&nbsp;'else'&nbsp;is&nbsp;missing&nbsp;and&nbsp;not&nbsp;calculated&nbsp;through&nbsp;'prior_lea'&nbsp;nor&nbsp;'auto_else',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;the&nbsp;clause&nbsp;conditions&nbsp;shall&nbsp;cover&nbsp;all&nbsp;possible&nbsp;cases,&nbsp;i.e.&nbsp;ORing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;them&nbsp;shall&nbsp;be&nbsp;certainly&nbsp;true;<br>
+an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;if&nbsp;any&nbsp;of&nbsp;such&nbsp;conditions&nbsp;is&nbsp;not&nbsp;verified;</dd></dl>
+
+<dl><dt><a name="Lea-dist_l1"><strong>dist_l1</strong></a>(lea1, lea2)</dt><dd>returns&nbsp;the&nbsp;L1&nbsp;distance&nbsp;between&nbsp;the&nbsp;pmf&nbsp;of&nbsp;given&nbsp;(coerced)<br>
+lea&nbsp;instances;<br>
+note:&nbsp;assuming&nbsp;that&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;are&nbsp;normalized,&nbsp;the&nbsp;result&nbsp;is&nbsp;between&nbsp;0<br>
+(iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have&nbsp;same&nbsp;pmf)&nbsp;and&nbsp;2&nbsp;(iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have&nbsp;disjoint<br>
+supports)</dd></dl>
+
+<dl><dt><a name="Lea-dist_l2"><strong>dist_l2</strong></a>(lea1, lea2)</dt><dd>returns&nbsp;the&nbsp;L2&nbsp;distance&nbsp;between&nbsp;the&nbsp;pmf&nbsp;of&nbsp;given&nbsp;(coerced)<br>
+lea&nbsp;instances;<br>
+note:&nbsp;assuming&nbsp;that&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;are&nbsp;normalized,&nbsp;the&nbsp;result&nbsp;is&nbsp;between&nbsp;0<br>
+(iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have&nbsp;same&nbsp;pmf)&nbsp;and&nbsp;sqrt(2)&nbsp;(iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have<br>
+disjoint&nbsp;singleton&nbsp;supports)</dd></dl>
+
+<dl><dt><a name="Alea-event"><strong>event</strong></a>(p, prob_type=None)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;boolean<br>
+probability&nbsp;distribution&nbsp;giving&nbsp;True&nbsp;with&nbsp;probability&nbsp;p&nbsp;and<br>
+False&nbsp;with&nbsp;probability&nbsp;1-p;<br>
+prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probability&nbsp;p:<br>
+&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
+&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
+&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;</dd></dl>
+
+<dl><dt><a name="Lea-func_wrapper"><strong>func_wrapper</strong></a>(f)</dt><dd>returns&nbsp;a&nbsp;wrapper&nbsp;function&nbsp;on&nbsp;given&nbsp;f&nbsp;function,<br>
+mimicking&nbsp;f&nbsp;with&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;as&nbsp;arguments;<br>
+the&nbsp;returned&nbsp;wrapper&nbsp;function&nbsp;has&nbsp;the&nbsp;same&nbsp;number&nbsp;of&nbsp;arguments<br>
+as&nbsp;f&nbsp;and&nbsp;expects&nbsp;for&nbsp;argument&nbsp;#i<br>
+-&nbsp;either&nbsp;an&nbsp;object&nbsp;of&nbsp;the&nbsp;type&nbsp;expected&nbsp;by&nbsp;f&nbsp;for&nbsp;argument&nbsp;#i<br>
+-&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;values&nbsp;of&nbsp;that&nbsp;type;<br>
+the&nbsp;returned&nbsp;wrapper&nbsp;function,&nbsp;when&nbsp;called,&nbsp;returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
+having&nbsp;values&nbsp;of&nbsp;the&nbsp;type&nbsp;returned&nbsp;by&nbsp;f;<br>
+note:&nbsp;<a href="#Lea">Lea</a>.func_wrapper&nbsp;can&nbsp;be&nbsp;used&nbsp;as&nbsp;a&nbsp;function&nbsp;decorator</dd></dl>
+
+<dl><dt><a name="Lea-if_"><strong>if_</strong></a>(cond_lea, then_lea, else_lea)</dt><dd>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Tlea&nbsp;representing&nbsp;the<br>
+conditional&nbsp;probability&nbsp;table<br>
+giving&nbsp;then_lea&nbsp;&nbsp;if&nbsp;cond_lea&nbsp;is&nbsp;true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else_lea&nbsp;&nbsp;otherwise<br>
+this&nbsp;is&nbsp;a&nbsp;convenience&nbsp;method&nbsp;equivalent&nbsp;to&nbsp;<br>
+&nbsp;&nbsp;cond_lea.<a href="#Lea-switch">switch</a>({True:then_lea,False:else_lea})</dd></dl>
+
+<dl><dt><a name="Alea-interval"><strong>interval</strong></a>(from_val, to_val, prob_type=None)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;uniform&nbsp;probability<br>
+distribution,&nbsp;for&nbsp;all&nbsp;the&nbsp;integers&nbsp;in&nbsp;the&nbsp;interval&nbsp;[from_val,to_val]<br>
+the&nbsp;given&nbsp;prob_type,&nbsp;if&nbsp;not&nbsp;None,&nbsp;allows&nbsp;using&nbsp;a&nbsp;probability<br>
+type&nbsp;different&nbsp;from&nbsp;the&nbsp;default&nbsp;one&nbsp;(float&nbsp;or&nbsp;any&nbsp;one&nbsp;set&nbsp;by<br>
+Alea.set_prob_type)&nbsp;-&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.set_prob_type</dd></dl>
+
+<dl><dt><a name="Lea-joint"><strong>joint</strong></a>(self, *args)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Clea&nbsp;instance,&nbsp;representing&nbsp;the&nbsp;joint&nbsp;of&nbsp;all<br>
+arguments,&nbsp;coerced&nbsp;to&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;including&nbsp;self&nbsp;as&nbsp;first&nbsp;argument</dd></dl>
+
+<dl><dt><a name="Lea-make_vars"><strong>make_vars</strong></a>(obj, tgt_dict, prefix='', suffix='')</dt><dd>retrieves&nbsp;attributes&nbsp;names&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An&nbsp;of&nbsp;obj&nbsp;and<br>
+put&nbsp;associations&nbsp;{V1&nbsp;:&nbsp;obj.A1,&nbsp;...&nbsp;,&nbsp;Vn&nbsp;:&nbsp;obj.An}&nbsp;in&nbsp;tgt_dict&nbsp;dictionary<br>
+where&nbsp;Vi&nbsp;is&nbsp;a&nbsp;variable&nbsp;name&nbsp;string&nbsp;built&nbsp;as&nbsp;prefix&nbsp;+&nbsp;Ai&nbsp;+&nbsp;suffix;<br>
+obj&nbsp;is<br>
+(a)&nbsp;either&nbsp;a&nbsp;named&nbsp;tuple&nbsp;with&nbsp;attributes&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An&nbsp;(as&nbsp;returned<br>
+by&nbsp;build_b_nfrom_joint,&nbsp;for&nbsp;example)<br>
+(b)&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;representing&nbsp;a&nbsp;joint&nbsp;probability&nbsp;distribution<br>
+with&nbsp;the&nbsp;attributes&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An&nbsp;(such&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;is&nbsp;returned&nbsp;by<br>
+as_joint&nbsp;method,&nbsp;for&nbsp;example);<br>
+note:&nbsp;if&nbsp;the&nbsp;caller&nbsp;passes&nbsp;globals()&nbsp;as&nbsp;tgt_dict,&nbsp;then&nbsp;the&nbsp;variables<br>
+named&nbsp;Vi,&nbsp;referring&nbsp;to&nbsp;obj.Ai,&nbsp;shall&nbsp;be&nbsp;created&nbsp;in&nbsp;its&nbsp;scope,&nbsp;as<br>
+a&nbsp;side-effect&nbsp;(this&nbsp;is&nbsp;the&nbsp;purpose&nbsp;of&nbsp;the&nbsp;method);<br>
+warning:&nbsp;the&nbsp;method&nbsp;may&nbsp;silently&nbsp;overwrite&nbsp;caller's&nbsp;variables</dd></dl>
+
+<dl><dt><a name="Lea-max_of"><strong>max_of</strong></a>(*args, **kwargs)</dt><dd>returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
+the&nbsp;maximum&nbsp;value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
+if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
+to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
+if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then<br>
+&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;a&nbsp;Flea2&nbsp;instance&nbsp;or,&nbsp;if&nbsp;there&nbsp;is&nbsp;only&nbsp;one&nbsp;argument&nbsp;in&nbsp;args,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;argument&nbsp;unchanged;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;dependencies&nbsp;with&nbsp;args&nbsp;but&nbsp;the&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;calculation&nbsp;could&nbsp;be&nbsp;prohibitively&nbsp;slow&nbsp;(exponential&nbsp;complexity);<br>
+if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;True,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;however,&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;loses<br>
+&nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
+&nbsp;&nbsp;&nbsp;&nbsp;appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.max(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;conditional&nbsp;probability&nbsp;expressions<br>
+requires&nbsp;at&nbsp;least&nbsp;one&nbsp;argument&nbsp;in&nbsp;args</dd></dl>
+
+<dl><dt><a name="Lea-min_of"><strong>min_of</strong></a>(*args, **kwargs)</dt><dd>returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
+the&nbsp;minimum&nbsp;value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
+if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
+to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
+if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then<br>
+&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;a&nbsp;Flea2&nbsp;instance&nbsp;or,&nbsp;if&nbsp;there&nbsp;is&nbsp;only&nbsp;one&nbsp;argument&nbsp;in&nbsp;args,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;argument&nbsp;unchanged;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;dependencies&nbsp;with&nbsp;args&nbsp;but&nbsp;the&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;calculation&nbsp;could&nbsp;be&nbsp;prohibitively&nbsp;slow&nbsp;(exponential&nbsp;complexity);<br>
+if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;True,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;however,&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;loses<br>
+&nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
+&nbsp;&nbsp;&nbsp;&nbsp;appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.max(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;conditional&nbsp;probability&nbsp;expressions<br>
+requires&nbsp;at&nbsp;least&nbsp;one&nbsp;argument&nbsp;in&nbsp;args</dd></dl>
+
+<dl><dt><a name="Lea-mutual_information"><strong>mutual_information</strong></a>(lea1, lea2)</dt><dd>returns&nbsp;the&nbsp;mutual&nbsp;information&nbsp;between&nbsp;given&nbsp;arguments,<br>
+expressed&nbsp;in&nbsp;bits;<br>
+the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&nbsp;expression&nbsp;(see&nbsp;doc&nbsp;of<br>
+Alea.entropy)</dd></dl>
+
+<dl><dt><a name="Alea-pmf"><strong>pmf</strong></a>(arg, prob_type=None, **kwargs)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;probability<br>
+distribution&nbsp;for&nbsp;a&nbsp;probability&nbsp;mass&nbsp;function&nbsp;specified&nbsp;by&nbsp;the&nbsp;given<br>
+arg,&nbsp;which&nbsp;is<br>
+&nbsp;&nbsp;either&nbsp;a&nbsp;dictionary&nbsp;{&nbsp;v1:p1,&nbsp;...&nbsp;,&nbsp;vn:pn&nbsp;}<br>
+&nbsp;&nbsp;or&nbsp;an&nbsp;iterable&nbsp;of&nbsp;pairs&nbsp;(v1,p1),&nbsp;...&nbsp;,&nbsp;(vn,pn)<br>
+pi&nbsp;is&nbsp;the&nbsp;probability&nbsp;of&nbsp;occurrence&nbsp;of&nbsp;vi&nbsp;or&nbsp;a&nbsp;number&nbsp;proportional<br>
+to&nbsp;it&nbsp;(see&nbsp;normalization&nbsp;argument&nbsp;below);<br>
+in&nbsp;the&nbsp;iterable&nbsp;case,&nbsp;if&nbsp;the&nbsp;same&nbsp;value&nbsp;v&nbsp;occurs&nbsp;multiple&nbsp;times,<br>
+then&nbsp;the&nbsp;associated&nbsp;p&nbsp;are&nbsp;summed&nbsp;together;<br>
+*&nbsp;prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probabilities:<br>
+&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
+&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
+&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;<br>
+the&nbsp;method&nbsp;admits&nbsp;three&nbsp;other&nbsp;optional&nbsp;boolean&nbsp;argument&nbsp;(in&nbsp;kwargs):<br>
+*&nbsp;sorting&nbsp;(default:True):&nbsp;if&nbsp;True,&nbsp;then&nbsp;the&nbsp;values&nbsp;for&nbsp;displaying<br>
+the&nbsp;distribution&nbsp;or&nbsp;getting&nbsp;the&nbsp;values&nbsp;will&nbsp;be&nbsp;sorted&nbsp;if&nbsp;possible<br>
+(i.e.&nbsp;no&nbsp;exception&nbsp;on&nbsp;sort);&nbsp;otherwise,&nbsp;the&nbsp;order&nbsp;of&nbsp;values&nbsp;is<br>
+unspecified&nbsp;unless&nbsp;ordered=True;<br>
+*&nbsp;ordered&nbsp;(default:False):&nbsp;if&nbsp;ordered&nbsp;is&nbsp;True,&nbsp;then&nbsp;the&nbsp;values&nbsp;for<br>
+displaying&nbsp;the&nbsp;distribution&nbsp;or&nbsp;getting&nbsp;the&nbsp;values&nbsp;will&nbsp;follow&nbsp;the<br>
+given&nbsp;order&nbsp;(requires&nbsp;that&nbsp;the&nbsp;arg&nbsp;is&nbsp;an&nbsp;iterable&nbsp;or&nbsp;a&nbsp;<br>
+collections.OrderedDict);<br>
+*&nbsp;normalization&nbsp;(default:True):&nbsp;if&nbsp;True,&nbsp;then&nbsp;each&nbsp;element<br>
+of&nbsp;the&nbsp;given&nbsp;ps&nbsp;is&nbsp;divided&nbsp;by&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;ps&nbsp;before&nbsp;being&nbsp;stored<br>
+(in&nbsp;such&nbsp;case,&nbsp;it's&nbsp;not&nbsp;mandatory&nbsp;to&nbsp;have&nbsp;true&nbsp;probabilities&nbsp;for&nbsp;ps<br>
+elements;&nbsp;these&nbsp;could&nbsp;be&nbsp;simple&nbsp;counters,&nbsp;for&nbsp;example);<br>
+requires&nbsp;that&nbsp;all&nbsp;the&nbsp;given&nbsp;values&nbsp;vi&nbsp;are&nbsp;hashable;<br>
+requires&nbsp;that&nbsp;prob_dict&nbsp;is&nbsp;not&nbsp;empty;<br>
+requires&nbsp;that&nbsp;ordered&nbsp;and&nbsp;sorting&nbsp;are&nbsp;not&nbsp;set&nbsp;to&nbsp;True&nbsp;together<br>
+requires&nbsp;Python&nbsp;2.7+&nbsp;for&nbsp;ordered=True&nbsp;and&nbsp;arg&nbsp;OrderedDict</dd></dl>
+
+<dl><dt><a name="Alea-poisson"><strong>poisson</strong></a>(mean, precision=1e-20, prob_type=None)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;Poisson&nbsp;probability<br>
+distribution&nbsp;having&nbsp;the&nbsp;given&nbsp;mean;&nbsp;the&nbsp;distribution&nbsp;is&nbsp;approximated&nbsp;by<br>
+the&nbsp;finite&nbsp;set&nbsp;of&nbsp;values&nbsp;that&nbsp;have&nbsp;probability&nbsp;&gt;&nbsp;precision<br>
+(i.e.&nbsp;low/high&nbsp;values&nbsp;with&nbsp;too&nbsp;small&nbsp;probabilities&nbsp;are&nbsp;dropped);<br>
+the&nbsp;probabilities&nbsp;are&nbsp;stored&nbsp;as&nbsp;float,&nbsp;whatever&nbsp;the&nbsp;current&nbsp;probability<br>
+type&nbsp;configured</dd></dl>
+
+<dl><dt><a name="Alea-read_csv_file"><strong>read_csv_file</strong></a>(csv_file, col_names=None, dialect='excel', **fmtparams)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;joint&nbsp;probability<br>
+distribution&nbsp;of&nbsp;the&nbsp;data&nbsp;read&nbsp;in&nbsp;the&nbsp;given&nbsp;CSV&nbsp;file;<br>
+if&nbsp;csv_file&nbsp;is&nbsp;a&nbsp;string,&nbsp;then&nbsp;it&nbsp;is&nbsp;interpreted&nbsp;as&nbsp;a&nbsp;filename,<br>
+otherwise,&nbsp;csv_file&nbsp;is&nbsp;interpreted&nbsp;as&nbsp;a&nbsp;file&nbsp;object&nbsp;ready&nbsp;to&nbsp;be&nbsp;read;<br>
+the&nbsp;arguments&nbsp;follow&nbsp;the&nbsp;same&nbsp;semantics&nbsp;as&nbsp;those&nbsp;of&nbsp;Python's&nbsp;csv.reader<br>
+method,&nbsp;which&nbsp;supports&nbsp;different&nbsp;CSV&nbsp;formats;<br>
+see&nbsp;doc&nbsp;in&nbsp;<a href="http://docs.python.org/3.7/library/csv.html">http://docs.python.org/3.7/library/csv.html</a><br>
+*&nbsp;if&nbsp;col_names&nbsp;is&nbsp;None,&nbsp;then&nbsp;the&nbsp;fields&nbsp;found&nbsp;in&nbsp;the&nbsp;first&nbsp;read&nbsp;row&nbsp;of&nbsp;the&nbsp;CSV<br>
+&nbsp;&nbsp;file&nbsp;provide&nbsp;information&nbsp;on&nbsp;the&nbsp;attributes:&nbsp;each&nbsp;field&nbsp;is&nbsp;made&nbsp;up&nbsp;of&nbsp;a&nbsp;name,<br>
+&nbsp;&nbsp;which&nbsp;shall&nbsp;be&nbsp;a&nbsp;valid&nbsp;identifier,&nbsp;followed&nbsp;by&nbsp;an&nbsp;optional&nbsp;3-characters&nbsp;type<br>
+&nbsp;&nbsp;code&nbsp;among<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{b}&nbsp;-&gt;&nbsp;boolean<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{i}&nbsp;-&gt;&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{f}&nbsp;-&gt;&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{s}&nbsp;-&gt;&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{#}&nbsp;-&gt;&nbsp;count<br>
+&nbsp;&nbsp;if&nbsp;the&nbsp;type&nbsp;code&nbsp;is&nbsp;missing&nbsp;for&nbsp;a&nbsp;given&nbsp;field,&nbsp;the&nbsp;type&nbsp;string&nbsp;is&nbsp;assumed&nbsp;for<br>
+&nbsp;&nbsp;this&nbsp;field;&nbsp;for&nbsp;example,&nbsp;using&nbsp;the&nbsp;comma&nbsp;delimiter&nbsp;(default),&nbsp;the&nbsp;first&nbsp;row<br>
+&nbsp;&nbsp;in&nbsp;the&nbsp;CSV&nbsp;file&nbsp;could&nbsp;be:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name,age{i},heigth{f},married{b}<br>
+*&nbsp;if&nbsp;col_names&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;col_names&nbsp;shall&nbsp;be&nbsp;a&nbsp;sequence&nbsp;of&nbsp;strings&nbsp;giving<br>
+&nbsp;&nbsp;attribute&nbsp;information&nbsp;as&nbsp;described&nbsp;above,&nbsp;e.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;('name','age{i}','heigth{f}','married{b}')<br>
+&nbsp;&nbsp;it&nbsp;assumed&nbsp;that&nbsp;there&nbsp;is&nbsp;NO&nbsp;header&nbsp;row&nbsp;in&nbsp;the&nbsp;CSV&nbsp;file<br>
+the&nbsp;type&nbsp;code&nbsp;defines&nbsp;the&nbsp;conversion&nbsp;to&nbsp;be&nbsp;applied&nbsp;to&nbsp;the&nbsp;fields&nbsp;read&nbsp;on&nbsp;the<br>
+data&nbsp;lines;&nbsp;if&nbsp;the&nbsp;read&nbsp;value&nbsp;is&nbsp;empty,&nbsp;then&nbsp;it&nbsp;is&nbsp;converted&nbsp;to&nbsp;Python's&nbsp;None,<br>
+except&nbsp;if&nbsp;the&nbsp;type&nbsp;is&nbsp;string,&nbsp;then,&nbsp;the&nbsp;value&nbsp;is&nbsp;the&nbsp;empty&nbsp;string;<br>
+if&nbsp;the&nbsp;read&nbsp;value&nbsp;is&nbsp;not&nbsp;empty&nbsp;and&nbsp;cannot&nbsp;be&nbsp;parsed&nbsp;for&nbsp;the&nbsp;expected&nbsp;type,&nbsp;then<br>
+an&nbsp;exception&nbsp;is&nbsp;raised;&nbsp;for&nbsp;boolean&nbsp;type,&nbsp;the&nbsp;following&nbsp;values&nbsp;(case<br>
+insensitive):<br>
+&nbsp;&nbsp;'1',&nbsp;'t',&nbsp;'true',&nbsp;'y',&nbsp;'yes'&nbsp;are&nbsp;interpreted&nbsp;as&nbsp;Python's&nbsp;True,<br>
+&nbsp;&nbsp;'0',&nbsp;'f',&nbsp;'false',&nbsp;'n',&nbsp;'no'&nbsp;are&nbsp;interpreted&nbsp;as&nbsp;Python's&nbsp;False;<br>
+the&nbsp;{#}&nbsp;code&nbsp;identifies&nbsp;a&nbsp;field&nbsp;that&nbsp;provides&nbsp;a&nbsp;count&nbsp;number&nbsp;of&nbsp;the&nbsp;row,<br>
+representing&nbsp;the&nbsp;probability&nbsp;of&nbsp;the&nbsp;row&nbsp;or&nbsp;its&nbsp;frequency&nbsp;as&nbsp;a&nbsp;positive&nbsp;integer;<br>
+such&nbsp;field&nbsp;is&nbsp;NOT&nbsp;included&nbsp;as&nbsp;attribute&nbsp;of&nbsp;the&nbsp;joint&nbsp;distribution;&nbsp;it&nbsp;is&nbsp;useful<br>
+to&nbsp;define&nbsp;non-uniform&nbsp;probability&nbsp;distribution,&nbsp;as&nbsp;alternative&nbsp;to&nbsp;repeating&nbsp;the<br>
+same&nbsp;row&nbsp;multiple&nbsp;times</dd></dl>
+
+<dl><dt><a name="Alea-read_pandas_df"><strong>read_pandas_df</strong></a>(dataframe, index_col_name=None, **kwargs)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;joint&nbsp;probability<br>
+distribution&nbsp;from&nbsp;the&nbsp;given&nbsp;pandas&nbsp;dataframe;<br>
+the&nbsp;attribute&nbsp;names&nbsp;of&nbsp;the&nbsp;distribution&nbsp;are&nbsp;those&nbsp;of&nbsp;the&nbsp;column&nbsp;of&nbsp;the<br>
+given&nbsp;dataframe;&nbsp;the&nbsp;first&nbsp;field&nbsp;in&nbsp;each&nbsp;item&nbsp;of&nbsp;the&nbsp;dataframe&nbsp;is&nbsp;assumed<br>
+to&nbsp;be&nbsp;the&nbsp;index;&nbsp;its&nbsp;treatment&nbsp;depends&nbsp;on&nbsp;given&nbsp;index_col_name:<br>
+if&nbsp;index_col_name&nbsp;is&nbsp;None,&nbsp;then&nbsp;this&nbsp;index&nbsp;field&nbsp;is&nbsp;ignored<br>
+otherwise,&nbsp;it&nbsp;is&nbsp;put&nbsp;in&nbsp;the&nbsp;joint&nbsp;distribution&nbsp;with&nbsp;index_col_name&nbsp;as<br>
+attribute&nbsp;name</dd></dl>
+
+<dl><dt><a name="Lea-reduce_all"><strong>reduce_all</strong></a>(op, args, absorber=None)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Flea2&nbsp;instance&nbsp;that&nbsp;join&nbsp;the&nbsp;given&nbsp;args&nbsp;with<br>
+the&nbsp;given&nbsp;function&nbsp;op,&nbsp;from&nbsp;left&nbsp;to&nbsp;right;<br>
+requires&nbsp;that&nbsp;op&nbsp;is&nbsp;a&nbsp;2-ary&nbsp;function,&nbsp;accepting&nbsp;self's&nbsp;values&nbsp;as&nbsp;arguments;<br>
+requires&nbsp;that&nbsp;args&nbsp;contains&nbsp;at&nbsp;least&nbsp;one&nbsp;element<br>
+if&nbsp;absorber&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;it&nbsp;is&nbsp;considered&nbsp;as&nbsp;a&nbsp;"left-absorber"&nbsp;value<br>
+(i.e.&nbsp;op(absorber,x)&nbsp;=&nbsp;absorber);&nbsp;this&nbsp;activates&nbsp;a&nbsp;more&nbsp;efficient&nbsp;algorithm<br>
+which&nbsp;prunes&nbsp;the&nbsp;tree&nbsp;search&nbsp;as&nbsp;soon&nbsp;as&nbsp;the&nbsp;absorber&nbsp;is&nbsp;met.</dd></dl>
+
+<dl><dt><a name="Alea-set_prob_type"><strong>set_prob_type</strong></a>(prob_type)</dt><dd>change&nbsp;the&nbsp;representation&nbsp;of&nbsp;probability&nbsp;values&nbsp;for&nbsp;newly&nbsp;created&nbsp;<a href="lea.lea.html#Lea">Lea</a><br>
+instances,&nbsp;according&nbsp;to&nbsp;the&nbsp;given&nbsp;prob_type;<br>
+if&nbsp;prob_type&nbsp;is&nbsp;a&nbsp;callable&nbsp;object,&nbsp;then&nbsp;it&nbsp;is&nbsp;set&nbsp;as&nbsp;such;<br>
+otherwise,&nbsp;the&nbsp;given&nbsp;prob_type&nbsp;is&nbsp;a&nbsp;code&nbsp;interpreted&nbsp;as&nbsp;follows:<br>
+-&nbsp;'f'&nbsp;-&gt;&nbsp;float&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;float)&nbsp;-&nbsp;default<br>
+-&nbsp;'d'&nbsp;-&gt;&nbsp;decimal&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;decimal.Decimal)<br>
+-&nbsp;'r'&nbsp;-&gt;&nbsp;rational&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;fractions.Fraction)<br>
+-&nbsp;'s'&nbsp;-&gt;&nbsp;symbolic&nbsp;(instance&nbsp;of&nbsp;a&nbsp;sympy&nbsp;Symbol)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;see&nbsp;Alea.prob_symbol&nbsp;method<br>
+-&nbsp;'x'&nbsp;-&gt;&nbsp;any:&nbsp;if&nbsp;probability&nbsp;given&nbsp;in&nbsp;a&nbsp;string,&nbsp;then&nbsp;determines<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;type&nbsp;from&nbsp;it&nbsp;(decimal,&nbsp;rational&nbsp;or&nbsp;symbol)&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;convert&nbsp;into&nbsp;it;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;otherwise,&nbsp;takes&nbsp;the&nbsp;object&nbsp;as-is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;see&nbsp;Alea.prob_any&nbsp;method<br>
+requires&nbsp;that&nbsp;a&nbsp;prob_type&nbsp;is&nbsp;a&nbsp;callable&nbsp;or&nbsp;a&nbsp;code&nbsp;among&nbsp;the&nbsp;ones<br>
+given&nbsp;above</dd></dl>
+
+<dl><dt><a name="Alea-vals"><strong>vals</strong></a>(*values, **kwargs)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;distribution<br>
+for&nbsp;the&nbsp;given&nbsp;values,&nbsp;so&nbsp;that&nbsp;each&nbsp;value&nbsp;occurrence&nbsp;is<br>
+taken&nbsp;as&nbsp;equiprobable;&nbsp;if&nbsp;each&nbsp;value&nbsp;occurs&nbsp;exactly&nbsp;once,&nbsp;then&nbsp;the<br>
+probability&nbsp;distribution&nbsp;is&nbsp;uniform,&nbsp;i.e.&nbsp;the&nbsp;probability&nbsp;of&nbsp;each<br>
+value&nbsp;is&nbsp;equal&nbsp;to&nbsp;1&nbsp;/&nbsp;#values;&nbsp;otherwise,&nbsp;the&nbsp;probability&nbsp;of&nbsp;each<br>
+value&nbsp;is&nbsp;equal&nbsp;to&nbsp;its&nbsp;frequency&nbsp;in&nbsp;the&nbsp;sequence;<br>
+the&nbsp;optional&nbsp;arguments&nbsp;(kwargs)&nbsp;are:<br>
+&nbsp;&nbsp;prob_type,&nbsp;ordered,&nbsp;sorting,&nbsp;normalization,&nbsp;check;<br>
+see&nbsp;doc&nbsp;of&nbsp;Alea.pmf&nbsp;static&nbsp;method;<br>
+requires&nbsp;at&nbsp;least&nbsp;one&nbsp;vals&nbsp;argument</dd></dl>
+</td></tr></table>
+
+<p>
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+
+<tr bgcolor="#eeeeee">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="Lea">class <strong>Lea</strong></a>(object)</font></td></tr>
     
-<tr bgcolor="#ffffff"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Lea">Lea</a>&nbsp;is&nbsp;an&nbsp;abstract&nbsp;class&nbsp;representing&nbsp;discrete&nbsp;probability&nbsp;distributions.<br>
+<tr bgcolor="#eeeeee"><td rowspan=2>&nbsp;&nbsp;&nbsp;</td>
+<td colspan=2><a href="#Lea">Lea</a>&nbsp;is&nbsp;an&nbsp;abstract&nbsp;class&nbsp;representing&nbsp;discrete&nbsp;probability&nbsp;distributions.<br>
 &nbsp;<br>
 Each&nbsp;instance&nbsp;of&nbsp;concrete&nbsp;<a href="#Lea">Lea</a>'s&nbsp;subclasses&nbsp;(called&nbsp;simply&nbsp;a&nbsp;"<a href="#Lea">Lea</a>&nbsp;instance"&nbsp;in&nbsp;the&nbsp;following)<br>
 represents&nbsp;a&nbsp;discrete&nbsp;probability&nbsp;distribution,&nbsp;which&nbsp;associates&nbsp;each&nbsp;value&nbsp;of&nbsp;a&nbsp;set&nbsp;of<br>
@@ -134,52 +627,52 @@ you&nbsp;may&nbsp;read&nbsp;the&nbsp;paper&nbsp;"Probabilistic&nbsp;inference&nb
 available&nbsp;on&nbsp;<a href="http://arxiv.org/abs/1806.09997">http://arxiv.org/abs/1806.09997</a>.&nbsp;The&nbsp;heart&nbsp;of&nbsp;the&nbsp;algorithm&nbsp;is&nbsp;implemented&nbsp;in<br>
 <a href="#Lea">Lea</a>._gen_bound_vp&nbsp;method&nbsp;(aka&nbsp;GENATOMS&nbsp;in&nbsp;the&nbsp;paper)&nbsp;and&nbsp;&lt;X&gt;lea._gen_vp&nbsp;methods&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>'s<br>
 subclasses&nbsp;(aka&nbsp;GENATOMSBYTYPE&nbsp;in&nbsp;the&nbsp;paper);&nbsp;the&nbsp;final&nbsp;collection&nbsp;and&nbsp;condensation&nbsp;is&nbsp;done&nbsp;by<br>
-<a href="#Lea">Lea</a>.calc&nbsp;method&nbsp;(aka&nbsp;MARG&nbsp;in&nbsp;the&nbsp;paper),&nbsp;which&nbsp;uses&nbsp;and&nbsp;<a href="#Lea">Lea</a>._calc&nbsp;and&nbsp;Alea.pmf&nbsp;methods.<br>&nbsp;</tt></td></tr>
+<a href="#Lea">Lea</a>.calc&nbsp;method&nbsp;(aka&nbsp;MARG&nbsp;in&nbsp;the&nbsp;paper),&nbsp;which&nbsp;uses&nbsp;<a href="#Lea">Lea</a>._calc&nbsp;and&nbsp;Alea.pmf&nbsp;methods.<br>&nbsp;</td></tr>
 <tr><td>&nbsp;</td>
 
-<td width="100%">Methods defined here:<br>
+<td width="100%"><i>Instance methods:</i><br>
 
-<dl><dt><a name="Alea-P"><strong>P</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;self&nbsp;is&nbsp;True;<br>
+<dl><dt><a name="Alea-P"><strong>P</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;self&nbsp;is&nbsp;True;<br>
 the&nbsp;probability&nbsp;is&nbsp;expressed&nbsp;in&nbsp;the&nbsp;probability&nbsp;type&nbsp;used&nbsp;in&nbsp;self,<br>
 possibly&nbsp;downcasted&nbsp;for&nbsp;convenience&nbsp;(Fraction&nbsp;-&gt;&nbsp;ProbFraction,<br>
 Decimal&nbsp;-&gt;&nbsp;ProbDecimal);<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;in&nbsp;the&nbsp;distribution&nbsp;is&nbsp;not&nbsp;boolean<br>
 (note&nbsp;that&nbsp;this&nbsp;is&nbsp;NOT&nbsp;the&nbsp;case&nbsp;with&nbsp;lea1.<a href="#Alea-p">p</a>(True))<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-Pf"><strong>Pf</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;self&nbsp;is&nbsp;True;<br>
+<dl><dt><a name="Alea-Pf"><strong>Pf</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;self&nbsp;is&nbsp;True;<br>
 the&nbsp;probability&nbsp;is&nbsp;expressed&nbsp;as&nbsp;a&nbsp;float&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0;<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;no&nbsp;convertible&nbsp;to&nbsp;float<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;in&nbsp;the&nbsp;distribution&nbsp;is&nbsp;not&nbsp;boolean<br>
 (this&nbsp;is&nbsp;NOT&nbsp;the&nbsp;case&nbsp;with&nbsp;lea1.<a href="#Alea-p">p</a>(True))<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-__abs__"><strong>__abs__</strong></a> = func(self)</dt><dd><tt>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;abs&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__abs__"><strong>__abs__</strong></a> = func(self)</dt><dd>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;abs&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__add__"><strong>__add__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;add&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__add__"><strong>__add__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;add&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__and__"><strong>__and__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_and&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__and__"><strong>__and__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_and&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>raises&nbsp;an&nbsp;exception&nbsp;telling&nbsp;that&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;cannot&nbsp;be&nbsp;evaluated&nbsp;as&nbsp;a&nbsp;boolean<br>
-called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"bool(self)",&nbsp;"if&nbsp;self:",&nbsp;"while&nbsp;self:",&nbsp;etc</tt></dd></dl>
+<dl><dt><a name="Lea-__bool__"><strong>__bool__</strong></a>(self)</dt><dd>raises&nbsp;an&nbsp;exception&nbsp;telling&nbsp;that&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;cannot&nbsp;be&nbsp;evaluated&nbsp;as&nbsp;a&nbsp;boolean<br>
+called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"bool(self)",&nbsp;"if&nbsp;self:",&nbsp;"while&nbsp;self:",&nbsp;etc</dd></dl>
 
-<dl><dt><a name="Lea-__call__"><strong>__call__</strong></a>(self, *args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;probability&nbsp;distribution<br>
+<dl><dt><a name="Lea-__call__"><strong>__call__</strong></a>(self, *args)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;probability&nbsp;distribution<br>
 of&nbsp;values&nbsp;returned&nbsp;by&nbsp;invoking&nbsp;functions&nbsp;of&nbsp;current&nbsp;distribution&nbsp;on&nbsp;<br>
 given&nbsp;arguments&nbsp;(assuming&nbsp;that&nbsp;the&nbsp;values&nbsp;of&nbsp;current&nbsp;distribution&nbsp;are<br>
 functions);<br>
-called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"self(*args)"</tt></dd></dl>
+called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"self(*args)"</dd></dl>
 
-<dl><dt><a name="Lea-__div__"><strong>__div__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__div__"><strong>__div__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__divmod__"><strong>__divmod__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;divmod&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__divmod__"><strong>__divmod__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;divmod&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__eq__"><strong>__eq__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;eq&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__eq__"><strong>__eq__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;eq&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__floordiv__"><strong>__floordiv__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;floordiv&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__floordiv__"><strong>__floordiv__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;floordiv&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__ge__"><strong>__ge__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;ge&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__ge__"><strong>__ge__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;ge&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__getattribute__"><strong>__getattribute__</strong></a>(self, attr_name)</dt><dd><tt>returns&nbsp;the&nbsp;attribute&nbsp;with&nbsp;the&nbsp;given&nbsp;name&nbsp;in&nbsp;the&nbsp;current&nbsp;<a href="#Lea">Lea</a>&nbsp;instance;<br>
+<dl><dt><a name="Lea-__getattribute__"><strong>__getattribute__</strong></a>(self, attr_name)</dt><dd>returns&nbsp;the&nbsp;attribute&nbsp;with&nbsp;the&nbsp;given&nbsp;name&nbsp;in&nbsp;the&nbsp;current&nbsp;<a href="#Lea">Lea</a>&nbsp;instance;<br>
 if&nbsp;the&nbsp;attribute&nbsp;name&nbsp;is&nbsp;a&nbsp;distribution&nbsp;indicator,&nbsp;then&nbsp;the&nbsp;distribution<br>
 is&nbsp;evaluated&nbsp;and&nbsp;the&nbsp;indicator&nbsp;method&nbsp;is&nbsp;called;&nbsp;<br>
 if&nbsp;the&nbsp;attribute&nbsp;name&nbsp;is&nbsp;unknown&nbsp;as&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance's&nbsp;attribute,<br>
@@ -192,105 +685,105 @@ WARNING:&nbsp;the&nbsp;following&nbsp;methods&nbsp;are&nbsp;called&nbsp;without&
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;support,&nbsp;p_sum,&nbsp;ps,&nbsp;pmf_tuple,&nbsp;pmf_dict,&nbsp;cdf_tuple,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cdf_dict<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;these&nbsp;are&nbsp;applicable&nbsp;on&nbsp;any&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;these&nbsp;are&nbsp;documented&nbsp;in&nbsp;the&nbsp;Alea&nbsp;class</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;these&nbsp;are&nbsp;documented&nbsp;in&nbsp;the&nbsp;Alea&nbsp;class</dd></dl>
 
-<dl><dt><a name="Lea-__getitem__"><strong>__getitem__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;getitem&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__getitem__"><strong>__getitem__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;getitem&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__gt__"><strong>__gt__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;gt&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__gt__"><strong>__gt__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;gt&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Return&nbsp;hash(self).</tt></dd></dl>
+<dl><dt><a name="Lea-__hash__"><strong>__hash__</strong></a>(self)</dt><dd>Return&nbsp;hash(self).</dd></dl>
 
-<dl><dt><a name="Lea-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>initializes&nbsp;<a href="#Lea">Lea</a>&nbsp;instance's&nbsp;attributes</tt></dd></dl>
+<dl><dt><a name="Lea-__init__"><strong>__init__</strong></a>(self)</dt><dd>initializes&nbsp;<a href="#Lea">Lea</a>&nbsp;instance's&nbsp;attributes</dd></dl>
 
-<dl><dt><a name="Lea-__invert__"><strong>__invert__</strong></a> = func(self)</dt><dd><tt>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;__safe_not&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__invert__"><strong>__invert__</strong></a> = func(self)</dt><dd>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;__safe_not&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__iter__"><strong>__iter__</strong></a>(self)</dt><dd><tt>raises&nbsp;en&nbsp;error&nbsp;exception<br>
+<dl><dt><a name="Lea-__iter__"><strong>__iter__</strong></a>(self)</dt><dd>raises&nbsp;en&nbsp;error&nbsp;exception<br>
 called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"iter(self)",&nbsp;"tuple(self)",&nbsp;"list(self)"<br>
-&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;on&nbsp;"for&nbsp;x&nbsp;in&nbsp;self"</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;on&nbsp;"for&nbsp;x&nbsp;in&nbsp;self"</dd></dl>
 
-<dl><dt><a name="Lea-__le__"><strong>__le__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;le&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__le__"><strong>__le__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;le&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__lt__"><strong>__lt__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;lt&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__lt__"><strong>__lt__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;lt&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__mod__"><strong>__mod__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mod&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__mod__"><strong>__mod__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mod&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__mul__"><strong>__mul__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mul&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__mul__"><strong>__mul__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mul&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__ne__"><strong>__ne__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;ne&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__ne__"><strong>__ne__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;ne&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__neg__"><strong>__neg__</strong></a> = func(self)</dt><dd><tt>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;neg&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__neg__"><strong>__neg__</strong></a> = func(self)</dt><dd>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;neg&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
 <dl><dt><a name="Lea-__nonzero__"><strong>__nonzero__</strong></a> = <a href="#Lea-__bool__">__bool__</a>(self)</dt></dl>
 
-<dl><dt><a name="Lea-__or__"><strong>__or__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_or&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__or__"><strong>__or__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_or&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__pos__"><strong>__pos__</strong></a> = func(self)</dt><dd><tt>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;pos&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__pos__"><strong>__pos__</strong></a> = func(self)</dt><dd>returns&nbsp;Flea1&nbsp;instance&nbsp;applying&nbsp;pos&nbsp;function&nbsp;on&nbsp;(self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__pow__"><strong>__pow__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;pow&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__pow__"><strong>__pow__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;pow&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__radd__"><strong>__radd__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;add&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__radd__"><strong>__radd__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;add&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rand__"><strong>__rand__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_and&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rand__"><strong>__rand__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_and&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rdiv__"><strong>__rdiv__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rdiv__"><strong>__rdiv__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rdivmod__"><strong>__rdivmod__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;divmod&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rdivmod__"><strong>__rdivmod__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;divmod&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
 <dl><dt><a name="Lea-__repr__"><strong>__repr__</strong></a> = <a href="#Lea-__str__">__str__</a>(self)</dt></dl>
 
-<dl><dt><a name="Lea-__rfloordiv__"><strong>__rfloordiv__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;floordiv&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rfloordiv__"><strong>__rfloordiv__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;floordiv&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rmod__"><strong>__rmod__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mod&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rmod__"><strong>__rmod__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mod&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rmul__"><strong>__rmul__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mul&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rmul__"><strong>__rmul__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;mul&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__ror__"><strong>__ror__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_or&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__ror__"><strong>__ror__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_or&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rpow__"><strong>__rpow__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;pow&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rpow__"><strong>__rpow__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;pow&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rsub__"><strong>__rsub__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;sub&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rsub__"><strong>__rsub__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;sub&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rtruediv__"><strong>__rtruediv__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rtruediv__"><strong>__rtruediv__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__rxor__"><strong>__rxor__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_xor&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__rxor__"><strong>__rxor__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_xor&nbsp;function&nbsp;on&nbsp;(other,self),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
+<dl><dt><a name="Lea-__str__"><strong>__str__</strong></a>(self)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
 representation&nbsp;of&nbsp;it;<br>
 it&nbsp;contains&nbsp;one&nbsp;line&nbsp;per&nbsp;distinct&nbsp;value,&nbsp;separated&nbsp;by&nbsp;a&nbsp;newline&nbsp;character;<br>
 each&nbsp;line&nbsp;contains&nbsp;the&nbsp;string&nbsp;representation&nbsp;of&nbsp;a&nbsp;value&nbsp;&nbsp;with&nbsp;its<br>
 probability&nbsp;expressed&nbsp;as&nbsp;a&nbsp;rational&nbsp;number&nbsp;"n/d"&nbsp;or&nbsp;"0"&nbsp;or&nbsp;"1";<br>
 if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined&nbsp;on&nbsp;values,&nbsp;then&nbsp;the&nbsp;values&nbsp;are&nbsp;sorted&nbsp;by&nbsp;<br>
 increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;<br>
-called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"str(self)"&nbsp;and&nbsp;"repr(self)"</tt></dd></dl>
+called&nbsp;on&nbsp;evaluation&nbsp;of&nbsp;"str(self)"&nbsp;and&nbsp;"repr(self)"</dd></dl>
 
-<dl><dt><a name="Lea-__sub__"><strong>__sub__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;sub&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__sub__"><strong>__sub__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;sub&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__truediv__"><strong>__truediv__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__truediv__"><strong>__truediv__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;truediv&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-__xor__"><strong>__xor__</strong></a> = func(self, other)</dt><dd><tt>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_xor&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</tt></dd></dl>
+<dl><dt><a name="Lea-__xor__"><strong>__xor__</strong></a> = func(self, other)</dt><dd>returns&nbsp;Flea2&nbsp;instance&nbsp;applying&nbsp;__safe_xor&nbsp;function&nbsp;on&nbsp;(self,other),&nbsp;for&nbsp;function/operator&nbsp;overloading</dd></dl>
 
-<dl><dt><a name="Lea-as_float"><strong>as_float</strong></a>(self, nb_decimals=6)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
+<dl><dt><a name="Lea-as_float"><strong>as_float</strong></a>(self, nb_decimals=6)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
 representation&nbsp;of&nbsp;it;<br>
 it&nbsp;contains&nbsp;one&nbsp;line&nbsp;per&nbsp;distinct&nbsp;value,&nbsp;separated&nbsp;by&nbsp;a&nbsp;newline&nbsp;character;<br>
 each&nbsp;line&nbsp;contains&nbsp;the&nbsp;string&nbsp;representation&nbsp;of&nbsp;a&nbsp;value&nbsp;with&nbsp;its<br>
 probability&nbsp;expressed&nbsp;as&nbsp;decimal&nbsp;with&nbsp;given&nbsp;nb_decimals&nbsp;digits;<br>
 if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined&nbsp;on&nbsp;values,&nbsp;then&nbsp;the&nbsp;values&nbsp;are&nbsp;sorted&nbsp;by&nbsp;<br>
-increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;</tt></dd></dl>
+increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;</dd></dl>
 
-<dl><dt><a name="Lea-as_joint"><strong>as_joint</strong></a>(self, *attr_names)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;by&nbsp;building&nbsp;named&nbsp;tuples&nbsp;from&nbsp;self,&nbsp;which<br>
+<dl><dt><a name="Lea-as_joint"><strong>as_joint</strong></a>(self, *attr_names)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;by&nbsp;building&nbsp;named&nbsp;tuples&nbsp;from&nbsp;self,&nbsp;which<br>
 is&nbsp;supposed&nbsp;to&nbsp;have&nbsp;n-tuples&nbsp;as&nbsp;values,&nbsp;using&nbsp;the&nbsp;n&nbsp;given&nbsp;attr_names;<br>
 note:&nbsp;this&nbsp;is&nbsp;useful&nbsp;to&nbsp;access&nbsp;fields&nbsp;of&nbsp;joint&nbsp;probability&nbsp;distribution<br>
-by&nbsp;names&nbsp;instead&nbsp;of&nbsp;indices</tt></dd></dl>
+by&nbsp;names&nbsp;instead&nbsp;of&nbsp;indices</dd></dl>
 
-<dl><dt><a name="Lea-as_pct"><strong>as_pct</strong></a>(self, nb_decimals=1)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
+<dl><dt><a name="Lea-as_pct"><strong>as_pct</strong></a>(self, nb_decimals=1)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
 representation&nbsp;of&nbsp;it;<br>
 it&nbsp;contains&nbsp;one&nbsp;line&nbsp;per&nbsp;distinct&nbsp;value,&nbsp;separated&nbsp;by&nbsp;a&nbsp;newline&nbsp;character;<br>
 each&nbsp;line&nbsp;contains&nbsp;the&nbsp;string&nbsp;representation&nbsp;of&nbsp;a&nbsp;value&nbsp;with&nbsp;its<br>
 probability&nbsp;expressed&nbsp;as&nbsp;percentage&nbsp;with&nbsp;given&nbsp;nb_decimals&nbsp;digits;<br>
 if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined&nbsp;on&nbsp;values,&nbsp;then&nbsp;the&nbsp;values&nbsp;are&nbsp;sorted&nbsp;by&nbsp;<br>
-increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;</tt></dd></dl>
+increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;</dd></dl>
 
-<dl><dt><a name="Lea-as_string"><strong>as_string</strong></a>(self, kind=None, nb_decimals=6, chart_size=100, tabular=True)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
+<dl><dt><a name="Lea-as_string"><strong>as_string</strong></a>(self, kind=None, nb_decimals=6, chart_size=100, tabular=True)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
 representation&nbsp;of&nbsp;it;<br>
 it&nbsp;contains&nbsp;one&nbsp;line&nbsp;per&nbsp;distinct&nbsp;value,&nbsp;separated&nbsp;by&nbsp;a&nbsp;newline&nbsp;character;<br>
 each&nbsp;line&nbsp;contains&nbsp;the&nbsp;string&nbsp;representation&nbsp;of&nbsp;a&nbsp;value&nbsp;with&nbsp;its<br>
@@ -310,9 +803,9 @@ if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined&nbsp;on&nbsp;values
 increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;<br>
 if&nbsp;tabular&nbsp;is&nbsp;True&nbsp;(default),&nbsp;then&nbsp;if&nbsp;values&nbsp;are&nbsp;tuples&nbsp;of&nbsp;same&nbsp;length,&nbsp;then<br>
 these&nbsp;are&nbsp;represented&nbsp;in&nbsp;a&nbsp;tabular&nbsp;format&nbsp;(fixed&nbsp;column&nbsp;width);&nbsp;in&nbsp;the<br>
-specific&nbsp;cases&nbsp;of&nbsp;named&nbsp;tuple,&nbsp;a&nbsp;header&nbsp;line&nbsp;is&nbsp;prepended&nbsp;with&nbsp;the&nbsp;field&nbsp;names</tt></dd></dl>
+specific&nbsp;cases&nbsp;of&nbsp;named&nbsp;tuple,&nbsp;a&nbsp;header&nbsp;line&nbsp;is&nbsp;prepended&nbsp;with&nbsp;the&nbsp;field&nbsp;names</dd></dl>
 
-<dl><dt><a name="Lea-build_bn_from_joint"><strong>build_bn_from_joint</strong></a>(self, *bn_definition)</dt><dd><tt>returns&nbsp;a&nbsp;named&nbsp;tuple&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;(Alea&nbsp;or&nbsp;Tlea)&nbsp;representing&nbsp;a&nbsp;Bayes<br>
+<dl><dt><a name="Lea-build_bn_from_joint"><strong>build_bn_from_joint</strong></a>(self, *bn_definition)</dt><dd>returns&nbsp;a&nbsp;named&nbsp;tuple&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;(Alea&nbsp;or&nbsp;Tlea)&nbsp;representing&nbsp;a&nbsp;Bayes<br>
 network&nbsp;with&nbsp;variables&nbsp;stored&nbsp;in&nbsp;attributes&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An,&nbsp;assuming&nbsp;that&nbsp;self<br>
 is&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;joint&nbsp;probability&nbsp;distribution&nbsp;having,&nbsp;as&nbsp;values,&nbsp;named&nbsp;tuples<br>
 with&nbsp;the&nbsp;same&nbsp;set&nbsp;of&nbsp;attributes&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An&nbsp;(such&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;is<br>
@@ -333,9 +826,9 @@ the&nbsp;variables&nbsp;that&nbsp;are&nbsp;never&nbsp;referred&nbsp;as&nbsp;'to'
 as&nbsp;independent&nbsp;in&nbsp;the&nbsp;BN&nbsp;and&nbsp;are&nbsp;calculated&nbsp;by&nbsp;unconditional&nbsp;marginalization<br>
 on&nbsp;the&nbsp;joint&nbsp;probability&nbsp;distribution;<br>
 if&nbsp;a&nbsp;variable&nbsp;appears&nbsp;in&nbsp;more&nbsp;than&nbsp;one&nbsp;'to'&nbsp;variable,&nbsp;then&nbsp;an&nbsp;exception&nbsp;is<br>
-raised&nbsp;(error)</tt></dd></dl>
+raised&nbsp;(error)</dd></dl>
 
-<dl><dt><a name="Lea-calc"><strong>calc</strong></a>(self, prob_type=-1, sorting=True, normalization=True, bindings=None, memoization=True)</dt><dd><tt>same&nbsp;as&nbsp;<a href="#Lea">Lea</a>.new&nbsp;method,&nbsp;adding&nbsp;three&nbsp;advanced&nbsp;optional&nbsp;arguments&nbsp;that&nbsp;allow&nbsp;changing&nbsp;the<br>
+<dl><dt><a name="Lea-calc"><strong>calc</strong></a>(self, prob_type=-1, sorting=True, normalization=True, bindings=None, memoization=True)</dt><dd>same&nbsp;as&nbsp;<a href="#Lea">Lea</a>.new&nbsp;method,&nbsp;adding&nbsp;three&nbsp;advanced&nbsp;optional&nbsp;arguments&nbsp;that&nbsp;allow&nbsp;changing&nbsp;the<br>
 behavior&nbsp;of&nbsp;the&nbsp;probabilistic&nbsp;inference&nbsp;algorithm&nbsp;(the&nbsp;"Statues"&nbsp;algorithm):<br>
 *&nbsp;normalization&nbsp;(default:True):&nbsp;if&nbsp;True,&nbsp;then&nbsp;each&nbsp;probability&nbsp;is&nbsp;divided<br>
 &nbsp;&nbsp;by&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;probabilities&nbsp;before&nbsp;being&nbsp;stored;&nbsp;this&nbsp;division&nbsp;is&nbsp;essential&nbsp;to<br>
@@ -360,33 +853,33 @@ behavior&nbsp;of&nbsp;the&nbsp;probabilistic&nbsp;inference&nbsp;algorithm&nbsp;
 if&nbsp;bindings&nbsp;is&nbsp;defined,&nbsp;then<br>
 -&nbsp;requires&nbsp;that&nbsp;bindings&nbsp;is&nbsp;a&nbsp;dictionary;<br>
 -&nbsp;requires&nbsp;that&nbsp;keys&nbsp;are&nbsp;all&nbsp;unbound&nbsp;Alea&nbsp;instances;<br>
--&nbsp;requires&nbsp;that&nbsp;the&nbsp;bindings&nbsp;values&nbsp;are&nbsp;in&nbsp;the&nbsp;expected&nbsp;domains&nbsp;of&nbsp;associated&nbsp;keys</tt></dd></dl>
+-&nbsp;requires&nbsp;that&nbsp;the&nbsp;bindings&nbsp;values&nbsp;are&nbsp;in&nbsp;the&nbsp;expected&nbsp;domains&nbsp;of&nbsp;associated&nbsp;keys</dd></dl>
 
-<dl><dt><a name="Alea-cdf_dict"><strong>cdf_dict</strong></a>(self)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;cumulative<br>
-distribution&nbsp;function&nbsp;of&nbsp;self,&nbsp;as&nbsp;an&nbsp;OrderedDict&nbsp;with&nbsp;v&nbsp;:&nbsp;<a href="#Alea-P">P</a>(x&lt;=v))&nbsp;pairs;<br>
+<dl><dt><a name="Alea-cdf_dict"><strong>cdf_dict</strong></a>(self)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;cumulative<br>
+distribution&nbsp;function&nbsp;of&nbsp;self,&nbsp;as&nbsp;an&nbsp;OrderedDict&nbsp;with&nbsp;v&nbsp;:&nbsp;P(x&lt;=v))&nbsp;pairs;<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
 requires&nbsp;Python&nbsp;2.7+<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-cdf_tuple"><strong>cdf_tuple</strong></a>(self)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;cumulative<br>
-distribution&nbsp;function&nbsp;of&nbsp;self,&nbsp;as&nbsp;a&nbsp;tuple&nbsp;with&nbsp;tuples&nbsp;(v,<a href="#Alea-P">P</a>(x&lt;=v));<br>
+<dl><dt><a name="Alea-cdf_tuple"><strong>cdf_tuple</strong></a>(self)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;cumulative<br>
+distribution&nbsp;function&nbsp;of&nbsp;self,&nbsp;as&nbsp;a&nbsp;tuple&nbsp;with&nbsp;tuples&nbsp;(v,P(x&lt;=v));<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-cond_entropy"><strong>cond_entropy</strong></a>(self, other)</dt><dd><tt>returns&nbsp;the&nbsp;conditional&nbsp;entropy&nbsp;of&nbsp;self&nbsp;given&nbsp;other,&nbsp;expressed&nbsp;in<br>
+<dl><dt><a name="Lea-cond_entropy"><strong>cond_entropy</strong></a>(self, other)</dt><dd>returns&nbsp;the&nbsp;conditional&nbsp;entropy&nbsp;of&nbsp;self&nbsp;given&nbsp;other,&nbsp;expressed&nbsp;in<br>
 bits;&nbsp;note&nbsp;that&nbsp;this&nbsp;value&nbsp;is&nbsp;also&nbsp;known&nbsp;as&nbsp;the&nbsp;equivocation&nbsp;of<br>
 self&nbsp;about&nbsp;other;<br>
 the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&nbsp;expression&nbsp;(see&nbsp;doc&nbsp;of<br>
-Alea.entropy)</tt></dd></dl>
+Alea.entropy)</dd></dl>
 
-<dl><dt><a name="Lea-cumul"><strong>cumul</strong></a>(self)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
+<dl><dt><a name="Lea-cumul"><strong>cumul</strong></a>(self)</dt><dd>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
 returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;probabilities&nbsp;p&nbsp;that&nbsp;self&nbsp;&lt;=&nbsp;value&nbsp;;<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values&nbsp;(if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined<br>
 on&nbsp;values,&nbsp;then&nbsp;the&nbsp;tuples&nbsp;follows&nbsp;their&nbsp;increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary<br>
 order&nbsp;is&nbsp;used,&nbsp;fixed&nbsp;from&nbsp;call&nbsp;to&nbsp;call<br>
-Note&nbsp;:&nbsp;the&nbsp;returned&nbsp;value&nbsp;is&nbsp;cached</tt></dd></dl>
+Note&nbsp;:&nbsp;the&nbsp;returned&nbsp;value&nbsp;is&nbsp;cached</dd></dl>
 
-<dl><dt><a name="Lea-draw"><strong>draw</strong></a>(self, n, sorted=False, replacement=False)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,<br>
+<dl><dt><a name="Lea-draw"><strong>draw</strong></a>(self, n, sorted=False, replacement=False)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,<br>
 a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;probability&nbsp;distribution<br>
 of&nbsp;drawing&nbsp;n&nbsp;elements&nbsp;from&nbsp;self;<br>
 the&nbsp;returned&nbsp;values&nbsp;are&nbsp;tuples&nbsp;with&nbsp;n&nbsp;elements;<br>
@@ -406,30 +899,30 @@ Note:&nbsp;if&nbsp;the&nbsp;order&nbsp;of&nbsp;drawing&nbsp;is&nbsp;irrelevant,&
 &nbsp;to&nbsp;a&nbsp;combinatorial&nbsp;algorithm&nbsp;proposed&nbsp;by&nbsp;Paul&nbsp;Moore;&nbsp;however,&nbsp;this<br>
 &nbsp;algorithm&nbsp;is&nbsp;NOT&nbsp;used&nbsp;if&nbsp;replacement&nbsp;is&nbsp;False&nbsp;AND&nbsp;the&nbsp;probability<br>
 &nbsp;distribution&nbsp;is&nbsp;NOT&nbsp;uniform.<br>
-requires&nbsp;Python&nbsp;2.7+&nbsp;for&nbsp;the&nbsp;case&nbsp;replacement&nbsp;=&nbsp;sorted&nbsp;=&nbsp;True</tt></dd></dl>
+requires&nbsp;Python&nbsp;2.7+&nbsp;for&nbsp;the&nbsp;case&nbsp;replacement&nbsp;=&nbsp;sorted&nbsp;=&nbsp;True</dd></dl>
 
-<dl><dt><a name="Alea-entropy"><strong>entropy</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;entropy&nbsp;of&nbsp;self&nbsp;in&nbsp;bits;<br>
+<dl><dt><a name="Alea-entropy"><strong>entropy</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;entropy&nbsp;of&nbsp;self&nbsp;in&nbsp;bits;<br>
 if&nbsp;all&nbsp;probabilities&nbsp;are&nbsp;(convertible&nbsp;to)&nbsp;float,&nbsp;then&nbsp;the&nbsp;entropy<br>
 is&nbsp;returned&nbsp;as&nbsp;a&nbsp;float;<br>
 if&nbsp;any&nbsp;probability&nbsp;is&nbsp;a&nbsp;sympy&nbsp;expression,&nbsp;then&nbsp;the&nbsp;entropy&nbsp;is<br>
 returned&nbsp;as&nbsp;a&nbsp;sympy&nbsp;expression<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;probabilities&nbsp;are&nbsp;neither&nbsp;convertible<br>
 to&nbsp;float&nbsp;nor&nbsp;a&nbsp;sympy&nbsp;expression<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-equiv"><strong>equiv</strong></a>(self, other, prec=None)</dt><dd><tt>returns&nbsp;True&nbsp;iff&nbsp;self&nbsp;and&nbsp;other&nbsp;represent&nbsp;the&nbsp;same&nbsp;probability&nbsp;distribution,<br>
+<dl><dt><a name="Lea-equiv"><strong>equiv</strong></a>(self, other, prec=None)</dt><dd>returns&nbsp;True&nbsp;iff&nbsp;self&nbsp;and&nbsp;other&nbsp;represent&nbsp;the&nbsp;same&nbsp;probability&nbsp;distribution,<br>
 i.e.&nbsp;they&nbsp;have&nbsp;the&nbsp;same&nbsp;probability&nbsp;for&nbsp;each&nbsp;of&nbsp;their&nbsp;value;<br>
 returns&nbsp;False&nbsp;otherwise;<br>
 the&nbsp;probabilities&nbsp;are&nbsp;compared&nbsp;strictly&nbsp;(see&nbsp;<a href="#Lea">Lea</a>.equiv_f&nbsp;method&nbsp;for<br>
-comparisons&nbsp;tolerant&nbsp;to&nbsp;rounding&nbsp;errors)</tt></dd></dl>
+comparisons&nbsp;tolerant&nbsp;to&nbsp;rounding&nbsp;errors)</dd></dl>
 
-<dl><dt><a name="Lea-equiv_f"><strong>equiv_f</strong></a>(self, other)</dt><dd><tt>returns&nbsp;True&nbsp;iff&nbsp;self&nbsp;and&nbsp;other&nbsp;represent&nbsp;the&nbsp;same&nbsp;probability&nbsp;distribution,<br>
+<dl><dt><a name="Lea-equiv_f"><strong>equiv_f</strong></a>(self, other)</dt><dd>returns&nbsp;True&nbsp;iff&nbsp;self&nbsp;and&nbsp;other&nbsp;represent&nbsp;the&nbsp;same&nbsp;probability&nbsp;distribution,<br>
 i.e.&nbsp;they&nbsp;have&nbsp;the&nbsp;same&nbsp;probability&nbsp;for&nbsp;each&nbsp;of&nbsp;their&nbsp;value;<br>
 returns&nbsp;False&nbsp;otherwise;<br>
 the&nbsp;probabilities&nbsp;are&nbsp;compared&nbsp;using&nbsp;the&nbsp;math.isclose&nbsp;function,<br>
-in&nbsp;order&nbsp;to&nbsp;be&nbsp;tolerant&nbsp;to&nbsp;rounding&nbsp;errors</tt></dd></dl>
+in&nbsp;order&nbsp;to&nbsp;be&nbsp;tolerant&nbsp;to&nbsp;rounding&nbsp;errors</dd></dl>
 
-<dl><dt><a name="Lea-estimate_mc"><strong>estimate_mc</strong></a>(self, n, nb_tries=None)</dt><dd><tt>returns&nbsp;an&nbsp;Alea&nbsp;instance,&nbsp;which&nbsp;is&nbsp;an&nbsp;estimation&nbsp;of&nbsp;the&nbsp;current&nbsp;distribution&nbsp;from&nbsp;a&nbsp;sample<br>
+<dl><dt><a name="Lea-estimate_mc"><strong>estimate_mc</strong></a>(self, n, nb_tries=None)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance,&nbsp;which&nbsp;is&nbsp;an&nbsp;estimation&nbsp;of&nbsp;the&nbsp;current&nbsp;distribution&nbsp;from&nbsp;a&nbsp;sample<br>
 of&nbsp;n&nbsp;random&nbsp;values;&nbsp;this&nbsp;is&nbsp;a&nbsp;true&nbsp;Monte-Carlo&nbsp;algorithm,&nbsp;which&nbsp;does&nbsp;not&nbsp;precalculate&nbsp;the<br>
 exact&nbsp;probability&nbsp;distribution&nbsp;(contrarily&nbsp;to&nbsp;'random'&nbsp;method);&nbsp;<br>
 the&nbsp;method&nbsp;is&nbsp;suited&nbsp;for&nbsp;complex&nbsp;distributions,&nbsp;when&nbsp;calculation&nbsp;of&nbsp;exact&nbsp;probability<br>
@@ -437,36 +930,36 @@ distribution&nbsp;is&nbsp;intractable;&nbsp;the&nbsp;larger&nbsp;the&nbsp;value&
 nb_tries,&nbsp;if&nbsp;not&nbsp;None,&nbsp;defines&nbsp;the&nbsp;maximum&nbsp;number&nbsp;of&nbsp;trials&nbsp;in&nbsp;case&nbsp;a&nbsp;random&nbsp;value<br>
 is&nbsp;incompatible&nbsp;with&nbsp;a&nbsp;condition;&nbsp;this&nbsp;happens&nbsp;only&nbsp;if&nbsp;the&nbsp;current&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
 is&nbsp;(referring&nbsp;to)&nbsp;an&nbsp;Ilea&nbsp;or&nbsp;Blea&nbsp;instance,&nbsp;i.e.&nbsp;'given'&nbsp;or&nbsp;'cpt'&nbsp;methods;<br>
-WARNING:&nbsp;if&nbsp;nb_tries&nbsp;is&nbsp;None,&nbsp;any&nbsp;infeasible&nbsp;condition&nbsp;shall&nbsp;cause&nbsp;an&nbsp;infinite&nbsp;loop</tt></dd></dl>
+WARNING:&nbsp;if&nbsp;nb_tries&nbsp;is&nbsp;None,&nbsp;any&nbsp;infeasible&nbsp;condition&nbsp;shall&nbsp;cause&nbsp;an&nbsp;infinite&nbsp;loop</dd></dl>
 
-<dl><dt><a name="Lea-flat"><strong>flat</strong></a>(self)</dt><dd><tt>assuming&nbsp;that&nbsp;self's&nbsp;values&nbsp;are&nbsp;themselves&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,<br>
+<dl><dt><a name="Lea-flat"><strong>flat</strong></a>(self)</dt><dd>assuming&nbsp;that&nbsp;self's&nbsp;values&nbsp;are&nbsp;themselves&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,<br>
 returns&nbsp;a&nbsp;new&nbsp;Rlea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;probability&nbsp;distribution&nbsp;of<br>
-inner&nbsp;values&nbsp;of&nbsp;these&nbsp;<a href="#Lea">Lea</a>&nbsp;instances</tt></dd></dl>
+inner&nbsp;values&nbsp;of&nbsp;these&nbsp;<a href="#Lea">Lea</a>&nbsp;instances</dd></dl>
 
-<dl><dt><a name="Lea-free"><strong>free</strong></a>(self, check=True)</dt><dd><tt>unbinds&nbsp;self;<br>
+<dl><dt><a name="Lea-free"><strong>free</strong></a>(self, check=True)</dt><dd>unbinds&nbsp;self;<br>
 requires&nbsp;that&nbsp;self&nbsp;is&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;(i.e.&nbsp;not&nbsp;dependent&nbsp;of&nbsp;other&nbsp;<a href="#Lea">Lea</a>&nbsp;instances);<br>
-if&nbsp;check&nbsp;is&nbsp;True,&nbsp;then&nbsp;requires&nbsp;that&nbsp;self&nbsp;is&nbsp;bound</tt></dd></dl>
+if&nbsp;check&nbsp;is&nbsp;True,&nbsp;then&nbsp;requires&nbsp;that&nbsp;self&nbsp;is&nbsp;bound</dd></dl>
 
-<dl><dt><a name="Lea-gen_random_mc"><strong>gen_random_mc</strong></a>(self, n, nb_tries=None)</dt><dd><tt>generates&nbsp;n&nbsp;random&nbsp;value&nbsp;from&nbsp;the&nbsp;current&nbsp;probability&nbsp;distribution,<br>
+<dl><dt><a name="Lea-gen_random_mc"><strong>gen_random_mc</strong></a>(self, n, nb_tries=None)</dt><dd>generates&nbsp;n&nbsp;random&nbsp;value&nbsp;from&nbsp;the&nbsp;current&nbsp;probability&nbsp;distribution,<br>
 without&nbsp;precalculating&nbsp;the&nbsp;exact&nbsp;probability&nbsp;distribution&nbsp;(contrarily&nbsp;to&nbsp;'random'&nbsp;method);<br>
 nb_tries,&nbsp;if&nbsp;not&nbsp;None,&nbsp;defines&nbsp;the&nbsp;maximum&nbsp;number&nbsp;of&nbsp;trials&nbsp;in&nbsp;case&nbsp;a&nbsp;random&nbsp;value<br>
 is&nbsp;incompatible&nbsp;with&nbsp;a&nbsp;condition;&nbsp;this&nbsp;happens&nbsp;only&nbsp;if&nbsp;the&nbsp;current&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
 is&nbsp;(referring&nbsp;to)&nbsp;an&nbsp;Ilea&nbsp;or&nbsp;Blea&nbsp;instance,&nbsp;i.e.&nbsp;'given'&nbsp;or&nbsp;'cpt'&nbsp;methods;<br>
-WARNING:&nbsp;if&nbsp;nb_tries&nbsp;is&nbsp;None,&nbsp;any&nbsp;infeasible&nbsp;condition&nbsp;shall&nbsp;cause&nbsp;an&nbsp;infinite&nbsp;loop</tt></dd></dl>
+WARNING:&nbsp;if&nbsp;nb_tries&nbsp;is&nbsp;None,&nbsp;any&nbsp;infeasible&nbsp;condition&nbsp;shall&nbsp;cause&nbsp;an&nbsp;infinite&nbsp;loop</dd></dl>
 
-<dl><dt><a name="Lea-get_alea"><strong>get_alea</strong></a>(self, sorting=True)</dt><dd><tt>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;after&nbsp;it&nbsp;has&nbsp;been&nbsp;evaluated;<br>
+<dl><dt><a name="Lea-get_alea"><strong>get_alea</strong></a>(self, sorting=True)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;after&nbsp;it&nbsp;has&nbsp;been&nbsp;evaluated;<br>
 if&nbsp;self&nbsp;is&nbsp;an&nbsp;Alea&nbsp;instance,&nbsp;then&nbsp;it&nbsp;returns&nbsp;itself,<br>
 otherwise&nbsp;the&nbsp;newly&nbsp;created&nbsp;Alea&nbsp;is&nbsp;cached&nbsp;:&nbsp;the&nbsp;evaluation&nbsp;occurs&nbsp;only&nbsp;for&nbsp;the&nbsp;first<br>
-call;&nbsp;for&nbsp;successive&nbsp;calls,&nbsp;the&nbsp;cached&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned,&nbsp;which&nbsp;is&nbsp;faster</tt></dd></dl>
+call;&nbsp;for&nbsp;successive&nbsp;calls,&nbsp;the&nbsp;cached&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned,&nbsp;which&nbsp;is&nbsp;faster</dd></dl>
 
-<dl><dt><a name="Lea-get_alea_leaves_set"><strong>get_alea_leaves_set</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;set&nbsp;containing&nbsp;all&nbsp;the&nbsp;Alea&nbsp;leaves&nbsp;in&nbsp;the&nbsp;tree&nbsp;having&nbsp;the&nbsp;root&nbsp;self;<br>
+<dl><dt><a name="Lea-get_alea_leaves_set"><strong>get_alea_leaves_set</strong></a>(self)</dt><dd>returns&nbsp;a&nbsp;set&nbsp;containing&nbsp;all&nbsp;the&nbsp;Alea&nbsp;leaves&nbsp;in&nbsp;the&nbsp;tree&nbsp;having&nbsp;the&nbsp;root&nbsp;self;<br>
 this&nbsp;calls&nbsp;_get_lea_children()&nbsp;method&nbsp;implemented&nbsp;in&nbsp;<a href="#Lea">Lea</a>'s&nbsp;subclasses;<br>
-this&nbsp;method&nbsp;is&nbsp;overloaded&nbsp;in&nbsp;Alea&nbsp;subclass&nbsp;to&nbsp;stop&nbsp;the&nbsp;recursion</tt></dd></dl>
+this&nbsp;method&nbsp;is&nbsp;overloaded&nbsp;in&nbsp;Alea&nbsp;subclass&nbsp;to&nbsp;stop&nbsp;the&nbsp;recursion</dd></dl>
 
-<dl><dt><a name="Lea-get_certain_value"><strong>get_certain_value</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;value&nbsp;having&nbsp;probability&nbsp;1<br>
-requires&nbsp;that&nbsp;such&nbsp;value&nbsp;exists&nbsp;(i.e.&nbsp;self.<a href="#Lea-is_certain_value">is_certain_value</a>()&nbsp;returns&nbsp;True)</tt></dd></dl>
+<dl><dt><a name="Lea-get_certain_value"><strong>get_certain_value</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;value&nbsp;having&nbsp;probability&nbsp;1<br>
+requires&nbsp;that&nbsp;such&nbsp;value&nbsp;exists&nbsp;(i.e.&nbsp;self.<a href="#Lea-is_certain_value">is_certain_value</a>()&nbsp;returns&nbsp;True)</dd></dl>
 
-<dl><dt><a name="Lea-given"><strong>given</strong></a>(self, *evidences)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Ilea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;current&nbsp;distribution<br>
+<dl><dt><a name="Lea-given"><strong>given</strong></a>(self, *evidences)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Ilea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;current&nbsp;distribution<br>
 updated&nbsp;with&nbsp;the&nbsp;given&nbsp;evidences,&nbsp;which&nbsp;are&nbsp;each&nbsp;either&nbsp;a&nbsp;boolean&nbsp;or<br>
 a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;boolean&nbsp;values;&nbsp;the&nbsp;values&nbsp;present&nbsp;in&nbsp;the&nbsp;returned<br>
 distribution&nbsp;are&nbsp;those&nbsp;and&nbsp;only&nbsp;those&nbsp;compatible&nbsp;with&nbsp;the&nbsp;given&nbsp;AND&nbsp;of<br>
@@ -474,97 +967,97 @@ evidences;<br>
 the&nbsp;resulting&nbsp;(value,probability)&nbsp;pairs&nbsp;are&nbsp;calculated&nbsp;when&nbsp;the<br>
 returned&nbsp;Ilea&nbsp;instance&nbsp;is&nbsp;evaluated;<br>
 an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;if&nbsp;the&nbsp;evidences&nbsp;contain&nbsp;a&nbsp;non-boolean&nbsp;or<br>
-if&nbsp;they&nbsp;are&nbsp;unfeasible</tt></dd></dl>
+if&nbsp;they&nbsp;are&nbsp;unfeasible</dd></dl>
 
-<dl><dt><a name="Lea-given_prob"><strong>given_prob</strong></a>(self, cond_lea, p)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;from&nbsp;current&nbsp;distribution,<br>
-such&nbsp;that&nbsp;given&nbsp;p&nbsp;is&nbsp;the&nbsp;probability&nbsp;that&nbsp;cond_lea&nbsp;is&nbsp;true</tt></dd></dl>
+<dl><dt><a name="Lea-given_prob"><strong>given_prob</strong></a>(self, cond_lea, p)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;from&nbsp;current&nbsp;distribution,<br>
+such&nbsp;that&nbsp;given&nbsp;p&nbsp;is&nbsp;the&nbsp;probability&nbsp;that&nbsp;cond_lea&nbsp;is&nbsp;true</dd></dl>
 
-<dl><dt><a name="Lea-histo"><strong>histo</strong></a>(self, size=100)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
+<dl><dt><a name="Lea-histo"><strong>histo</strong></a>(self, size=100)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;string<br>
 representation&nbsp;of&nbsp;it;<br>
 it&nbsp;contains&nbsp;one&nbsp;line&nbsp;per&nbsp;distinct&nbsp;value,&nbsp;separated&nbsp;by&nbsp;a&nbsp;newline&nbsp;character;<br>
 each&nbsp;line&nbsp;contains&nbsp;the&nbsp;string&nbsp;representation&nbsp;of&nbsp;a&nbsp;value&nbsp;with&nbsp;its<br>
 probability&nbsp;expressed&nbsp;as&nbsp;a&nbsp;histogram&nbsp;bar&nbsp;made&nbsp;up&nbsp;of&nbsp;repeated&nbsp;'-',<br>
 such&nbsp;that&nbsp;a&nbsp;bar&nbsp;length&nbsp;of&nbsp;given&nbsp;size&nbsp;represents&nbsp;a&nbsp;probability&nbsp;1<br>
 if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined&nbsp;on&nbsp;values,&nbsp;then&nbsp;the&nbsp;values&nbsp;are&nbsp;sorted&nbsp;by&nbsp;<br>
-increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;</tt></dd></dl>
+increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary&nbsp;order&nbsp;is&nbsp;used;</dd></dl>
 
-<dl><dt><a name="Alea-information"><strong>information</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;information&nbsp;of&nbsp;self&nbsp;being&nbsp;true,&nbsp;expressed&nbsp;in&nbsp;bits<br>
+<dl><dt><a name="Alea-information"><strong>information</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;information&nbsp;of&nbsp;self&nbsp;being&nbsp;true,&nbsp;expressed&nbsp;in&nbsp;bits<br>
 assuming&nbsp;that&nbsp;self&nbsp;is&nbsp;a&nbsp;boolean&nbsp;distribution;<br>
 the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&nbsp;expression&nbsp;(see&nbsp;doc&nbsp;of<br>
 Alea.entropy);<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;self&nbsp;is&nbsp;certainly&nbsp;false<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-information_of"><strong>information_of</strong></a>(self, val)</dt><dd><tt>returns&nbsp;the&nbsp;information&nbsp;of&nbsp;given&nbsp;val,&nbsp;expressed&nbsp;in&nbsp;bits;<br>
+<dl><dt><a name="Lea-information_of"><strong>information_of</strong></a>(self, val)</dt><dd>returns&nbsp;the&nbsp;information&nbsp;of&nbsp;given&nbsp;val,&nbsp;expressed&nbsp;in&nbsp;bits;<br>
 the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&nbsp;expression&nbsp;(see&nbsp;doc&nbsp;of<br>
 Alea.entropy);<br>
-raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;given&nbsp;val&nbsp;has&nbsp;a&nbsp;null&nbsp;probability</tt></dd></dl>
+raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;given&nbsp;val&nbsp;has&nbsp;a&nbsp;null&nbsp;probability</dd></dl>
 
-<dl><dt><a name="Lea-internal"><strong>internal</strong></a>(self, indent='', refs=None)</dt><dd><tt>returns&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;inner&nbsp;definition&nbsp;of&nbsp;self,&nbsp;with<br>
+<dl><dt><a name="Lea-internal"><strong>internal</strong></a>(self, indent='', refs=None)</dt><dd>returns&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;inner&nbsp;definition&nbsp;of&nbsp;self,&nbsp;with<br>
 children&nbsp;leas&nbsp;recursively&nbsp;up&nbsp;to&nbsp;Alea&nbsp;leaves;&nbsp;if&nbsp;the&nbsp;same&nbsp;lea&nbsp;child<br>
 appears&nbsp;multiple&nbsp;times,&nbsp;it&nbsp;is&nbsp;expanded&nbsp;only&nbsp;on&nbsp;the&nbsp;first&nbsp;occurrence,<br>
 the&nbsp;other&nbsp;ones&nbsp;being&nbsp;marked&nbsp;with&nbsp;reference&nbsp;id;<br>
 the&nbsp;arguments&nbsp;are&nbsp;used&nbsp;only&nbsp;for&nbsp;recursive&nbsp;calls,&nbsp;they&nbsp;can&nbsp;be&nbsp;ignored<br>
 for&nbsp;a&nbsp;normal&nbsp;usage;<br>
-note:&nbsp;this&nbsp;method&nbsp;is&nbsp;overloaded&nbsp;in&nbsp;Alea&nbsp;class</tt></dd></dl>
+note:&nbsp;this&nbsp;method&nbsp;is&nbsp;overloaded&nbsp;in&nbsp;Alea&nbsp;class</dd></dl>
 
-<dl><dt><a name="Lea-inv_cumul"><strong>inv_cumul</strong></a>(self)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
+<dl><dt><a name="Lea-inv_cumul"><strong>inv_cumul</strong></a>(self)</dt><dd>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
 returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;the&nbsp;probabilities&nbsp;p&nbsp;that&nbsp;self&nbsp;&gt;=&nbsp;value&nbsp;;<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values&nbsp;(if&nbsp;an&nbsp;order&nbsp;relationship&nbsp;is&nbsp;defined<br>
 on&nbsp;values,&nbsp;then&nbsp;the&nbsp;tuples&nbsp;follows&nbsp;their&nbsp;increasing&nbsp;order;&nbsp;otherwise,&nbsp;an&nbsp;arbitrary<br>
 order&nbsp;is&nbsp;used,&nbsp;fixed&nbsp;from&nbsp;call&nbsp;to&nbsp;call<br>
-Note&nbsp;:&nbsp;the&nbsp;returned&nbsp;value&nbsp;is&nbsp;cached</tt></dd></dl>
+Note&nbsp;:&nbsp;the&nbsp;returned&nbsp;value&nbsp;is&nbsp;cached</dd></dl>
 
-<dl><dt><a name="Lea-is_any_of"><strong>is_any_of</strong></a>(self, *values)</dt><dd><tt>returns&nbsp;a&nbsp;boolean&nbsp;probability&nbsp;distribution<br>
-indicating&nbsp;the&nbsp;probability&nbsp;that&nbsp;a&nbsp;value&nbsp;is&nbsp;any&nbsp;of&nbsp;the&nbsp;values&nbsp;passed&nbsp;as&nbsp;arguments</tt></dd></dl>
+<dl><dt><a name="Lea-is_any_of"><strong>is_any_of</strong></a>(self, *values)</dt><dd>returns&nbsp;a&nbsp;boolean&nbsp;probability&nbsp;distribution<br>
+indicating&nbsp;the&nbsp;probability&nbsp;that&nbsp;a&nbsp;value&nbsp;is&nbsp;any&nbsp;of&nbsp;the&nbsp;values&nbsp;passed&nbsp;as&nbsp;arguments</dd></dl>
 
-<dl><dt><a name="Lea-is_bound"><strong>is_bound</strong></a>(self)</dt><dd><tt>returns&nbsp;True&nbsp;iff&nbsp;self&nbsp;is&nbsp;currently&nbsp;bound</tt></dd></dl>
+<dl><dt><a name="Lea-is_bound"><strong>is_bound</strong></a>(self)</dt><dd>returns&nbsp;True&nbsp;iff&nbsp;self&nbsp;is&nbsp;currently&nbsp;bound</dd></dl>
 
-<dl><dt><a name="Lea-is_certain_value"><strong>is_certain_value</strong></a>(self)</dt><dd><tt>returns&nbsp;True&nbsp;iff&nbsp;there&nbsp;is&nbsp;only&nbsp;one&nbsp;possible&nbsp;value,&nbsp;having&nbsp;probability&nbsp;1<br>
-False&nbsp;otherwise</tt></dd></dl>
+<dl><dt><a name="Lea-is_certain_value"><strong>is_certain_value</strong></a>(self)</dt><dd>returns&nbsp;True&nbsp;iff&nbsp;there&nbsp;is&nbsp;only&nbsp;one&nbsp;possible&nbsp;value,&nbsp;having&nbsp;probability&nbsp;1<br>
+False&nbsp;otherwise</dd></dl>
 
-<dl><dt><a name="Lea-is_feasible"><strong>is_feasible</strong></a>(self)</dt><dd><tt>returns&nbsp;True&nbsp;iff&nbsp;the&nbsp;value&nbsp;True&nbsp;has&nbsp;a&nbsp;non-null&nbsp;probability;<br>
+<dl><dt><a name="Lea-is_feasible"><strong>is_feasible</strong></a>(self)</dt><dd>returns&nbsp;True&nbsp;iff&nbsp;the&nbsp;value&nbsp;True&nbsp;has&nbsp;a&nbsp;non-null&nbsp;probability;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;False&nbsp;otherwise;<br>
-raises&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;is&nbsp;not&nbsp;boolean</tt></dd></dl>
+raises&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;is&nbsp;not&nbsp;boolean</dd></dl>
 
-<dl><dt><a name="Lea-is_none_of"><strong>is_none_of</strong></a>(self, *values)</dt><dd><tt>returns&nbsp;a&nbsp;boolean&nbsp;probability&nbsp;distribution<br>
-indicating&nbsp;the&nbsp;probability&nbsp;that&nbsp;a&nbsp;value&nbsp;is&nbsp;none&nbsp;of&nbsp;the&nbsp;given&nbsp;values&nbsp;passed&nbsp;as&nbsp;arguments</tt></dd></dl>
+<dl><dt><a name="Lea-is_none_of"><strong>is_none_of</strong></a>(self, *values)</dt><dd>returns&nbsp;a&nbsp;boolean&nbsp;probability&nbsp;distribution<br>
+indicating&nbsp;the&nbsp;probability&nbsp;that&nbsp;a&nbsp;value&nbsp;is&nbsp;none&nbsp;of&nbsp;the&nbsp;given&nbsp;values&nbsp;passed&nbsp;as&nbsp;arguments</dd></dl>
 
-<dl><dt><a name="Lea-is_true"><strong>is_true</strong></a>(self)</dt><dd><tt>returns&nbsp;True&nbsp;iff&nbsp;the&nbsp;value&nbsp;True&nbsp;has&nbsp;probability&nbsp;1;<br>
+<dl><dt><a name="Lea-is_true"><strong>is_true</strong></a>(self)</dt><dd>returns&nbsp;True&nbsp;iff&nbsp;the&nbsp;value&nbsp;True&nbsp;has&nbsp;probability&nbsp;1;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;False&nbsp;otherwise;<br>
-raises&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;is&nbsp;not&nbsp;boolean</tt></dd></dl>
+raises&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;is&nbsp;not&nbsp;boolean</dd></dl>
 
-<dl><dt><a name="Lea-is_uniform"><strong>is_uniform</strong></a>(self)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,<br>
+<dl><dt><a name="Lea-is_uniform"><strong>is_uniform</strong></a>(self)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,<br>
 True&nbsp;&nbsp;if&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;is&nbsp;uniform,<br>
-False&nbsp;otherwise</tt></dd></dl>
+False&nbsp;otherwise</dd></dl>
 
-<dl><dt><a name="Lea-joint"><strong>joint</strong></a>(self, *args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Clea&nbsp;instance,&nbsp;representing&nbsp;the&nbsp;joint&nbsp;of&nbsp;all<br>
-arguments,&nbsp;coerced&nbsp;to&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;including&nbsp;self&nbsp;as&nbsp;first&nbsp;argument</tt></dd></dl>
+<dl><dt><a name="Lea-joint"><strong>joint</strong></a>(self, *args)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Clea&nbsp;instance,&nbsp;representing&nbsp;the&nbsp;joint&nbsp;of&nbsp;all<br>
+arguments,&nbsp;coerced&nbsp;to&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;including&nbsp;self&nbsp;as&nbsp;first&nbsp;argument</dd></dl>
 
-<dl><dt><a name="Lea-lr"><strong>lr</strong></a>(self, *hyp_leas)</dt><dd><tt>returns&nbsp;a&nbsp;float&nbsp;giving&nbsp;the&nbsp;likelihood&nbsp;ratio&nbsp;(LR)&nbsp;of&nbsp;an&nbsp;'evidence'&nbsp;E,<br>
+<dl><dt><a name="Lea-lr"><strong>lr</strong></a>(self, *hyp_leas)</dt><dd>returns&nbsp;a&nbsp;float&nbsp;giving&nbsp;the&nbsp;likelihood&nbsp;ratio&nbsp;(LR)&nbsp;of&nbsp;an&nbsp;'evidence'&nbsp;E,<br>
 which&nbsp;is&nbsp;self,&nbsp;for&nbsp;a&nbsp;given&nbsp;'hypothesis'&nbsp;H,&nbsp;which&nbsp;is&nbsp;the&nbsp;AND&nbsp;of&nbsp;given<br>
 hyp_leas&nbsp;arguments;&nbsp;it&nbsp;is&nbsp;calculated&nbsp;as&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P(E&nbsp;|&nbsp;H)&nbsp;/&nbsp;P(E&nbsp;|&nbsp;not&nbsp;H)<br>
 both&nbsp;E&nbsp;and&nbsp;H&nbsp;must&nbsp;be&nbsp;boolean&nbsp;probability&nbsp;distributions,&nbsp;otherwise<br>
 an&nbsp;exception&nbsp;is&nbsp;raised;<br>
-an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;also&nbsp;if&nbsp;H&nbsp;is&nbsp;certainly&nbsp;true&nbsp;or&nbsp;certainly&nbsp;false</tt></dd></dl>
+an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;also&nbsp;if&nbsp;H&nbsp;is&nbsp;certainly&nbsp;true&nbsp;or&nbsp;certainly&nbsp;false</dd></dl>
 
-<dl><dt><a name="Lea-map"><strong>map</strong></a>(self, f, *args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;obtained<br>
+<dl><dt><a name="Lea-map"><strong>map</strong></a>(self, f, *args)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;obtained<br>
 by&nbsp;applying&nbsp;the&nbsp;given&nbsp;function&nbsp;f,&nbsp;taking&nbsp;values&nbsp;of&nbsp;self&nbsp;distribution<br>
 as&nbsp;first&nbsp;argument&nbsp;and&nbsp;optional&nbsp;given&nbsp;args&nbsp;as&nbsp;following&nbsp;arguments;<br>
 requires&nbsp;that&nbsp;f&nbsp;is&nbsp;a&nbsp;n-ary&nbsp;function&nbsp;with&nbsp;1&nbsp;&lt;=&nbsp;n&nbsp;=&nbsp;len(args)+1;<br>
-note:&nbsp;f&nbsp;can&nbsp;be&nbsp;also&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;with&nbsp;functions&nbsp;as&nbsp;values</tt></dd></dl>
+note:&nbsp;f&nbsp;can&nbsp;be&nbsp;also&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;with&nbsp;functions&nbsp;as&nbsp;values</dd></dl>
 
-<dl><dt><a name="Lea-map_seq"><strong>map_seq</strong></a>(self, f, *args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;obtained<br>
+<dl><dt><a name="Lea-map_seq"><strong>map_seq</strong></a>(self, f, *args)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Flea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;obtained<br>
 by&nbsp;applying&nbsp;the&nbsp;given&nbsp;function&nbsp;f&nbsp;on&nbsp;each&nbsp;element&nbsp;of&nbsp;each&nbsp;value<br>
 of&nbsp;self&nbsp;distribution;&nbsp;optional&nbsp;given&nbsp;args&nbsp;are&nbsp;added&nbsp;as&nbsp;f's<br>
 following&nbsp;arguments;<br>
 requires&nbsp;that&nbsp;f&nbsp;is&nbsp;a&nbsp;n-ary&nbsp;function&nbsp;with&nbsp;1&nbsp;&lt;=&nbsp;n&nbsp;=&nbsp;len(args)+1;<br>
 requires&nbsp;that&nbsp;self's&nbsp;values&nbsp;are&nbsp;sequences;<br>
 the&nbsp;values&nbsp;of&nbsp;returned&nbsp;distribution&nbsp;are&nbsp;tuples<br>
-note:&nbsp;f&nbsp;can&nbsp;be&nbsp;also&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;with&nbsp;functions&nbsp;as&nbsp;values</tt></dd></dl>
+note:&nbsp;f&nbsp;can&nbsp;be&nbsp;also&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;with&nbsp;functions&nbsp;as&nbsp;values</dd></dl>
 
-<dl><dt><a name="Alea-mean"><strong>mean</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;mean&nbsp;value&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution,&nbsp;which&nbsp;is&nbsp;the<br>
+<dl><dt><a name="Alea-mean"><strong>mean</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;mean&nbsp;value&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution,&nbsp;which&nbsp;is&nbsp;the<br>
 probability&nbsp;weighted&nbsp;sum&nbsp;of&nbsp;the&nbsp;values;<br>
 requires&nbsp;that<br>
 1&nbsp;-&nbsp;the&nbsp;values&nbsp;can&nbsp;be&nbsp;subtracted&nbsp;together,<br>
@@ -575,41 +1068,41 @@ requires&nbsp;that<br>
 &nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;an&nbsp;integer;<br>
 if&nbsp;any&nbsp;of&nbsp;these&nbsp;conditions&nbsp;is&nbsp;not&nbsp;met,&nbsp;then&nbsp;the&nbsp;result&nbsp;depends&nbsp;of&nbsp;the<br>
 value&nbsp;class&nbsp;implementation&nbsp;(likely,&nbsp;raised&nbsp;exception)<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-mean_f"><strong>mean_f</strong></a>(self)</dt><dd><tt>same&nbsp;as&nbsp;mean&nbsp;method&nbsp;but&nbsp;with&nbsp;conversion&nbsp;to&nbsp;float&nbsp;or&nbsp;simplification&nbsp;of&nbsp;symbolic&nbsp;expression<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+<dl><dt><a name="Alea-mean_f"><strong>mean_f</strong></a>(self)</dt><dd>same&nbsp;as&nbsp;mean&nbsp;method&nbsp;but&nbsp;with&nbsp;conversion&nbsp;to&nbsp;float&nbsp;or&nbsp;simplification&nbsp;of&nbsp;symbolic&nbsp;expression<br>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-merge"><strong>merge</strong></a>(self, *lea_args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Blea&nbsp;instance,&nbsp;representing&nbsp;the&nbsp;merge&nbsp;of&nbsp;self&nbsp;and&nbsp;given&nbsp;lea_args,&nbsp;i.e.<br>
+<dl><dt><a name="Lea-merge"><strong>merge</strong></a>(self, *lea_args)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Blea&nbsp;instance,&nbsp;representing&nbsp;the&nbsp;merge&nbsp;of&nbsp;self&nbsp;and&nbsp;given&nbsp;lea_args,&nbsp;i.e.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P(v)&nbsp;=&nbsp;(P1(v)&nbsp;+&nbsp;...&nbsp;+&nbsp;Pn(v))&nbsp;/&nbsp;n<br>
 where&nbsp;P(v)&nbsp;&nbsp;is&nbsp;the&nbsp;probability&nbsp;of&nbsp;value&nbsp;v&nbsp;in&nbsp;the&nbsp;merge&nbsp;result&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pi(v)&nbsp;is&nbsp;the&nbsp;probability&nbsp;of&nbsp;value&nbsp;v&nbsp;in&nbsp;((self,)+lea_args)[i]</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pi(v)&nbsp;is&nbsp;the&nbsp;probability&nbsp;of&nbsp;value&nbsp;v&nbsp;in&nbsp;((self,)+lea_args)[i]</dd></dl>
 
-<dl><dt><a name="Alea-mode"><strong>mode</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;the&nbsp;value(s)&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution<br>
+<dl><dt><a name="Alea-mode"><strong>mode</strong></a>(self)</dt><dd>returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;the&nbsp;value(s)&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution<br>
 having&nbsp;the&nbsp;highest&nbsp;probability<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-nb_cases"><strong>nb_cases</strong></a>(self, bindings=None, memoization=True)</dt><dd><tt>returns&nbsp;the&nbsp;number&nbsp;of&nbsp;atomic&nbsp;cases&nbsp;evaluated&nbsp;to&nbsp;build&nbsp;the&nbsp;exact&nbsp;probability&nbsp;distribution;<br>
+<dl><dt><a name="Lea-nb_cases"><strong>nb_cases</strong></a>(self, bindings=None, memoization=True)</dt><dd>returns&nbsp;the&nbsp;number&nbsp;of&nbsp;atomic&nbsp;cases&nbsp;evaluated&nbsp;to&nbsp;build&nbsp;the&nbsp;exact&nbsp;probability&nbsp;distribution;<br>
 this&nbsp;provides&nbsp;a&nbsp;measure&nbsp;of&nbsp;the&nbsp;complexity&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution<br>
 *&nbsp;bindings&nbsp;argument:&nbsp;see&nbsp;<a href="#Lea">Lea</a>.calc&nbsp;method<br>
-*&nbsp;memoization&nbsp;argument:&nbsp;see&nbsp;<a href="#Lea">Lea</a>.calc&nbsp;method</tt></dd></dl>
+*&nbsp;memoization&nbsp;argument:&nbsp;see&nbsp;<a href="#Lea">Lea</a>.calc&nbsp;method</dd></dl>
 
-<dl><dt><a name="Lea-new"><strong>new</strong></a>(self, n=None, prob_type=-1, sorting=True)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;after&nbsp;it&nbsp;has&nbsp;been&nbsp;evaluated;<br>
+<dl><dt><a name="Lea-new"><strong>new</strong></a>(self, n=None, prob_type=-1, sorting=True)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;after&nbsp;it&nbsp;has&nbsp;been&nbsp;evaluated;<br>
 if&nbsp;self&nbsp;is&nbsp;an&nbsp;Alea,&nbsp;then&nbsp;it&nbsp;returns&nbsp;a&nbsp;clone&nbsp;of&nbsp;itself&nbsp;representing&nbsp;an&nbsp;independent&nbsp;event;<br>
 the&nbsp;probability&nbsp;type&nbsp;used&nbsp;in&nbsp;the&nbsp;returned&nbsp;instance&nbsp;depends&nbsp;on&nbsp;given&nbsp;prob_type:<br>
 *&nbsp;in&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;new&nbsp;independent&nbsp;Alea&nbsp;instances&nbsp;is&nbsp;returned<br>
 *&nbsp;if&nbsp;prob_type&nbsp;is&nbsp;-1,&nbsp;then&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;self's<br>
 &nbsp;&nbsp;otherwise,&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;defined&nbsp;using&nbsp;prob_type&nbsp;(see&nbsp;doc&nbsp;of&nbsp;Alea.set_prob_type);<br>
 *&nbsp;sorting&nbsp;allows&nbsp;sorting&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;returned&nbsp;Alea&nbsp;instance&nbsp;(see&nbsp;Alea.pmf&nbsp;method);<br>
-note&nbsp;that&nbsp;the&nbsp;present&nbsp;method&nbsp;is&nbsp;overloaded&nbsp;in&nbsp;Alea&nbsp;class,&nbsp;to&nbsp;be&nbsp;more&nbsp;efficient</tt></dd></dl>
+note&nbsp;that&nbsp;the&nbsp;present&nbsp;method&nbsp;is&nbsp;overloaded&nbsp;in&nbsp;Alea&nbsp;class,&nbsp;to&nbsp;be&nbsp;more&nbsp;efficient</dd></dl>
 
-<dl><dt><a name="Lea-observe"><strong>observe</strong></a>(self, v)</dt><dd><tt>(re)binds&nbsp;self&nbsp;with&nbsp;given&nbsp;value&nbsp;v;<br>
+<dl><dt><a name="Lea-observe"><strong>observe</strong></a>(self, v)</dt><dd>(re)binds&nbsp;self&nbsp;with&nbsp;given&nbsp;value&nbsp;v;<br>
 requires&nbsp;that&nbsp;self&nbsp;is&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;(i.e.&nbsp;not&nbsp;dependent&nbsp;of&nbsp;other&nbsp;<a href="#Lea">Lea</a>&nbsp;instances);<br>
-requires&nbsp;that&nbsp;v&nbsp;is&nbsp;present&nbsp;in&nbsp;the&nbsp;domain&nbsp;of&nbsp;self</tt></dd></dl>
+requires&nbsp;that&nbsp;v&nbsp;is&nbsp;present&nbsp;in&nbsp;the&nbsp;domain&nbsp;of&nbsp;self</dd></dl>
 
-<dl><dt><a name="Lea-p"><strong>p</strong></a>(self, val)</dt><dd><tt>returns&nbsp;the&nbsp;probability&nbsp;of&nbsp;given&nbsp;value&nbsp;val</tt></dd></dl>
+<dl><dt><a name="Lea-p"><strong>p</strong></a>(self, val)</dt><dd>returns&nbsp;the&nbsp;probability&nbsp;of&nbsp;given&nbsp;value&nbsp;val</dd></dl>
 
-<dl><dt><a name="Alea-p_sum"><strong>p_sum</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;probabilities&nbsp;of&nbsp;self;<br>
+<dl><dt><a name="Alea-p_sum"><strong>p_sum</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;probabilities&nbsp;of&nbsp;self;<br>
 the&nbsp;result&nbsp;is&nbsp;expressed&nbsp;in&nbsp;the&nbsp;probability&nbsp;type&nbsp;used&nbsp;in&nbsp;self,<br>
 possibly&nbsp;downcasted&nbsp;for&nbsp;convenience&nbsp;(Fraction&nbsp;-&gt;&nbsp;ProbFraction,<br>
 Decimal&nbsp;-&gt;&nbsp;ProbDecimal);<br>
@@ -617,9 +1110,9 @@ note:&nbsp;the&nbsp;result&nbsp;is&nbsp;supposed&nbsp;to&nbsp;be&nbsp;1&nbsp;(ex
 BUT&nbsp;it&nbsp;could&nbsp;be&nbsp;different:<br>
 -&nbsp;due&nbsp;to&nbsp;float&nbsp;rounding-errors<br>
 -&nbsp;due&nbsp;to&nbsp;an&nbsp;explicit&nbsp;normalization=False&nbsp;argument&nbsp;<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-plot"><strong>plot</strong></a>(self, title=None, fname=None, savefig_args={}, **bar_args)</dt><dd><tt>produces,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,<br>
+<dl><dt><a name="Lea-plot"><strong>plot</strong></a>(self, title=None, fname=None, savefig_args={}, **bar_args)</dt><dd>produces,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,<br>
 a&nbsp;matplotlib&nbsp;bar&nbsp;chart&nbsp;representing&nbsp;it&nbsp;with&nbsp;the&nbsp;given&nbsp;title&nbsp;(if&nbsp;not&nbsp;None);<br>
 the&nbsp;bar&nbsp;chart&nbsp;may&nbsp;be&nbsp;customized&nbsp;by&nbsp;using&nbsp;named&nbsp;arguments&nbsp;bar_args,&nbsp;which&nbsp;are<br>
 relayed&nbsp;to&nbsp;matplotlib.pyplot.bar&nbsp;function<br>
@@ -632,71 +1125,71 @@ relayed&nbsp;to&nbsp;matplotlib.pyplot.bar&nbsp;function<br>
 &nbsp;&nbsp;function&nbsp;and&nbsp;containing&nbsp;named&nbsp;arguments&nbsp;expected&nbsp;by&nbsp;this&nbsp;function;<br>
 &nbsp;&nbsp;example:<br>
 &nbsp;&nbsp;&nbsp;flip.<a href="#Lea-plot">plot</a>(fname='flip.png',savefig_args=dict(bbox_inches='tight'),color='green')<br>
-the&nbsp;method&nbsp;requires&nbsp;matplotlib&nbsp;package;&nbsp;an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;if&nbsp;it&nbsp;is&nbsp;not&nbsp;installed</tt></dd></dl>
+the&nbsp;method&nbsp;requires&nbsp;matplotlib&nbsp;package;&nbsp;an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;if&nbsp;it&nbsp;is&nbsp;not&nbsp;installed</dd></dl>
 
-<dl><dt><a name="Alea-pmf_dict"><strong>pmf_dict</strong></a>(self)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;probability<br>
+<dl><dt><a name="Alea-pmf_dict"><strong>pmf_dict</strong></a>(self)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;probability<br>
 mass&nbsp;function&nbsp;of&nbsp;self,&nbsp;as&nbsp;an&nbsp;OrderedDict&nbsp;with&nbsp;v&nbsp;:&nbsp;<a href="#Alea-P">P</a>(v))&nbsp;pairs;<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
 requires&nbsp;Python&nbsp;2.7+<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-pmf_tuple"><strong>pmf_tuple</strong></a>(self)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;probability<br>
+<dl><dt><a name="Alea-pmf_tuple"><strong>pmf_tuple</strong></a>(self)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;the&nbsp;probability<br>
 mass&nbsp;function&nbsp;of&nbsp;self,&nbsp;as&nbsp;a&nbsp;tuple&nbsp;with&nbsp;tuples&nbsp;(v,<a href="#Alea-P">P</a>(v));<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-ps"><strong>ps</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;probability&nbsp;of&nbsp;self<br>
+<dl><dt><a name="Alea-ps"><strong>ps</strong></a>(self)</dt><dd>returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;probability&nbsp;of&nbsp;self<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;increasing&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
 if&nbsp;order&nbsp;is&nbsp;undefined&nbsp;(e.g.&nbsp;complex&nbsp;numbers),&nbsp;then&nbsp;the&nbsp;order&nbsp;is<br>
 arbitrary&nbsp;but&nbsp;fixed&nbsp;from&nbsp;call&nbsp;to&nbsp;call<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-random"><strong>random</strong></a>(self, n=None)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,&nbsp;<br>
+<dl><dt><a name="Lea-random"><strong>random</strong></a>(self, n=None)</dt><dd>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,&nbsp;<br>
 if&nbsp;n&nbsp;is&nbsp;None,&nbsp;returns&nbsp;a&nbsp;random&nbsp;value&nbsp;with&nbsp;the&nbsp;probability&nbsp;given&nbsp;by&nbsp;the&nbsp;distribution<br>
-otherwise,&nbsp;returns&nbsp;a&nbsp;tuple&nbsp;of&nbsp;n&nbsp;such&nbsp;random&nbsp;values</tt></dd></dl>
+otherwise,&nbsp;returns&nbsp;a&nbsp;tuple&nbsp;of&nbsp;n&nbsp;such&nbsp;random&nbsp;values</dd></dl>
 
-<dl><dt><a name="Lea-random_draw"><strong>random_draw</strong></a>(self, n=None, sorted=False)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
+<dl><dt><a name="Lea-random_draw"><strong>random_draw</strong></a>(self, n=None, sorted=False)</dt><dd>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
 if&nbsp;n=None,&nbsp;then&nbsp;returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;all&nbsp;the&nbsp;values&nbsp;of&nbsp;the&nbsp;distribution,&nbsp;in&nbsp;a&nbsp;random&nbsp;order<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;respecting&nbsp;the&nbsp;probabilities&nbsp;(the&nbsp;higher&nbsp;probability&nbsp;of&nbsp;a&nbsp;value,&nbsp;the&nbsp;most&nbsp;likely<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;in&nbsp;the&nbsp;beginning&nbsp;of&nbsp;the&nbsp;sequence)<br>
 if&nbsp;n&nbsp;&gt;&nbsp;0,&nbsp;&nbsp;then&nbsp;returns&nbsp;only&nbsp;n&nbsp;different&nbsp;drawn&nbsp;values<br>
-if&nbsp;sorted&nbsp;is&nbsp;True,&nbsp;then&nbsp;the&nbsp;returned&nbsp;tuple&nbsp;is&nbsp;sorted</tt></dd></dl>
+if&nbsp;sorted&nbsp;is&nbsp;True,&nbsp;then&nbsp;the&nbsp;returned&nbsp;tuple&nbsp;is&nbsp;sorted</dd></dl>
 
-<dl><dt><a name="Lea-random_iter"><strong>random_iter</strong></a>(self)</dt><dd><tt>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
+<dl><dt><a name="Lea-random_iter"><strong>random_iter</strong></a>(self)</dt><dd>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
 generates&nbsp;an&nbsp;infinite&nbsp;sequence&nbsp;of&nbsp;random&nbsp;values&nbsp;among&nbsp;the&nbsp;values&nbsp;of&nbsp;self,<br>
-according&nbsp;to&nbsp;their&nbsp;probabilities</tt></dd></dl>
+according&nbsp;to&nbsp;their&nbsp;probabilities</dd></dl>
 
-<dl><dt><a name="Lea-random_mc"><strong>random_mc</strong></a>(self, n=None, nb_tries=None)</dt><dd><tt>if&nbsp;n&nbsp;is&nbsp;None,&nbsp;returns&nbsp;a&nbsp;random&nbsp;value&nbsp;with&nbsp;the&nbsp;probability&nbsp;given&nbsp;by&nbsp;the&nbsp;distribution<br>
+<dl><dt><a name="Lea-random_mc"><strong>random_mc</strong></a>(self, n=None, nb_tries=None)</dt><dd>if&nbsp;n&nbsp;is&nbsp;None,&nbsp;returns&nbsp;a&nbsp;random&nbsp;value&nbsp;with&nbsp;the&nbsp;probability&nbsp;given&nbsp;by&nbsp;the&nbsp;distribution<br>
 without&nbsp;precalculating&nbsp;the&nbsp;exact&nbsp;probability&nbsp;distribution&nbsp;(contrarily&nbsp;to&nbsp;'random'&nbsp;method);<br>
 otherwise,&nbsp;returns&nbsp;a&nbsp;tuple&nbsp;of&nbsp;n&nbsp;such&nbsp;random&nbsp;values;<br>
 nb_tries,&nbsp;if&nbsp;not&nbsp;None,&nbsp;defines&nbsp;the&nbsp;maximum&nbsp;number&nbsp;of&nbsp;trials&nbsp;in&nbsp;case&nbsp;a&nbsp;random&nbsp;value<br>
 is&nbsp;incompatible&nbsp;with&nbsp;a&nbsp;condition;&nbsp;this&nbsp;happens&nbsp;only&nbsp;if&nbsp;the&nbsp;current&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
 is&nbsp;(referring&nbsp;to)&nbsp;an&nbsp;Ilea&nbsp;or&nbsp;Blea&nbsp;instance,&nbsp;i.e.&nbsp;'given'&nbsp;or&nbsp;'cpt'&nbsp;methods;<br>
-WARNING:&nbsp;if&nbsp;nb_tries&nbsp;is&nbsp;None,&nbsp;any&nbsp;infeasible&nbsp;condition&nbsp;shall&nbsp;cause&nbsp;an&nbsp;infinite&nbsp;loop</tt></dd></dl>
+WARNING:&nbsp;if&nbsp;nb_tries&nbsp;is&nbsp;None,&nbsp;any&nbsp;infeasible&nbsp;condition&nbsp;shall&nbsp;cause&nbsp;an&nbsp;infinite&nbsp;loop</dd></dl>
 
-<dl><dt><a name="Alea-redundancy"><strong>redundancy</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;redundancy&nbsp;of&nbsp;self;<br>
+<dl><dt><a name="Alea-redundancy"><strong>redundancy</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;redundancy&nbsp;of&nbsp;self;<br>
 if&nbsp;all&nbsp;probabilities&nbsp;are&nbsp;(convertible&nbsp;to)&nbsp;float,&nbsp;then&nbsp;the<br>
 redundancy&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;float&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0;<br>
 if&nbsp;any&nbsp;probability&nbsp;is&nbsp;a&nbsp;sympy&nbsp;expression,&nbsp;then&nbsp;the&nbsp;redundancy<br>
 is&nbsp;returned&nbsp;as&nbsp;a&nbsp;sympy&nbsp;expression;<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;probabilities&nbsp;are&nbsp;neither&nbsp;convertible<br>
 to&nbsp;float&nbsp;nor&nbsp;a&nbsp;sympy&nbsp;expression<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-rel_entropy"><strong>rel_entropy</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;relativz&nbsp;entropy&nbsp;of&nbsp;self;<br>
+<dl><dt><a name="Alea-rel_entropy"><strong>rel_entropy</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;relativz&nbsp;entropy&nbsp;of&nbsp;self;<br>
 if&nbsp;all&nbsp;probabilities&nbsp;are&nbsp;(convertible&nbsp;to)&nbsp;float,&nbsp;then&nbsp;the&nbsp;relative<br>
 entropy&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;float&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0;<br>
 if&nbsp;any&nbsp;probability&nbsp;is&nbsp;a&nbsp;sympy&nbsp;expression,&nbsp;then&nbsp;the&nbsp;relative&nbsp;entropy<br>
 is&nbsp;returned&nbsp;as&nbsp;a&nbsp;sympy&nbsp;expression;<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;probabilities&nbsp;are&nbsp;neither&nbsp;convertible<br>
 to&nbsp;float&nbsp;nor&nbsp;a&nbsp;sympy&nbsp;expression<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-reset"><strong>reset</strong></a>(self)</dt><dd><tt>erases&nbsp;the&nbsp;Alea&nbsp;cache,&nbsp;so&nbsp;to&nbsp;force&nbsp;the&nbsp;recalculation&nbsp;at&nbsp;next&nbsp;call&nbsp;to&nbsp;<a href="#Lea-get_alea">get_alea</a>();<br>
+<dl><dt><a name="Lea-reset"><strong>reset</strong></a>(self)</dt><dd>erases&nbsp;the&nbsp;Alea&nbsp;cache,&nbsp;so&nbsp;to&nbsp;force&nbsp;the&nbsp;recalculation&nbsp;at&nbsp;next&nbsp;call&nbsp;to&nbsp;<a href="#Lea-get_alea">get_alea</a>();<br>
 note:&nbsp;there&nbsp;is&nbsp;no&nbsp;need&nbsp;to&nbsp;call&nbsp;this&nbsp;method,&nbsp;except&nbsp;for&nbsp;freeing&nbsp;memory&nbsp;or&nbsp;for&nbsp;making<br>
-cleanup&nbsp;after&nbsp;hacking&nbsp;private&nbsp;attributes&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;assumed&nbsp;immutable</tt></dd></dl>
+cleanup&nbsp;after&nbsp;hacking&nbsp;private&nbsp;attributes&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;assumed&nbsp;immutable</dd></dl>
 
-<dl><dt><a name="Lea-revised_with_cpt"><strong>revised_with_cpt</strong></a>(self, *clauses)</dt><dd><tt>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional&nbsp;probability&nbsp;table<br>
+<dl><dt><a name="Lea-revised_with_cpt"><strong>revised_with_cpt</strong></a>(self, *clauses)</dt><dd>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional&nbsp;probability&nbsp;table<br>
 (e.g.&nbsp;a&nbsp;node&nbsp;in&nbsp;a&nbsp;Bayes&nbsp;network)&nbsp;from&nbsp;the&nbsp;given&nbsp;clauses;<br>
 each&nbsp;clause&nbsp;is&nbsp;a&nbsp;tuple&nbsp;(condition,result)<br>
 where&nbsp;condition&nbsp;is&nbsp;a&nbsp;boolean&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;boolean&nbsp;distribution<br>
@@ -705,396 +1198,281 @@ where&nbsp;condition&nbsp;is&nbsp;a&nbsp;boolean&nbsp;or&nbsp;a&nbsp;<a href="#L
 the&nbsp;conditions&nbsp;from&nbsp;all&nbsp;clauses&nbsp;shall&nbsp;be&nbsp;mutually&nbsp;exclusive<br>
 no&nbsp;clause&nbsp;can&nbsp;contain&nbsp;None&nbsp;as&nbsp;condition<br>
 the&nbsp;'else'&nbsp;clause&nbsp;is&nbsp;calculated&nbsp;so&nbsp;that&nbsp;the&nbsp;returned&nbsp;Blea&nbsp;if&nbsp;no&nbsp;condition&nbsp;is<br>
-given&nbsp;is&nbsp;self</tt></dd></dl>
+given&nbsp;is&nbsp;self</dd></dl>
 
-<dl><dt><a name="Lea-sort_by"><strong>sort_by</strong></a>(self, *ordering_leas)</dt><dd><tt>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;same&nbsp;probability&nbsp;distribution&nbsp;as&nbsp;self<br>
+<dl><dt><a name="Lea-sort_by"><strong>sort_by</strong></a>(self, *ordering_leas)</dt><dd>returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;same&nbsp;probability&nbsp;distribution&nbsp;as&nbsp;self<br>
 but&nbsp;having&nbsp;values&nbsp;ordered&nbsp;according&nbsp;to&nbsp;given&nbsp;ordering_leas;<br>
 requires&nbsp;that&nbsp;self&nbsp;doesn't&nbsp;contain&nbsp;duplicate&nbsp;values,&nbsp;otherwise&nbsp;an&nbsp;exception&nbsp;is<br>
-raised;&nbsp;note&nbsp;that&nbsp;it&nbsp;is&nbsp;NOT&nbsp;required&nbsp;that&nbsp;all&nbsp;ordering_leas&nbsp;appear&nbsp;in&nbsp;self</tt></dd></dl>
+raised;&nbsp;note&nbsp;that&nbsp;it&nbsp;is&nbsp;NOT&nbsp;required&nbsp;that&nbsp;all&nbsp;ordering_leas&nbsp;appear&nbsp;in&nbsp;self</dd></dl>
 
-<dl><dt><a name="Lea-subs"><strong>subs</strong></a>(self, *args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance,&nbsp;equivalent&nbsp;to&nbsp;self,&nbsp;where&nbsp;probabilities&nbsp;have&nbsp;been&nbsp;converted<br>
+<dl><dt><a name="Lea-subs"><strong>subs</strong></a>(self, *args)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance,&nbsp;equivalent&nbsp;to&nbsp;self,&nbsp;where&nbsp;probabilities&nbsp;have&nbsp;been&nbsp;converted<br>
 by&nbsp;applying&nbsp;<a href="#Lea-subs">subs</a>(*args)&nbsp;on&nbsp;them;<br>
 this&nbsp;is&nbsp;useful&nbsp;for&nbsp;substituting&nbsp;variables&nbsp;when&nbsp;probabilities&nbsp;are&nbsp;expressed&nbsp;as&nbsp;sympy<br>
 expressions&nbsp;(see&nbsp;doc&nbsp;of&nbsp;sympy.Expreesion.subs&nbsp;method);<br>
-requires&nbsp;that&nbsp;all&nbsp;self's&nbsp;probabilities&nbsp;have&nbsp;a&nbsp;'subs'&nbsp;method&nbsp;available</tt></dd></dl>
+requires&nbsp;that&nbsp;all&nbsp;self's&nbsp;probabilities&nbsp;have&nbsp;a&nbsp;'subs'&nbsp;method&nbsp;available</dd></dl>
 
-<dl><dt><a name="Alea-std"><strong>std</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;standard&nbsp;deviation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution<br>
+<dl><dt><a name="Alea-std"><strong>std</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;standard&nbsp;deviation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution<br>
 requires&nbsp;that&nbsp;the&nbsp;requirements&nbsp;of&nbsp;the&nbsp;var&nbsp;method&nbsp;are&nbsp;met<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-std_f"><strong>std_f</strong></a>(self)</dt><dd><tt>same&nbsp;as&nbsp;std&nbsp;method&nbsp;but&nbsp;with&nbsp;conversion&nbsp;to&nbsp;float&nbsp;or&nbsp;simplification<br>
+<dl><dt><a name="Alea-std_f"><strong>std_f</strong></a>(self)</dt><dd>same&nbsp;as&nbsp;std&nbsp;method&nbsp;but&nbsp;with&nbsp;conversion&nbsp;to&nbsp;float&nbsp;or&nbsp;simplification<br>
 of&nbsp;symbolic&nbsp;expression<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-support"><strong>support</strong></a>(self)</dt><dd><tt>returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;values&nbsp;of&nbsp;self<br>
+<dl><dt><a name="Alea-support"><strong>support</strong></a>(self)</dt><dd>returns&nbsp;a&nbsp;tuple&nbsp;with&nbsp;values&nbsp;of&nbsp;self<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;increasing&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
 if&nbsp;order&nbsp;is&nbsp;undefined&nbsp;(e.g.&nbsp;complex&nbsp;numbers),&nbsp;then&nbsp;the&nbsp;order&nbsp;is<br>
 arbitrary&nbsp;but&nbsp;fixed&nbsp;from&nbsp;call&nbsp;to&nbsp;call<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Lea-switch"><strong>switch</strong></a>(self, lea_dict, default_lea=[])</dt><dd><tt>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Tlea&nbsp;representing&nbsp;a&nbsp;conditional&nbsp;probability&nbsp;table&nbsp;(CPT)<br>
+<dl><dt><a name="Lea-switch"><strong>switch</strong></a>(self, lea_dict, default_lea=[])</dt><dd>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Tlea&nbsp;representing&nbsp;a&nbsp;conditional&nbsp;probability&nbsp;table&nbsp;(CPT)<br>
 defined&nbsp;by&nbsp;the&nbsp;given&nbsp;dictionary&nbsp;lea_dict&nbsp;associating&nbsp;each&nbsp;value&nbsp;of&nbsp;self&nbsp;to&nbsp;a<br>
 specific&nbsp;<a href="#Lea">Lea</a>&nbsp;instance;<br>
 if&nbsp;default_lea&nbsp;is&nbsp;given,&nbsp;then&nbsp;it&nbsp;provides&nbsp;the&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;associated&nbsp;to&nbsp;the<br>
 value(s)&nbsp;of&nbsp;self&nbsp;missing&nbsp;in&nbsp;lea_dict;<br>
-all&nbsp;dictionary's&nbsp;values&nbsp;and&nbsp;default_lea&nbsp;(if&nbsp;defined)&nbsp;are&nbsp;coerced&nbsp;to&nbsp;Alea&nbsp;instances</tt></dd></dl>
+all&nbsp;dictionary's&nbsp;values&nbsp;and&nbsp;default_lea&nbsp;(if&nbsp;defined)&nbsp;are&nbsp;coerced&nbsp;to&nbsp;Alea&nbsp;instances</dd></dl>
 
-<dl><dt><a name="Lea-switch_func"><strong>switch_func</strong></a>(self, f)</dt><dd><tt>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Slea&nbsp;representing&nbsp;a&nbsp;conditional&nbsp;probability&nbsp;table&nbsp;(CPT)<br>
+<dl><dt><a name="Lea-switch_func"><strong>switch_func</strong></a>(self, f)</dt><dd>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Slea&nbsp;representing&nbsp;a&nbsp;conditional&nbsp;probability&nbsp;table&nbsp;(CPT)<br>
 defined&nbsp;by&nbsp;the&nbsp;given&nbsp;function&nbsp;f&nbsp;associating&nbsp;each&nbsp;value&nbsp;of&nbsp;self&nbsp;to&nbsp;a<br>
 specific&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;if&nbsp;returned&nbsp;value&nbsp;is&nbsp;not&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;then&nbsp;it&nbsp;is<br>
-coerced&nbsp;to&nbsp;Alea&nbsp;instance</tt></dd></dl>
+coerced&nbsp;to&nbsp;Alea&nbsp;instance</dd></dl>
 
-<dl><dt><a name="Lea-times"><strong>times</strong></a>(self, n, op=&lt;built-in function add&gt;)</dt><dd><tt>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;new<br>
+<dl><dt><a name="Lea-times"><strong>times</strong></a>(self, n, op=&lt;built-in function add&gt;)</dt><dd>returns,&nbsp;after&nbsp;evaluation&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;self,&nbsp;a&nbsp;new<br>
 Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;current&nbsp;distribution&nbsp;operated&nbsp;n&nbsp;times<br>
 with&nbsp;itself,&nbsp;through&nbsp;the&nbsp;given&nbsp;binary&nbsp;operator&nbsp;op;<br>
 if&nbsp;n&nbsp;=&nbsp;1,&nbsp;then&nbsp;a&nbsp;copy&nbsp;of&nbsp;self&nbsp;is&nbsp;returned;<br>
 requires&nbsp;that&nbsp;n&nbsp;is&nbsp;strictly&nbsp;positive;&nbsp;otherwise,&nbsp;an&nbsp;exception&nbsp;is<br>
 raised;<br>
 note&nbsp;that&nbsp;the&nbsp;implementation&nbsp;uses&nbsp;a&nbsp;fast&nbsp;dichotomous&nbsp;algorithm,<br>
-instead&nbsp;of&nbsp;a&nbsp;naive&nbsp;approach&nbsp;that&nbsp;scales&nbsp;up&nbsp;badly&nbsp;as&nbsp;n&nbsp;grows</tt></dd></dl>
+instead&nbsp;of&nbsp;a&nbsp;naive&nbsp;approach&nbsp;that&nbsp;scales&nbsp;up&nbsp;badly&nbsp;as&nbsp;n&nbsp;grows</dd></dl>
 
-<dl><dt><a name="Lea-times_tuple"><strong>times_tuple</strong></a>(self, n)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;with&nbsp;tuples&nbsp;of&nbsp;length&nbsp;n,&nbsp;containing<br>
+<dl><dt><a name="Lea-times_tuple"><strong>times_tuple</strong></a>(self, n)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;with&nbsp;tuples&nbsp;of&nbsp;length&nbsp;n,&nbsp;containing<br>
 the&nbsp;joint&nbsp;of&nbsp;self&nbsp;with&nbsp;itself&nbsp;repeated&nbsp;n&nbsp;times<br>
-note:&nbsp;equivalent&nbsp;to&nbsp;self.<a href="#Lea-draw">draw</a>(n,sorted=False,replacement=True)</tt></dd></dl>
+note:&nbsp;equivalent&nbsp;to&nbsp;self.<a href="#Lea-draw">draw</a>(n,sorted=False,replacement=True)</dd></dl>
 
-<dl><dt><a name="Alea-var"><strong>var</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;variance&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution;<br>
+<dl><dt><a name="Alea-var"><strong>var</strong></a>(self)</dt><dd>returns&nbsp;the&nbsp;variance&nbsp;of&nbsp;the&nbsp;probability&nbsp;distribution;<br>
 requires&nbsp;that<br>
 1&nbsp;-&nbsp;the&nbsp;requirements&nbsp;of&nbsp;the&nbsp;<a href="#Alea-mean">mean</a>()&nbsp;method&nbsp;are&nbsp;met,<br>
 2&nbsp;-&nbsp;the&nbsp;values&nbsp;can&nbsp;be&nbsp;subtracted&nbsp;to&nbsp;the&nbsp;mean&nbsp;value,<br>
 3&nbsp;-&nbsp;the&nbsp;differences&nbsp;between&nbsp;values&nbsp;and&nbsp;the&nbsp;mean&nbsp;value&nbsp;can&nbsp;be&nbsp;squared;<br>
 if&nbsp;any&nbsp;of&nbsp;these&nbsp;conditions&nbsp;is&nbsp;not&nbsp;met,&nbsp;then&nbsp;the&nbsp;result&nbsp;depends&nbsp;of&nbsp;the<br>
 value&nbsp;implementation&nbsp;(likely,&nbsp;raised&nbsp;exception)<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
-<dl><dt><a name="Alea-var_f"><strong>var_f</strong></a>(self)</dt><dd><tt>same&nbsp;as&nbsp;var&nbsp;method&nbsp;but&nbsp;with&nbsp;conversion&nbsp;to&nbsp;float&nbsp;or&nbsp;simplification&nbsp;of&nbsp;symbolic&nbsp;expression<br>
-WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</tt></dd></dl>
+<dl><dt><a name="Alea-var_f"><strong>var_f</strong></a>(self)</dt><dd>same&nbsp;as&nbsp;var&nbsp;method&nbsp;but&nbsp;with&nbsp;conversion&nbsp;to&nbsp;float&nbsp;or&nbsp;simplification&nbsp;of&nbsp;symbolic&nbsp;expression<br>
+WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
 <hr>
-Static methods defined here:<br>
+<i>Static methods:</i><br>
 
-<dl><dt><a name="Lea-joint_entropy"><strong>joint_entropy</strong></a>(*args)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;the&nbsp;joint&nbsp;entropy&nbsp;of&nbsp;arguments,&nbsp;expressed&nbsp;in&nbsp;bits;<br>
-the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&nbsp;expression&nbsp;(see&nbsp;doc&nbsp;of&nbsp;Alea.entropy)</tt></dd></dl>
+<dl><dt><a name="Lea-joint_entropy"><strong>joint_entropy</strong></a>(*args)</dt><dd>static&nbsp;method,&nbsp;returns&nbsp;the&nbsp;joint&nbsp;entropy&nbsp;of&nbsp;arguments,&nbsp;expressed&nbsp;in&nbsp;bits;<br>
+the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&nbsp;expression&nbsp;(see&nbsp;doc&nbsp;of&nbsp;Alea.entropy)</dd></dl>
 <hr>
-Data and other attributes defined here:<br>
-<dl><dt><strong>Error</strong> = &lt;class 'Lea.Error'&gt;<dd><tt>exception&nbsp;representing&nbsp;any&nbsp;violation&nbsp;of&nbsp;requirements&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods</tt></dl>
+<i>Other attributes:</i><br>
+<dl><dt><strong>Error</strong> = &lt;class 'Lea.Error'&gt;<dd>exception&nbsp;representing&nbsp;any&nbsp;violation&nbsp;of&nbsp;requirements&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods</dl>
 </td></tr>
 </table></td></tr></table>
+
+<p>
 <hr>
+
+<a name="Markov">
+<h1>lea.markov module</h1>
+</a>
+
+The lea.markov module provides functions to define Markov chains and make queries on them.<br><br>
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffffff">
+<td colspan=1 valign=bottom>
+<strong>Functions of lea.markov module:</strong><br>
+<a href="#-chain_from_matrix">chain_from_matrix</a><br>
+<a href="#-chain_from_seq">chain_from_seq</a><br>
+<br>
+<strong>Methods of <a href="#Chain">markov.Chain</a> instance:</strong><br>
+<a href="#Chain-__init__">__init__</a><br>
+<a href="#Chain-__repr__">__repr__</a><br>
+<a href="#Chain-__str__">__str__</a><br>
+<a href="#Chain-absorbing_mc_info">absorbing_mc_info</a><br>
+<a href="#Chain-get_state">get_state</a><br>
+<a href="#Chain-get_states">get_states</a><br>
+<a href="#Chain-matrix">matrix</a><br>
+<a href="#Chain-next_state">next_state</a><br>
+<a href="#Chain-next_state_given">next_state_given</a><br>
+<a href="#Chain-reachable_states">reachable_states</a><br>
+<a href="#Chain-state_given">state_given</a><br>
+<a href="#Chain-from_matrix">from_matrix</a><br>
+<a href="#Chain-from_seq">from_seq</a><br>
+<br>
+<strong>Methods of <a href="#StateAlea">markov.StateAlea</a> instance:</strong><br>
+<a href="#StateAlea">StateAlea</a><br>
+<a href="#StateAlea-__init__">__init__</a><br>
+<a href="#StateAlea-gen_random_seq">gen_random_seq</a><br>
+<a href="#StateAlea-next_state">next_state</a><br>
+<a href="#StateAlea-random_seq">random_seq</a><br>
+</td></tr>
+</table>
+
+<hr>
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#dddddd">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><big><strong>Functions of lea.markov module</strong></big></font></td></tr>
+<tr><td bgcolor="#dddddd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>&nbsp;</td>
+<td width="100%">
+<dl>
+<br>
+<dt><a name="-chain_from_matrix"><strong>chain_from_matrix</strong></a> = from_matrix(states, *trans_probs_per_state)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;<a href="#Chain">Chain</a>&nbsp;instance&nbsp;from&nbsp;given&nbsp;arguments;<br>
+states&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;objects&nbsp;representing&nbsp;states&nbsp;(typically&nbsp;strings);<br>
+trans_probs_per_state&nbsp;arguments&nbsp;contain&nbsp;the&nbsp;transition&nbsp;probabilities;<br>
+there&nbsp;is&nbsp;one&nbsp;such&nbsp;argument&nbsp;per&nbsp;state,&nbsp;it&nbsp;is&nbsp;a&nbsp;tuple&nbsp;(state,trans_probs)<br>
+where&nbsp;trans_probs&nbsp;is&nbsp;the&nbsp;sequence&nbsp;of&nbsp;probabilities&nbsp;of&nbsp;transition&nbsp;from<br>
+state&nbsp;to&nbsp;each&nbsp;declared&nbsp;state,&nbsp;in&nbsp;the&nbsp;order&nbsp;of&nbsp;their&nbsp;declarations</dd></dl>
+ <dl><dt><a name="-chain_from_seq"><strong>chain_from_seq</strong></a> = from_seq(state_seq)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;<a href="#Chain">Chain</a>&nbsp;instance&nbsp;from&nbsp;given&nbsp;sequence&nbsp;of&nbsp;state&nbsp;objects;<br>
+the&nbsp;probabilities&nbsp;of&nbsp;state&nbsp;transitions&nbsp;are&nbsp;set&nbsp;according&nbsp;to&nbsp;transition<br>
+frequencies&nbsp;in&nbsp;the&nbsp;given&nbsp;sequence;<br>
+if&nbsp;last&nbsp;state&nbsp;of&nbsp;state_seq&nbsp;does&nbsp;not&nbsp;occur&nbsp;elsewhere&nbsp;in&nbsp;state_seq,<br>
+then&nbsp;this&nbsp;state&nbsp;is&nbsp;defined&nbsp;arbitrarily&nbsp;as&nbsp;an&nbsp;absorbing&nbsp;state&nbsp;(i.e.<br>
+its&nbsp;next&nbsp;state&nbsp;is&nbsp;itself&nbsp;with&nbsp;probability&nbsp;1)</dd></dl>
+</td></tr></table>
+
+<p>
+
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeeeee">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<a name="Functions">
-<font color="#000000" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="Chain">class <strong>Chain</strong></a>(object)</font></td></tr>
     
-<tr><td bgcolor="#eeeeee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr bgcolor="#eeeeee"><td rowspan=2>&nbsp;&nbsp;&nbsp;</td>
+<td colspan=2>
+
+A&nbsp;<a href="#Chain">Chain</a>&nbsp;instance&nbsp;represents&nbsp;a&nbsp;Markov&nbsp;chain,&nbsp;with&nbsp;a&nbsp;given&nbsp;set&nbsp;of&nbsp;states<br>
+and&nbsp;given&nbsp;probabilities&nbsp;of&nbsp;transition&nbsp;from&nbsp;state&nbsp;to&nbsp;state.<br>
+Two&nbsp;instance&nbsp;attributes&nbsp;are&nbsp;public:<br>
+-&nbsp;states:&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;states&nbsp;of&nbsp;the&nbsp;Markov&nbsp;chain,&nbsp;without&nbsp;any&nbsp;probability<br>
+-&nbsp;state&nbsp;:&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;representing&nbsp;an&nbsp;equiprobable&nbsp;distribution&nbsp;of&nbsp;states<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;Markov&nbsp;chain;&nbsp;it&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;express&nbsp;a&nbsp;condition&nbsp;to&nbsp;pass&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state_given&nbsp;or&nbsp;next_state_given&nbsp;methods<br>&nbsp;</td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><i>Instance methods:</i><br>
+<dl><dt><a name="Chain-__init__"><strong>__init__</strong></a>(self, next_state_lea_per_state)</dt><dd>initializes&nbsp;<a href="#Chain">Chain</a>&nbsp;instance's&nbsp;attributes;&nbsp;<br>
+next_state_lea_per_state&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;tuples&nbsp;(S,next_state_lea)<br>
+where&nbsp;S&nbsp;is&nbsp;an&nbsp;<a href="builtins.html#object">object</a>&nbsp;representing&nbsp;a&nbsp;state&nbsp;(typically&nbsp;a&nbsp;string)&nbsp;and<br>
+next_state_lea&nbsp;is&nbsp;a&nbsp;Lea&nbsp;instance&nbsp;giving&nbsp;probabilities&nbsp;of&nbsp;transition<br>
+from&nbsp;S&nbsp;to&nbsp;the&nbsp;next&nbsp;state</dd></dl>
+
+<dl><dt><a name="Chain-__repr__"><strong>__repr__</strong></a> = <a href="#Chain-__str__">__str__</a>(self)</dt></dl>
+
+<dl><dt><a name="Chain-__str__"><strong>__str__</strong></a>(self)</dt><dd>returns&nbsp;a&nbsp;string&nbsp;representation&nbsp;of&nbsp;the&nbsp;Markov&nbsp;chain<br>
+with&nbsp;each&nbsp;state&nbsp;S&nbsp;followed&nbsp;by&nbsp;the&nbsp;indented&nbsp;representation&nbsp;of&nbsp;probability&nbsp;distribution<br>
+of&nbsp;transition&nbsp;from&nbsp;S&nbsp;to&nbsp;next&nbsp;state</dd></dl>
+
+<dl><dt><a name="Chain-absorbing_mc_info"><strong>absorbing_mc_info</strong></a>(self, as_array=False)</dt><dd>returns&nbsp;a&nbsp;tuple<br>
+(is_absorbing,&nbsp;transient_states,&nbsp;absorbing_states,&nbsp;q_matrix,&nbsp;r_matrix,&nbsp;n_matrix)<br>
+where<br>
+*&nbsp;is_absorbing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;a&nbsp;boolean&nbsp;telling&nbsp;whether&nbsp;the&nbsp;Markov&nbsp;chain&nbsp;is&nbsp;absorbing<br>
+*&nbsp;transient_states&nbsp;is&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;t&nbsp;transient&nbsp;states<br>
+*&nbsp;absorbing_states&nbsp;is&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;r&nbsp;absorbing&nbsp;states<br>
+*&nbsp;q_matrix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;t&nbsp;x&nbsp;t&nbsp;probability&nbsp;matrix&nbsp;from&nbsp;transient&nbsp;to&nbsp;transient&nbsp;states<br>
+*&nbsp;r_matrix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;t&nbsp;x&nbsp;r&nbsp;probability&nbsp;matrix&nbsp;from&nbsp;transient&nbsp;to&nbsp;absorbing&nbsp;states<br>
+*&nbsp;n_matrix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;t&nbsp;x&nbsp;t&nbsp;fundamental&nbsp;matrix,&nbsp;defined&nbsp;as&nbsp;inv(I-q_matrix),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;calculated&nbsp;only&nbsp;if&nbsp;as_array&nbsp;is&nbsp;True&nbsp;(=None,&nbsp;otherwise)<br>
+notes:<br>
+-&nbsp;t&nbsp;&gt;&nbsp;0&nbsp;iff&nbsp;the&nbsp;Markov&nbsp;chain&nbsp;is&nbsp;absorbing;<br>
+-&nbsp;the&nbsp;returned&nbsp;states&nbsp;in&nbsp;transient_states&nbsp;and&nbsp;absorbing_states&nbsp;are&nbsp;ordered&nbsp;as<br>
+&nbsp;&nbsp;defined&nbsp;in&nbsp;the&nbsp;'states'&nbsp;attribute&nbsp;of&nbsp;the&nbsp;MC;&nbsp;the&nbsp;q_matrix&nbsp;and&nbsp;r_matrix&nbsp;matrices<br>
+&nbsp;&nbsp;follow&nbsp;the&nbsp;same&nbsp;order<br>
+-&nbsp;if&nbsp;as_array&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then&nbsp;the&nbsp;matrices&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;tuple&nbsp;of&nbsp;tuples<br>
+&nbsp;&nbsp;otherwise,&nbsp;they&nbsp;are&nbsp;returned&nbsp;as&nbsp;numpy&nbsp;arrays&nbsp;(an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;if&nbsp;numpy&nbsp;is<br>
+&nbsp;&nbsp;not&nbsp;installed)</dd></dl>
+
+<dl><dt><a name="Chain-get_state"><strong>get_state</strong></a>(self, state_lea)</dt><dd>returns&nbsp;a&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;probability&nbsp;distribution<br>
+given&nbsp;in&nbsp;state_lea;<br>
+if&nbsp;state_lea&nbsp;is&nbsp;not&nbsp;a&nbsp;Lea&nbsp;instance,&nbsp;then&nbsp;it&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;a&nbsp;certain&nbsp;state</dd></dl>
+
+<dl><dt><a name="Chain-get_states"><strong>get_states</strong></a>(self)</dt><dd>returns&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;one&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;per&nbsp;state&nbsp;declared&nbsp;in&nbsp;the&nbsp;chain,<br>
+in&nbsp;the&nbsp;order&nbsp;of&nbsp;their&nbsp;declaration;&nbsp;each&nbsp;instance&nbsp;represents&nbsp;a&nbsp;certain,&nbsp;unique,&nbsp;state</dd></dl>
+
+<dl><dt><a name="Chain-matrix"><strong>matrix</strong></a>(self, from_states=None, to_states=None, as_array=False)</dt><dd>returns&nbsp;the&nbsp;probability&nbsp;matrix&nbsp;of&nbsp;transition&nbsp;from&nbsp;given&nbsp;iterable&nbsp;from_states&nbsp;to<br>
+given&nbsp;iterable&nbsp;to_states;<br>
+if&nbsp;from_states&nbsp;or&nbsp;to_states&nbsp;is&nbsp;None&nbsp;(default),&nbsp;then&nbsp;it&nbsp;is&nbsp;replaced&nbsp;by&nbsp;all&nbsp;states<br>
+of&nbsp;Markov&nbsp;chain&nbsp;(so,&nbsp;without&nbsp;arguments,&nbsp;the&nbsp;full&nbsp;transition&nbsp;matrix&nbsp;is&nbsp;returned);<br>
+if&nbsp;as_array&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then&nbsp;the&nbsp;matrix&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;tuple&nbsp;of&nbsp;tuples<br>
+otherwise,&nbsp;it&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;numpy&nbsp;array&nbsp;(an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;if&nbsp;numpy&nbsp;is<br>
+not&nbsp;installed)</dd></dl>
+
+<dl><dt><a name="Chain-next_state"><strong>next_state</strong></a>(self, from_state=None, n=1)</dt><dd>returns&nbsp;the&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;obtained&nbsp;after&nbsp;n&nbsp;transitions&nbsp;from&nbsp;an&nbsp;initial<br>
+state&nbsp;defined&nbsp;by&nbsp;the&nbsp;given&nbsp;from_state,&nbsp;which&nbsp;either&nbsp;a&nbsp;given&nbsp;certain&nbsp;state<br>
+or&nbsp;a&nbsp;Lea&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;of&nbsp;states;<br>
+if&nbsp;from_state&nbsp;is&nbsp;None,&nbsp;then&nbsp;the&nbsp;initial&nbsp;state&nbsp;is&nbsp;the&nbsp;uniform&nbsp;probability<br>
+distribution&nbsp;of&nbsp;the&nbsp;declared&nbsp;states;<br>
+if&nbsp;n&nbsp;=&nbsp;0,&nbsp;then&nbsp;this&nbsp;initial&nbsp;state&nbsp;is&nbsp;returned</dd></dl>
+
+<dl><dt><a name="Chain-next_state_given"><strong>next_state_given</strong></a>(self, cond_lea, n=1)</dt><dd>returns&nbsp;the&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;obtained&nbsp;after&nbsp;n&nbsp;transitions&nbsp;from&nbsp;initial&nbsp;state<br>
+defined&nbsp;by&nbsp;the&nbsp;state&nbsp;distribution&nbsp;verifying&nbsp;the&nbsp;given&nbsp;cond_lea,&nbsp;a&nbsp;Lea&nbsp;instance<br>
+expressing&nbsp;a&nbsp;condition&nbsp;using&nbsp;the&nbsp;'state'&nbsp;instance&nbsp;attribute;<br>
+if&nbsp;n&nbsp;=&nbsp;0,&nbsp;then&nbsp;this&nbsp;initial&nbsp;state&nbsp;is&nbsp;returned</dd></dl>
+
+<dl><dt><a name="Chain-reachable_states"><strong>reachable_states</strong></a>(self, from_state, _cur_reachable_states=None)</dt><dd>returns&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;states&nbsp;that&nbsp;can&nbsp;be&nbsp;reached&nbsp;starting&nbsp;from&nbsp;the<br>
+given&nbsp;from_state;&nbsp;the&nbsp;returned&nbsp;states&nbsp;are&nbsp;ordered&nbsp;as&nbsp;defined&nbsp;in&nbsp;the&nbsp;'states'<br>
+attribute&nbsp;of&nbsp;the&nbsp;MC</dd></dl>
+
+<dl><dt><a name="Chain-state_given"><strong>state_given</strong></a>(self, cond_lea)</dt><dd>returns&nbsp;the&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;verifying&nbsp;the&nbsp;given&nbsp;cond_lea,&nbsp;a&nbsp;Lea&nbsp;instance<br>
+expressing&nbsp;a&nbsp;condition&nbsp;using&nbsp;the&nbsp;'state'&nbsp;instance&nbsp;attribute</dd></dl>
+
+<hr>
+<i>Static methods:</i><br>
+<dl><dt><a name="Chain-from_matrix"><strong>from_matrix</strong></a>(states, *trans_probs_per_state)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;<a href="#Chain">Chain</a>&nbsp;instance&nbsp;from&nbsp;given&nbsp;arguments;<br>
+states&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;objects&nbsp;representing&nbsp;states&nbsp;(typically&nbsp;strings);<br>
+trans_probs_per_state&nbsp;arguments&nbsp;contain&nbsp;the&nbsp;transition&nbsp;probabilities;<br>
+there&nbsp;is&nbsp;one&nbsp;such&nbsp;argument&nbsp;per&nbsp;state,&nbsp;it&nbsp;is&nbsp;a&nbsp;tuple&nbsp;(state,trans_probs)<br>
+where&nbsp;trans_probs&nbsp;is&nbsp;the&nbsp;sequence&nbsp;of&nbsp;probabilities&nbsp;of&nbsp;transition&nbsp;from<br>
+state&nbsp;to&nbsp;each&nbsp;declared&nbsp;state,&nbsp;in&nbsp;the&nbsp;order&nbsp;of&nbsp;their&nbsp;declarations</dd></dl>
+
+<dl><dt><a name="Chain-from_seq"><strong>from_seq</strong></a>(state_seq)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;<a href="#Chain">Chain</a>&nbsp;instance&nbsp;from&nbsp;given&nbsp;sequence&nbsp;of&nbsp;state&nbsp;objects;<br>
+the&nbsp;probabilities&nbsp;of&nbsp;state&nbsp;transitions&nbsp;are&nbsp;set&nbsp;according&nbsp;to&nbsp;transition<br>
+frequencies&nbsp;in&nbsp;the&nbsp;given&nbsp;sequence;<br>
+if&nbsp;last&nbsp;state&nbsp;of&nbsp;state_seq&nbsp;does&nbsp;not&nbsp;occur&nbsp;elsewhere&nbsp;in&nbsp;state_seq,<br>
+then&nbsp;this&nbsp;state&nbsp;is&nbsp;defined&nbsp;arbitrarily&nbsp;as&nbsp;an&nbsp;absorbing&nbsp;state&nbsp;(i.e.<br>
+its&nbsp;next&nbsp;state&nbsp;is&nbsp;itself&nbsp;with&nbsp;probability&nbsp;1)</dd></dl>
+
+<hr>
+<i>Instance attributes</i><br>
+<dl><dt><strong>state</strong>:&nbsp;<a href="#StateAlea">StateAlea</a><dd>instance&nbsp;representing&nbsp;a&nbsp;uniform&nbsp;probability&nbsp;distribution&nbsp;on&nbsp;the&nbsp;states&nbsp;of&nbsp;the&nbsp;Markov&nbsp;chain;&nbsp;this&nbsp;may&nbsp;be&nbsp;used&nbsp;to&nbsp;define&nbsp;conditions&nbsp;for&nbsp;(next_)state_given&nbsp;method
+</dd></dt> 
+</dl>
+<dl><dt><strong>states</strong>:&nbsp;tuple<dd>containing&nbsp;the&nbsp;states&nbsp;of&nbsp;the&nbsp;Markov&nbsp;chain</dd></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeeeee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="StateAlea">class <strong>StateAlea</strong></a>(Alea)</font></td></tr>
+    
+<tr bgcolor="#eeeeee"><td rowspan=2>&nbsp;&nbsp;&nbsp;</td>
+<td colspan=2>
+
+A&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;represents&nbsp;a&nbsp;probability&nbsp;distribution&nbsp;of&nbsp;states,&nbsp;for&nbsp;a&nbsp;given&nbsp;Markov&nbsp;chain<br>&nbsp;</td></tr>
+<tr><td>&nbsp;</td>
 <td width="100%">
+<i>Instance methods:</i><br>
+<dl><dt><a name="StateAlea-__init__"><strong>__init__</strong></a>(self, state_lea, chain)</dt><dd>initializes&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance's&nbsp;attributes<br>
+corresponding&nbsp;to&nbsp;the&nbsp;probability&nbsp;distribution&nbsp;given&nbsp;in&nbsp;state_lea<br>
+and&nbsp;referring&nbsp;to&nbsp;the&nbsp;given&nbsp;chain,&nbsp;instance&nbsp;of&nbsp;<a href="#Chain">Chain</a></dd></dl>
 
-<dl><dt><a name="-P"><strong>P</strong></a>(lea1)</dt><dd><tt>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;given&nbsp;lea1&nbsp;is&nbsp;True;<br>
-the&nbsp;probability&nbsp;is&nbsp;expressed&nbsp;in&nbsp;the&nbsp;probability&nbsp;type&nbsp;used&nbsp;in&nbsp;lea1,<br>
-possibly&nbsp;downcasted&nbsp;for&nbsp;convenience&nbsp;(Fraction&nbsp;-&gt;&nbsp;ProbFraction,<br>
-Decimal&nbsp;-&gt;&nbsp;ProbDecimal);<br>
-raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;in&nbsp;the&nbsp;distribution&nbsp;is&nbsp;not&nbsp;boolean<br>
-(note&nbsp;that&nbsp;this&nbsp;is&nbsp;NOT&nbsp;the&nbsp;case&nbsp;with&nbsp;lea1.p(True));<br>
-this&nbsp;is&nbsp;a&nbsp;convenience&nbsp;function&nbsp;equivalent&nbsp;to&nbsp;lea1.P</tt></dd></dl>
+<dl><dt><a name="StateAlea-gen_random_seq"><strong>gen_random_seq</strong></a>(self)</dt><dd>generates&nbsp;an&nbsp;infinite&nbsp;sequence&nbsp;of&nbsp;random&nbsp;state&nbsp;objects,<br>
+starting&nbsp;from&nbsp;self&nbsp;and&nbsp;obeying&nbsp;the&nbsp;transition&nbsp;probabilities&nbsp;defined&nbsp;in&nbsp;the&nbsp;chain</dd></dl>
 
-<dl><dt><a name="-Pf"><strong>Pf</strong></a>(lea1)</dt><dd><tt>returns&nbsp;the&nbsp;probability&nbsp;that&nbsp;given&nbsp;lea1&nbsp;is&nbsp;True;<br>
-the&nbsp;probability&nbsp;is&nbsp;expressed&nbsp;as&nbsp;a&nbsp;float&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0;<br>
-raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;no&nbsp;convertible&nbsp;to&nbsp;float<br>
-raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;some&nbsp;value&nbsp;in&nbsp;the&nbsp;distribution&nbsp;is&nbsp;not&nbsp;boolean<br>
-(this&nbsp;is&nbsp;NOT&nbsp;the&nbsp;case&nbsp;with&nbsp;lea1.p(True));<br>
-this&nbsp;is&nbsp;a&nbsp;convenience&nbsp;function&nbsp;equivalent&nbsp;to&nbsp;lea1.Pf</tt></dd></dl>
+<dl><dt><a name="StateAlea-next_state"><strong>next_state</strong></a>(self, n=1)</dt><dd>returns&nbsp;the&nbsp;<a href="#StateAlea">StateAlea</a>&nbsp;instance&nbsp;obtained&nbsp;after&nbsp;n&nbsp;transitions&nbsp;from&nbsp;initial&nbsp;state&nbsp;self<br>
+if&nbsp;n&nbsp;=&nbsp;0,&nbsp;then&nbsp;self&nbsp;is&nbsp;returned</dd></dl>
 
-<dl><dt><a name="Alea-bernoulli"><strong>bernoulli</strong></a>(p, prob_type=None)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;Bernoulli<br>
-distribution&nbsp;giving&nbsp;1&nbsp;with&nbsp;probability&nbsp;p&nbsp;and&nbsp;0&nbsp;with&nbsp;probability<br>
-1-p;<br>
-prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probability&nbsp;p:<br>
-&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
-&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
-&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;</tt></dd></dl>
-
-<dl><dt><a name="Alea-binom"><strong>binom</strong></a>(n, p, prob_type=None)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;binomial<br>
-distribution&nbsp;giving&nbsp;the&nbsp;number&nbsp;of&nbsp;successes&nbsp;among&nbsp;a&nbsp;number&nbsp;n&nbsp;of<br>
-independent&nbsp;experiments,&nbsp;each&nbsp;having&nbsp;probability&nbsp;p&nbsp;of&nbsp;success;<br>
-note:&nbsp;the&nbsp;binom&nbsp;method&nbsp;generalizes&nbsp;the&nbsp;bernoulli&nbsp;method:<br>
-&nbsp;&nbsp;<a href="#Alea-binom">binom</a>(1,p)&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;<a href="#Alea-bernoulli">bernoulli</a>(p)<br>
-prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probability&nbsp;p:<br>
-&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
-&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
-&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;</tt></dd></dl>
-
-<dl><dt><a name="Alea-coerce"><strong>coerce</strong></a>(value, prob_type=-1)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;a&nbsp;<a href="lea.lea.html#Lea">Lea</a>&nbsp;instance&nbsp;corresponding&nbsp;to&nbsp;the<br>
-given&nbsp;value:<br>
-if&nbsp;the&nbsp;value&nbsp;is&nbsp;a&nbsp;<a href="lea.lea.html#Lea">Lea</a>&nbsp;instance,&nbsp;then&nbsp;it&nbsp;is&nbsp;returned&nbsp;as-is<br>
-otherwise,&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;is&nbsp;returned,&nbsp;with&nbsp;given&nbsp;value<br>
-as&nbsp;unique&nbsp;value,&nbsp;with&nbsp;a&nbsp;probability&nbsp;of&nbsp;1.<br>
-if&nbsp;prob_type&nbsp;is&nbsp;-1,<br>
-&nbsp;&nbsp;&nbsp;then&nbsp;the&nbsp;returned&nbsp;Alea&nbsp;instance&nbsp;has&nbsp;integer&nbsp;1&nbsp;as&nbsp;probability<br>
-&nbsp;&nbsp;&nbsp;otherwise,&nbsp;the&nbsp;returned&nbsp;Alea&nbsp;instance&nbsp;has&nbsp;probability&nbsp;1<br>
-&nbsp;&nbsp;&nbsp;converted&nbsp;according&nbsp;to&nbsp;prob_type&nbsp;(see&nbsp;doc&nbsp;of&nbsp;Alea.set_prob_type)</tt></dd></dl>
-
-<dl><dt><a name="Lea-cpt"><strong>cpt</strong></a>(*clauses, **kwargs)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional<br>
-probability&nbsp;table&nbsp;(e.g.&nbsp;a&nbsp;node&nbsp;in&nbsp;a&nbsp;Bayes&nbsp;network)&nbsp;from&nbsp;the&nbsp;given&nbsp;clauses;<br>
-each&nbsp;clause&nbsp;is&nbsp;a&nbsp;tuple&nbsp;(condition,result)<br>
-where&nbsp;condition&nbsp;is&nbsp;a&nbsp;boolean&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;boolean&nbsp;distribution<br>
-&nbsp;&nbsp;and&nbsp;result&nbsp;is&nbsp;a&nbsp;value&nbsp;or&nbsp;<a href="#Lea">Lea</a>&nbsp;distribution&nbsp;representing&nbsp;the&nbsp;result<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assuming&nbsp;that&nbsp;condition&nbsp;is&nbsp;true<br>
-the&nbsp;conditions&nbsp;from&nbsp;all&nbsp;clauses&nbsp;shall&nbsp;be&nbsp;mutually&nbsp;exclusive<br>
-if&nbsp;a&nbsp;clause&nbsp;contains&nbsp;None&nbsp;as&nbsp;condition,&nbsp;then&nbsp;it&nbsp;is&nbsp;considered&nbsp;as&nbsp;a&nbsp;'else'<br>
-condition;<br>
-the&nbsp;method&nbsp;supports&nbsp;three&nbsp;optional&nbsp;named&nbsp;arguments:<br>
-&nbsp;'prior_lea',&nbsp;'auto_else',&nbsp;'check'&nbsp;and&nbsp;'ctx_type';<br>
-'prior_lea'&nbsp;and&nbsp;'auto_else'&nbsp;are&nbsp;mutually&nbsp;exclusive,&nbsp;they&nbsp;require&nbsp;the&nbsp;absence<br>
-of&nbsp;an&nbsp;'else'&nbsp;clause&nbsp;(otherwise,&nbsp;an&nbsp;exception&nbsp;is&nbsp;raised);&nbsp;<br>
-*&nbsp;if&nbsp;prior_lea&nbsp;argument&nbsp;is&nbsp;specified,&nbsp;then&nbsp;the&nbsp;'else'&nbsp;clause&nbsp;is&nbsp;calculated<br>
-so&nbsp;that&nbsp;the&nbsp;prior_lea&nbsp;is&nbsp;returned&nbsp;for&nbsp;the&nbsp;unconditional&nbsp;case<br>
-*&nbsp;if&nbsp;auto_else&nbsp;argument&nbsp;is&nbsp;specified&nbsp;as&nbsp;True,&nbsp;then&nbsp;the&nbsp;'else'&nbsp;clause&nbsp;is<br>
-calculated&nbsp;so&nbsp;that&nbsp;a&nbsp;uniform&nbsp;probability&nbsp;distribution&nbsp;is&nbsp;returned&nbsp;for<br>
-the&nbsp;condition&nbsp;cases&nbsp;not&nbsp;covered&nbsp;in&nbsp;given&nbsp;clauses&nbsp;(principle&nbsp;of&nbsp;indifference);<br>
-the&nbsp;values&nbsp;are&nbsp;retrieved&nbsp;from&nbsp;the&nbsp;results&nbsp;found&nbsp;in&nbsp;given&nbsp;clauses<br>
-*&nbsp;if&nbsp;check&nbsp;argument&nbsp;is&nbsp;specified&nbsp;as&nbsp;False,&nbsp;then&nbsp;NO&nbsp;checks&nbsp;are&nbsp;made&nbsp;on&nbsp;the&nbsp;given<br>
-clauses&nbsp;(see&nbsp;below);&nbsp;this&nbsp;can&nbsp;significantly&nbsp;increase&nbsp;performances,&nbsp;as&nbsp;the&nbsp;<br>
-set&nbsp;of&nbsp;clauses&nbsp;or&nbsp;variables&nbsp;become&nbsp;large;&nbsp;<br>
-by&nbsp;default&nbsp;(check&nbsp;arg&nbsp;absent&nbsp;or&nbsp;set&nbsp;to&nbsp;True),&nbsp;checks&nbsp;are&nbsp;made&nbsp;on&nbsp;clause<br>
-conditions&nbsp;to&nbsp;ensure&nbsp;that&nbsp;they&nbsp;form&nbsp;a&nbsp;partition:<br>
-&nbsp;&nbsp;1)&nbsp;the&nbsp;clause&nbsp;conditions&nbsp;shall&nbsp;be&nbsp;mutually&nbsp;disjoint,&nbsp;i.e.&nbsp;no&nbsp;subset<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;conditions&nbsp;shall&nbsp;be&nbsp;true&nbsp;together;<br>
-&nbsp;&nbsp;2)&nbsp;if&nbsp;'else'&nbsp;is&nbsp;missing&nbsp;and&nbsp;not&nbsp;calculated&nbsp;through&nbsp;'prior_lea'&nbsp;nor&nbsp;'auto_else',<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;the&nbsp;clause&nbsp;conditions&nbsp;shall&nbsp;cover&nbsp;all&nbsp;possible&nbsp;cases,&nbsp;i.e.&nbsp;ORing<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;them&nbsp;shall&nbsp;be&nbsp;certainly&nbsp;true;<br>
-an&nbsp;exception&nbsp;is&nbsp;raised&nbsp;if&nbsp;any&nbsp;of&nbsp;such&nbsp;conditions&nbsp;is&nbsp;not&nbsp;verified;</tt></dd></dl>
-
-<dl><dt><a name="Lea-dist_l1"><strong>dist_l1</strong></a>(lea1, lea2)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;the&nbsp;L1&nbsp;distance&nbsp;between&nbsp;the&nbsp;pmf&nbsp;of&nbsp;given&nbsp;(coerced)<br>
-lea&nbsp;instances;<br>
-note:&nbsp;assuming&nbsp;that&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;are&nbsp;normalized,&nbsp;the&nbsp;result&nbsp;is&nbsp;between&nbsp;0<br>
-(iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have&nbsp;same&nbsp;pmf)&nbsp;and&nbsp;2&nbsp;((iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have&nbsp;disjoint<br>
-supports)</tt></dd></dl>
-
-<dl><dt><a name="Lea-dist_l2"><strong>dist_l2</strong></a>(lea1, lea2)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;the&nbsp;L2&nbsp;distance&nbsp;between&nbsp;the&nbsp;pmf&nbsp;of&nbsp;given&nbsp;(coerced)<br>
-lea&nbsp;instances;<br>
-note:&nbsp;assuming&nbsp;that&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;are&nbsp;normalized,&nbsp;the&nbsp;result&nbsp;is&nbsp;between&nbsp;0<br>
-(iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have&nbsp;same&nbsp;pmf)&nbsp;and&nbsp;sqrt(2)&nbsp;(iff&nbsp;lea1&nbsp;and&nbsp;lea2&nbsp;have<br>
-disjoint&nbsp;singleton&nbsp;supports)</tt></dd></dl>
-
-<dl><dt><a name="Alea-event"><strong>event</strong></a>(p, prob_type=None)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;boolean<br>
-probability&nbsp;distribution&nbsp;giving&nbsp;True&nbsp;with&nbsp;probability&nbsp;p&nbsp;and<br>
-False&nbsp;with&nbsp;probability&nbsp;1-p;<br>
-prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probability&nbsp;p:<br>
-&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
-&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
-&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;</tt></dd></dl>
-
-<dl><dt><a name="Lea-func_wrapper"><strong>func_wrapper</strong></a>(f)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;a&nbsp;wrapper&nbsp;function&nbsp;on&nbsp;given&nbsp;f&nbsp;function,<br>
-mimicking&nbsp;f&nbsp;with&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;as&nbsp;arguments;<br>
-the&nbsp;returned&nbsp;wrapper&nbsp;function&nbsp;has&nbsp;the&nbsp;same&nbsp;number&nbsp;of&nbsp;arguments<br>
-as&nbsp;f&nbsp;and&nbsp;expects&nbsp;for&nbsp;argument&nbsp;#i<br>
--&nbsp;either&nbsp;an&nbsp;object&nbsp;of&nbsp;the&nbsp;type&nbsp;expected&nbsp;by&nbsp;f&nbsp;for&nbsp;argument&nbsp;#i<br>
--&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;values&nbsp;of&nbsp;that&nbsp;type;<br>
-the&nbsp;returned&nbsp;wrapper&nbsp;function,&nbsp;when&nbsp;called,&nbsp;returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance<br>
-having&nbsp;values&nbsp;of&nbsp;the&nbsp;type&nbsp;returned&nbsp;by&nbsp;f;<br>
-note:&nbsp;<a href="#Lea">Lea</a>.func_wrapper&nbsp;can&nbsp;be&nbsp;used&nbsp;as&nbsp;a&nbsp;function&nbsp;decorator</tt></dd></dl>
-
-<dl><dt><a name="Lea-if_"><strong>if_</strong></a>(cond_lea, then_lea, else_lea)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Tlea&nbsp;representing&nbsp;the<br>
-conditional&nbsp;probability&nbsp;table<br>
-giving&nbsp;then_lea&nbsp;&nbsp;if&nbsp;cond_lea&nbsp;is&nbsp;true<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else_lea&nbsp;&nbsp;otherwise<br>
-this&nbsp;is&nbsp;a&nbsp;convenience&nbsp;method&nbsp;equivalent&nbsp;to&nbsp;<br>
-&nbsp;&nbsp;cond_lea.<a href="#Lea-switch">switch</a>({True:then_lea,False:else_lea})</tt></dd></dl>
-
-<dl><dt><a name="Alea-interval"><strong>interval</strong></a>(from_val, to_val, prob_type=None)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;uniform&nbsp;probability<br>
-distribution,&nbsp;for&nbsp;all&nbsp;the&nbsp;integers&nbsp;in&nbsp;the&nbsp;interval&nbsp;[from_val,to_val]<br>
-the&nbsp;given&nbsp;prob_type,&nbsp;if&nbsp;not&nbsp;None,&nbsp;allows&nbsp;using&nbsp;a&nbsp;probability<br>
-type&nbsp;different&nbsp;from&nbsp;the&nbsp;default&nbsp;one&nbsp;(float&nbsp;or&nbsp;any&nbsp;one&nbsp;set&nbsp;by<br>
-Alea.set_prob_type)&nbsp;-&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.set_prob_type</tt></dd></dl>
-
-<dl><dt><a name="Lea-joint"><strong>joint</strong></a>(self, *args)</dt><dd><tt>returns&nbsp;a&nbsp;new&nbsp;Clea&nbsp;instance,&nbsp;representing&nbsp;the&nbsp;joint&nbsp;of&nbsp;all<br>
-arguments,&nbsp;coerced&nbsp;to&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;including&nbsp;self&nbsp;as&nbsp;first&nbsp;argument</tt></dd></dl>
-
-<dl><dt><a name="Lea-make_vars"><strong>make_vars</strong></a>(obj, tgt_dict, prefix='', suffix='')</dt><dd><tt>static&nbsp;method,&nbsp;retrieves&nbsp;attributes&nbsp;names&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An&nbsp;of&nbsp;obj&nbsp;and<br>
-put&nbsp;associations&nbsp;{V1&nbsp;:&nbsp;obj.A1,&nbsp;...&nbsp;,&nbsp;Vn&nbsp;:&nbsp;obj.An}&nbsp;in&nbsp;tgt_dict&nbsp;dictionary<br>
-where&nbsp;Vi&nbsp;is&nbsp;a&nbsp;variable&nbsp;name&nbsp;string&nbsp;built&nbsp;as&nbsp;prefix&nbsp;+&nbsp;Ai&nbsp;+&nbsp;suffix;<br>
-obj&nbsp;is<br>
-(a)&nbsp;either&nbsp;a&nbsp;named&nbsp;tuple&nbsp;with&nbsp;attributes&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An&nbsp;(as&nbsp;returned<br>
-by&nbsp;build_b_nfrom_joint,&nbsp;for&nbsp;example)<br>
-(b)&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;representing&nbsp;a&nbsp;joint&nbsp;probability&nbsp;distribution<br>
-with&nbsp;the&nbsp;attributes&nbsp;A1,&nbsp;...&nbsp;,&nbsp;An&nbsp;(such&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;is&nbsp;returned&nbsp;by<br>
-as_joint&nbsp;method,&nbsp;for&nbsp;example);<br>
-note:&nbsp;if&nbsp;the&nbsp;caller&nbsp;passes&nbsp;globals()&nbsp;as&nbsp;tgt_dict,&nbsp;then&nbsp;the&nbsp;variables<br>
-named&nbsp;Vi,&nbsp;referring&nbsp;to&nbsp;obj.Ai,&nbsp;shall&nbsp;be&nbsp;created&nbsp;in&nbsp;its&nbsp;scope,&nbsp;as<br>
-a&nbsp;side-effect&nbsp;(this&nbsp;is&nbsp;the&nbsp;purpose&nbsp;of&nbsp;the&nbsp;method);<br>
-warning:&nbsp;the&nbsp;method&nbsp;may&nbsp;silently&nbsp;overwrite&nbsp;caller's&nbsp;variables</tt></dd></dl>
-
-<dl><dt><a name="Lea-max_of"><strong>max_of</strong></a>(*args, **kwargs)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
-the&nbsp;maximum&nbsp;value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
-if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
-to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
-if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;a&nbsp;Flea2&nbsp;instance&nbsp;or,&nbsp;if&nbsp;there&nbsp;is&nbsp;only&nbsp;one&nbsp;argument&nbsp;in&nbsp;args,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;argument&nbsp;unchanged;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;dependencies&nbsp;with&nbsp;args&nbsp;but&nbsp;the&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;calculation&nbsp;could&nbsp;be&nbsp;prohibitively&nbsp;slow&nbsp;(exponential&nbsp;complexity);<br>
-if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;True,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;however,&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;loses<br>
-&nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
-&nbsp;&nbsp;&nbsp;&nbsp;appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.max(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;conditional&nbsp;probability&nbsp;expressions<br>
-requires&nbsp;at&nbsp;least&nbsp;one&nbsp;argument&nbsp;in&nbsp;args</tt></dd></dl>
-
-<dl><dt><a name="Lea-min_of"><strong>min_of</strong></a>(*args, **kwargs)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
-the&nbsp;minimum&nbsp;value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
-if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
-to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
-if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;a&nbsp;Flea2&nbsp;instance&nbsp;or,&nbsp;if&nbsp;there&nbsp;is&nbsp;only&nbsp;one&nbsp;argument&nbsp;in&nbsp;args,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;argument&nbsp;unchanged;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;returned&nbsp;distribution&nbsp;keeps&nbsp;dependencies&nbsp;with&nbsp;args&nbsp;but&nbsp;the&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;calculation&nbsp;could&nbsp;be&nbsp;prohibitively&nbsp;slow&nbsp;(exponential&nbsp;complexity);<br>
-if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;True,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;however,&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;loses<br>
-&nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
-&nbsp;&nbsp;&nbsp;&nbsp;appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.max(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;conditional&nbsp;probability&nbsp;expressions<br>
-requires&nbsp;at&nbsp;least&nbsp;one&nbsp;argument&nbsp;in&nbsp;args</tt></dd></dl>
-
-<dl><dt><a name="Lea-mutual_information"><strong>mutual_information</strong></a>(lea1, lea2)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;the&nbsp;mutual&nbsp;information&nbsp;between&nbsp;given&nbsp;arguments,<br>
-expressed&nbsp;in&nbsp;bits;<br>
-the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&nbsp;expression&nbsp;(see&nbsp;doc&nbsp;of<br>
-Alea.entropy)</tt></dd></dl>
-
-<dl><dt><a name="Alea-pmf"><strong>pmf</strong></a>(arg, prob_type=None, **kwargs)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;probability<br>
-distribution&nbsp;for&nbsp;a&nbsp;probability&nbsp;mass&nbsp;function&nbsp;specified&nbsp;by&nbsp;the&nbsp;given<br>
-arg,&nbsp;which&nbsp;is<br>
-&nbsp;&nbsp;either&nbsp;a&nbsp;dictionary&nbsp;{&nbsp;v1:p1,&nbsp;...&nbsp;,&nbsp;vn:pn&nbsp;}<br>
-&nbsp;&nbsp;or&nbsp;an&nbsp;iterable&nbsp;of&nbsp;pairs&nbsp;(v1,p1),&nbsp;...&nbsp;,&nbsp;(vn,pn)<br>
-pi&nbsp;is&nbsp;the&nbsp;probability&nbsp;of&nbsp;occurrence&nbsp;of&nbsp;vi&nbsp;or&nbsp;a&nbsp;number&nbsp;proportional<br>
-to&nbsp;it&nbsp;(see&nbsp;normalization&nbsp;argument&nbsp;below);<br>
-in&nbsp;the&nbsp;iterable&nbsp;case,&nbsp;if&nbsp;the&nbsp;same&nbsp;value&nbsp;v&nbsp;occurs&nbsp;multiple&nbsp;times,<br>
-then&nbsp;the&nbsp;associated&nbsp;p&nbsp;are&nbsp;summed&nbsp;together;<br>
-*&nbsp;prob_type&nbsp;argument&nbsp;allows&nbsp;converting&nbsp;the&nbsp;given&nbsp;probabilities:<br>
-&nbsp;&nbsp;-1:&nbsp;no&nbsp;conversion;<br>
-&nbsp;&nbsp;None&nbsp;(default):&nbsp;default&nbsp;conversion,&nbsp;as&nbsp;set&nbsp;by&nbsp;Alea.set_prob_type;<br>
-&nbsp;&nbsp;other:&nbsp;see&nbsp;doc&nbsp;of&nbsp;Alea.get_prob_type;<br>
-the&nbsp;method&nbsp;admits&nbsp;three&nbsp;other&nbsp;optional&nbsp;boolean&nbsp;argument&nbsp;(in&nbsp;kwargs):<br>
-*&nbsp;sorting&nbsp;(default:True):&nbsp;if&nbsp;True,&nbsp;then&nbsp;the&nbsp;values&nbsp;for&nbsp;displaying<br>
-the&nbsp;distribution&nbsp;or&nbsp;getting&nbsp;the&nbsp;values&nbsp;will&nbsp;be&nbsp;sorted&nbsp;if&nbsp;possible<br>
-(i.e.&nbsp;no&nbsp;exception&nbsp;on&nbsp;sort);&nbsp;otherwise,&nbsp;the&nbsp;order&nbsp;of&nbsp;values&nbsp;is<br>
-unspecified&nbsp;unless&nbsp;ordered=True;<br>
-*&nbsp;ordered&nbsp;(default:False):&nbsp;if&nbsp;ordered&nbsp;is&nbsp;True,&nbsp;then&nbsp;the&nbsp;values&nbsp;for<br>
-displaying&nbsp;the&nbsp;distribution&nbsp;or&nbsp;getting&nbsp;the&nbsp;values&nbsp;will&nbsp;follow&nbsp;the<br>
-given&nbsp;order&nbsp;(requires&nbsp;that&nbsp;the&nbsp;arg&nbsp;is&nbsp;an&nbsp;iterable&nbsp;or&nbsp;a&nbsp;<br>
-collections.OrderedDict);<br>
-*&nbsp;normalization&nbsp;(default:True):&nbsp;if&nbsp;True,&nbsp;then&nbsp;each&nbsp;element<br>
-of&nbsp;the&nbsp;given&nbsp;ps&nbsp;is&nbsp;divided&nbsp;by&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;ps&nbsp;before&nbsp;being&nbsp;stored<br>
-(in&nbsp;such&nbsp;case,&nbsp;it's&nbsp;not&nbsp;mandatory&nbsp;to&nbsp;have&nbsp;true&nbsp;probabilities&nbsp;for&nbsp;ps<br>
-elements;&nbsp;these&nbsp;could&nbsp;be&nbsp;simple&nbsp;counters,&nbsp;for&nbsp;example);<br>
-requires&nbsp;that&nbsp;all&nbsp;the&nbsp;given&nbsp;values&nbsp;vi&nbsp;are&nbsp;hashable;<br>
-requires&nbsp;that&nbsp;prob_dict&nbsp;is&nbsp;not&nbsp;empty;<br>
-requires&nbsp;that&nbsp;ordered&nbsp;and&nbsp;sorting&nbsp;are&nbsp;not&nbsp;set&nbsp;to&nbsp;True&nbsp;together<br>
-requires&nbsp;Python&nbsp;2.7+&nbsp;for&nbsp;ordered=True&nbsp;and&nbsp;arg&nbsp;OrderedDict</tt></dd></dl>
-
-<dl><dt><a name="Alea-poisson"><strong>poisson</strong></a>(mean, precision=1e-20, prob_type=None)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;Poisson&nbsp;probability<br>
-distribution&nbsp;having&nbsp;the&nbsp;given&nbsp;mean;&nbsp;the&nbsp;distribution&nbsp;is&nbsp;approximated&nbsp;by<br>
-the&nbsp;finite&nbsp;set&nbsp;of&nbsp;values&nbsp;that&nbsp;have&nbsp;probability&nbsp;&gt;&nbsp;precision<br>
-(i.e.&nbsp;low/high&nbsp;values&nbsp;with&nbsp;too&nbsp;small&nbsp;probabilities&nbsp;are&nbsp;dropped);<br>
-the&nbsp;probabilities&nbsp;are&nbsp;stored&nbsp;as&nbsp;float,&nbsp;whatever&nbsp;the&nbsp;current&nbsp;probability<br>
-type&nbsp;configured</tt></dd></dl>
-
-<dl><dt><a name="Alea-read_csv_file"><strong>read_csv_file</strong></a>(csv_file, col_names=None, dialect='excel', **fmtparams)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;joint&nbsp;probability<br>
-distribution&nbsp;of&nbsp;the&nbsp;data&nbsp;read&nbsp;in&nbsp;the&nbsp;given&nbsp;CSV&nbsp;file;<br>
-if&nbsp;csv_file&nbsp;is&nbsp;a&nbsp;string,&nbsp;then&nbsp;it&nbsp;is&nbsp;interpreted&nbsp;as&nbsp;a&nbsp;filename,<br>
-otherwise,&nbsp;csv_file&nbsp;is&nbsp;interpreted&nbsp;as&nbsp;a&nbsp;file&nbsp;object&nbsp;ready&nbsp;to&nbsp;be&nbsp;read;<br>
-the&nbsp;arguments&nbsp;follow&nbsp;the&nbsp;same&nbsp;semantics&nbsp;as&nbsp;those&nbsp;of&nbsp;Python's&nbsp;csv.reader<br>
-method,&nbsp;which&nbsp;supports&nbsp;different&nbsp;CSV&nbsp;formats;<br>
-see&nbsp;doc&nbsp;in&nbsp;https://docs.python.org/2/library/csv.html<br>
-*&nbsp;if&nbsp;col_names&nbsp;is&nbsp;None,&nbsp;then&nbsp;the&nbsp;fields&nbsp;found&nbsp;in&nbsp;the&nbsp;first&nbsp;read&nbsp;row&nbsp;of&nbsp;the&nbsp;CSV<br>
-&nbsp;&nbsp;file&nbsp;provide&nbsp;information&nbsp;on&nbsp;the&nbsp;attributes:&nbsp;each&nbsp;field&nbsp;is&nbsp;made&nbsp;up&nbsp;of&nbsp;a&nbsp;name,<br>
-&nbsp;&nbsp;which&nbsp;shall&nbsp;be&nbsp;a&nbsp;valid&nbsp;identifier,&nbsp;followed&nbsp;by&nbsp;an&nbsp;optional&nbsp;3-characters&nbsp;type<br>
-&nbsp;&nbsp;code&nbsp;among<br>
-&nbsp;&nbsp;&nbsp;&nbsp;{b}&nbsp;-&gt;&nbsp;boolean<br>
-&nbsp;&nbsp;&nbsp;&nbsp;{i}&nbsp;-&gt;&nbsp;integer<br>
-&nbsp;&nbsp;&nbsp;&nbsp;{f}&nbsp;-&gt;&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;{s}&nbsp;-&gt;&nbsp;string<br>
-&nbsp;&nbsp;&nbsp;&nbsp;{#}&nbsp;-&gt;&nbsp;count<br>
-&nbsp;&nbsp;if&nbsp;the&nbsp;type&nbsp;code&nbsp;is&nbsp;missing&nbsp;for&nbsp;a&nbsp;given&nbsp;field,&nbsp;the&nbsp;type&nbsp;string&nbsp;is&nbsp;assumed&nbsp;for<br>
-&nbsp;&nbsp;this&nbsp;field;&nbsp;for&nbsp;example,&nbsp;using&nbsp;the&nbsp;comma&nbsp;delimiter&nbsp;(default),&nbsp;the&nbsp;first&nbsp;row<br>
-&nbsp;&nbsp;in&nbsp;the&nbsp;CSV&nbsp;file&nbsp;could&nbsp;be:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name,age{i},heigth{f},married{b}<br>
-*&nbsp;if&nbsp;col_names&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;col_names&nbsp;shall&nbsp;be&nbsp;a&nbsp;sequence&nbsp;of&nbsp;strings&nbsp;giving<br>
-&nbsp;&nbsp;attribute&nbsp;information&nbsp;as&nbsp;described&nbsp;above,&nbsp;e.g.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;('name','age{i}','heigth{f}','married{b}')<br>
-&nbsp;&nbsp;it&nbsp;assumed&nbsp;that&nbsp;there&nbsp;is&nbsp;NO&nbsp;header&nbsp;row&nbsp;in&nbsp;the&nbsp;CSV&nbsp;file<br>
-the&nbsp;type&nbsp;code&nbsp;defines&nbsp;the&nbsp;conversion&nbsp;to&nbsp;be&nbsp;applied&nbsp;to&nbsp;the&nbsp;fields&nbsp;read&nbsp;on&nbsp;the<br>
-data&nbsp;lines;&nbsp;if&nbsp;the&nbsp;read&nbsp;value&nbsp;is&nbsp;empty,&nbsp;then&nbsp;it&nbsp;is&nbsp;converted&nbsp;to&nbsp;Python's&nbsp;None,<br>
-except&nbsp;if&nbsp;the&nbsp;type&nbsp;is&nbsp;string,&nbsp;then,&nbsp;the&nbsp;value&nbsp;is&nbsp;the&nbsp;empty&nbsp;string;<br>
-if&nbsp;the&nbsp;read&nbsp;value&nbsp;is&nbsp;not&nbsp;empty&nbsp;and&nbsp;cannot&nbsp;be&nbsp;parsed&nbsp;for&nbsp;the&nbsp;expected&nbsp;type,&nbsp;then<br>
-an&nbsp;exception&nbsp;is&nbsp;raised;&nbsp;for&nbsp;boolean&nbsp;type,&nbsp;the&nbsp;following&nbsp;values&nbsp;(case<br>
-insensitive):<br>
-&nbsp;&nbsp;'1',&nbsp;'t',&nbsp;'true',&nbsp;'y',&nbsp;'yes'&nbsp;are&nbsp;interpreted&nbsp;as&nbsp;Python's&nbsp;True,<br>
-&nbsp;&nbsp;'0',&nbsp;'f',&nbsp;'false',&nbsp;'n',&nbsp;'no'&nbsp;are&nbsp;interpreted&nbsp;as&nbsp;Python's&nbsp;False;<br>
-the&nbsp;{#}&nbsp;code&nbsp;identifies&nbsp;a&nbsp;field&nbsp;that&nbsp;provides&nbsp;a&nbsp;count&nbsp;number&nbsp;of&nbsp;the&nbsp;row,<br>
-representing&nbsp;the&nbsp;probability&nbsp;of&nbsp;the&nbsp;row&nbsp;or&nbsp;its&nbsp;frequency&nbsp;as&nbsp;a&nbsp;positive&nbsp;integer;<br>
-such&nbsp;field&nbsp;is&nbsp;NOT&nbsp;included&nbsp;as&nbsp;attribute&nbsp;of&nbsp;the&nbsp;joint&nbsp;distribution;&nbsp;it&nbsp;is&nbsp;useful<br>
-to&nbsp;define&nbsp;non-uniform&nbsp;probability&nbsp;distribution,&nbsp;as&nbsp;alternative&nbsp;to&nbsp;repeating&nbsp;the<br>
-same&nbsp;row&nbsp;multiple&nbsp;times</tt></dd></dl>
-
-<dl><dt><a name="Alea-read_pandas_df"><strong>read_pandas_df</strong></a>(dataframe, index_col_name=None, **kwargs)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;joint&nbsp;probability<br>
-distribution&nbsp;from&nbsp;the&nbsp;given&nbsp;pandas&nbsp;dataframe;<br>
-the&nbsp;attribute&nbsp;names&nbsp;of&nbsp;the&nbsp;distribution&nbsp;are&nbsp;those&nbsp;of&nbsp;the&nbsp;column&nbsp;of&nbsp;the<br>
-given&nbsp;dataframe;&nbsp;the&nbsp;first&nbsp;field&nbsp;in&nbsp;each&nbsp;item&nbsp;of&nbsp;the&nbsp;dataframe&nbsp;is&nbsp;assumed<br>
-to&nbsp;be&nbsp;the&nbsp;index;&nbsp;its&nbsp;treatment&nbsp;depends&nbsp;on&nbsp;given&nbsp;index_col_name:<br>
-if&nbsp;index_col_name&nbsp;is&nbsp;None,&nbsp;then&nbsp;this&nbsp;index&nbsp;field&nbsp;is&nbsp;ignored<br>
-otherwise,&nbsp;it&nbsp;is&nbsp;put&nbsp;in&nbsp;the&nbsp;joint&nbsp;distribution&nbsp;with&nbsp;index_col_name&nbsp;as<br>
-attribute&nbsp;name</tt></dd></dl>
-
-<dl><dt><a name="Lea-reduce_all"><strong>reduce_all</strong></a>(op, args, absorber=None)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;a&nbsp;new&nbsp;Flea2&nbsp;instance&nbsp;that&nbsp;join&nbsp;the&nbsp;given&nbsp;args&nbsp;with<br>
-the&nbsp;given&nbsp;function&nbsp;op,&nbsp;from&nbsp;left&nbsp;to&nbsp;right;<br>
-requires&nbsp;that&nbsp;op&nbsp;is&nbsp;a&nbsp;2-ary&nbsp;function,&nbsp;accepting&nbsp;self's&nbsp;values&nbsp;as&nbsp;arguments;<br>
-requires&nbsp;that&nbsp;args&nbsp;contains&nbsp;at&nbsp;least&nbsp;one&nbsp;element<br>
-if&nbsp;absorber&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;it&nbsp;is&nbsp;considered&nbsp;as&nbsp;a&nbsp;"left-absorber"&nbsp;value<br>
-(i.e.&nbsp;op(absorber,x)&nbsp;=&nbsp;absorber);&nbsp;this&nbsp;activates&nbsp;a&nbsp;more&nbsp;efficient&nbsp;algorithm<br>
-which&nbsp;prunes&nbsp;the&nbsp;tree&nbsp;search&nbsp;as&nbsp;soon&nbsp;as&nbsp;the&nbsp;absorber&nbsp;is&nbsp;met.</tt></dd></dl>
-
-<dl><dt><a name="Alea-set_prob_type"><strong>set_prob_type</strong></a>(prob_type)</dt><dd><tt>static&nbsp;method&nbsp;allowing&nbsp;to&nbsp;change&nbsp;the&nbsp;representation&nbsp;of&nbsp;probability<br>
-values&nbsp;for&nbsp;newly&nbsp;created&nbsp;<a href="lea.lea.html#Lea">Lea</a>&nbsp;instances,&nbsp;according&nbsp;to&nbsp;the&nbsp;given<br>
-prob_type;<br>
-if&nbsp;prob_type&nbsp;is&nbsp;a&nbsp;callable&nbsp;object,&nbsp;then&nbsp;it&nbsp;is&nbsp;set&nbsp;as&nbsp;such;<br>
-otherwise,&nbsp;the&nbsp;given&nbsp;prob_type&nbsp;is&nbsp;a&nbsp;code&nbsp;interpreted&nbsp;as&nbsp;follows:<br>
--&nbsp;'f'&nbsp;-&gt;&nbsp;float&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;float)&nbsp;-&nbsp;default<br>
--&nbsp;'d'&nbsp;-&gt;&nbsp;decimal&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;decimal.Decimal)<br>
--&nbsp;'r'&nbsp;-&gt;&nbsp;rational&nbsp;(instance&nbsp;of&nbsp;Python's&nbsp;fractions.Fraction)<br>
--&nbsp;'s'&nbsp;-&gt;&nbsp;symbolic&nbsp;(instance&nbsp;of&nbsp;a&nbsp;sympy&nbsp;Symbol)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;see&nbsp;Alea.prob_symbol&nbsp;method<br>
--&nbsp;'x'&nbsp;-&gt;&nbsp;any:&nbsp;if&nbsp;probability&nbsp;given&nbsp;in&nbsp;a&nbsp;string,&nbsp;then&nbsp;determines<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;type&nbsp;from&nbsp;it&nbsp;(decimal,&nbsp;rational&nbsp;or&nbsp;symbol)&nbsp;and<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;convert&nbsp;into&nbsp;it;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;otherwise,&nbsp;takes&nbsp;the&nbsp;object&nbsp;as-is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;see&nbsp;Alea.prob_any&nbsp;method<br>
-requires&nbsp;that&nbsp;a&nbsp;prob_type&nbsp;is&nbsp;a&nbsp;callable&nbsp;or&nbsp;a&nbsp;code&nbsp;among&nbsp;the&nbsp;ones<br>
-given&nbsp;above</tt></dd></dl>
-
-<dl><dt><a name="Alea-vals"><strong>vals</strong></a>(*values, **kwargs)</dt><dd><tt>static&nbsp;method,&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;a&nbsp;distribution<br>
-for&nbsp;the&nbsp;given&nbsp;values,&nbsp;so&nbsp;that&nbsp;each&nbsp;value&nbsp;occurrence&nbsp;is<br>
-taken&nbsp;as&nbsp;equiprobable;&nbsp;if&nbsp;each&nbsp;value&nbsp;occurs&nbsp;exactly&nbsp;once,&nbsp;then&nbsp;the<br>
-probability&nbsp;distribution&nbsp;is&nbsp;uniform,&nbsp;i.e.&nbsp;the&nbsp;probability&nbsp;of&nbsp;each<br>
-value&nbsp;is&nbsp;equal&nbsp;to&nbsp;1&nbsp;/&nbsp;#values;&nbsp;otherwise,&nbsp;the&nbsp;probability&nbsp;of&nbsp;each<br>
-value&nbsp;is&nbsp;equal&nbsp;to&nbsp;its&nbsp;frequency&nbsp;in&nbsp;the&nbsp;sequence;<br>
-the&nbsp;optional&nbsp;arguments&nbsp;(kwargs)&nbsp;are:<br>
-&nbsp;&nbsp;prob_type,&nbsp;ordered,&nbsp;sorting,&nbsp;normalization,&nbsp;check;<br>
-see&nbsp;doc&nbsp;of&nbsp;Alea.pmf&nbsp;static&nbsp;method;<br>
-requires&nbsp;at&nbsp;least&nbsp;one&nbsp;vals&nbsp;argument</tt></dd></dl>
-
+<dl><dt><a name="StateAlea-random_seq"><strong>random_seq</strong></a>(self, n)</dt><dd>returns&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;state&nbsp;objects&nbsp;representing&nbsp;a&nbsp;random&nbsp;sequence<br>
+starting&nbsp;from&nbsp;self&nbsp;and&nbsp;obeying&nbsp;the&nbsp;transition&nbsp;probabilities&nbsp;defined&nbsp;in&nbsp;the&nbsp;chain</dd></dl>
 </td></tr></table>
 
-
 <tr bgcolor="#ffffff">
-<td colspan=3 valign=bottom>&nbsp;<br>
+<td colspan=1 valign=bottom>&nbsp;<br>
 <hr>
 <font color="#000000" face="helvetica, arial" size=1.5>
 Copyright 2013-2019 Pierre Denis<br><br>
@@ -1114,6 +1492,6 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with Lea. If not, see http://www.gnu.org/licenses/.
 </font></td></tr>
-<hr>
+
 
 </body></html>
