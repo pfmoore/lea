@@ -529,7 +529,7 @@ class Lea(object):
         ''' static method, returns the L1 distance between the pmf of given (coerced)
             lea instances;
             note: assuming that Lea instances are normalized, the result is between 0
-            (iff lea1 and lea2 have same pmf) and 2 ((iff lea1 and lea2 have disjoint
+            (iff lea1 and lea2 have same pmf) and 2 (iff lea1 and lea2 have disjoint
             supports)
         '''
         lea1 = Alea.coerce(lea1)

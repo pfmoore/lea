@@ -204,7 +204,7 @@ def read_csv_file(csv_file,col_names=None,dialect='excel',**fmtparams):
           giving the probability weight of this row;
         the arguments follow the same semantics as those of Python's csv.reader
         method, which supports different CSV formats
-        see doc in https://docs.python.org/2/library/csv.html
+        see doc in http://docs.python.org/3.7/library/csv.html
         * if col_names is None, then the fields found in the first read row of the CSV
           file provide information on the attributes: each field is made up of a name,
           which shall be a valid identifier, followed by an optional 3-characters type
