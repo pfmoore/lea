@@ -311,7 +311,8 @@ class Alea(Lea):
         ''' returns a new Alea instance, which represents the same probability
             distribution as self but for another event, independent from the
             event represented by self;
-            * in is not None, then a tuple containing n new independent Alea instances is returned
+            * if n is not None,
+               then a tuple containing n new independent Alea instances is returned
             * if prob_type is -1,
                then the returned Alea instance is a shallow copy of self
                     (values and probabilities data are shared);

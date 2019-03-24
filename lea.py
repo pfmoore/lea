@@ -143,7 +143,7 @@ class Lea(object):
     available on http://arxiv.org/abs/1806.09997. The heart of the algorithm is implemented in
     Lea._gen_bound_vp method (aka GENATOMS in the paper) and <X>lea._gen_vp methods implemented in Lea's
     subclasses (aka GENATOMSBYTYPE in the paper); the final collection and condensation is done by
-    Lea.calc method (aka MARG in the paper), which uses and Lea._calc and Alea.pmf methods.
+    Lea.calc method (aka MARG in the paper), which uses Lea._calc and Alea.pmf methods.
     '''
 
     class Error(Exception):
