@@ -256,9 +256,20 @@ class StateAlea(Alea):
     def __init__(self,state_lea,chain):
         ''' initializes StateAlea instance's attributes
             corresponding to the probability distribution given in state_lea
-            and referring to the given chain, instance of Chain 
+            and referring to the given chain, instance of Chain
         '''
-        Alea.__init__(self,*zip(*state_lea.get_alea()._gen_vp()))
+        # order the states to follow the order given in chain.states, for user-friendliness
+        ## if not needed, the following statement is sufficient:
+        ## Alea.__init__(self,*zip(*state_lea.get_alea()._gen_vp()))
+        vs = []
+        ps = []
+        state_lea_pmf_dict = state_lea.pmf_dict
+        for state in chain.states:
+            p = state_lea_pmf_dict.get(state,self)
+            if p is not self:
+                vs.append(state)
+                ps.append(p)
+        Alea.__init__(self,vs,ps)
         self._chain = chain
 
     def next_state(self,n=1):
