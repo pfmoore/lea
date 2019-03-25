@@ -592,7 +592,7 @@ class Alea(Lea):
             otherwise, csv_file is interpreted as a file object ready to be read;
             the arguments follow the same semantics as those of Python's csv.reader
             method, which supports different CSV formats;
-            see doc in https://docs.python.org/2/library/csv.html
+            see doc in http://docs.python.org/3.7/library/csv.html
             * if col_names is None, then the fields found in the first read row of the CSV
               file provide information on the attributes: each field is made up of a name,
               which shall be a valid identifier, followed by an optional 3-characters type
@@ -1196,8 +1196,7 @@ class Alea(Lea):
             cumul_func is the cumul function that determines whether max or min is
             used : respectively, Alea.p_cumul or Alea.p_inv_cumul;
             the method uses an efficient algorithm (linear complexity), which is
-            due to Nicky van Foreest; for explanations, see
-            http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
+            due to Nicky van Foreest
         '''
         if len(alea_args) == 1:
             return alea_args[0]

@@ -836,8 +836,7 @@ class Lea(object):
             if optional arg fast is True,
                 returns an Alea instance;
                 the method uses an efficient algorithm (linear complexity), which is
-                due to Nicky van Foreest; for explanations, see
-                http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
+                due to Nicky van Foreest;
                 however, unlike most of Lea methods, the distribution returned loses
                 any dependency with given args; this could be important if some args
                 appear in the same expression as Lea.max(...) but outside it, e.g.
@@ -870,8 +869,7 @@ class Lea(object):
             if optional arg fast is True,
                 returns an Alea instance;
                 the method uses an efficient algorithm (linear complexity), which is
-                due to Nicky van Foreest; for explanations, see
-                http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html
+                due to Nicky van Foreest;
                 however, unlike most of Lea methods, the distribution returned loses
                 any dependency with given args; this could be important if some args
                 appear in the same expression as Lea.max(...) but outside it, e.g.

@@ -250,7 +250,7 @@ if&nbsp;prob_type&nbsp;is&nbsp;-1,<br>
 &nbsp;&nbsp;&nbsp;otherwise,&nbsp;the&nbsp;returned&nbsp;Alea&nbsp;instance&nbsp;has&nbsp;probability&nbsp;1<br>
 &nbsp;&nbsp;&nbsp;converted&nbsp;according&nbsp;to&nbsp;prob_type&nbsp;(see&nbsp;doc&nbsp;of&nbsp;Alea.set_prob_type)</dd></dl>
 
-<dl><dt><a name="Lea-cpt"><strong>cpt</strong></a>(*clauses, **kwargs)</dt><dd>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional<br>
+<dl><dt><a name="Lea-cpt"><strong>cpt</strong></a>(*clauses, prior_lea=None, auto_else=False, check=True)</dt><dd>returns&nbsp;an&nbsp;instance&nbsp;of&nbsp;Blea&nbsp;representing&nbsp;the&nbsp;conditional<br>
 probability&nbsp;table&nbsp;(e.g.&nbsp;a&nbsp;node&nbsp;in&nbsp;a&nbsp;Bayes&nbsp;network)&nbsp;from&nbsp;the&nbsp;given&nbsp;clauses;<br>
 each&nbsp;clause&nbsp;is&nbsp;a&nbsp;tuple&nbsp;(condition,result)<br>
 where&nbsp;condition&nbsp;is&nbsp;a&nbsp;boolean&nbsp;or&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;boolean&nbsp;distribution<br>
@@ -341,7 +341,7 @@ named&nbsp;Vi,&nbsp;referring&nbsp;to&nbsp;obj.Ai,&nbsp;shall&nbsp;be&nbsp;creat
 a&nbsp;side-effect&nbsp;(this&nbsp;is&nbsp;the&nbsp;purpose&nbsp;of&nbsp;the&nbsp;method);<br>
 warning:&nbsp;the&nbsp;method&nbsp;may&nbsp;silently&nbsp;overwrite&nbsp;caller's&nbsp;variables</dd></dl>
 
-<dl><dt><a name="Lea-max_of"><strong>max_of</strong></a>(*args, **kwargs)</dt><dd>returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
+<dl><dt><a name="Lea-max_of"><strong>max_of</strong></a>(*args, fast=False)</dt><dd>returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
 the&nbsp;maximum&nbsp;value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
 if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
 to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
@@ -353,15 +353,14 @@ if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then
 if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;True,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;however,&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;loses<br>
 &nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
 &nbsp;&nbsp;&nbsp;&nbsp;appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.max(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;conditional&nbsp;probability&nbsp;expressions<br>
 requires&nbsp;at&nbsp;least&nbsp;one&nbsp;argument&nbsp;in&nbsp;args</dd></dl>
 
-<dl><dt><a name="Lea-min_of"><strong>min_of</strong></a>(*args, **kwargs)</dt><dd>returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
+<dl><dt><a name="Lea-min_of"><strong>min_of</strong></a>(*args, fast=False)</dt><dd>returns&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;giving&nbsp;the&nbsp;probabilities&nbsp;to&nbsp;have<br>
 the&nbsp;minimum&nbsp;value&nbsp;of&nbsp;each&nbsp;combination&nbsp;of&nbsp;the&nbsp;given&nbsp;args;<br>
 if&nbsp;some&nbsp;elements&nbsp;of&nbsp;args&nbsp;are&nbsp;not&nbsp;<a href="#Lea">Lea</a>&nbsp;instances,&nbsp;then&nbsp;these&nbsp;are&nbsp;coerced<br>
 to&nbsp;a&nbsp;<a href="#Lea">Lea</a>&nbsp;instance&nbsp;with&nbsp;probability&nbsp;1;<br>
@@ -373,8 +372,7 @@ if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then
 if&nbsp;optional&nbsp;arg&nbsp;fast&nbsp;is&nbsp;True,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;an&nbsp;Alea&nbsp;instance;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;method&nbsp;uses&nbsp;an&nbsp;efficient&nbsp;algorithm&nbsp;(linear&nbsp;complexity),&nbsp;which&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;&nbsp;for&nbsp;explanations,&nbsp;see<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html">http://nicky.vanforeest.com/scheduling/cpm/stochastic_makespan.html</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;due&nbsp;to&nbsp;Nicky&nbsp;van&nbsp;Foreest;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;however,&nbsp;unlike&nbsp;most&nbsp;of&nbsp;<a href="#Lea">Lea</a>&nbsp;methods,&nbsp;the&nbsp;distribution&nbsp;returned&nbsp;loses<br>
 &nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;dependency&nbsp;with&nbsp;given&nbsp;args;&nbsp;this&nbsp;could&nbsp;be&nbsp;important&nbsp;if&nbsp;some&nbsp;args<br>
 &nbsp;&nbsp;&nbsp;&nbsp;appear&nbsp;in&nbsp;the&nbsp;same&nbsp;expression&nbsp;as&nbsp;<a href="#Lea">Lea</a>.max(...)&nbsp;but&nbsp;outside&nbsp;it,&nbsp;e.g.<br>
