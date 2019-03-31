@@ -1088,7 +1088,7 @@ this&nbsp;provides&nbsp;a&nbsp;measure&nbsp;of&nbsp;the&nbsp;complexity&nbsp;of&
 <dl><dt><a name="Lea-new"><strong>new</strong></a>(self, n=None, prob_type=-1, sorting=True)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;after&nbsp;it&nbsp;has&nbsp;been&nbsp;evaluated;<br>
 if&nbsp;self&nbsp;is&nbsp;an&nbsp;Alea,&nbsp;then&nbsp;it&nbsp;returns&nbsp;a&nbsp;clone&nbsp;of&nbsp;itself&nbsp;representing&nbsp;an&nbsp;independent&nbsp;event;<br>
 the&nbsp;probability&nbsp;type&nbsp;used&nbsp;in&nbsp;the&nbsp;returned&nbsp;instance&nbsp;depends&nbsp;on&nbsp;given&nbsp;prob_type:<br>
-*&nbsp;in&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;new&nbsp;independent&nbsp;Alea&nbsp;instances&nbsp;is&nbsp;returned<br>
+*&nbsp;if&nbsp;n&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;new&nbsp;independent&nbsp;Alea&nbsp;instances&nbsp;is&nbsp;returned<br>
 *&nbsp;if&nbsp;prob_type&nbsp;is&nbsp;-1,&nbsp;then&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;self's<br>
 &nbsp;&nbsp;otherwise,&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;defined&nbsp;using&nbsp;prob_type&nbsp;(see&nbsp;doc&nbsp;of&nbsp;Alea.set_prob_type);<br>
 *&nbsp;sorting&nbsp;allows&nbsp;sorting&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;returned&nbsp;Alea&nbsp;instance&nbsp;(see&nbsp;Alea.pmf&nbsp;method);<br>

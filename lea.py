@@ -1140,7 +1140,7 @@ class Lea(object):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
             if self is an Alea, then it returns a clone of itself representing an independent event;
             the probability type used in the returned instance depends on given prob_type:
-            * in is not None, then a tuple containing n new independent Alea instances is returned
+            * if n is not None, then a tuple containing n new independent Alea instances is returned
             * if prob_type is -1, then the probability type is the same as self's
               otherwise, the probability type is defined using prob_type (see doc of Alea.set_prob_type);
             * sorting allows sorting the value of the returned Alea instance (see Alea.pmf method);
