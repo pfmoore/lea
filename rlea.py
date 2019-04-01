@@ -42,6 +42,9 @@ class Rlea(Lea):
     def _get_lea_children(self):
         return (self._lea_of_leas,) + self._lea_of_leas.support
 
+    def _clone_by_type(self,clone_table):
+        return Rlea(self._lea_of_leas._clone(clone_table))
+
     def _gen_vp(self):
         for (lea1,p1) in self._lea_of_leas.gen_vp():
             for (v,p2) in lea1.gen_vp():

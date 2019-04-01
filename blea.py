@@ -135,6 +135,9 @@ class Blea(Lea):
     def _get_lea_children(self):
         return self._ileas
     
+    def _clone_by_type(self,clone_table):
+        return Blea(*(i_lea._clone(clone_table) for i_lea in self._ileas))
+
     def _gen_vp(self):
         for i_lea in self._ileas:
             for vp in i_lea.gen_vp():

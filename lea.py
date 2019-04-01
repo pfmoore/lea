@@ -134,7 +134,8 @@ class Lea(object):
     Short design notes:
     
     Lea uses the "template method" design pattern: the Lea base abstract class calls the following methods,
-    which are implemented in each Lea's subclass: _get_lea_children, _gen_vp and _gen_one_random_mc.
+    which are implemented in each Lea's subclass:
+        _get_lea_children, _clone_by_type, _gen_vp and _gen_one_random_mc.
     Excepting the afore-mentioned estimate_mc method, Lea performs EXACT calculation of probability
     distributions.
     It implements an original algorithm, called the "Statues" algorithm, by reference to the game of the
@@ -191,9 +192,6 @@ class Lea(object):
         '''
         return frozenset(alea_leaf for lea_child in self._get_lea_children()
                                    for alea_leaf in lea_child.get_alea_leaves_set())
-
-    # constructor methods
-    # -------------------
 
     def _gen_bound_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
@@ -891,7 +889,19 @@ class Lea(object):
             Lea._get_lea_children method is abstract: it is implemented in all Lea's subclasses
         '''
         raise NotImplementedError("missing method '%s._get_lea_children(self)'"%(self.__class__.__name__))
-       
+
+    def _clone_by_type(self,clone_table):
+        ''' returns a deep copy of current Lea, without any value binding;
+            all Lea instances are copied, excepting the instances k refered in (k,v) associations
+            of given clone_table dictionary, in such case the instance refered by v is used instead
+            of instance refered by k; otherwise, a new entry (k,v) is put in clone_table, where u
+            is a reference to the newly created clone of k; so, if the Lea tree contains multiple
+            references to the same Lea instance, then this instance is cloned only once and its
+            references are copied in the cloned DAG;
+            Lea._clone method is abstract: it is implemented in all Lea's subclasses
+        '''
+        raise NotImplementedError("missing method '%s._clone(self,clone_table)'"%(self.__class__.__name__))
+        
     def _gen_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability (integer > 0);
@@ -1136,9 +1146,40 @@ class Lea(object):
         if check:
             raise Lea.Error("impossible to unbind %s because it depends of other instances"%self._id())
 
+    def clone(self,shared=(),n=None):
+        ''' returns a deep copy of current Lea, without any value binding;
+            if n is not None, then a tuple containing n new independent instances is returned;
+            all Lea instances are cloned, excepting the instances present in given iterable shared,
+            these instances are shared between the cloned and the original instances; 
+            if the Lea tree contains multiple references to the same Lea instance, then this instance
+            is cloned only once and its references are copied in the cloned tree
+        '''
+        clone_table = dict((lea1,lea1) for lea1 in shared)
+        if n is not None:
+            return tuple(self._clone(clone_table.copy()) for _ in range(n))
+        return self._clone(clone_table)
+
+    def _clone(self,clone_table):
+        ''' returns a deep copy of current Lea, without any value binding;
+            all Lea instances are copied, excepting the instances k refered in (k,v) associations
+            of given clone_table dictionary, in such case the instance refered by v is used instead
+            of instance refered by k; otherwise, a new entry (k,v) is put in clone_table, where u
+            is a reference to the newly created clone of k; so, if the Lea tree contains multiple
+            references to the same Lea instance, then this instance is cloned only once and its
+            references are copied in the cloned DAG;
+            the method calls the _clone_by_type() method implemented in Lea's subclasses
+        '''
+        cloned_lea = clone_table.get(self)
+        if cloned_lea is None:
+            cloned_lea = self._clone_by_type(clone_table)
+            clone_table[self] = cloned_lea
+            if self._alea is not None:
+                cloned_lea._alea = self._alea
+        return cloned_lea
+
     def new(self,n=None,prob_type=-1,sorting=True):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
-            if self is an Alea, then it returns a clone of itself representing an independent event;
+            if self is an Alea, then it returns a copy of itself representing an independent event;
             the probability type used in the returned instance depends on given prob_type:
             * if n is not None, then a tuple containing n new independent Alea instances is returned
             * if prob_type is -1, then the probability type is the same as self's

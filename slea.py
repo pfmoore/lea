@@ -48,6 +48,9 @@ class Slea(Lea):
     def _get_lea_children(self):
         return (self._lea_c,)
 
+    def _clone_by_type(self,clone_table):
+        return Slea(self._lea_c._clone(clone_table),f)
+
     def _gen_vp(self):
         f = self._f
         for (vc,pc) in self._lea_c.gen_vp():

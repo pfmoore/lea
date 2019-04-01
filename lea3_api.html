@@ -109,6 +109,7 @@ Note that some of the functions are just aliases for Lea or Alea static methods 
 <a href="#Lea-calc">calc</a>&nbsp;&nbsp;
 <a href="#Alea-cdf_dict">cdf_dict</a>&nbsp;&nbsp;
 <a href="#Alea-cdf_tuple">cdf_tuple</a><br>
+<a href="#Lea-clone">clone</a>&nbsp;&nbsp;
 <a href="#Lea-cond_entropy">cond_entropy</a>&nbsp;&nbsp;
 <a href="#Lea-cumul">cumul</a>&nbsp;&nbsp;
 <a href="#Lea-draw">draw</a>&nbsp;&nbsp;
@@ -616,7 +617,8 @@ These&nbsp;are&nbsp;applicable&nbsp;on&nbsp;any&nbsp;<a href="#Lea">Lea</a>&nbsp
 Short&nbsp;design&nbsp;notes:<br>
 &nbsp;<br>
 <a href="#Lea">Lea</a>&nbsp;uses&nbsp;the&nbsp;"template&nbsp;method"&nbsp;design&nbsp;pattern:&nbsp;the&nbsp;<a href="#Lea">Lea</a>&nbsp;base&nbsp;abstract&nbsp;class&nbsp;calls&nbsp;the&nbsp;following&nbsp;methods,<br>
-which&nbsp;are&nbsp;implemented&nbsp;in&nbsp;each&nbsp;<a href="#Lea">Lea</a>'s&nbsp;subclass:&nbsp;_get_lea_children,&nbsp;_gen_vp&nbsp;and&nbsp;_gen_one_random_mc.<br>
+which&nbsp;are&nbsp;implemented&nbsp;in&nbsp;each&nbsp;<a href="#Lea">Lea</a>'s&nbsp;subclass:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_get_lea_children,&nbsp;_clone_by_type,&nbsp;_gen_vp&nbsp;and&nbsp;_gen_one_random_mc.<br>
 Excepting&nbsp;the&nbsp;afore-mentioned&nbsp;estimate_mc&nbsp;method,&nbsp;<a href="#Lea">Lea</a>&nbsp;performs&nbsp;EXACT&nbsp;calculation&nbsp;of&nbsp;probability<br>
 distributions.<br>
 It&nbsp;implements&nbsp;an&nbsp;original&nbsp;algorithm,&nbsp;called&nbsp;the&nbsp;"Statues"&nbsp;algorithm,&nbsp;by&nbsp;reference&nbsp;to&nbsp;the&nbsp;game&nbsp;of&nbsp;the<br>
@@ -863,6 +865,13 @@ WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses
 distribution&nbsp;function&nbsp;of&nbsp;self,&nbsp;as&nbsp;a&nbsp;tuple&nbsp;with&nbsp;tuples&nbsp;(v,P(x&lt;=v));<br>
 the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;values<br>
 WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
+
+<dl><dt><a name="Lea-clone"><strong>clone</strong></a>(self, shared=(), n=None)</dt><dd>returns&nbsp;a&nbsp;deep&nbsp;copy&nbsp;of&nbsp;current&nbsp;<a href="#Lea">Lea</a>,&nbsp;without&nbsp;any&nbsp;value&nbsp;binding;<br>
+if&nbsp;n&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;new&nbsp;independent&nbsp;instances&nbsp;is&nbsp;returned;<br>
+all&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;are&nbsp;cloned,&nbsp;excepting&nbsp;the&nbsp;instances&nbsp;present&nbsp;in&nbsp;given&nbsp;iterable&nbsp;shared,<br>
+these&nbsp;instances&nbsp;are&nbsp;shared&nbsp;between&nbsp;the&nbsp;cloned&nbsp;and&nbsp;the&nbsp;original&nbsp;instances;&nbsp;<br>
+if&nbsp;the&nbsp;<a href="#Lea">Lea</a>&nbsp;tree&nbsp;contains&nbsp;multiple&nbsp;references&nbsp;to&nbsp;the&nbsp;same&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;then&nbsp;this&nbsp;instance<br>
+is&nbsp;cloned&nbsp;only&nbsp;once&nbsp;and&nbsp;its&nbsp;references&nbsp;are&nbsp;copied&nbsp;in&nbsp;the&nbsp;cloned&nbsp;tree</dd></dl>
 
 <dl><dt><a name="Lea-cond_entropy"><strong>cond_entropy</strong></a>(self, other)</dt><dd>returns&nbsp;the&nbsp;conditional&nbsp;entropy&nbsp;of&nbsp;self&nbsp;given&nbsp;other,&nbsp;expressed&nbsp;in<br>
 bits;&nbsp;note&nbsp;that&nbsp;this&nbsp;value&nbsp;is&nbsp;also&nbsp;known&nbsp;as&nbsp;the&nbsp;equivocation&nbsp;of<br>

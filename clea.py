@@ -47,6 +47,9 @@ class Clea(Lea):
     def _get_lea_children(self):
         return self._lea_args
     
+    def _clone_by_type(self,clone_table):
+        return Clea(*(lea_arg._clone(clone_table) for lea_arg in self._lea_args))
+
     @staticmethod
     def prod(gs):
         if len(gs) == 0:

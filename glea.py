@@ -50,6 +50,9 @@ class Glea(Lea):
     def _get_lea_children(self):
         return (self._clea_func_and_args,)
 
+    def _clone_by_type(self,clone_table):
+        return Glea(self._clea_func_and_args._clone(clone_table))
+
     def _gen_vp(self):
         for ((f,args),p) in self._clea_func_and_args.gen_vp():
             yield (f(*args),p)
