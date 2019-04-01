@@ -1476,21 +1476,28 @@ class Alea(Lea):
         '''
         return 1.0 - self.rel_entropy
 
-    def internal(self,indent='',refs=None):
+    def internal(self,full=False,_indent='',_refs=None):
         ''' returns a string representing the inner definition of self;
             if the same lea child appears multiple times, it is expanded only
             on the first occurrence, the other ones being marked with
-            reference id; the arguments are used only for recursive calls
-            from Lea.internal method, they can be ignored for a normal usage
+            reference id;
+            if full is False (default), then only the first element of Alea
+            instances is displayed, otherwise all elements are displayed;
+            the other arguments are used only for recursive calls made in
+            Lea.internal method, they can be ignored for a normal usage
         '''
-        if refs is None:
-            refs = set()
-        if self in refs:
+        if _refs is None:
+            _refs = set()
+        if self in _refs:
             return self._id() + '*'
-        refs.add(self)
+        _refs.add(self)
         vps = tuple(self._gen_raw_vps())
         res = "%s <%s" % (self._id(),vps[0])
         if len(vps) >= 2:
-            res += ', ...'
+            res += ', '
+            if full:
+                res += ', '.join(str(vp) for vp in (vps[1:]))
+            else:
+                res += '...'
         res += '>'
         return res

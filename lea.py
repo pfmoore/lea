@@ -1172,7 +1172,7 @@ class Lea(object):
               and Bayesian reasoning); this option has no real use, excepting demonstrating by absurd the
               importance of memoization and referential consistency in the Statues algorithm; note that
               this option offers NO speedup when evaluating expressions not requiring referential
-              consistency: such cases are already detected and optimize by the calculation preprocessing
+              consistency: such cases are already detected and optimized by the calculation preprocessing
               (see Lea._init_calc).
             if bindings is defined, then
             - requires that bindings is a dictionary;
@@ -1292,34 +1292,40 @@ class Lea(object):
         '''
         return self.given(*hyp_leas).lr()
 
-    def internal(self,indent='',refs=None):
+    def internal(self,full=False,_indent='',_refs=None):
         ''' returns a string representing the inner definition of self, with
             children leas recursively up to Alea leaves; if the same lea child
-            appears multiple times, it is expanded only on the first occurrence,
-            the other ones being marked with reference id;
-            the arguments are used only for recursive calls, they can be ignored
-            for a normal usage;
+            appears multiple times, then it is expanded only on the first
+            occurrence, the other ones being marked with reference id;
+            if full is False (default), then only the first element of Alea
+            instances is displayed, otherwise all elements are displayed;
+            the other arguments are used only for recursive calls, they can
+            be ignored for a normal usage;
             note: this method is overloaded in Alea class
         '''
-        if refs is None:
-            refs = set()
-        if self in refs:
+        if _refs is None:
+            _refs = set()
+        if self in _refs:
             args = [self._id()+'*']
         else:
-            refs.add(self)
+            _refs.add(self)
             args = [self._id()]
             for attr_name in self.__slots__:
                 attr_val = getattr(self,attr_name)
                 if isinstance(attr_val,Lea):
-                    args.append(attr_val.internal(indent+'  ',refs))
+                    args.append(attr_val.internal(full,_indent+'  ',_refs))
                 elif isinstance(attr_val,tuple):
-                    args1 = ['(']
-                    for lea1 in attr_val:
-                        args1.append(lea1.internal(indent+'    ',refs))
-                    args.append(('\n'+indent+'    ').join(args1)+'\n'+indent+'  )')
+                    args1 = [lea1.internal(full,_indent+'    ',_refs) for lea1 in attr_val]
+                    args1[0] = '( ' + args1[0]
+                    args.append(('\n'+_indent+'    ').join(args1)+'\n'+_indent+'  )')
+                elif isinstance(attr_val,dict):
+                    args1 = ["'%s': %s"%(k,v.internal(full,_indent+'    ',_refs) if isinstance(v,Lea) else v)
+                             for (k,v) in attr_val.items()]
+                    args1[0] = '{ ' + args1[0]
+                    args.append(('\n'+_indent+'    ').join(args1)+'\n'+_indent+'  }')
                 elif hasattr(attr_val,'__call__'):
                     args.append(attr_val.__module__+'.'+attr_val.__name__)
-        return ('\n'+indent+'  ').join(args)
+        return ('\n'+_indent+'  ').join(args)
 
     def __hash__(self):
         return id(self)
@@ -1332,6 +1338,7 @@ class Lea(object):
 
     # Python 2 compatibility
     __nonzero__ = __bool__
+    
     @staticmethod
     def _check_booleans(op_msg,*vals):
         ''' static method, raises an exception if any of vals arguments is not boolean;

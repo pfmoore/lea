@@ -991,12 +991,14 @@ the&nbsp;returned&nbsp;type&nbsp;is&nbsp;a&nbsp;float&nbsp;or&nbsp;a&nbsp;sympy&
 Alea.entropy);<br>
 raises&nbsp;an&nbsp;exception&nbsp;if&nbsp;given&nbsp;val&nbsp;has&nbsp;a&nbsp;null&nbsp;probability</dd></dl>
 
-<dl><dt><a name="Lea-internal"><strong>internal</strong></a>(self, indent='', refs=None)</dt><dd>returns&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;inner&nbsp;definition&nbsp;of&nbsp;self,&nbsp;with<br>
+<dl><dt><a name="Lea-internal"><strong>internal</strong></a>(self, full=False, _indent='', _refs=None)</dt><dd>returns&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;inner&nbsp;definition&nbsp;of&nbsp;self,&nbsp;with<br>
 children&nbsp;leas&nbsp;recursively&nbsp;up&nbsp;to&nbsp;Alea&nbsp;leaves;&nbsp;if&nbsp;the&nbsp;same&nbsp;lea&nbsp;child<br>
-appears&nbsp;multiple&nbsp;times,&nbsp;it&nbsp;is&nbsp;expanded&nbsp;only&nbsp;on&nbsp;the&nbsp;first&nbsp;occurrence,<br>
-the&nbsp;other&nbsp;ones&nbsp;being&nbsp;marked&nbsp;with&nbsp;reference&nbsp;id;<br>
-the&nbsp;arguments&nbsp;are&nbsp;used&nbsp;only&nbsp;for&nbsp;recursive&nbsp;calls,&nbsp;they&nbsp;can&nbsp;be&nbsp;ignored<br>
-for&nbsp;a&nbsp;normal&nbsp;usage;<br>
+appears&nbsp;multiple&nbsp;times,&nbsp;then&nbsp;it&nbsp;is&nbsp;expanded&nbsp;only&nbsp;on&nbsp;the&nbsp;first<br>
+occurrence,&nbsp;the&nbsp;other&nbsp;ones&nbsp;being&nbsp;marked&nbsp;with&nbsp;reference&nbsp;id;<br>
+if&nbsp;full&nbsp;is&nbsp;False&nbsp;(default),&nbsp;then&nbsp;only&nbsp;the&nbsp;first&nbsp;element&nbsp;of&nbsp;Alea<br>
+instances&nbsp;is&nbsp;displayed,&nbsp;otherwise&nbsp;all&nbsp;elements&nbsp;are&nbsp;displayed;<br>
+the&nbsp;other&nbsp;arguments&nbsp;are&nbsp;used&nbsp;only&nbsp;for&nbsp;recursive&nbsp;calls,&nbsp;they&nbsp;can<br>
+be&nbsp;ignored&nbsp;for&nbsp;a&nbsp;normal&nbsp;usage;<br>
 note:&nbsp;this&nbsp;method&nbsp;is&nbsp;overloaded&nbsp;in&nbsp;Alea&nbsp;class</dd></dl>
 
 <dl><dt><a name="Lea-inv_cumul"><strong>inv_cumul</strong></a>(self)</dt><dd>evaluates&nbsp;the&nbsp;distribution,&nbsp;then,<br>
