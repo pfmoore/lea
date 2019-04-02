@@ -867,7 +867,7 @@ the&nbsp;sequence&nbsp;follows&nbsp;the&nbsp;order&nbsp;defined&nbsp;on&nbsp;val
 WARNING:&nbsp;this&nbsp;method&nbsp;is&nbsp;called&nbsp;without&nbsp;parentheses</dd></dl>
 
 <dl><dt><a name="Lea-clone"><strong>clone</strong></a>(self, shared=(), n=None)</dt><dd>returns&nbsp;a&nbsp;deep&nbsp;copy&nbsp;of&nbsp;current&nbsp;<a href="#Lea">Lea</a>,&nbsp;without&nbsp;any&nbsp;value&nbsp;binding;<br>
-if&nbsp;n&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;new&nbsp;independent&nbsp;instances&nbsp;is&nbsp;returned;<br>
+if&nbsp;n&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;new&nbsp;instances&nbsp;is&nbsp;returned;<br>
 all&nbsp;<a href="#Lea">Lea</a>&nbsp;instances&nbsp;are&nbsp;cloned,&nbsp;excepting&nbsp;the&nbsp;instances&nbsp;present&nbsp;in&nbsp;given&nbsp;iterable&nbsp;shared,<br>
 these&nbsp;instances&nbsp;are&nbsp;shared&nbsp;between&nbsp;the&nbsp;cloned&nbsp;and&nbsp;the&nbsp;original&nbsp;instances;&nbsp;<br>
 if&nbsp;the&nbsp;<a href="#Lea">Lea</a>&nbsp;tree&nbsp;contains&nbsp;multiple&nbsp;references&nbsp;to&nbsp;the&nbsp;same&nbsp;<a href="#Lea">Lea</a>&nbsp;instance,&nbsp;then&nbsp;this&nbsp;instance<br>
@@ -1097,7 +1097,7 @@ this&nbsp;provides&nbsp;a&nbsp;measure&nbsp;of&nbsp;the&nbsp;complexity&nbsp;of&
 *&nbsp;memoization&nbsp;argument:&nbsp;see&nbsp;<a href="#Lea">Lea</a>.calc&nbsp;method</dd></dl>
 
 <dl><dt><a name="Lea-new"><strong>new</strong></a>(self, n=None, prob_type=-1, sorting=True)</dt><dd>returns&nbsp;a&nbsp;new&nbsp;Alea&nbsp;instance&nbsp;representing&nbsp;the&nbsp;distribution&nbsp;after&nbsp;it&nbsp;has&nbsp;been&nbsp;evaluated;<br>
-if&nbsp;self&nbsp;is&nbsp;an&nbsp;Alea,&nbsp;then&nbsp;it&nbsp;returns&nbsp;a&nbsp;clone&nbsp;of&nbsp;itself&nbsp;representing&nbsp;an&nbsp;independent&nbsp;event;<br>
+if&nbsp;self&nbsp;is&nbsp;an&nbsp;Alea,&nbsp;then&nbsp;it&nbsp;returns&nbsp;a&nbsp;copy&nbsp;of&nbsp;itself&nbsp;representing&nbsp;an&nbsp;independent&nbsp;event;<br>
 the&nbsp;probability&nbsp;type&nbsp;used&nbsp;in&nbsp;the&nbsp;returned&nbsp;instance&nbsp;depends&nbsp;on&nbsp;given&nbsp;prob_type:<br>
 *&nbsp;if&nbsp;n&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;n&nbsp;new&nbsp;independent&nbsp;Alea&nbsp;instances&nbsp;is&nbsp;returned<br>
 *&nbsp;if&nbsp;prob_type&nbsp;is&nbsp;-1,&nbsp;then&nbsp;the&nbsp;probability&nbsp;type&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;self's<br>

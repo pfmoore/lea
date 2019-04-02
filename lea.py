@@ -1148,7 +1148,7 @@ class Lea(object):
 
     def clone(self,shared=(),n=None):
         ''' returns a deep copy of current Lea, without any value binding;
-            if n is not None, then a tuple containing n new independent instances is returned;
+            if n is not None, then a tuple containing n new instances is returned;
             all Lea instances are cloned, excepting the instances present in given iterable shared,
             these instances are shared between the cloned and the original instances; 
             if the Lea tree contains multiple references to the same Lea instance, then this instance
