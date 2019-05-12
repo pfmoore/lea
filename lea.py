@@ -28,7 +28,8 @@ import sys
 from itertools import islice
 import collections
 from .prob_fraction import ProbFraction
-from .toolbox import min2, max2, read_csv_filename, read_csv_file, dict, zip, isclose
+from .toolbox import min2, max2, read_csv_filename, read_csv_file, dict, zip, isclose, log2
+
 
 class Lea(object):
     
@@ -734,7 +735,7 @@ class Lea(object):
             all_vals = Lea.joint(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).support
             missing_vals = frozenset(all_vals) - frozenset(joint_src_vals)
             if len(missing_vals) > 0:
-                # there are missing conditions: add c   lauses with each of these conditions associating
+                # there are missing conditions: add clauses with each of these conditions associating
                 # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
                 else_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in result.support))
@@ -750,6 +751,100 @@ class Lea(object):
         # return the BN variables as attributes of a new named tuple having the same attributes as the
         # values found in self
         return NamedTuple(**vars_bn_dict)
+
+    @staticmethod
+    def _learn_by_em_one_step(lea1, model_lea, obs_pmf_tuple, conversion_dict):
+        ''' static method, returns a revised version of lea1 tuned to match obs_pmf_tuple;
+            lea1 is required to belong to model_lea;
+            the returned object is a Lea instance having the same subclass and same DAG
+            structure as given model_clea, although revised internal probabilities;
+            this is done by executing one step of the expectation-maximization (EM) algorithm;
+            the method is called recursively on lea1's child nodes, if any
+        '''
+        lea2 = conversion_dict.get(lea1)
+        if lea2 is not None:
+            return lea2
+        if isinstance(lea1,Alea):
+            lea2 = Alea.pmf(dict((v, sum(px * P((lea1==v).given(model_lea==vx))
+                                         for (vx,px) in obs_pmf_tuple))
+                                 for v in lea1.support))
+        elif isinstance(lea1,Tlea):
+            lea1_support = lea1.support
+            lea1_c = lea1._lea_c
+            lea2_c = Lea._learn_by_em_one_step(lea1_c,model_lea,obs_pmf_tuple,conversion_dict)
+            lea2_dict = dict((vc, Alea.pmf(dict((v, sum(px * P(((lea1==v) & (lea1_c==vc)).given(model_lea==vx))
+                                                        for (vx,px) in obs_pmf_tuple))
+                                                for v in lea1_support)))
+                             for vc in lea2_c.support)
+            lea2 = Tlea(lea2_c,lea2_dict)
+        elif isinstance(lea1,Clea):
+            lea2 = Clea(*(Lea._learn_by_em_one_step(lea_arg,model_lea,obs_pmf_tuple,conversion_dict) for lea_arg in lea1._lea_args))
+        elif isinstance(lea1,Flea1):
+            lea2 = Flea1(lea1._f,Lea._learn_by_em_one_step(lea1._lea_arg,model_lea,obs_pmf_tuple,conversion_dict))
+        elif isinstance(lea1,Flea2a):
+            lea2 = Flea2a(lea1._f,Lea._learn_by_em_one_step(lea1._lea_arg1,model_lea,obs_pmf_tuple,conversion_dict),
+                                  Lea._learn_by_em_one_step(lea1._lea_arg2,model_lea,obs_pmf_tuple,conversion_dict),
+                                  lea1._absorber)
+        elif isinstance(lea1,Flea2):
+            lea2 = Flea2(lea1._f,Lea._learn_by_em_one_step(lea1._lea_arg1,model_lea,obs_pmf_tuple,conversion_dict),
+                                 Lea._learn_by_em_one_step(lea1._lea_arg2,model_lea,obs_pmf_tuple,conversion_dict))
+        elif isinstance(lea1,Flea):
+            lea2 = Flea(lea1._f,Lea._learn_by_em_one_step(lea1._clea_args,model_lea,obs_pmf_tuple,conversion_dict))
+        elif isinstance(lea1,Ilea):
+            lea2 = Ilea(Lea._learn_by_em_one_step(lea1._lea1,model_lea,obs_pmf_tuple,conversion_dict),
+                        ( Lea._learn_by_em_one_step(cond_lea,model_lea,obs_pmf_tuple,conversion_dict)
+                          for cond_lea in self._cond_leas) )
+        else:
+            raise Lea.Error("learn_by_em method does not support '%s' instances"%lea1.__class__.__name__)
+        conversion_dict[lea1] = lea2
+        return lea2
+    
+    @staticmethod
+    def learn_by_em(model_lea, obs_lea, max_nb_iterations=None, max_kld=None, max_delta_kld=None):
+        ''' static method, returns a revised version of model_lea, tuned to match obs_lea;
+            the returned object is a Lea instance having the same subclass and same DAG
+            structure as given model_clea, although revised internal probabilities;
+            this uses the expectation-maximization (EM) algorithm
+            the algorithm is iterative, supposingly converging to a Lea instance maximizing
+            the likelihood of obs_lea; this is equivalently stated as maximizing log-likelihood,  
+            minimizing the cross-entropy or minimizing the Kullback-Leibler divergence;
+            the exit condition can be specified in three different ways, defined by the last
+            three arguments (at least one of them shall be not None):
+            - max_nb_iterations (int): the maximum number of iterations of EM algorithm
+            - max_kld (float): the EM algorithm halts as soon as the Kullback-Leibler
+              divergence is equal or lower to this number; this indicates the degree of fit
+              required - the smallest, the longest the execution;
+            - max_delta_kld (float): the EM algorithm halts as soon as the
+              difference in absolute value between cross entropy calculated on two consecutive
+              iterations is equal or lower to this number; this is a convergence criterium
+              - the smallest, the longest the execution;
+            if more than one argument is not None, then any fulfilled halting conditions makes
+            the EM algorithm halt
+        '''
+        if max_nb_iterations is None and max_kld is None and max_delta_kld is None:
+            raise Lea.Error("learn_by_em method requires providing at least one halt condition (max_nb_iterations,"
+                            " max_delta_kld or max_kld argument)")
+        obs_pmf_tuple = obs_lea.pmf_tuple
+        obs_lea_entropy = obs_lea.entropy
+        nb_iterations = 0
+        while True:
+            # note that calculation of cross_entropy may raise an exception if
+            # some value of obs_lea support is absent from model_lea 
+            kld = Lea.cross_entropy(obs_lea,model_lea) - obs_lea_entropy
+            if max_kld is not None and kld <= max_kld:
+                break
+            nb_iterations += 1
+            if nb_iterations >= 2 and max_delta_kld is not None:
+                delta_kld = abs(kld - prev_kld)
+                print(delta_kld)
+                if delta_kld <= max_delta_kld:
+                    break
+            prev_kld = kld
+            print (kld)
+            if max_nb_iterations is not None and nb_iterations > max_nb_iterations:
+                break
+            model_lea = Lea._learn_by_em_one_step(model_lea, model_lea, obs_pmf_tuple, dict())
+        return model_lea
 
     @staticmethod
     def make_vars(obj,tgt_dict,prefix='',suffix=''):
@@ -1277,6 +1372,50 @@ class Lea(object):
             if sorted is True, then the returned tuple is sorted
         '''
         return self.get_alea().random_draw(n,sorted)
+  
+    @staticmethod
+    def cross_entropy(lea1,lea2,entropy_ceiling=True):
+        ''' static method, returns the cross-entropy between given lea1 and lea2;
+            the logarithm base is 2;
+            requires that all values of lea2's support have a non-null probability in lea1
+            notes:
+            - the cross-entropy is non-commutative; i.e. the order of arguments matters;
+            - the cross-entropy should always be greater than the entropy of first argument,
+              the equality being reached if both arguments have same pmf; if argument
+              entropy_ceiling is True (default), then this is guaranteed by the implementation,
+              even in case of rounding errors;
+            - if lea1 is interpreted as frequencies of observed data having N as total number
+              of samples, then the cross-entropy is linked to (negative) log-likelihood by
+                log-likelihood = - N * cross-entropy
+              using logarithm in base 2 (for other base, use the right factor)
+        '''
+        lea2_pmf_dict = lea2.pmf_dict
+        try:
+            ce = -sum(px*log2(lea2_pmf_dict[vx]) for (vx,px) in lea1._gen_vps() if px > 0)
+        except KeyError as key_error:
+            raise Lea.Error("observed value '%s' is not produced by given model"%key_error.args[0])
+        except ValueError:
+            raise Lee.Error("some observed value has null probability in given model")
+        if entropy_ceiling:
+            ce = max(ce,lea1.entropy)
+        return ce
+
+    @staticmethod
+    def kl_divergence(lea1,lea2,zero_ceiling=True):
+        ''' returns the Kullback-Leibler divergence between given lea1 and lea2;
+            the logarithim base is 2;
+            requires that all values of lea2's support have a non-null probability in lea1
+            notes:
+            - the KL divergence is also known as "relative entropy";
+            - the KL divergence is non-commutative; i.e. the order of arguments matters;
+            - the KL divergence should always be positive; it is null if both arguments have
+              same pmf; if argument zero_ceiling is True (default), then this is guaranteed
+              by the implementation, even in case of rounding errors
+        '''
+        kld = Lea.cross_entropy(lea1,lea2,entropy_ceiling=False) - lea1.entropy
+        if zero_ceiling:
+            kld = max(kld,0.0)
+        return kld
 
     @staticmethod
     def joint_entropy(*args):
