@@ -51,6 +51,9 @@ class Flea(Lea):
     def _get_lea_children(self):
         return (self._clea_args,)
 
+    def _clone_by_type(self,clone_table):
+        return Flea(self._f,self._clea_args._clone(clone_table))
+
     def _gen_vp(self):
         f = self._f
         for (args,p) in self._clea_args.gen_vp():
