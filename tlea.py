@@ -86,3 +86,10 @@ class Tlea(Lea):
                 raise Lea.Error("missing value '%s' in CPT"%vc)
             for vd in lea_v._gen_one_random_mc():
                 yield vd
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        lea_c = self._lea_c
+        lea2_c = lea_c.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict)
+        lea2_dict = dict((vc,d.em_step(model_lea,cond_lea&(lea_c==vc),obs_pmf_tuple,conversion_dict))
+                         for (vc,d) in self._lea_dict.items())
+        return Tlea(lea2_c,lea2_dict)

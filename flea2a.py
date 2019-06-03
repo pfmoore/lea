@@ -58,3 +58,8 @@ class Flea2a(Flea2):
             else:
                 for (v2,p2) in self._lea_arg2.gen_vp():
                     yield (f(v1,v2),p1*p2)
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        return Flea2a(self._f,self._lea_arg1.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict),
+                              self._lea_arg2.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict),
+                              lea1._absorber)

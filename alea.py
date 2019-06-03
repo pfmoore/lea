@@ -34,7 +34,7 @@ from decimal import Decimal
 from random import random
 from bisect import bisect_left, bisect_right
 import itertools
-from math import exp, factorial
+from math import factorial
 from operator import truediv
 import collections
 
@@ -61,6 +61,8 @@ try:
 except:
     # NumPy module not installed
     np_bool_type = ()
+
+# note: see other import statements at the end of the module
 
     
 class Alea(Lea):
@@ -562,7 +564,7 @@ class Alea(Lea):
 
     @staticmethod
     def binom(n,p,prob_type=None):
-        ''' static method, returns an Alea instance representing a binomial
+        ''' static method, returns an Olea instance representing a binomial
             distribution giving the number of successes among a number n of
             independent experiments, each having probability p of success;
             note: the binom method generalizes the bernoulli method:
@@ -572,7 +574,7 @@ class Alea(Lea):
               None (default): default conversion, as set by Alea.set_prob_type;
               other: see doc of Alea.get_prob_type;
         '''
-        return Alea.bernoulli(p,prob_type).times(n)
+        return Olea(n,p,prob_type)
 
     @staticmethod
     def interval(from_val,to_val,prob_type=None):
@@ -770,25 +772,15 @@ class Alea(Lea):
         return Alea._pmf_ordered(vps, check=False)
 
     @staticmethod
-    def poisson(mean,precision=1e-20,prob_type=None):
-        ''' static method, returns an Alea instance representing a Poisson probability
+    def poisson(mean,precision=1e-20):
+        ''' static method, returns a Plea instance representing a Poisson probability
             distribution having the given mean; the distribution is approximated by
             the finite set of values that have probability > precision
             (i.e. low/high values with too small probabilities are dropped);
             the probabilities are stored as float, whatever the current probability
             type configured
         '''
-        val_freqs = []
-        p = exp(-mean)
-        v = 0
-        t = 0.0
-        while p >= precision or v <= mean:
-            if p >= precision:
-                val_freqs.append((v,p))
-            t += p
-            v += 1
-            p = (p*mean) / v
-        return Alea.pmf(val_freqs,prob_type)
+        return Plea(mean,precision)
 
     __DISPLAY_KINDS = (None, '/', '.', '%', '-', '/-', '.-', '%-')
 
@@ -1057,6 +1049,15 @@ class Alea(Lea):
             finally:
                 # unbind value, after the random value has been bound or if an exception has been raised
                 self._val = self
+                
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        if cond_lea is True:
+            return Alea.pmf(dict((v, sum(px * ((self==v).given(model_lea==vx))._p(True)
+                                         for (vx,px) in obs_pmf_tuple))
+                                 for v in self.support))
+        return Alea.pmf(dict((v, sum(px * (((self==v) & cond_lea).given(model_lea==vx))._p(True)
+                                     for (vx,px) in obs_pmf_tuple))
+                             for v in self.support))
 
     def observe(self,v):
         ''' (re)bind self with given value v;
@@ -1505,3 +1506,7 @@ class Alea(Lea):
                 res += '...'
         res += '>'
         return res
+
+# these must be placed here to avoid cycles (these import alea module)
+from .olea import Olea
+from .plea import Plea

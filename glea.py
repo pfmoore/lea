@@ -60,3 +60,6 @@ class Glea(Lea):
     def _gen_one_random_mc(self):
         for (f,args) in self._clea_func_and_args._gen_one_random_mc():
             yield f(*args)
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        return Glea(self._clea_func_and_args.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict))

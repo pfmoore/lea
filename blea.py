@@ -42,8 +42,8 @@ class Blea(Lea):
     The set of conditions shall form a partition of the "certain true", i.e.
      ORing  all conditions shall give a "certain true" distribution
      ANDing all conditions pairwise shall give "certain false" distributions
-    A Blea instance is a "misxture pex", as defined in the paper on Statues algorithm
-    (see http://arxiv.org/abs/1806.09997).
+    A Blea instance is a "mixture pex", as defined in the paper on Statues
+    algorithm (see http://arxiv.org/abs/1806.09997).
     '''
 
     __slots__ = ('_ileas','_cond_clea')
@@ -158,3 +158,7 @@ class Blea(Lea):
                     if v is not i_lea:
                         # the current ilea is the one having the condition that evaluates to True
                         yield v
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        return Blea(*(i_lea.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict) for i_lea in self._ileas))
+

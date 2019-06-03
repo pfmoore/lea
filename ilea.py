@@ -124,3 +124,8 @@ class Ilea(Lea):
                 raise Lea.Error("undefined likelihood ratio")
             return float('inf') 
         return lr_n / lr_d
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        return Ilea(self._lea1.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict),
+                    ( cond_lea1.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict)
+                      for cond_lea1 in self._cond_leas) )

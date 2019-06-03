@@ -54,3 +54,10 @@ class Rlea(Lea):
         for lea_arg in self._lea_of_leas._gen_one_random_mc():
             for v in lea_arg._gen_one_random_mc():
                 yield v
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        lea_of_leas1 = self._lea_of_leas.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict)
+        lea_of_leas2 = lea.pmf(dict((v.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict),p)
+                                    for (v,p) in lea_of_leas1.pmf_tuple))
+        return Rlea(lea_of_leas2)
+    

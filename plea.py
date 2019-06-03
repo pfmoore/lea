@@ -1,7 +1,7 @@
 '''
 --------------------------------------------------------------------------------
 
-    slea.py
+    plea.py
 
 --------------------------------------------------------------------------------
 Copyright 2013-2019 Pierre Denis
@@ -25,46 +25,52 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .lea import Lea
 from .alea import Alea
-from .toolbox import dict, defaultdict
 
-class Slea(Lea):
+from math import exp
+
+class Plea(Lea):
     
     '''
-    Slea is a Lea subclass, which instance represents a conditional probability
-    table (CPT) giving a Lea instance C and a function associating each
-    possible value of C to a specific Lea instance.
-    A Slea instance is similar to a "table pex", as defined in the paper on
-    Statues algorithm (see http://arxiv.org/abs/1806.09997), if we replace
-    the explicit CPT lookup table by a function. 
+    Plea is a Lea subclass, which instance represents a Poisson probability
+    distribution having the given mean; the distribution is approximated by
+    the finite set of values that have probability > precision(i.e. low/high
+    values with too small probabilities are dropped)
     '''
+    
+    __slots__ = ('_mean','precision')
 
-    __slots__ = ('_lea_c','_f')
-
-    def __init__(self,lea_c,f):
+    def __init__(self,mean,precision=1e-20):
         Lea.__init__(self)
-        self._lea_c = Alea.coerce(lea_c)
-        self._f = f
-
+        self._mean = mean
+        self.precision = precision
+    
     def _get_lea_children(self):
-        return (self._lea_c,)
+        return ()
 
     def _clone_by_type(self,clone_table):
-        return Slea(self._lea_c._clone(clone_table),self._f)
+        return Plea(self._mean,self.precision)
 
     def _gen_vp(self):
-        f = self._f
-        for (vc,pc) in self._lea_c.gen_vp():
-            lea_v = Alea.coerce(f(vc))
-            for (vd,pd) in lea_v._gen_vp():
-                yield (vd,pc*pd)
+        mean = self._mean
+        precision = self.precision
+        p = exp(-mean)
+        v = 0
+        t = 0.0
+        while p >= precision or v <= mean:
+            if p >= precision:
+                yield (v,p)
+            t += p
+            v += 1
+            p = (p*mean) / v
 
     def _gen_one_random_mc(self):
-        f = self._f
-        for vc in self._lea_c._gen_one_random_mc():
-            lea_v = Alea.coerce(f(vc))
-            for vd in lea_v._gen_one_random_mc():
-                yield vd
+        for v in self.get_alea()._gen_one_random_mc():
+            yield v
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
-        return Slea(self._lea_c.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict),self._f)
-
+        if cond_lea is True:
+            vps = obs_pmf_tuple
+        else:
+            vps = tuple((vx,px*(cond_lea.given(model_lea==vx))._p(True)) for (vx,px) in obs_pmf_tuple)
+        mean = sum(px*vx for (vx,px) in vps) / sum(px for (_,px) in vps)
+        return Plea(mean,self.precision)

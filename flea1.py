@@ -56,3 +56,6 @@ class Flea1(Lea):
     def _gen_one_random_mc(self):
         for v in self._lea_arg._gen_one_random_mc():
             yield self._f(v)
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        return Flea1(self._f,self._lea_arg.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict))

@@ -63,3 +63,6 @@ class Flea(Lea):
         f = self._f
         for args in self._clea_args._gen_one_random_mc():
             yield f(*args)
+
+    def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        return Flea(self._f,lea1._clea_args.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict))
