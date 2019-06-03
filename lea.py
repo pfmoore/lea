@@ -88,8 +88,8 @@ class Lea(object):
     distribution is intractable. This could be used to provide an estimation of the probability
     distribution (see estimate_mc method).
 
-    There are eleven concrete subclasses to Lea class, namely:
-      Alea, Clea, Flea, Flea1, Flea2, Glea, Ilea, Rlea, Tlea, Slea and Blea.
+    There are 13 concrete subclasses to Lea class, namely:
+      Alea, Olea, Plea, Clea, Flea, Flea1, Flea2, Glea, Ilea, Rlea, Tlea, Slea and Blea.
     
     Each subclass represents a "definition" of discrete probability distribution, with its own data
     or with references to other Lea instances to be combined together through a given operation.
@@ -100,10 +100,10 @@ class Lea(object):
     their relationships. We indicate the equivalent type of "p-expression" ("pex" for short) as
     defined in the paper on the Statues algorithm (see reference below).
 
-    - Alea  (elementary pex) defines probability mass function ("pmf") defined by extension,
+    - Alea  (elementary pex) defines a probability mass function ("pmf") defined by extension,
             i.e. explicit (value,P(value)) pairs
-    - Olea  (elementary pex) defines binomial probability distribution
-    - Plea  (elementary pex) defines Poisson probability distribution
+    - Olea  (elementary pex) defines a binomial probability distribution
+    - Plea  (elementary pex) defines a Poisson probability distribution
     - Clea  (tuple pex) provides the joint of a given sequence of Lea instances
     - Flea  (functional pex) applies a given n-ary function to a given sequence of n Lea instances
     - Flea1 (functional pex) applies a given 1-ary function to a given Lea instance
