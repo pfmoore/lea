@@ -757,7 +757,7 @@ class Lea(object):
         return NamedTuple(**vars_bn_dict)
 
     def em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
-        ''' returns a revised version of a self, with parameters tuned to match a given observed
+        ''' returns a revised version of self, with parameters tuned to match a given observed
             sample; this executes one step of the Expectation-Maximization (EM) algorithm;
             the arguments are:
             - model_lea:  model in which self occurs, it shall match the observed data
@@ -779,14 +779,13 @@ class Lea(object):
             recursively em_step on self's child nodes;
         '''
         lea2 = conversion_dict.get(self)
-        if lea2 is not None:
-            return lea2
-        lea2 = self._em_step(model_lea, cond_lea, obs_pmf_tuple, conversion_dict)
-        conversion_dict[self] = lea2
+        if lea2 is None:
+            lea2 = self._em_step(model_lea, cond_lea, obs_pmf_tuple, conversion_dict)
+            conversion_dict[self] = lea2
         return lea2
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
-        ''' returns a revised version of a self, with parameters tuned to match a given observed
+        ''' returns a revised version of self, with parameters tuned to match a given observed
             sample; this executes one step of the Expectation-Maximization (EM) algorithm;
             the arguments are:
             - model_lea: model in which self occurs, and which matches the observed data (see
@@ -897,7 +896,7 @@ class Lea(object):
         tgt_dict.update((prefix+var_name+suffix,obj.__getattribute__(var_name)) for var_name in NamedTuple._fields)       
     
     def __call__(self,*args):
-        ''' returns a new Flea instance representing the probability distribution
+        ''' returns a new Glea instance representing the probability distribution
             of values returned by invoking functions of current distribution on 
             given arguments (assuming that the values of current distribution are
             functions);
@@ -1419,7 +1418,7 @@ class Lea(object):
         except KeyError as key_error:
             raise Lea.Error("observed value '%s' is not produced by given model"%key_error.args[0])
         except ValueError:
-            raise Lee.Error("some observed value has null probability in given model")
+            raise Lea.Error("some observed value has null probability in given model")
         if entropy_ceiling:
             ce = max(ce,self.entropy)
         return ce
