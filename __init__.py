@@ -28,16 +28,18 @@ from .license import VER as __version__
 
 # make convenient aliases for public static methods of Lea & Alea classes
 bernoulli = Alea.bernoulli
-binom = Alea.binom
+binom = Lea.binom
 coerce = Alea.coerce
 cpt = Lea.cpt
 dist_l1 = Lea.dist_l1
 dist_l2 = Lea.dist_l2
 event = Alea.event
 func_wrapper = Lea.func_wrapper
+gen_em_steps = Lea.gen_em_steps
 if_ = Lea.if_
 interval = Alea.interval
 joint = Lea.joint
+learn_by_em = Lea.learn_by_em
 lr = Lea.lr
 mutual_information = Lea.mutual_information
 joint_entropy = Lea.joint_entropy
@@ -45,7 +47,7 @@ make_vars = Lea.make_vars
 max_of = Lea.max_of
 min_of = Lea.min_of
 pmf = Alea.pmf
-poisson = Alea.poisson
+poisson = Lea.poisson
 read_csv_file = Alea.read_csv_file
 read_pandas_df = Alea.read_pandas_df
 reduce_all = Lea.reduce_all

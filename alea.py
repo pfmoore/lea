@@ -62,8 +62,6 @@ except:
     # NumPy module not installed
     np_bool_type = ()
 
-# note: see other import statements at the end of the module
-
     
 class Alea(Lea):
     
@@ -82,7 +80,7 @@ class Alea(Lea):
     # an Alea constructor method; if None and if no prob_type arg is
     # specified in the constructore, then each probability is stored as-is
     ## this is embedded in a list to circumvent a problem occuring only in Python 2.7
-    ## i.e. functions assigned directly to this attribute becomes instance methods 
+    ## i.e. functions assigned directly to this attribute become instance methods 
     _prob_type = [None]
 
     # function used to simplify symbolic probability expressions to be
@@ -279,7 +277,6 @@ class Alea(Lea):
     #         <-- _selections
     #              <-- draw_sorted_with_replacement
     #              <-- draw_sorted_without_replacement
-    #         <-- poisson
     #    <-- _pmf_ordered [S]
     #         <-- pmf [S]
     #              <-- ... (see above)
@@ -288,7 +285,6 @@ class Alea(Lea):
     #    <-- _binary_distribution [S]
     #         <-- event [S]
     #         <-- bernoulli [S]
-    #              <-- binom [S]
 
     @staticmethod
     def coerce(value,prob_type=-1):
@@ -563,20 +559,6 @@ class Alea(Lea):
         return Alea._binary_distribution(0,1,p,prob_type)
 
     @staticmethod
-    def binom(n,p,prob_type=None):
-        ''' static method, returns an Olea instance representing a binomial
-            distribution giving the number of successes among a number n of
-            independent experiments, each having probability p of success;
-            note: the binom method generalizes the bernoulli method:
-              binom(1,p) is the same as bernoulli(p)
-            prob_type argument allows converting the given probability p:
-              -1: no conversion;
-              None (default): default conversion, as set by Alea.set_prob_type;
-              other: see doc of Alea.get_prob_type;
-        '''
-        return Olea(n,p,prob_type)
-
-    @staticmethod
     def interval(from_val,to_val,prob_type=None):
         ''' static method, returns an Alea instance representing a uniform probability
             distribution, for all the integers in the interval [from_val,to_val]
@@ -770,17 +752,6 @@ class Alea(Lea):
             for (vt,pt) in alea2._gen_raw_vps():
                 vps.append(((v,)+vt,p*pt))
         return Alea._pmf_ordered(vps, check=False)
-
-    @staticmethod
-    def poisson(mean,precision=1e-20):
-        ''' static method, returns a Plea instance representing a Poisson probability
-            distribution having the given mean; the distribution is approximated by
-            the finite set of values that have probability > precision
-            (i.e. low/high values with too small probabilities are dropped);
-            the probabilities are stored as float, whatever the current probability
-            type configured
-        '''
-        return Plea(mean,precision)
 
     __DISPLAY_KINDS = (None, '/', '.', '%', '-', '/-', '.-', '%-')
 
@@ -1506,7 +1477,3 @@ class Alea(Lea):
                 res += '...'
         res += '>'
         return res
-
-# these must be placed here to avoid cycles (these import alea module)
-from .olea import Olea
-from .plea import Plea

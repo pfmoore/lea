@@ -185,6 +185,31 @@ class Lea(object):
         # (see _init_calc method)
         self.gen_vp = None
 
+    @staticmethod
+    def binom(n,p,prob_type=None):
+        ''' static method, returns an Olea instance representing a binomial
+            distribution giving the number of successes among a number n of
+            independent experiments, each having probability p of success;
+            note: the binom method generalizes the bernoulli method:
+              binom(1,p) is the same as bernoulli(p)
+            prob_type argument allows converting the given probability p:
+              -1: no conversion;
+              None (default): default conversion, as set by Alea.set_prob_type;
+              other: see doc of Alea.get_prob_type;
+        '''
+        return Olea(n,p,prob_type)
+
+    @staticmethod
+    def poisson(mean,precision=1e-20):
+        ''' static method, returns a Plea instance representing a Poisson probability
+            distribution having the given mean; the distribution is approximated by
+            the finite set of values that have probability > precision
+            (i.e. low/high values with too small probabilities are dropped);
+            the probabilities are stored as float, whatever the current probability
+            type configured
+        '''
+        return Plea(mean,precision)
+
     def _id(self):
         ''' returns a unique id, containing the concrete Lea class name as prefix
         '''
@@ -799,13 +824,49 @@ class Lea(object):
             - conversion_dict: dictionary associating the variables of model_lea already
               converted by the present function, with their conversion; if self is not yet
               present in it as a key, then it is added, with the instance to be returned 
-            the object returned has same type and sme DAG structure as self, only the internal
+            the object returned has same type and same DAG structure as self, only the internal
             parameters may be different;
             the method is defined on each Lea subclass, this implements the required treatments
             for EM step for the specifc instance, possibly calling recursively em_step on self's
             child nodes;
         '''
         raise NotImplementedError("missing method '%s._em_step(...)'"%(self.__class__.__name__))
+
+    @staticmethod
+    def gen_em_steps(model_lea_vars,obs_lea,fixed_vars=()):
+        ''' static method, generates an infinite sequence of steps of Expectation-Maximization (EM)
+            algorithm, yielding revised versions of a probabilistic model, with parameters
+            tuned to match a given observed sample; this algorithm allows hidden variables in the
+            model (i.e. absent from observed sample);
+            the arguments are:
+            - model_lea_vars: an iterable giving the N variables "of interest" of the model (see
+              description of return below); the first variable (V1) shall match the observed data
+              (see obs_lea below);
+            - obs_lea: Lea instance giving the frequencies of the observed data; the support of
+              obs_lea shall be a subset of the support of V1, the first variable of model_lea_vars;
+              in case of multiple variables observed, obs_lea can be a joint table, with tuples as
+              support, then V1 could be defined by a a joint of variables: lea.joint(Vr,...,Vs);
+            - fixed_vars (default: empty tuple): an iterable giving the variables that shall NOT
+              be revised by the algorithm, if any; in the returned model, these variables shall
+              keep their initial parameters unchanged;
+            the object yielded is a tuple with the revised variables, in the same order as 
+            model_lea_vars; each returned variable has same type and same DAG structure as their
+            counterpart in model_lea_vars, only the internal parameters may be different;
+            the algorithm is iterative, supposingly converging to a Lea instance maximizing
+            the likelihood of obs_lea; the caller is expected to stop iterations when some criteria
+            are satisfied (see Lea.learn_by_em method for an example)
+        '''
+        obs_pmf_tuple = obs_lea.pmf_tuple
+        new_model_lea = model_lea_vars[0]
+        new_inner_vars = model_lea_vars[1:]
+        while True:
+            conversion_dict = dict((fv,fv) for fv in fixed_vars)
+            new_model_lea = new_model_lea.em_step(new_model_lea, True, obs_pmf_tuple, conversion_dict)
+            try:
+                new_inner_vars = tuple(conversion_dict[new_inner_var] for new_inner_var in new_inner_vars)
+            except KeyError:
+                raise Lea.Error("some given inner variable is disconnected from the given model")
+            yield (new_model_lea,) + new_inner_vars
 
     @staticmethod
     def learn_by_em(model_lea_vars,obs_lea,fixed_vars=(),nb_steps=None,max_kld=None,max_delta_kld=None):
@@ -821,10 +882,10 @@ class Lea(object):
               in case of multiple variables observed, obs_lea can be a joint table, with tuples as
               support, then V1 could be defined by a a joint of variables: lea.joint(Vr,...,Vs);
             - fixed_vars (default: empty tuple): an iterable giving the variables that shall NOT
-              be revisded by the algorithm, if any; in the returned model, these variables shall
+              be revised by the algorithm, if any; in the returned model, these variables shall
               keep their initial parameters unchanged;
             the object returned is a tuple with the revised variables, in the same order as 
-            model_lea_vars; each returned variable has same type and same DAG structure as their
+            model_lea_vars; each returned variable has same type and same DAG structure as its
             counterpart in model_lea_vars, only the internal parameters may be different;
             the algorithm is iterative, supposingly converging to a Lea instance maximizing
             the likelihood of obs_lea; this is equivalently stated as maximizing log-likelihood,  
@@ -845,17 +906,16 @@ class Lea(object):
         if nb_steps is None and max_kld is None and max_delta_kld is None:
             raise Lea.Error("learn_by_em method requires providing at least one halt condition (nb_steps,"
                             " max_delta_kld or max_kld argument)")
-        obs_pmf_tuple = obs_lea.pmf_tuple
         obs_lea_entropy = obs_lea.entropy
-        new_model_lea = model_lea_vars[0]
-        new_inner_vars = model_lea_vars[1:]
         nb_steps_done = 0
+        learn_by_em_generator = Lea.gen_em_steps(model_lea_vars,obs_lea,fixed_vars)        
         while True:
             nb_steps_done += 1
             # calculation of cross_entropy will raise an exception if some value of obs_lea
             # support is absent from model_lea
             ## kl_divergence method is not used here, to avoid multiple calculation
             ## of obs_lea.entropy, which is constant
+            new_model_lea = model_lea_vars[0]
             kld = obs_lea.cross_entropy(new_model_lea) - obs_lea_entropy
             if nb_steps is not None and nb_steps_done > nb_steps:
                 break
@@ -865,10 +925,8 @@ class Lea(object):
                 if nb_steps_done >= 2 and abs(kld-prev_kld) <= max_delta_kld:
                     break
                 prev_kld = kld
-            conversion_dict = dict((fv,fv) for fv in fixed_vars)
-            new_model_lea = new_model_lea.em_step(new_model_lea, True, obs_pmf_tuple, conversion_dict)
-            new_inner_vars = tuple(conversion_dict[new_inner_var] for new_inner_var in new_inner_vars)
-        return (new_model_lea,) + new_inner_vars
+            model_lea_vars = next(learn_by_em_generator)
+        return model_lea_vars
 
     @staticmethod
     def make_vars(obj,tgt_dict,prefix='',suffix=''):
@@ -1665,6 +1723,8 @@ class Lea(object):
 # import modules with Lea subclasses
 # these must be placed here to avoid cycles (these import lea module)
 from .alea import Alea
+from .olea import Olea
+from .plea import Plea
 from .clea import Clea
 from .ilea import Ilea
 from .rlea import Rlea
