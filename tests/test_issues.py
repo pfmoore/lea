@@ -4,21 +4,25 @@ from lea.leaf import D6
 import pytest
 
 # All tests are made using fraction representation, in order to ease comparison
-lea.set_prob_type('r')
+#lea.set_prob_type('r')
 
-def test_times_commutativity():
+@pytest.fixture(scope="module")
+def setup():
+    lea.set_prob_type('r')
+
+def test_times_commutativity(setup):
     """See issue #3 on bitbucket"""
     lr = D6.times(2) + D6
     rl = D6 + D6.times(2)
     assert lr.equiv(rl)
 
-def test_withprob():
+def test_withprob(setup):
     """See issues #8 and #15 on Bitbucket"""
     dU = D6.given_prob(D6>=5,PF(1,2))
     assert dU.p(5) == PF(2,8)
     assert dU.equiv(lea.pmf(((1,1),(2,1),(3,1),(4,1),(5,2),(6,2))))
 
-def test_infeasible_cpt():
+def test_infeasible_cpt(setup):
     """See issue #13 on Bitbucket"""
     a = lea.vals(*"xy")
     always_s = lea.cpt((a == a, 's'), (None, 't'))
@@ -26,7 +30,7 @@ def test_infeasible_cpt():
     assert always_s.equiv('s')
     assert never_s.equiv('t')
 
-def test_cpt_refactoring():
+def test_cpt_refactoring(setup):
     """See issues #9 and #11 on Bitbucket"""
     x = lea.event(PF(1,3))
     y = lea.event(PF(1,4))
@@ -52,7 +56,7 @@ def test_cpt_refactoring():
     assert z2.equiv(z1)
     assert z3.equiv(z1)
 
-def test_draw_nonuniform():
+def test_draw_nonuniform(setup):
     """See issue #19 on bitbucket"""
     h = lea.pmf((("A",3),("B",2),("C",1)))
     expected = lea.pmf((
@@ -65,7 +69,7 @@ def test_draw_nonuniform():
         ))
     assert h.draw(2).equiv(expected)
 
-def test_joint():
+def test_joint(setup):
     """See issue #20 on bitbucket"""
     joint = lea.pmf((((1,2),10), ((1,3),9), ((2,2),8))).as_joint('A','B')
     assert joint.p((1,2)) == PF(10,27)
@@ -83,7 +87,7 @@ def test_check_bool():
     with pytest.raises(lea.Lea.Error):
         mixed.Pf
 
-def test_given_times():
+def test_given_times(setup):
     """See issue #28 on bitbucket"""
     flip = lea.vals(0,1)
     flip4 = flip.times(4)
@@ -91,7 +95,7 @@ def test_given_times():
     assert flip4.given(flip4<=2).equiv(expected)
 
 
-def test_sympy_expressions():
+def test_sympy_expressions(setup):
     """No issue number; make sure sympy classes work."""
     try:
         from sympy.core.numbers import Rational
@@ -104,7 +108,7 @@ def test_sympy_expressions():
     except ImportError:
         pass
 
-def test_symbol_prob_type():
+def test_symbol_prob_type(setup):
     """No issue number; make sure 's' prob_type works."""
     try:
         import sympy  # failure skips the test entirely
@@ -117,7 +121,7 @@ def test_symbol_prob_type():
         pass
 
 
-def test_symbol_prob_type_with_identifier_check():
+def test_symbol_prob_type_with_identifier_check(setup):
     """
     No issue number; make sure 's' prob_type works when values might be
     identifiers.
@@ -132,7 +136,7 @@ def test_symbol_prob_type_with_identifier_check():
     except ImportError:
         pass
 
-def test_symbol_prob_type_with_identifier_check_2():
+def test_symbol_prob_type_with_identifier_check_2(setup):
     """
     No issue number; make sure automatic type detection works when values
     might be identifiers (without specifying prob_type='s')
@@ -141,14 +145,11 @@ def test_symbol_prob_type_with_identifier_check_2():
         import sympy  # failure skips the test entirely
         # reset permanent prob_type to automatic type detection mode
         lea.set_prob_type('x')
-        try:
-            probs = {
-              'A': 'p',
-              'B': 'q',
-            }
-            _ = lea.pmf(probs)
-        finally:
-            lea.set_prob_type('r')
+        probs = {
+          'A': 'p',
+          'B': 'q',
+        }
+        _ = lea.pmf(probs)
     except ImportError:
         pass
 

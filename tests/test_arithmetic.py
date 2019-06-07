@@ -1,12 +1,15 @@
 import lea
+import pytest
 from lea import P
 from lea.toolbox import isclose
 from lea.prob_fraction import ProbFraction as PF
 
 # All tests are made using fraction representation, in order to ease comparison
-lea.set_prob_type('r')
-
-def test_arith_with_constant():
+@pytest.fixture(scope="module")
+def setup():
+    lea.set_prob_type('r')
+    
+def test_arith_with_constant(setup):
     die = lea.interval(1, 6)
     assert (die + 3).support == (4, 5, 6, 7, 8, 9)
     assert (die - 3).support == (-2, -1, 0, 1, 2, 3)
@@ -16,49 +19,49 @@ def test_arith_with_constant():
     assert (die // 3).equiv(lea.vals(0, 0, 1, 1, 1, 2))
     assert (die % 2).equiv(lea.vals(0, 1))
 
-def test_arith_independent_vars():
+def test_arith_independent_vars(setup):
     die1 = lea.interval(1, 6)
     die2 = die1.new()
     assert (die1 + die2).equiv(lea.pmf({
         2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1
     }))
 
-def test_arith_dependent_vars():
+def test_arith_dependent_vars(setup):
     die = lea.interval(1, 6)
     assert (die + die).equiv(lea.vals(2, 4, 6, 8, 10, 12))
 
-def test_arith_square_diff():
+def test_arith_square_diff(setup):
     die1 = lea.interval(1, 6)
     die2 = die1.new()
     assert ((die1 - die2) ** 2).equiv(lea.pmf(((0,3), (1,5), (4,4), (9,3), (16,2), (25,1))))
 
-def test_arith_const_result():
+def test_arith_const_result(setup):
     die1 = lea.interval(1, 6)
     die2 = die1.new()
     assert (die1 + 2*die2 - die1 - (die2 + die2)).p(0) == 1
 
-def test_complex_expr():
+def test_complex_expr(setup):
     die1 = lea.interval(1, 6)
     diexN = sum(die1.new() for i in range(4))
     assert diexN.p(13) == PF(35, 324)
 
-def test_times():
+def test_times(setup):
     die1 = lea.interval(1, 6)
     diexN = sum(die1.new() for i in range(4))
     assert die1.times(4).equiv(diexN)
 
-def test_times_alt_op():
+def test_times_alt_op(setup):
     from operator import mul
     die = lea.interval(1, 6)
     explicit = die.new() * die.new() * die.new() * die.new()
     assert die.times(4, op=mul).equiv(explicit)
 
-def binom_bernoulli_equiv():
+def binom_bernoulli_equiv(setup):
     binom = lea.binom(6,3,10)
     bernoulli = lea.bernoulli(3,10)
     assert binom.equiv(bernoulli.times(6))
 
-def test_comparisons():
+def test_comparisons(setup):
     die1 = lea.interval(1, 6)
     die2 = die1.new()
     assert P(die1 == 4) == PF(1, 6)
@@ -73,7 +76,7 @@ def test_comparisons():
     assert P((die1+die2).is_any_of(2,3,12)) == PF(1, 9)
     assert P((die1+die2).is_none_of(2,3,12)) == PF(8, 9)
 
-def test_logic():
+def test_logic(setup):
     die1 = lea.interval(1, 6)
     die2 = die1.new()
     assert P(~(die1 == 3)) == PF(5, 6)
@@ -81,14 +84,14 @@ def test_logic():
     assert P((die1 == 4) & (die2 == 2)) == PF(1, 36)
     assert P((die1 <= 3) & (die2 > 3)) == PF(1, 4)
 
-def test_map():
+def test_map(setup):
     die1 = lea.interval(1, 6)
     def parity(x):
         return "odd" if x%2==1 else "even"
     assert die1.map(parity).equiv(lea.vals("even", "odd"))
     assert die1.map(parity).map(len).equiv(lea.vals(3, 4))
 
-def test_min_of():
+def test_min_of(setup):
     die1 = lea.interval(1, 6)
     die2 = die1.new()
     die3 = die1.new()
@@ -99,7 +102,7 @@ def test_min_of():
     assert lea.min_of(die1,die2,fast=True).equiv(lea.pmf({1: 11, 2: 9, 3: 7, 4: 5, 5: 3, 6: 1}))
     assert lea.min_of(die1,die2,die3,fast=True).equiv(lea.pmf({1: 91, 2: 61, 3: 37, 4: 19, 5: 7, 6: 1}))
         
-def test_max_of():
+def test_max_of(setup):
     die1 = lea.interval(1, 6)
     die2 = die1.new()
     die3 = die1.new()

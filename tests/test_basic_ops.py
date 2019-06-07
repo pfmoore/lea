@@ -2,16 +2,18 @@ import lea
 import pytest
 
 # All tests are made using fraction representation, in order to ease comparison
-lea.set_prob_type('r')
+@pytest.fixture(scope="module")
+def setup():
+    lea.set_prob_type('r')
 
-def test_equiv():
+def test_equiv(setup):
     """Equivalence behaves as expected"""
     d1 = lea.vals(1,2,3,4)
     d2 = lea.vals(1,2,3)
     assert (d1).equiv(d1)
     assert not (d1).equiv(d2)
 
-def test_add():
+def test_add(setup):
     """Two distributions can be added together"""
     d1 = lea.vals(1,2,3,4)
     d2 = lea.vals(1,2,3,4)
@@ -21,7 +23,7 @@ def test_add():
     assert (d1 + 1).equiv(dinc)
     assert (1 + d1).equiv(dinc)
 
-def test_sub():
+def test_sub(setup):
     """A distribution can be subtracted from another"""
     d1 = lea.vals(1,2,3,4)
     d2 = lea.vals(1,2,3,4)
@@ -33,7 +35,7 @@ def test_sub():
     assert (1 - d1).equiv(-ddec)
     assert (-d1).equiv(dneg)
 
-def test_mul():
+def test_mul(setup):
     """A distribution can be multiplied by another"""
     d1 = lea.vals(1,2,3,4)
     d2 = lea.vals(1,2,3,4)
@@ -43,7 +45,7 @@ def test_mul():
     assert (d1 * 2).equiv(ddbl)
     assert (2 * d1).equiv(ddbl)
 
-def test_div():
+def test_div(setup):
     """A distribution can be divided by another"""
     d1 = lea.vals(12,24,36,48)
     d2 = lea.vals(1,2,3,4)
@@ -54,7 +56,7 @@ def test_div():
     assert (d1 / 2).equiv(dhalf)
     assert (12 / d2).equiv(ddiv)
 
-def test_floordiv():
+def test_floordiv(setup):
     """A distribution can be divided by another"""
     d1 = lea.vals(12,24,36,9)
     d2 = lea.vals(1,2,3,4)
@@ -65,7 +67,7 @@ def test_floordiv():
     assert (d1 // 2).equiv(dhalf)
     assert (7 // d2).equiv(ddiv)
 
-def test_mod():
+def test_mod(setup):
     """We can take mod of one distribution by another"""
     d1 = lea.vals(6,7,8,9)
     d2 = lea.vals(2,3)
@@ -76,7 +78,7 @@ def test_mod():
     assert (d1 % 2).equiv(dmod2)
     assert (12 % d1).equiv(d12mod)
 
-def test_divmod():
+def test_divmod(setup):
     """We can take divmod of one distribution by another"""
     d1 = lea.vals(6,7,8,9)
     d2 = lea.vals(2,3)
@@ -87,7 +89,7 @@ def test_divmod():
     assert (divmod(d1, 2)).equiv(ddmod2)
     assert (divmod(12, d1)).equiv(d12dmod)
 
-def test_pow():
+def test_pow(setup):
     d1 = lea.vals(1,4,9)
     d2 = lea.vals(1,2,3)
     dpow = lea.vals(1,4,9,1,16,81,1,64,729)
@@ -96,12 +98,12 @@ def test_pow():
     assert (d2 ** 2).equiv(d1)
     assert (2 ** d2).equiv(dpow2)
 
-def test_abs():
+def test_abs(setup):
     d1 = lea.vals(1,2,3,4,-1,-3,-5,0)
     dabs = lea.vals(1,2,3,4,1,3,5,0)
     assert abs(d1).equiv(dabs)
 
-def test_bool():
+def test_bool(setup):
     with pytest.raises(lea.Lea.Error):
         bool(lea.vals(True))
     with pytest.raises(lea.Lea.Error):

@@ -7,31 +7,33 @@ import math
 import sys
 
 # All tests are made using fraction representation, in order to ease comparison
-lea.set_prob_type('r')
+@pytest.fixture(scope="module")
+def setup():
+    lea.set_prob_type('r')
 
-def test_new():
+def test_new(setup):
     dist1 = lea.vals(1,2,3,4)
     dist2 = dist1.new()
     assert dist1.equiv(dist2)
     assert dist1 is not dist2
 
-def test_id():
+def test_id(setup):
     dist1 = lea.vals(1,2,3,4)
     dist2 = dist1.new()
     assert dist1._id() != dist2._id()
     assert isinstance(dist1._id(), str)
 
-def test_get_alea_leaves():
+def test_get_alea_leaves(setup):
     dist1 = lea.vals(1,2,3,4)
     dist2 = lea.vals(2,4,6,8)
     distcalc = (dist1 + dist2) * (dist1 - dist2)
     assert distcalc.get_alea_leaves_set() == {dist1, dist2}
 
 # Constructors
-def test_fromvals():
+def test_fromvals(setup):
     d = lea.vals(1,2, prob_type='f', ordered=True, sorting=False, normalization=False, check=False)
 
-def test_fromvals_errors():
+def test_fromvals_errors(setup):
     # Must be at least one value
     with pytest.raises(lea.Lea.Error):
         d = lea.vals()
@@ -48,21 +50,21 @@ def test_fromvals_errors():
     with pytest.raises(lea.Lea.Error):
         d = lea.pmf({1: 2, 2: 5}, ordered=True)
 
-def test_fromvals_ordered():
+def test_fromvals_ordered(setup):
     d = lea.vals(2,1,3, ordered=True)
     assert d.support == (2,1,3)
     d = lea.pmf(((2,9),(1,7),(3,5)), ordered=True)
     assert d.support == (2,1,3)
 
-def test_fromvals_sorting():
+def test_fromvals_sorting(setup):
     d = lea.vals(2,1,3,2, sorting=True)
     assert d.support == (1,2,3)
 
-def test_from_dict():
+def test_from_dict(setup):
     d = lea.pmf({'a': 5, 'b': 6})
     assert set(d.pmf_tuple) == {('a', PF(5,11)), ('b', PF(6,11))}
 
-def test_event():
+def test_event(setup):
     d = lea.event(0)
     assert d.p(True) == PF(0)
     d = lea.event('1/2')
@@ -91,7 +93,7 @@ def test_event():
     assert d.p(True) == sys.float_info.epsilon
     assert d.p(False) == 1.0 - sys.float_info.epsilon
 
-def test_bernoulli():
+def test_bernoulli(setup):
     d = lea.bernoulli(0)
     assert d.p(1) == PF(0)
     d = lea.bernoulli('1/2')
@@ -120,7 +122,7 @@ def test_bernoulli():
     assert d.p(1) == sys.float_info.epsilon
     assert d.p(0) == 1.0 - sys.float_info.epsilon
 
-def test_poisson():
+def test_poisson(setup):
     d = lea.poisson(2)
     # Probability of k events (mean m) is (m**k)*exp(-m)/k!
     expected = 8.0 * math.exp(-2) / 6.0
@@ -128,11 +130,11 @@ def test_poisson():
     assert round(d.p(3)-expected, 10) == 0
 
 @pytest.mark.skip(reason="Test not written yet")
-def test_csv():
+def test_csv(setup):
     lea.read_csv_file
     lea.read_pandas_df
 
-def test_draw_unsorted_without_replacement():
+def test_draw_unsorted_without_replacement(setup):
     # test an unbiased die
     d = lea.interval(1,6)
     d0 = d.draw(0)
@@ -183,7 +185,7 @@ def test_draw_unsorted_without_replacement():
         d7 = d.draw(7)
 
 # TODO LOOP
-def test_draw_unsorted_with_replacement():
+def test_draw_unsorted_with_replacement(setup):
     # test an unbiased die
     d = lea.interval(1,6)
     d0 = d.draw(0,replacement=True)
@@ -233,7 +235,7 @@ def test_draw_unsorted_with_replacement():
     d4 = d.draw(4,replacement=True)
     assert len(d4._vs) == 6**4
 
-def test_draw_sorted_without_replacement():
+def test_draw_sorted_without_replacement(setup):
     # test an unbiased die
     d = lea.interval(1,6)
     d0 = d.draw(0,sorted=True)
@@ -287,7 +289,7 @@ def test_draw_sorted_without_replacement():
     with pytest.raises(lea.Lea.Error):
         d7 = d.draw(7,sorted=True)
 
-def test_draw_sorted_with_replacement():
+def test_draw_sorted_with_replacement(setup):
     # test an unbiased die
     d = lea.interval(1,6)
     d0 = d.draw(0,sorted=True,replacement=True)

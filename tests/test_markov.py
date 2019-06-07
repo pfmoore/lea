@@ -3,6 +3,10 @@ import pytest
 
 from lea import markov 
 
+@pytest.fixture(scope="module")
+def setup():
+    lea.set_prob_type('f')
+
 def create_market_mc():
     """create and return a MC"""
     # test made with float representation for probabilities
@@ -13,22 +17,22 @@ def create_market_mc():
         ( 'BEAR', ( 0.150 , 0.800 , 0.050  )),
         ( 'STAG', ( 0.250 , 0.250 , 0.500  )))
 
-def test_markov_create():
+def test_markov_create(setup):
     """Check that a MC can be created (markov.chain_from_matrix function) and displayed"""
     market = create_market_mc()
     assert str(market) == 'BULL\n  -> BULL : 0.9\n  -> BEAR : 0.075\n  -> STAG : 0.025\nBEAR\n  -> BULL : 0.15\n  -> BEAR : 0.8\n  -> STAG : 0.05\nSTAG\n  -> BULL : 0.25\n  -> BEAR : 0.25\n  -> STAG : 0.5'
 
-def test_markov_states():
+def test_markov_states(setup):
     """Check that markov.Chain.state attribute is correct"""
     market = create_market_mc()
     assert market.states == ('BULL', 'BEAR', 'STAG')
 
-def test_markov_state():
+def test_markov_state(setup):
     """Check that markov.Chain.state attribute is correct"""
     market = create_market_mc()
     assert market.state.equiv_f(lea.pmf({'BULL': 1./3., 'BEAR': 1./3., 'STAG': 1./3.,}))
 
-def test_markov_get_states():
+def test_markov_get_states(setup):
     """Check that markov.Chain.get_states method is correct"""
     market = create_market_mc()
     (bull_state,bear_state,stag_state) = market.get_states()
@@ -36,7 +40,7 @@ def test_markov_get_states():
     assert bear_state.equiv_f(lea.pmf({'BEAR': 1.}))
     assert stag_state.equiv_f(lea.pmf({'STAG': 1.}))
 
-def test_markov_next_state():
+def test_markov_next_state(setup):
     """Check that markov.Chain.next_state method is correct"""
     market = create_market_mc()
     (bull_state,bear_state,stag_state) = market.get_states()
@@ -53,7 +57,7 @@ def test_markov_next_state():
     with pytest.raises(lea.Lea.Error):
         bear_state.next_state(-1)
 
-def test_markov_state_given():
+def test_markov_state_given(setup):
     """Check that markov.Chain.state_given method is correct"""
     market = create_market_mc()
     (bull_state,bear_state,stag_state) = market.get_states()
@@ -65,7 +69,7 @@ def test_markov_state_given():
     with pytest.raises(lea.Lea.Error):
         market.state_given(market.state=='XXX')
 
-def test_markov_next_state_given():
+def test_markov_next_state_given(setup):
     """Check that markov.Chain.next_state_given method is correct"""
     market = create_market_mc()
     (bull_state,bear_state,stag_state) = market.get_states()
@@ -79,7 +83,7 @@ def test_markov_next_state_given():
     with pytest.raises(lea.Lea.Error):
         market.next_state_given(market.state=='XXX')
 
-def test_markov_matrix():
+def test_markov_matrix(setup):
     """Check that markov.Chain.matrix method is correct"""
     market = create_market_mc()
     assert market.states == ('BULL', 'BEAR', 'STAG')
@@ -91,7 +95,7 @@ def test_markov_matrix():
     assert market.matrix(to_states=()) == ((), (), ())
     assert market.matrix(from_states=(),to_states=()) == ()
 
-def test_markov_chain_from_seq():
+def test_markov_chain_from_seq(setup):
     """Check that markov.chain_from_seq function is correct"""
     mc = markov.chain_from_seq(('A','A','B','B','B','A','C','B','C','A','A','A','B','A','A','B'))
     assert mc.states == ('A', 'B', 'C')
@@ -101,7 +105,7 @@ def test_markov_chain_from_seq():
     assert mc.states == ('A', 'B', 'C', 'D')
     assert mc.matrix() == ((0.5, 0.25, 0.125, 0.125), (0.4, 0.4, 0.2, 0.0), (0.5, 0.5, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0))
 
-def test_markov_absorbing_mc_info():
+def test_markov_absorbing_mc_info(setup):
     """Check that markov.chain_from_seq function is correct"""
     market = create_market_mc()
     (is_absorbing1, transient_states1, absorbing_states1, q_matrix1, r_matrix1, n_matrix1) = market.absorbing_mc_info()
