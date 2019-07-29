@@ -520,7 +520,7 @@ class Lea(object):
         '''
         return Rlea(self)
 
-    def equiv(self,other,prec=None):
+    def equiv(self,other):
         ''' returns True iff self and other represent the same probability distribution,
             i.e. they have the same probability for each of their value;
             returns False otherwise;
@@ -532,7 +532,7 @@ class Lea(object):
         # frozenset(...) is used to avoid any dependency on the order of values
         return frozenset(self._gen_raw_vps()) == frozenset(other._gen_raw_vps())
 
-    def equiv_f(self,other):
+    def equiv_f(self,other,rel_tol=1e-09,abs_tol=0.0):
         ''' returns True iff self and other represent the same probability distribution,
             i.e. they have the same probability for each of their value;
             returns False otherwise;
@@ -548,7 +548,7 @@ class Lea(object):
             p2 = vps2Dict.get(v1)
             if p2 is None:
                 return False
-            if not isclose(p1,p2):
+            if not isclose(p1,p2,rel_tol,abs_tol):
                 return False
         return True
 
@@ -786,7 +786,7 @@ class Lea(object):
             sample; this executes one step of the Expectation-Maximization (EM) algorithm;
             the arguments are:
             - model_lea:  model in which self occurs, it shall match the observed data
-              (see obs_lea below);
+              (see obs_pmf_tuple below);
             - cond_lea: condition involving variables of model_lea, to be verified in the
               returned instance;
             - obs_pmf_tuple: tuple containing the frequencies of the observed data in the form of
@@ -805,7 +805,7 @@ class Lea(object):
         '''
         lea2 = conversion_dict.get(self)
         if lea2 is None:
-            lea2 = self._em_step(model_lea, cond_lea, obs_pmf_tuple, conversion_dict)
+            lea2 = self._em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict)
             conversion_dict[self] = lea2
         return lea2
 
@@ -814,7 +814,7 @@ class Lea(object):
             sample; this executes one step of the Expectation-Maximization (EM) algorithm;
             the arguments are:
             - model_lea: model in which self occurs, and which matches the observed data (see
-              obs_lea below);
+              obs_pmf_tuple below);
             - cond_lea: condition involving variables of model_lea, to be verified in the
               returned instance;
             - obs_pmf_tuple: tuple containing the frequencies of the observed data in the form of
@@ -832,61 +832,51 @@ class Lea(object):
         '''
         raise NotImplementedError("missing method '%s._em_step(...)'"%(self.__class__.__name__))
 
-    @staticmethod
-    def gen_em_steps(model_lea_vars,obs_lea,fixed_vars=()):
-        ''' static method, generates an infinite sequence of steps of Expectation-Maximization (EM)
-            algorithm, yielding revised versions of a probabilistic model, with parameters
-            tuned to match a given observed sample; this algorithm allows hidden variables in the
-            model (i.e. absent from observed sample);
+    def gen_em_steps(self,obs_lea,fixed_vars=()):
+        ''' generates an infinite sequence of steps of Expectation-Maximization (EM) algorithm,
+            yielding revised versions of a probabilistic model, with parameters tuned to match
+            a given observed sample; this algorithm allows hidden variables in the model (i.e.
+            absent from observed sample);
             the arguments are:
-            - model_lea_vars: an iterable giving the N variables "of interest" of the model (see
-              description of return below); the first variable (V1) shall match the observed data
-              (see obs_lea below);
             - obs_lea: Lea instance giving the frequencies of the observed data; the support of
-              obs_lea shall be a subset of the support of V1, the first variable of model_lea_vars;
-              in case of multiple variables observed, obs_lea can be a joint table, with tuples as
-              support, then V1 could be defined by a a joint of variables: lea.joint(Vr,...,Vs);
+              obs_lea shall be a subset of the support of self; in case of n variables observed,
+              self and obs_lea can be defined as joint tables, having tuples of size n as support;
             - fixed_vars (default: empty tuple): an iterable giving the variables that shall NOT
-              be revised by the algorithm, if any; in the returned model, these variables shall
-              keep their initial parameters unchanged;
-            the object yielded is a tuple with the revised variables, in the same order as 
-            model_lea_vars; each returned variable has same type and same DAG structure as their
-            counterpart in model_lea_vars, only the internal parameters may be different;
-            the algorithm is iterative, supposingly converging to a Lea instance maximizing
+              be revised by the algorithm; in the returned model, these variables shall keep their
+              initial parameters unchanged;
+            the object yielded is a dictionary md associating self and inner self variables to the
+            revised variables after each EM step, for any variable v present in self, md[v] has same
+            type and same DAG structure as v, only the internal parameters may be different;
+            the EM algorithm is iterative, supposingly converging to a Lea instance maximizing
             the likelihood of obs_lea; the caller is expected to stop iterations when some criteria
             are satisfied (see Lea.learn_by_em method for an example)
         '''
         obs_pmf_tuple = obs_lea.pmf_tuple
-        new_model_lea = model_lea_vars[0]
-        new_inner_vars = model_lea_vars[1:]
+        new_model_lea = self
+        conversion_dict = None
         while True:
-            conversion_dict = dict((fv,fv) for fv in fixed_vars)
-            new_model_lea = new_model_lea.em_step(new_model_lea, True, obs_pmf_tuple, conversion_dict)
-            try:
-                new_inner_vars = tuple(conversion_dict[new_inner_var] for new_inner_var in new_inner_vars)
-            except KeyError:
-                raise Lea.Error("some given inner variable is disconnected from the given model")
-            yield (new_model_lea,) + new_inner_vars
+            conversion_dict2 = dict((fv,fv) for fv in fixed_vars)
+            new_model_lea = new_model_lea.em_step(new_model_lea,True,obs_pmf_tuple,conversion_dict2)
+            if conversion_dict is None:
+                conversion_dict = conversion_dict2
+            else:
+                conversion_dict = dict((var0,conversion_dict2[var1]) for (var0,var1) in conversion_dict.items())
+            yield conversion_dict
 
-    @staticmethod
-    def learn_by_em(model_lea_vars,obs_lea,fixed_vars=(),nb_steps=None,max_kld=None,max_delta_kld=None):
-        ''' static method, returns a revised version of a probabilistic model, with parameters
-            tuned to match a given observed sample; this uses the Expectation-Maximization (EM)
-            algorithm, which allows hidden variables in the model (i.e. absent from observed sample);
-            the first three arguments define the model to be refined and the observed data:
-            - model_lea_vars: an iterable giving the N variables "of interest" of the model (see
-              description of return below); the first variable V1 shall match the observed data
-              (see obs_lea below);
+    def learn_by_em(self,obs_lea,fixed_vars=(),nb_steps=None,max_kld=None,max_delta_kld=None):
+        ''' returns a revised version of a probabilistic model, with parameters tuned to match a
+            given observed sample; this uses the Expectation-Maximization (EM) algorithm, which
+            allows hidden variables in the model (i.e. absent from observed sample);
+            the first two arguments are:
             - obs_lea: Lea instance giving the frequencies of the observed data; the support of
-              obs_lea shall be a subset of the support of V1, the first variable of model_lea_vars;
-              in case of multiple variables observed, obs_lea can be a joint table, with tuples as
-              support, then V1 could be defined by a a joint of variables: lea.joint(Vr,...,Vs);
+              obs_lea shall be a subset of the support of self; in case of n variables observed,
+              self and obs_lea can be defined as joint tables, having tuples of size n as support;
             - fixed_vars (default: empty tuple): an iterable giving the variables that shall NOT
               be revised by the algorithm, if any; in the returned model, these variables shall
               keep their initial parameters unchanged;
-            the object returned is a tuple with the revised variables, in the same order as 
-            model_lea_vars; each returned variable has same type and same DAG structure as its
-            counterpart in model_lea_vars, only the internal parameters may be different;
+            the object returned is a dictionary md associating self and inner self variables to the
+            revised variables after each EM step, for any variable v present in self, md[v] has same
+            type and same DAG structure as v, only the internal parameters may be different;
             the algorithm is iterative, supposingly converging to a Lea instance maximizing
             the likelihood of obs_lea; this is equivalently stated as maximizing log-likelihood,  
             minimizing the cross-entropy or minimizing the Kullback-Leibler divergence;
@@ -894,7 +884,7 @@ class Lea(object):
             three arguments (at least one of them shall be not None):
             - nb_steps (int): the maximum number of iterations of EM algorithm
             - max_kld (float): the EM algorithm halts as soon as the Kullback-Leibler
-              divergence is equal or lower to this number; this indicates the degree of fit
+              divergence is lower or equal to this number; this indicates the degree of fit
               required; the smallest, the longest the execution;
             - max_delta_kld (float): the EM algorithm halts as soon as the difference in
               absolute value between cross entropy calculated on two consecutive iterations
@@ -908,14 +898,14 @@ class Lea(object):
                             " max_delta_kld or max_kld argument)")
         obs_lea_entropy = obs_lea.entropy
         nb_steps_done = 0
-        learn_by_em_generator = Lea.gen_em_steps(model_lea_vars,obs_lea,fixed_vars)        
+        learn_by_em_generator = self.gen_em_steps(obs_lea,fixed_vars)
+        new_model_lea = self
         while True:
             nb_steps_done += 1
             # calculation of cross_entropy will raise an exception if some value of obs_lea
             # support is absent from model_lea
             ## kl_divergence method is not used here, to avoid multiple calculation
             ## of obs_lea.entropy, which is constant
-            new_model_lea = model_lea_vars[0]
             kld = obs_lea.cross_entropy(new_model_lea) - obs_lea_entropy
             if nb_steps is not None and nb_steps_done > nb_steps:
                 break
@@ -925,8 +915,9 @@ class Lea(object):
                 if nb_steps_done >= 2 and abs(kld-prev_kld) <= max_delta_kld:
                     break
                 prev_kld = kld
-            model_lea_vars = next(learn_by_em_generator)
-        return model_lea_vars
+            model_lea_dict = next(learn_by_em_generator)
+            new_model_lea = model_lea_dict[self]
+        return model_lea_dict
 
     @staticmethod
     def make_vars(obj,tgt_dict,prefix='',suffix=''):
