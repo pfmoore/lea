@@ -65,4 +65,4 @@ class Flea(Lea):
             yield f(*args)
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
-        return Flea(self._f,lea1._clea_args.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict))
+        return Flea(self._f,self._clea_args.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict))
