@@ -926,7 +926,7 @@ class Lea(object):
             where Vi is a variable name string built as prefix + Ai + suffix;
             obj is
             (a) either a named tuple with attributes A1, ... , An (as returned
-            by build_b_nfrom_joint, for example)
+            by build_bn_from_joint, for example)
             (b) or a Lea instances representing a joint probability distribution
             with the attributes A1, ... , An (such Lea instance is returned by
             as_joint method, for example);
