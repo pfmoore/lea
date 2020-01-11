@@ -186,7 +186,7 @@ def str_to_bool(b_str):
         return True
     if b_str in ('f','false','0','n','no'):
         return False
-    raise ValueError("invalid boolean litteral '%s'"%b_str)
+    raise ValueError("invalid boolean litteral '%s'"%(b_str,))
 
 def read_csv_filename(csv_filename,col_names=None,dialect='excel',**fmtparams):
     ''' same as read_csv_file method, except that it takes a filename instead

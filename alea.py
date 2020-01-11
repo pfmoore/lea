@@ -101,7 +101,7 @@ class Alea(Lea):
         '''
         if isinstance(arg,str):
             if not is_identifier(arg):
-                arg = "(%s)" % arg
+                arg = "(%s)" % (arg,)
             return sympy.Symbol(arg)
         return arg
 
@@ -126,7 +126,7 @@ class Alea(Lea):
         except:            
             pass
         if sympy is None:
-            raise Lea.Error("probability expression '%s' requires the sympy module, which does not seem to be installed"%arg)
+            raise Lea.Error("probability expression '%s' requires the sympy module, which does not seem to be installed"%(arg,))
         return Alea.prob_symbol(arg)
    
     @staticmethod
@@ -175,7 +175,7 @@ class Alea(Lea):
             return None
         if not isinstance(prob_type,str):
             if not callable(prob_type):
-                raise Lea.Error("given prob_type '%s' is not a probability type code and it is not callable"%prob_type)
+                raise Lea.Error("given prob_type '%s' is not a probability type code and it is not callable"%(prob_type,))
             return prob_type
         if prob_type == 'f':
             return float
@@ -189,7 +189,7 @@ class Alea(Lea):
             return Alea.prob_symbol
         if prob_type == 'x':
             return Alea.prob_any
-        raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%prob_type)
+        raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%(prob_type,))
 
     @staticmethod
     def set_prob_type(prob_type):
@@ -212,7 +212,7 @@ class Alea(Lea):
             given above
         '''
         if prob_type is None or prob_type == -1:
-            raise Lea.Error("Alea.set_prob_type does not allow %s as argument"%prob_type)
+            raise Lea.Error("Alea.set_prob_type does not allow %s as argument"%(prob_type,))
         Alea._prob_type[0] = Alea.get_prob_type(prob_type)
 
     def __init__(self,vs,ps,normalization=True,prob_type=-1):
@@ -508,7 +508,7 @@ class Alea(Lea):
             # probability, the range check cannot be enforced
             is_valid = True
         if not is_valid:
-            raise Lea.Error("invalid probability value %s"%p)
+            raise Lea.Error("invalid probability value %s"%(p,))
 
     @staticmethod
     def _binary_distribution(v1,v2,p2,prob_type=None):
@@ -824,7 +824,7 @@ class Alea(Lea):
                     den = '/%d' % pdenom
                 lines_iter = (line+p_string.rjust(pnum_size_max)+den for (line,p_string) in zip(lines_iter,p_strings))
             elif prob_representation == '.':
-                fmt = "%%s%%.%df" % nb_decimals
+                fmt = "%%s%%.%df" % (nb_decimals,)
                 lines_iter = (fmt%(line,p) for (line,p) in zip(lines_iter,ps))
             elif prob_representation == '%':
                 fmt = "%%s%%%d.%df %%%%" % (4+nb_decimals,nb_decimals)
@@ -1045,7 +1045,7 @@ class Alea(Lea):
             if check is True, then requires that self is bound
         '''
         if check and self._val is self:
-            raise Lea.Error("%s already unbound"%self._id())
+            raise Lea.Error("%s already unbound"%(self._id(),))
         self._val = self
 
     def _p(self,val,check_val_type=False):
@@ -1384,7 +1384,7 @@ class Alea(Lea):
                 from sympy import log
                 return -log(p,2)
             except:
-                raise Lea.Error("cannot calculate logarithm of %s"%p)
+                raise Lea.Error("cannot calculate logarithm of %s"%(p,))
 
     def information(self):
         ''' returns the information of self being true, expressed in bits

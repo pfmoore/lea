@@ -451,7 +451,7 @@ class Lea(object):
             return Flea.build(f,args)
         wrapper.__name__ = 'lea_wrapper_on__' + f.__name__
         wrapper.__doc__ = ("" if f.__doc__ is None else f.__doc__) \
-                          + "\nThe present function wraps '%s' so to work with Lea instances as arguments." % f.__name__
+                          + "\nThe present function wraps '%s' so to work with Lea instances as arguments." % (f.__name__,)
         return wrapper
 
     def as_joint(self,*attr_names):
@@ -752,7 +752,7 @@ class Lea(object):
         vars_bn_dict = dict((var_name,var.get_alea(sorting=False)) for (var_name,var) in vars_dict.items())
         for (src_var_names,tgt_var_name) in bn_definition:
             if not isinstance(vars_bn_dict[tgt_var_name],Alea):
-                raise Lea.Error("'%s' is defined as target in more than one BN relationship"%tgt_var_name)
+                raise Lea.Error("'%s' is defined as target in more than one BN relationship"%(tgt_var_name,))
             tgt_var = vars_dict[tgt_var_name]
             joint_src_vars = Lea.joint(*(vars_dict[src_var_name] for src_var_name in src_var_names))
             joint_src_vars_bn = Lea.joint(*(vars_bn_dict[src_var_name] for src_var_name in src_var_names))
@@ -1115,7 +1115,7 @@ class Lea(object):
                     if nb_tries is not None:
                         remaining_nb_tries -= 1        
             if v is self:
-                raise Lea.Error("impossible to validate given condition(s), after %d random trials"%nb_tries) 
+                raise Lea.Error("impossible to validate given condition(s), after %d random trials"%(nb_tries,)) 
         
     def random_mc(self,n=None,nb_tries=None):
         ''' if n is None, returns a random value with the probability given by the distribution
@@ -1304,7 +1304,7 @@ class Lea(object):
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             requires that v is present in the domain of self
         '''
-        raise Lea.Error("impossible to bind %s because it depends of other instances"%self._id())
+        raise Lea.Error("impossible to bind %s because it depends of other instances"%(self._id(),))
 
     def free(self,check=True):
         ''' unbinds self;
@@ -1312,7 +1312,7 @@ class Lea(object):
             if check is True, then requires that self is bound
         '''
         if check:
-            raise Lea.Error("impossible to unbind %s because it depends of other instances"%self._id())
+            raise Lea.Error("impossible to unbind %s because it depends of other instances"%(self._id(),))
 
     def clone(self,shared=(),n=None):
         ''' returns a deep copy of current Lea, without any value binding;
@@ -1465,7 +1465,7 @@ class Lea(object):
         try:
             ce = -sum(px*log2(lea1_pmf_dict[vx]) for (vx,px) in self._gen_vps() if px > 0)
         except KeyError as key_error:
-            raise Lea.Error("observed value '%s' is not produced by given model"%key_error.args[0])
+            raise Lea.Error("observed value '%s' is not produced by given model"%(key_error.args[0],))
         except ValueError:
             raise Lea.Error("some observed value has null probability in given model")
         if entropy_ceiling:
@@ -1597,7 +1597,7 @@ class Lea(object):
         '''
         for val in vals:
             if not isinstance(val,bool):
-                raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%op_msg) 
+                raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%(op_msg,)) 
 
     # create helper functions for defining magic methods,
     # these are used only at class creation; these are unbound below
@@ -1638,7 +1638,7 @@ class Lea(object):
         '''
         def func(self):            
             return Flea1(f,self)
-        func.__doc__ = "returns Flea1 instance applying %s function on (self), for function/operator overloading" % f.__name__
+        func.__doc__ = "returns Flea1 instance applying %s function on (self), for function/operator overloading" % (f.__name__,)
         return func
 
     def __make_flea2_n(f):
@@ -1649,7 +1649,7 @@ class Lea(object):
         '''
         def func(self,other):
             return Flea2(f,self,other)
-        func.__doc__ = "returns Flea2 instance applying %s function on (self,other), for function/operator overloading" % f.__name__
+        func.__doc__ = "returns Flea2 instance applying %s function on (self,other), for function/operator overloading" % (f.__name__,)
         return func
 
     def __make_flea2_r(f):
@@ -1660,7 +1660,7 @@ class Lea(object):
         '''
         def func(self,other):            
             return Flea2(f,other,self)
-        func.__doc__ = "returns Flea2 instance applying %s function on (other,self), for function/operator overloading" % f.__name__  
+        func.__doc__ = "returns Flea2 instance applying %s function on (other,self), for function/operator overloading" % (f.__name__,)
         return func
   
     # overloading of arithmetic operators and mathematical functions

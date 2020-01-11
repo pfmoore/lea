@@ -73,7 +73,7 @@ class Tlea(Lea):
             try:
                 lea_v = lea_dict[vc]
             except KeyError:
-                raise Lea.Error("missing value '%s' in CPT"%vc)
+                raise Lea.Error("missing value '%s' in CPT"%(vc,))
             for (vd,pd) in lea_v.gen_vp():
                 yield (vd,pc*pd)
 
@@ -83,7 +83,7 @@ class Tlea(Lea):
             try:
                 lea_v = lea_dict[vc]
             except KeyError:
-                raise Lea.Error("missing value '%s' in CPT"%vc)
+                raise Lea.Error("missing value '%s' in CPT"%(vc,))
             for vd in lea_v._gen_one_random_mc():
                 yield vd
 
