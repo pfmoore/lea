@@ -2,7 +2,7 @@
 
 ---
 
-**New**: try Lea online in the [Jupyter Notebook Tutorial](http://hub.gke.mybinder.org/user/piedenis-lea_tutorials-k2okiwnh/notebooks/Lea3_Tutorial_1.ipynb) (no installation required)!
+**New**: try Lea online in the [Jupyter Notebook Tutorial](https://hub.gke.mybinder.org/user/piedenis-lea_tutorials-dg8wbgv2/notebooks/Lea3_Tutorial_1.ipynb) (no installation required)!
 
 ---
 
