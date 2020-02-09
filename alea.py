@@ -34,7 +34,7 @@ from decimal import Decimal
 from random import random
 from bisect import bisect_left, bisect_right
 import itertools
-from math import factorial
+from math import factorial, sqrt
 from operator import truediv
 import collections
 
@@ -128,7 +128,16 @@ class Alea(Lea):
         if sympy is None:
             raise Lea.Error("probability expression '%s' requires the sympy module, which does not seem to be installed"%(arg,))
         return Alea.prob_symbol(arg)
-   
+
+    @staticmethod
+    def quantum_measurement(p):
+        ''' static method, returns the probability associated the measurement
+            of a given quantum state having the probability amplitude p;
+            p has usually the complex type but it could also have float or
+            int types; the probability returned is the float |p|^2 (Born rule)
+        '''
+        return float(abs(p*p))
+
     @staticmethod
     def _simplify(v,to_float=False):
         ''' static method, tries to simplify the given value v
@@ -159,6 +168,8 @@ class Alea(Lea):
             - 'f' -> float (instance of Python's float)
             - 'd' -> decimal (instance of Python's decimal.Decimal)
             - 'r' -> rational (instance of Python's fractions.Fraction)
+            - 'q' -> amplitude (instance of Python's complex)
+                     - see Alea.quantum_measurement method
             - 's' -> symbolic (instance of a sympy Symbol)
                      - see Alea.prob_symbol method
             - 'x' -> any: if probability given in a string, then determines
@@ -183,6 +194,10 @@ class Alea(Lea):
             return Fraction
         if prob_type == 'd':
             return Decimal
+        if prob_type == 'c':
+            return complex
+        if prob_type == 'q':
+            return Alea.quantum_measurement
         if prob_type == 's':
             if sympy is None:
                 raise Lea.Error("prob_type 's' requires the installation of SymPy module")
@@ -242,14 +257,20 @@ class Alea(Lea):
             ps = tuple(ps)
             nb_none = ps.count(None)
             if nb_none > 1:
-                raise Lea.Error("for normalization, no more than one single probability can be None")
+                raise Lea.Error("no more than one single probability can be None")
+            is_prob_complex = any(isinstance(p,complex) for p in ps)                
             if nb_none == 1:
+                if is_prob_complex:
+                    raise Lea.Error("complex probabilities cannot be mixed with None value")
                 p_sum = sum(p for p in ps if p is not None)
                 Alea._check_prob(p_sum)
                 idx_none = ps.index(None)
                 ps = ps[:idx_none] + (1-p_sum,) + ps[idx_none+1:]
             else:
-                p_sum = sum(ps)
+                if is_prob_complex:
+                    p_sum = sqrt(sum(Alea.quantum_measurement(p) for p in ps))
+                else:
+                    p_sum = sum(ps)
                 ps = (truediv(p,p_sum) for p in ps)
             if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
                 ps = (Alea._symbolic_simplify_function(p) for p in ps)
@@ -336,14 +357,14 @@ class Alea(Lea):
         return new_alea
 
     # keyword arguments available for Alea constructor
-    __contructor_arg_names = frozenset(('ordered', 'sorting', 'normalization', 'check', 'prob_type'))
+    __contructor_arg_names = frozenset(('ordered', 'sorting', 'normalization', 'remove_zeroes', 'check', 'prob_type'))
 
     @staticmethod
     def _parsed_kwargs(kwargs):
-        ''' static method, returns (ordered,sorting,normalization,check,prob_type) tuple,
+        ''' static method, returns (ordered, sorting, normalization, remove_zeroes, check, prob_type) tuple,
             with values found in the given kwargs dictionary (keywords);
             for missing keywords, the default values are
-            (False, True, True, True, -1), respectively, except
+            (False, True, True, False, True, -1), respectively, except
             if ordered=True and sorting is missing, then sorting=False;
             requires that the given kwargs dictionary contains no other
             keywords than those defined above;
@@ -355,6 +376,7 @@ class Alea(Lea):
             raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknown_arg_names)),tuple(Alea.__contructor_arg_names)))
         ordered = kwargs.get('ordered',False)
         normalization = kwargs.get('normalization',True)
+        remove_zeroes = kwargs.get('remove_zeroes',False)
         check = kwargs.get('check',True)
         prob_type = kwargs.get('prob_type',-1)
         if ordered and 'sorting' not in kwargs:
@@ -363,7 +385,7 @@ class Alea(Lea):
             sorting = kwargs.get('sorting',True)
             if ordered and sorting:
                 raise Lea.Error("ordered and sorting arguments cannot be set to True together")
-        return (ordered,sorting,normalization,check,prob_type)
+        return (ordered,sorting,normalization,remove_zeroes,check,prob_type)
 
     @staticmethod
     def _check_not_empty(arg):
@@ -418,16 +440,19 @@ class Alea(Lea):
             of the given ps is divided by the sum of all ps before being stored
             (in such case, it's not mandatory to have true probabilities for ps
             elements; these could be simple counters, for example);
+            * remove_zeroes (default:False): if True, then element of arg having
+            a zero probability are discarded;            
             requires that all the given values vi are hashable;
             requires that prob_dict is not empty;
             requires that ordered and sorting are not set to True together
             requires Python 2.7+ for ordered=True and arg OrderedDict
         '''
-        (ordered,sorting,normalization,_,_) = Alea._parsed_kwargs(kwargs)
+        (ordered,sorting,normalization,remove_zeroes,_,_) = Alea._parsed_kwargs(kwargs)
+        prob_type2 = prob_type
         if is_dict(arg):
             prob_dict = arg
             if ordered and not isinstance(prob_dict,collections.OrderedDict):
-                raise Lea.Error("ordered=True requires to provide a collections.OrderedDict")
+                raise Lea.Error("ordered=True requires the provision of a collections.OrderedDict")
             Alea._check_not_empty(prob_dict)
         else:
             if ordered:
@@ -444,9 +469,11 @@ class Alea(Lea):
                 for (v,p) in vps:
                     prob_dict[v] += prob_type_func(p)
             ## note: since probability conversions have been done (if required),
-            ## putting prob_type=-1 avoids unneccessary conversion in the subsequent calls
-            prob_type = -1
+            ## putting prob_type2=-1 avoids unneccessary conversion in the following
+            prob_type2 = -1
         vps = prob_dict.items()
+        if remove_zeroes:
+            vps = ((v,p) for (v,p) in vps if p != 0)
         if sorting:
             vps = list(vps)
             try:
@@ -454,7 +481,7 @@ class Alea(Lea):
             except:
                 # no ordering relationship on values (e.g. complex numbers)
                 pass
-        prob_type_func = Alea.get_prob_type(prob_type)
+        prob_type_func = Alea.get_prob_type(prob_type2)
         if prob_type_func is not None:
             vps = ((v,prob_type_func(p)) for (v,p) in vps)
         return Alea(*zip(*vps),normalization=normalization,prob_type=-1)
@@ -486,7 +513,7 @@ class Alea(Lea):
             requires that each value has a unique occurrence;
             requires at least one value_freqs argument;
         '''
-        (_,_,normalization,check,prob_type) = Alea._parsed_kwargs(kwargs)
+        (_,_,normalization,_,check,prob_type) = Alea._parsed_kwargs(kwargs)
         (vs,ps) = Alea._zip_vps(vps)
         # check duplicates
         if check and len(frozenset(vs)) < len(vs):
@@ -821,7 +848,7 @@ class Alea(Lea):
                 if pdenom == 1:
                     den = ''
                 else:
-                    den = '/%d' % pdenom
+                    den = '/%d' % (pdenom,)
                 lines_iter = (line+p_string.rjust(pnum_size_max)+den for (line,p_string) in zip(lines_iter,p_strings))
             elif prob_representation == '.':
                 fmt = "%%s%%.%df" % (nb_decimals,)
