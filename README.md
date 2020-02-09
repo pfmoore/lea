@@ -1,5 +1,11 @@
 # Lea - Discrete probability distributions in Python
 
+---
+
+**New**: try Lea online in the [Jupyter Notebook Tutorial](http://hub.gke.mybinder.org/user/piedenis-lea_tutorials-k2okiwnh/notebooks/Lea3_Tutorial_1.ipynb) (no installation required)!
+
+---
+
 ## What is Lea?
 
 Lea is a Python library aiming at working with discrete probability distributions in an intuitive way.
