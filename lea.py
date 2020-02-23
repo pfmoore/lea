@@ -1596,7 +1596,7 @@ class Lea(object):
             the exception message refers to the name of a logical operation given in the op_msg argument
         '''
         for val in vals:
-            if not isinstance(val,bool):
+            if val != True and val != False:
                 raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%(op_msg,)) 
 
     # create helper functions for defining magic methods,

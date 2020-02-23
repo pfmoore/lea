@@ -62,12 +62,12 @@ class Ilea(Lea):
             yield 1
         else:
             for (cv0,p0) in cond_leas[0].gen_vp():
-                if cv0 is True:
+                if cv0 == True:
                     # the first condition is true, for some binding of variables
                     for p1 in Ilea._gen_true_p(cond_leas[1:]):
                         # the full condition is true, for some binding of variables
                         yield p0*p1
-                elif cv0 is False:
+                elif cv0 == False:
                     # short-circuit: do not go further since the AND is false
                     pass
                 else:
@@ -87,10 +87,10 @@ class Ilea(Lea):
             yield None
         else:
             for cv in cond_leas[0]._gen_one_random_mc():
-                if cv is True:
+                if cv == True:
                     for v in self._gen_one_random_true_cond(cond_leas[1:],with_exception):
                         yield v
-                elif cv is False:
+                elif cv == False:
                     if with_exception:
                         raise Lea._FailedRandomMC()
                     yield self
