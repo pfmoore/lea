@@ -2,7 +2,7 @@
 
 ---
 
-**New**: try Lea online in the [Jupyter Notebook Tutorial](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) (no installation required)!
+**New**: try Lea online in the [Jupyter Notebook Tutorial #1](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) or [Jupyter Notebook Tutorial #2](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb) (no installation required)!
 
 ---
 
@@ -144,7 +144,9 @@ The above examples show only a very, very small subset of Lea 3 capabilities. To
   * [Lea 3 Tutorial on Machine Learning](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_4) - maximum likelihood, EM algorithm, …
   * [Lea 3 Examples](http://bitbucket.org/piedenis/lea/wiki/Lea3_Examples)
 
-Note that Lea 2 tutorials are still available [here](http://bitbucket.org/piedenis/lea/wiki/Home) although these are no longer maintained. You can also get Lea 2 presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
+**Jupyter Notebooks** - To play with Lea online without any installation, you can also try the [Jupyter Notebook Tutorial #1](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) and [Jupyter Notebook Tutorial #2](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb), which are equivalent to the tutorial pages above.
+
+Note: Lea 2 tutorials are still available [here](http://bitbucket.org/piedenis/lea/wiki/Home) although these are no longer maintained. You can also get Lea 2 presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
 
 * [Lea, a probability engine in Python](http://drive.google.com/open?id=0B1_ICcQCs7geUld1eE1CWGhEVEk) - presented at [FOSDEM 15/Python devroom](http://fosdem.org/2015/schedule/track/python/)
 * [Probabilistic Programming with Lea](http://drive.google.com/open?id=0B1_ICcQCs7gebF9uVGdNdG1nR0E) - presented at [PyCon Ireland 15](http://python.ie/pycon-2015/)
