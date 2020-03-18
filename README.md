@@ -2,7 +2,7 @@
 
 ---
 
-**New**: try Lea online in the [Jupyter Notebook Tutorial #1](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) or [Jupyter Notebook Tutorial #2](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb) (no installation required)!
+**New**: [Bayesian Reasoning with Lea: the COVID-19 Case](https://mybinder.org/v2/gh/piedenis/lea_mini_tutorials/master?filepath=Lea_COVID19.ipynb) (Jupyter Notebook - no installation required)
 
 ---
 
