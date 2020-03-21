@@ -641,25 +641,41 @@ class Lea(object):
         return Alea(*zip(*((v,p.subs(*args)) for (v,p) in self._gen_raw_vps())),normalization=False)
 
     @staticmethod
-    def if_(cond_lea,then_lea,else_lea):
+    def if_(cond_lea,then_lea,else_lea=_DUMMY_VAL,prior_lea=_DUMMY_VAL):
         ''' static method, returns an instance of Tlea representing the
             conditional probability table
             giving then_lea  if cond_lea is true
                    else_lea  otherwise
-            this is a convenience method equivalent to 
+            if else_lea is defined this method is equivalent to 
               cond_lea.switch({True:then_lea,False:else_lea})
+            if else_lea is undefined then prior_lea provides the Lea
+            instance representing the prior (unconditional) probabilities;
+            this is used then to calculate the missing else_lea
+            requires: either else_lea or prior_lea argument shall be provided
+            requires: if prior_lea is provided, a solution shall exist for else_lea
         '''
-        return Tlea(cond_lea,{True:then_lea,False:else_lea})
+        if (else_lea is Lea._DUMMY_VAL and prior_lea is Lea._DUMMY_VAL) \
+           or (else_lea is not Lea._DUMMY_VAL and prior_lea is not Lea._DUMMY_VAL):
+            raise Lea.Error("if_ method requires either else_lea or prior_lea argument")
+        lea_dict = dict(((True,then_lea),))
+        if else_lea is not Lea._DUMMY_VAL:
+            lea_dict[False] = else_lea
+        return Tlea.build(cond_lea,lea_dict,prior_lea=prior_lea)
 
-    def switch(self,lea_dict,default_lea=_DUMMY_VAL):
+    def switch(self,lea_dict,default_lea=_DUMMY_VAL,prior_lea=_DUMMY_VAL):
         ''' returns an instance of Tlea representing a conditional probability table (CPT)
             defined by the given dictionary lea_dict associating each value of self to a
             specific Lea instance;
             if default_lea is given, then it provides the Lea instance associated to the
             value(s) of self missing in lea_dict;
+            if prior_lea is given, then it provides the Lea instance representing the prior
+            (unconditional) probabilities; this is used to define the Lea instance associated
+            to the value(s) of self missing in lea_dict (as default_lea)
             all dictionary's values and default_lea (if defined) are coerced to Alea instances
-        '''
-        return Tlea(self,lea_dict,default_lea)
+            requires: default_lea and prior_lea shall not defined together
+            requires: if prior_lea is provided, a solution shall exist for default_lea
+        '''        
+        return Tlea.build(self,lea_dict,default_lea,prior_lea)
 
     def switch_func(self,f):
         ''' returns an instance of Slea representing a conditional probability table (CPT)
@@ -1367,7 +1383,7 @@ class Lea(object):
               by the sum of all probabilities before being stored; this division is essential to
               get exact results in case of conditional probabilities;
               setting normalization=False is useful,
-              - to speed up if the caller guarantee that the probabilities sum is 1
+              - to speed up if the caller guarantees that the probabilities sum is 1
               - or to get non-normalized probabilities of a subset of a given probability distribution
             * bindings (default: None): if not None, it is a dictionary {a1:v1, a2:v2 ,... }
               associating some Alea instances a1, a2, ... to specific values v1, v2, ... of their

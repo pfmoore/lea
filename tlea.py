@@ -51,6 +51,32 @@ class Tlea(Lea):
             self._default_lea = Alea.coerce(default_lea)
             self._lea_dict = defaultdict(lambda:self._default_lea,self._lea_dict)
 
+    @staticmethod
+    def build(lea_c,lea_dict,default_lea=Lea._DUMMY_VAL,prior_lea=Lea._DUMMY_VAL):
+        if default_lea is not Lea._DUMMY_VAL and prior_lea is not Lea._DUMMY_VAL:
+            raise Lea.Error('default_lea and prior_lea arguments cannot be defined together')
+        if prior_lea is not Lea._DUMMY_VAL:
+            # determine default_lea from prior_lea
+            dummy_lea = []
+            tlea = Tlea(lea_c,lea_dict,dummy_lea)
+            alea1 = tlea.given(tlea!=dummy_lea).calc(normalization=False)
+            default_lea_support = set(alea1.support)
+            default_lea_support.update(prior_lea.support)
+            vps = []
+            for v in default_lea_support:
+                p = prior_lea._p(v) - alea1._p(v)
+                try:
+                    is_valid = bool(p >= 0)
+                except:
+                    # comparison impossible due to probability type (e.g. symbolic type as in sympy)
+                    # no probability check possible
+                    is_valid = True
+                if not is_valid:
+                    raise Lea.Error('impossible to calculate probabilities from input data')
+                vps.append((v,p))
+            default_lea = Alea.pmf(vps)
+        return Tlea(lea_c,lea_dict,default_lea)
+
     def _get_lea_children(self):
         lea_children = [self._lea_c]
         for lea1 in self._lea_dict.values():
