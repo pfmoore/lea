@@ -4,6 +4,8 @@
 
 **New**: [Bayesian Reasoning with Lea: the COVID-19 Case](https://mybinder.org/v2/gh/piedenis/lea_mini_tutorials/master?filepath=Lea_COVID19.ipynb) (Jupyter Notebook - no installation required)
 
+**New**: The Statues algorithm, which is at the core of Lea, will be presented at the forthcoming [Computing Conference 2020](http://saiconference.com/Computing) (London - 16-17 July).
+
 ---
 
 ## What is Lea?
@@ -144,7 +146,7 @@ The above examples show only a very, very small subset of Lea 3 capabilities. To
   * [Lea 3 Tutorial on Machine Learning](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_4) - maximum likelihood, EM algorithm, …
   * [Lea 3 Examples](http://bitbucket.org/piedenis/lea/wiki/Lea3_Examples)
 
-**Jupyter Notebooks** - To play with Lea online without any installation, you can also try the [Jupyter Notebook Tutorial #1](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) and [Jupyter Notebook Tutorial #2](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb), which are equivalent to the tutorial pages above.
+**Jupyter Notebooks** - To play with Lea online without any installation, you can also try the [Jupyter Notebook Tutorial #1](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) and [Jupyter Notebook Tutorial #2](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb), which are equivalent to the tutorial pages above. You may also have a look on the short notebook dedicated to the [COVID-19 Case](https://mybinder.org/v2/gh/piedenis/lea_mini_tutorials/master?filepath=Lea_COVID19.ipynb).
 
 Note: Lea 2 tutorials are still available [here](http://bitbucket.org/piedenis/lea/wiki/Home) although these are no longer maintained. You can also get Lea 2 presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
 
