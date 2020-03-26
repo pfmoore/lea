@@ -680,8 +680,10 @@ class Lea(object):
     def switch_func(self,f):
         ''' returns an instance of Slea representing a conditional probability table (CPT)
             defined by the given function f associating each value of self to a
-            specific Lea instance, if returned value is not a Lea instance, then it is
-            coerced to Alea instance
+            specific Alea instance, if returned value is not a Lea instance, then it is
+            coerced to an Alea instance
+            requires: the f function shall return Alea instances only or non-Lea instances
+            (coerced automatically to Alea instances)
         '''
         return Slea(self,f)
 
@@ -1070,7 +1072,9 @@ class Lea(object):
 
     def _get_lea_children(self):
         ''' returns a tuple containing all the Lea instances children of the current Lea;
-            Lea._get_lea_children method is abstract: it is implemented in all Lea's subclasses
+            Lea._get_lea_children method is abstract: it is implemented in all Lea's subclasses;
+            it shall contain one entry per occurrence, NOT per instance (duplicates shall not
+            be removed)
         '''
         raise NotImplementedError("missing method '%s._get_lea_children(self)'"%(self.__class__.__name__))
 
