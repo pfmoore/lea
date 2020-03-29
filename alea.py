@@ -129,14 +129,15 @@ class Alea(Lea):
             raise Lea.Error("probability expression '%s' requires the sympy module, which does not seem to be installed"%(arg,))
         return Alea.prob_symbol(arg)
 
-    @staticmethod
-    def quantum_measurement(p):
-        ''' static method, returns the probability associated the measurement
-            of a given quantum state having the probability amplitude p;
-            p has usually the complex type but it could also have float or
-            int types; the probability returned is the float |p|^2 (Born rule)
+    def calq(self):
+        ''' returns an Alea instance with probability associated  to the measurement
+            of a given quantum object having the given probability amplitudes;
+            Each probability amplitude p (complex, float or int types) is converted
+            into the float |p|^2 (Born rule)
         '''
-        return float(abs(p*p))
+        # TODO sympy
+        return Alea(*zip(*((v,float(abs(p*p)))
+                           for (v,p) in zip(self._vs,self._ps) if p != 0)))
 
     @staticmethod
     def _simplify(v,to_float=False):
@@ -168,8 +169,6 @@ class Alea(Lea):
             - 'f' -> float (instance of Python's float)
             - 'd' -> decimal (instance of Python's decimal.Decimal)
             - 'r' -> rational (instance of Python's fractions.Fraction)
-            - 'q' -> amplitude (instance of Python's complex)
-                     - see Alea.quantum_measurement method
             - 's' -> symbolic (instance of a sympy Symbol)
                      - see Alea.prob_symbol method
             - 'x' -> any: if probability given in a string, then determines
@@ -196,8 +195,6 @@ class Alea(Lea):
             return Decimal
         if prob_type == 'c':
             return complex
-        if prob_type == 'q':
-            return Alea.quantum_measurement
         if prob_type == 's':
             if sympy is None:
                 raise Lea.Error("prob_type 's' requires the installation of SymPy module")
@@ -268,7 +265,7 @@ class Alea(Lea):
                 ps = ps[:idx_none] + (1-p_sum,) + ps[idx_none+1:]
             else:
                 if is_prob_complex:
-                    p_sum = sqrt(sum(Alea.quantum_measurement(p) for p in ps))
+                    p_sum = sqrt(sum(abs(p*p) for p in ps))
                 else:
                     p_sum = sum(ps)
                 ps = (truediv(p,p_sum) for p in ps)
@@ -343,6 +340,7 @@ class Alea(Lea):
             note that the present method overloads Lea.new to be more efficient;
         '''
         if sorting:
+            # TODO: treat n
             # for sorting, relay to Lea.new, which is less efficient but handles the case correctly 
             return Lea.new(self,prob_type=prob_type,sorting=True)
         normalization = prob_type != -1

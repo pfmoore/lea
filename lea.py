@@ -1215,8 +1215,8 @@ class Lea(object):
         ''' returns, after evaluation of the probability distribution self, a string
             representation of it;
             it contains one line per distinct value, separated by a newline character;
-            each line contains the string representation of a value  with its
-            probability expressed as a rational number "n/d" or "0" or "1";
+            each line contains the string representation of a value with its
+            probability expressed according to its type;
             if an order relationship is defined on values, then the values are sorted by 
             increasing order; otherwise, an arbitrary order is used;
             called on evaluation of "str(self)" and "repr(self)"
@@ -1367,7 +1367,7 @@ class Lea(object):
               by the sum of all probabilities before being stored; this division is essential to
               get exact results in case of conditional probabilities;
               setting normalization=False is useful,
-              - to speed up if the caller guarantee that the probabilities sum is 1
+              - to speed up if the caller guarantees that the probabilities sum is 1
               - or to get non-normalized probabilities of a subset of a given probability distribution
             * bindings (default: None): if not None, it is a dictionary {a1:v1, a2:v2 ,... }
               associating some Alea instances a1, a2, ... to specific values v1, v2, ... of their
@@ -1388,6 +1388,8 @@ class Lea(object):
             - requires that keys are all unbound Alea instances;
             - requires that the bindings values are in the expected domains of associated keys
         '''
+        #if prob_type == 'q':
+        #    return Alea.pmf(self._calc(bindings,memoization),sorting=sorting,normalization=normalization).new(prob_type='q')
         return Alea.pmf(self._calc(bindings,memoization),prob_type=prob_type,sorting=sorting,normalization=normalization)
 
     def _calc(self,bindings=None,memoization=True):
@@ -1399,6 +1401,16 @@ class Lea(object):
             return tuple(self.gen_vp())
         finally:
             self._finalize_calc(bindings)
+
+    def calq(self,*args,**kwargs):
+        ''' returns an Alea instance giving the probability distribution
+            of measurement assuming that self has probability amplitudes;
+            the method calls Lea.calc method; then, each probability amplitude p
+            is converted into the float |p|^2 (Born rule);
+            warning: the returned result is only meaningful for some constructs
+            like those modeling application of quantum gates
+        '''        
+        return self.calc(*args,**kwargs).calq()
 
     def cumul(self):
         ''' evaluates the distribution, then,
