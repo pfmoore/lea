@@ -140,9 +140,13 @@ class Alea(Lea):
                                for (v,p) in zip(self._vs,self._ps) if p != 0)))
         except:
             # retry with simpler treatment, assuming that exception is due to probabilities as SymPy expressions
-            #return Alea(*zip(*((v,abs(Alea._symbolic_simplify_function(p*p))) for (v,p) in zip(self._vs,self._ps))))
-            #return Alea(*zip(*((v,abs(p**2)) for (v,p) in zip(self._vs,self._ps))),normalization=False)
-            return Alea(*zip(*((v,sympy.re(p)**2+sympy.im(p)**2) for (v,p) in zip(self._vs,self._ps))),normalization=False)
+            return Alea(*zip(*((v,abs(p)**2)
+                               for (v,p) in zip(self._vs,self._ps))),
+                        normalization=False)
+            ## other possible approach:
+            ## return Alea(*zip(*((v,sympy.re(p)**2+sympy.im(p)**2)
+            ##                    for (v,p) in zip(self._vs,self._ps))),
+            ##             normalization=False)
 
     @staticmethod
     def _simplify(v,to_float=False):
