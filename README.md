@@ -2,11 +2,11 @@
 
 ---
 
-**WARNING: Following [Bitbucket decision to drop Mercurial (Hg) support](http://bitbucket.org/blog/sunsetting-mercurial-support-in-bitbucket), the present Lea repository (Mercurial) will be migrated very soon to Git. The project name, URLs and resources should remain unchanged.**
-
 **New**: [Bayesian Reasoning with Lea: the COVID-19 Case](https://mybinder.org/v2/gh/piedenis/lea_mini_tutorials/master?filepath=Lea_COVID19.ipynb) (Jupyter Notebook - no installation required)
 
 **New**: The Statues algorithm, which is at the core of Lea, will be presented at the forthcoming [Computing Conference 2020](http://saiconference.com/Computing) (London - 16-17 July).
+
+**WARNING: Following [Bitbucket decision to drop Mercurial (Hg) support](http://bitbucket.org/blog/sunsetting-mercurial-support-in-bitbucket), the present Lea repository has been migrated to Git on April 12, 2020. The old Lea repository in Mercurial is temporarily available [here](http://bitbucket.org/piedenis/lea_hg)**
 
 ---
 
