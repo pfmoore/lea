@@ -1388,8 +1388,6 @@ class Lea(object):
             - requires that keys are all unbound Alea instances;
             - requires that the bindings values are in the expected domains of associated keys
         '''
-        #if prob_type == 'q':
-        #    return Alea.pmf(self._calc(bindings,memoization),sorting=sorting,normalization=normalization).new(prob_type='q')
         return Alea.pmf(self._calc(bindings,memoization),prob_type=prob_type,sorting=sorting,normalization=normalization)
 
     def _calc(self,bindings=None,memoization=True):

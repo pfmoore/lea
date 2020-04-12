@@ -135,9 +135,14 @@ class Alea(Lea):
             Each probability amplitude p (complex, float or int types) is converted
             into the float |p|^2 (Born rule)
         '''
-        # TODO sympy
-        return Alea(*zip(*((v,float(abs(p*p)))
-                           for (v,p) in zip(self._vs,self._ps) if p != 0)))
+        try:
+            return Alea(*zip(*((v,float(abs(p*p)))
+                               for (v,p) in zip(self._vs,self._ps) if p != 0)))
+        except:
+            # retry with simpler treatment, assuming that exception is due to probabilities as SymPy expressions
+            #return Alea(*zip(*((v,abs(Alea._symbolic_simplify_function(p*p))) for (v,p) in zip(self._vs,self._ps))))
+            #return Alea(*zip(*((v,abs(p**2)) for (v,p) in zip(self._vs,self._ps))),normalization=False)
+            return Alea(*zip(*((v,sympy.re(p)**2+sympy.im(p)**2) for (v,p) in zip(self._vs,self._ps))),normalization=False)
 
     @staticmethod
     def _simplify(v,to_float=False):
@@ -169,7 +174,9 @@ class Alea(Lea):
             - 'f' -> float (instance of Python's float)
             - 'd' -> decimal (instance of Python's decimal.Decimal)
             - 'r' -> rational (instance of Python's fractions.Fraction)
-            - 's' -> symbolic (instance of a sympy Symbol)
+            - 'c' -> complex (instance of Python's complex)
+                     - used for probability amplitudes needed for quantum bits
+            - 's' -> symbolic (instance of a sympy's Symbol)
                      - see Alea.prob_symbol method
             - 'x' -> any: if probability given in a string, then determines
                      the type from it (decimal, rational or symbol) and
@@ -201,7 +208,7 @@ class Alea(Lea):
             return Alea.prob_symbol
         if prob_type == 'x':
             return Alea.prob_any
-        raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%(prob_type,))
+        raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 'c', 's' or 'x'"%(prob_type,))
 
     @staticmethod
     def set_prob_type(prob_type):
@@ -213,7 +220,8 @@ class Alea(Lea):
             - 'f' -> float (instance of Python's float) - default
             - 'd' -> decimal (instance of Python's decimal.Decimal)
             - 'r' -> rational (instance of Python's fractions.Fraction)
-            - 's' -> symbolic (instance of a sympy Symbol)
+            - 'c' -> complex (instance of Python's complex)
+            - 's' -> symbolic (instance of a sympy's Symbol)
                      - see Alea.prob_symbol method
             - 'x' -> any: if probability given in a string, then determines
                      the type from it (decimal, rational or symbol) and
@@ -467,7 +475,7 @@ class Alea(Lea):
                 for (v,p) in vps:
                     prob_dict[v] += prob_type_func(p)
             ## note: since probability conversions have been done (if required),
-            ## putting prob_type2=-1 avoids unneccessary conversion in the following
+            ## putting prob_type2 = -1 avoids unnecessary conversion in the following
             prob_type2 = -1
         vps = prob_dict.items()
         if remove_zeroes:
