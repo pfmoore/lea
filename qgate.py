@@ -82,7 +82,7 @@ class QGate(object):
                                    for (v0,matrix_row) in zip(qubit_tuples,matrix))
         except:
             # retry with simpler treatment, assuming that exception is due to probabilities as SymPy expressions
-            cpt_dict = OrderedDict((v0, Alea.pmf(zip(qubit_tuples,matrix_row),remove_zeroes=False,normalization=False))
+            cpt_dict = OrderedDict((v0, Alea.pmf(zip(qubit_tuples,matrix_row),prob_type='sc',remove_zeroes=False,normalization=False))
                                    for (v0,matrix_row) in zip(qubit_tuples,matrix))
         return QGate(cpt_dict)
 
@@ -122,13 +122,15 @@ class QGate(object):
         nb_args = len(args)
         gate_dim = self.dim()
         args = (Alea.coerce(a) for a in args)
+        # Alea instances shall be copied, otherwise they would be shared betwwen all gate calls
+        cpt_dict = dict((k,alea1.new()) for (k,alea1) in self.cpt_dict.items())
         if nb_args == 1 and gate_dim > 1:
             arg = next(args)
-            joint_qb_out = arg.switch(self.cpt_dict)
+            joint_qb_out = arg.switch(cpt_dict)
         else:
             if nb_args != gate_dim:
                 raise Lea.Error("the gate requires %d qubit(s) instead of %d"%(gate_dim,nb_args))
-            joint_qb_out = Lea.joint(*args).switch(self.cpt_dict)
+            joint_qb_out = Lea.joint(*args).switch(cpt_dict)
         if gate_dim == 1:
             return joint_qb_out[0]
         if nb_args == 1:
