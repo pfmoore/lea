@@ -136,7 +136,7 @@ class Alea(Lea):
             into the float |p|^2 (Born rule)
         '''
         try:
-            return Alea(*zip(*((v,float(abs(p*p)))
+            return Alea(*zip(*((v,float(abs(p)**2))
                                for (v,p) in zip(self._vs,self._ps) if p != 0)))
         except:
             # retry with simpler treatment, assuming that exception is due to probabilities as SymPy expressions
@@ -175,18 +175,21 @@ class Alea(Lea):
             if prob_type is None, then current prob_type configured by
                Alea.set_prob_type is returned;
             otherwise, the given prob_type is a code interpreted as follows:
-            - 'f' -> float (instance of Python's float)
-            - 'd' -> decimal (instance of Python's decimal.Decimal)
-            - 'r' -> rational (instance of Python's fractions.Fraction)
-            - 'c' -> complex (instance of Python's complex)
-                     - used for probability amplitudes needed for quantum bits
-            - 's' -> symbolic (instance of a sympy's Symbol)
-                     - see Alea.prob_symbol method
-            - 'x' -> any: if probability given in a string, then determines
-                     the type from it (decimal, rational or symbol) and
-                     converts into that type;
-                     otherwise, takes the object as-is
-                     - see Alea.prob_any method
+            - 'f'  -> float (instance of Python's float)
+            - 'd'  -> decimal (instance of Python's decimal.Decimal)
+            - 'r'  -> rational (instance of Python's fractions.Fraction)
+            - 'c'  -> complex (instance of Python's complex)
+                      - used for probability amplitudes needed for quantum bits
+            - 's'  -> symbolic (instance of a sympy's Symbol)
+                      - see Alea.prob_symbol method
+            - 'sc' -> symbolic complex (instance of a sympy's Symbol)
+                      - see Alea.prob_symbol method
+                      - used for probability amplitudes needed for quantum bits
+            - 'x'  -> any: if probability given in a string, then determines
+                      the type from it (decimal, rational or symbol) and
+                      converts into that type;
+                      otherwise, takes the object as-is
+                      - see Alea.prob_any method
             requires that prob_type is -1 or None or a callable or a code
             among the ones given above
         '''
@@ -206,13 +209,13 @@ class Alea(Lea):
             return Decimal
         if prob_type == 'c':
             return complex
-        if prob_type == 's':
+        if prob_type[0] == 's':
             if sympy is None:
-                raise Lea.Error("prob_type 's' requires the installation of SymPy module")
+                raise Lea.Error("prob_type 's' or 'sc' requires the installation of SymPy module")
             return Alea.prob_symbol
         if prob_type == 'x':
             return Alea.prob_any
-        raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 'c', 's' or 'x'"%(prob_type,))
+        raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 'c', 's', 'sc' or 'x'"%(prob_type,))
 
     @staticmethod
     def set_prob_type(prob_type):
@@ -267,17 +270,31 @@ class Alea(Lea):
             nb_none = ps.count(None)
             if nb_none > 1:
                 raise Lea.Error("no more than one single probability can be None")
-            is_prob_complex = any(isinstance(p,complex) for p in ps)                
+            is_prob_complex = any(isinstance(p,complex) for p in ps)
+            is_prob_complex_specified = (isinstance(prob_type,str) and prob_type[-1] == 'c')
+            #is_prob_complex = (isinstance(prob_type,str) and prob_type[-1] == 'c') \
+            #                  or any(isinstance(p,complex) for p in ps)            
             if nb_none == 1:
-                if is_prob_complex:
+                #if is_prob_complex:
+                if is_prob_complex or is_prob_complex_specified:
                     raise Lea.Error("complex probabilities cannot be mixed with None value")
                 p_sum = sum(p for p in ps if p is not None)
                 Alea._check_prob(p_sum)
                 idx_none = ps.index(None)
                 ps = ps[:idx_none] + (1-p_sum,) + ps[idx_none+1:]
             else:
-                if is_prob_complex:
-                    p_sum = sqrt(sum(abs(p*p) for p in ps))
+                #if is_prob_complex:
+                if is_prob_complex_specified:
+                    p_sum0 = sum(abs(p)**2 for p in ps)
+                    try:
+                        p_sum = sqrt(p_sum0)
+                    except:
+                        if sympy is None:
+                            raise
+                        p_sum = sympy.sqrt(p_sum0)
+                elif is_prob_complex:
+                    # do not normalize
+                    p_sum = 1
                 else:
                     p_sum = sum(ps)
                 ps = (truediv(p,p_sum) for p in ps)
@@ -494,7 +511,8 @@ class Alea(Lea):
         prob_type_func = Alea.get_prob_type(prob_type2)
         if prob_type_func is not None:
             vps = ((v,prob_type_func(p)) for (v,p) in vps)
-        return Alea(*zip(*vps),normalization=normalization,prob_type=-1)
+        prob_type3 = prob_type if isinstance(prob_type,str) and prob_type[-1] == 'c' else -1
+        return Alea(*zip(*vps),normalization=normalization,prob_type=prob_type3)
 
     @staticmethod
     def vals(*values,**kwargs):
@@ -790,7 +808,7 @@ class Alea(Lea):
                 vps.append(((v,)+vt,p*pt))
         return Alea._pmf_ordered(vps, check=False)
 
-    __DISPLAY_KINDS = (None, '/', '.', '%', '-', '/-', '.-', '%-')
+    __DISPLAY_KINDS = (None, '/', '.', '%', '-', '/-', '.-', '%-', 'k')
 
     def as_string(self,kind=None,nb_decimals=6,histo_size=100,tabular=True):
         ''' returns a string representation of probability distribution self;
@@ -827,6 +845,12 @@ class Alea(Lea):
         header = ''
         lines_iter = None
         v0 = vs[0]
+        if kind == 'k':
+            # ket representation (quantum computing)
+            vps_iter = zip(vs,ps)
+            if isinstance(v0,tuple):
+                vps_iter = ((''.join(str(b) for b in v),p)  for (v,p) in vps_iter)
+            return ' + '.join('%s|%s>'%(p,v) for (v,p) in vps_iter)
         if tabular and isinstance(v0,tuple):
             v0_class = v0.__class__
             v0_length = len(v0)
