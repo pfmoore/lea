@@ -1381,8 +1381,7 @@ class Alea(Lea):
             return -log2(p)
         except TypeError:
             try:
-                from sympy import log
-                return -log(p,2)
+                return -sympy.log(p,2)
             except:
                 raise Lea.Error("cannot calculate logarithm of %s"%(p,))
 
@@ -1414,7 +1413,7 @@ class Alea(Lea):
             return res
         except TypeError:
             try:
-                from sympy import log
+                log = sympy.log
                 for (v,p) in self._gen_raw_vps():
                     res -= p*log(p)
                 return res / log(2)
