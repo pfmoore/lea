@@ -62,11 +62,11 @@ class Slea(Lea):
 
     def _gen_one_random_mc(self):
         f = self._f
-        for vc in self._lea_c._gen_one_random_mc():
+        for vc in self._lea_c.gen_one_random_mc():
             lea_v = Alea.coerce(f(vc))
             if not isinstance(lea_v,Alea):
                 raise Lea.Error("the function passed to switch_func shall return Alea instances only, e.g. lea.pmf(...) or lea.vals(...)")
-            for vd in lea_v._gen_one_random_mc():
+            for vd in lea_v.gen_one_random_mc():
                 yield vd
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):

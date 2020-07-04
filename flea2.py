@@ -59,8 +59,8 @@ class Flea2(Lea):
                 yield (f(v1,v2),p1*p2)
 
     def _gen_one_random_mc(self):
-        for v1 in self._lea_arg1._gen_one_random_mc():
-            for v2 in self._lea_arg2._gen_one_random_mc():
+        for v1 in self._lea_arg1.gen_one_random_mc():
+            for v2 in self._lea_arg2.gen_one_random_mc():
                 yield self._f(v1,v2)
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):

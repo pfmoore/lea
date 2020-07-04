@@ -64,7 +64,7 @@ class Plea(Lea):
             p = (p*mean) / v
 
     def _gen_one_random_mc(self):
-        for v in self.get_alea()._gen_one_random_mc():
+        for v in self.get_alea().gen_one_random_mc():
             yield v
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):

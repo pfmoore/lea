@@ -105,12 +105,12 @@ class Tlea(Lea):
 
     def _gen_one_random_mc(self):
         lea_dict = self._lea_dict
-        for vc in self._lea_c._gen_one_random_mc():
+        for vc in self._lea_c.gen_one_random_mc():
             try:
                 lea_v = lea_dict[vc]
             except KeyError:
                 raise Lea.Error("missing value '%s' in CPT"%(vc,))
-            for vd in lea_v._gen_one_random_mc():
+            for vd in lea_v.gen_one_random_mc():
                 yield vd
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):

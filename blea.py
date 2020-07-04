@@ -150,11 +150,11 @@ class Blea(Lea):
                                                    for alea_leaf in ilea._cond_leas[0].get_alea_leaves_set())
             self._cond_clea = Clea(*cond_alea_leaves_set)
         # the first for loop binds a random value on each Alea instances refered in CPT conditions
-        for _ in self._cond_clea._gen_one_random_mc():
+        for _ in self._cond_clea.gen_one_random_mc():
             # here, there will be at most one ilea having condition that evaluates to True,
             # regarding the random binding that has been made 
             for i_lea in self._ileas:
-                for v in i_lea._gen_one_random_mc_no_exc():
+                for v in i_lea.gen_one_random_mc_no_exc():
                     if v is not i_lea:
                         # the current ilea is the one having the condition that evaluates to True
                         yield v

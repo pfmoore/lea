@@ -68,7 +68,7 @@ class Clea(Lea):
             yield (v,p)
 
     def _gen_one_random_mc(self):
-        for v in Clea.prod(tuple(lea_arg._gen_one_random_mc for lea_arg in self._lea_args)):
+        for v in Clea.prod(tuple(lea_arg.gen_one_random_mc for lea_arg in self._lea_args)):
             yield v
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):

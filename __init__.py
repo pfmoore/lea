@@ -53,3 +53,7 @@ read_pandas_df = Alea.read_pandas_df
 reduce_all = Lea.reduce_all
 set_prob_type = Alea.set_prob_type
 vals = Alea.vals
+EXACT = Lea.EXACT
+MCEV = Lea.MCEV
+MCEC = Lea.MCEC
+MCRS = Lea.MCRS

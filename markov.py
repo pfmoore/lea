@@ -113,7 +113,7 @@ class Chain(object):
             of transition from S to next state
         '''        
         ## note: the simpler expression ('  -> ' + next_state_lea.map(str)) works but it reorders the states
-        formatted_next_state_leas = (Alea.pmf(('  -> ' + next_state_lea.map(str))._calc(),ordered=True)
+        formatted_next_state_leas = (Alea.pmf((('  -> %s'%v,p) for (v,p) in next_state_lea._gen_vps()),ordered=True)
                                      for (_,next_state_lea) in self._next_state_lea_per_state)
         return '\n'.join('%s\n%s'%(state,formatted_next_state_lea)
                          for (state,formatted_next_state_lea)

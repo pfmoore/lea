@@ -81,6 +81,31 @@ class Ilea(Lea):
             for (v,p) in self._lea1.gen_vp():
                 yield (v,cp*p)
 
+    def gen_vp_mcec(self,nb_subsamples,exact_vars_lea,nb_tries=None):
+        ''' generates tuples (v,p) where v is a value of the current probability distribution
+            and p is the associated probability weight; this implements the MCEC algorithm
+            (Monte-Carlo with Exact Condition): exact inference on the conditon,
+            then, for each binding found, nb_subsamples random samples for remaining unbound
+            variables; nb_tries, if not None, defines the maximum number of trials in case a random
+            value is incompatible with a condition; this happens only if the conditioned part
+            is itself an Ilea instance x.given(e) or is referring to such instance;
+        '''
+        '''
+        for p in Ilea._gen_true_p(self._cond_leas):
+            # the AND of conditions is true, for some binding of variables
+            # perform random sampling on _lea1, given this binding and
+            # yield value-probability pairs with the probability of the binding
+            for v in self._lea1.gen_random_mc(nb_samples=nb_subsamples,nb_tries=nb_tries):
+                yield (v,p)
+        '''
+        for p0 in Ilea._gen_true_p(self._cond_leas):
+            # the AND of conditions is true, for some binding of variables
+            # perform random sampling on _lea1, given this binding and
+            # yield value-probability pairs with the probability of the binding
+            for (_,p1) in exact_vars_lea.gen_vp():
+                for v in self._lea1.gen_random_mc(nb_samples=nb_subsamples,nb_tries=nb_tries):
+                    yield (v,p0*p1)
+
     def _gen_one_random_true_cond(self,cond_leas,with_exception):
         if len(cond_leas) == 0:
             # empty condition: evaluated as True (seed of recursion)
@@ -97,10 +122,31 @@ class Ilea(Lea):
                 else:
                     raise Lea.Error("boolean expression expected")
 
-    def _gen_one_random_mc(self):
+    def gen_one_random_mc(self,nb_subsamples=1):
+        if self._val is not self:
+            # distribution already bound to a value, because gen_one_random_mc has been called already on self 
+            # yield the bound value nb_subsamples times, in order to be consistent
+            for _ in range(nb_subsamples):
+                yield self._val
+        else:        
+            # distribution not yet bound
+            try:
+                # get nb_subsamples random values from Ilea._gen_one_random_mc method 
+                # (this generator create some binding by calling gen_one_random_mc)
+                for v in self._gen_one_random_mc(nb_subsamples):
+                    # bind value v: this is important if an object calls gen_one_random_mc on the same
+                    # instance before resuming the present generator (see above)
+                    self._val = v
+                    yield v
+            finally:
+                # unbind value, after the random values have been bound or if an exception has been raised
+                self._val = self
+
+    def _gen_one_random_mc(self,nb_subsamples=1):
         for _ in self._gen_one_random_true_cond(self._cond_leas,True):
-            for v in self._lea1._gen_one_random_mc():
-                yield v
+            for _ in range(nb_subsamples):
+                for v in self._lea1.gen_one_random_mc():
+                    yield v
 
     def _gen_one_random_mc_no_exc(self):
         for u in self._gen_one_random_true_cond(self._cond_leas,False):

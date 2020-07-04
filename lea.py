@@ -149,7 +149,7 @@ class Lea(object):
     available on http://arxiv.org/abs/1806.09997. The heart of the algorithm is implemented in
     Lea._gen_bound_vp method (aka GENATOMS in the paper) and <X>lea._gen_vp methods implemented in Lea's
     subclasses (aka GENATOMSBYTYPE in the paper); the final collection and condensation is done by
-    Lea.calc method (aka MARG in the paper), which uses Lea._calc and Alea.pmf methods.
+    Lea.calc method (aka MARG in the paper), which uses Alea.pmf method.
     '''
 
     class Error(Exception):
@@ -1080,9 +1080,9 @@ class Lea(object):
 
     def _clone_by_type(self,clone_table):
         ''' returns a deep copy of current Lea, without any value binding;
-            all Lea instances are copied, excepting the instances k refered in (k,v) associations
-            of given clone_table dictionary, in such case the instance refered by v is used instead
-            of instance refered by k; otherwise, a new entry (k,v) is put in clone_table, where u
+            all Lea instances are copied, excepting the instances k referred in (k,v) associations
+            of given clone_table dictionary, in such case the instance referred by v is used instead
+            of instance referred by k; otherwise, a new entry (k,v) is put in clone_table, where u
             is a reference to the newly created clone of k; so, if the Lea tree contains multiple
             references to the same Lea instance, then this instance is cloned only once and its
             references are copied in the cloned DAG;
@@ -1091,44 +1091,78 @@ class Lea(object):
         raise NotImplementedError("missing method '%s._clone(self,clone_table)'"%(self.__class__.__name__))
         
     def _gen_vp(self):
-        ''' generates tuple (v,p) where v is a value of the current probability distribution
-            and p is the associated probability (integer > 0);
+        ''' generates tuples (v,p) where v is a value of the current probability distribution
+            and p is a probability such that the sum of all probabilities yielded for v is the
+            probability that self equals v;
             this obeys the "binding" mechanism, so if the same variable is referred multiple times in
             a given expression, then same value will be yielded at each occurrence;
             Lea._gen_vp method is abstract: it is implemented in all Lea's subclasses
         '''
         raise NotImplementedError("missing method '%s._gen_vp(self)'"%(self.__class__.__name__))
-         
+
     def _gen_one_random_mc(self):
+        ''' generates one random value from the current probability distribution,
+            WITHOUT precalculating the exact probability distribution (contrarily to 'random' method);
+            Lea._gen_one_random_mc method is abstract: it is implemented in all Lea's subclasses;
+            see Lea.gen_one_random_mc method
+        '''
+        raise NotImplementedError("missing method '%s._gen_one_random_mc(self)'"%(self.__class__.__name__))
+
+    def gen_one_random_mc(self,nb_subsamples=1):
         ''' generates one random value from the current probability distribution,
             WITHOUT precalculating the exact probability distribution (contrarily to 'random' method);
             this obeys the "binding" mechanism, so if the same variable is referred multiple times in
             a given expression, then same value will be yielded at each occurrence; 
             before yielding the random value v, this value v is bound to the current instance;
-            then, if the current calculation requires to get again a random value on the current
-            instance, then the bound value is yielded;
+            if the current calculation requires to get again a random value on the current instance,
+            then the bound value is yielded;
             the instance is rebound to a new value at each iteration, as soon as the execution
             is resumed after the yield;
             the instance is unbound at the end;
-            Lea._gen_one_random_mc method is abstract: it is implemented in all Lea's subclasses
+            the actual random value is yielded by _gen_one_random_mc method, which is implemented in
+            each Lea subclass
+            nb_subsamples is not used in present Lea.gen_one_random_mc method; it is used in the
+            overloaded Ilea.gen_one_random_mc method
         '''
-        raise NotImplementedError("missing method '%s._gen_one_random_mc(self)'"%(self.__class__.__name__))
-            
-    def gen_random_mc(self,n,nb_tries=None):
-        ''' generates n random value from the current probability distribution,
+        if self._val is not self:
+            # distribution already bound to a value, because gen_one_random_mc has been called already on self;
+            # yield the bound value, to ensure referential consistency 
+            yield self._val
+        else:
+            # distribution not yet bound
+            try:
+                # get random value from _gen_one_random_mc method defined in Lea subclass
+                # (this generator create some binding by calling gen_one_random_mc)
+                for v in self._gen_one_random_mc():
+                    # bind value v: this is important if an object calls gen_one_random_mc on the same
+                    # instance before resuming the present generator (see above)
+                    self._val = v
+                    yield v
+            finally:
+                # unbind value, after the random value has been bound or if an exception has been raised
+                self._val = self
+
+    def gen_random_mc(self,nb_samples,nb_subsamples=1,nb_tries=None):
+        ''' generates nb_samples random values from the current probability distribution,
             without precalculating the exact probability distribution (contrarily to 'random' method);
-            nb_tries, if not None, defines the maximum number of trials in case a random value
-            is incompatible with a condition; this happens only if the current Lea instance
-            is (referring to) an Ilea, Tlea, Slea or Blea instance, i.e. returned 'given', 'switch',
-            'switch_func' or 'cpt' methods;
-            WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
+            nb_tries, if not None, defines the maximum number of trials in case a random
+            value is incompatible with a condition; this happens only if the conditioned part
+            is itself an Ilea instance x.given(e) or is referring to such instance;
         '''
-        for _ in range(n):
+        if nb_subsamples == 1:
+            act_nb_samples = nb_samples
+        else:
+            if not isinstance(self,Ilea):
+                raise Lea.Error("nb_subsamples argument can only be specified for sampling expressions under condition, i.e. x.given(...) constructs")
+            (act_nb_samples,residue) = divmod(nb_samples,nb_subsamples)
+            if residue > 0:
+                raise Lea.Error("nb_samples argument (%s) shall be a multiple of nb_subsamples argument (%s)"%(nb_samples,nb_subsamples))
+        for _ in range(act_nb_samples):
             remaining_nb_tries = 1 if nb_tries is None else nb_tries
             v = self
             while remaining_nb_tries > 0:
                 try:
-                    for v in self._gen_one_random_mc():
+                    for v in self.gen_one_random_mc(nb_subsamples):
                         yield v
                     remaining_nb_tries = 0
                 except Lea._FailedRandomMC:
@@ -1136,24 +1170,26 @@ class Lea(object):
                         remaining_nb_tries -= 1        
             if v is self:
                 raise Lea.Error("impossible to validate given condition(s), after %d random trials"%(nb_tries,)) 
-        
-    def random_mc(self,n=None,nb_tries=None):
-        ''' if n is None, returns a random value with the probability given by the distribution
+    
+    def random_mc(self,nb_samples=None,nb_subsamples=1,nb_tries=None):
+        ''' if nb_samples is None, returns a random value with the probability given by the distribution
             without precalculating the exact probability distribution (contrarily to 'random' method);
-            otherwise, returns a tuple of n such random values;
+            otherwise, returns a tuple of nb_samples such random values;
             nb_tries, if not None, defines the maximum number of trials in case a random value
             is incompatible with a condition; this happens only if the current Lea instance
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
-        n1 = 1 if n is None else n
-        random_mc_tuple = tuple(self.gen_random_mc(n1,nb_tries))
-        if n is None:
+        n1 = 1 if nb_samples is None else nb_samples
+        random_mc_tuple = tuple(self.gen_random_mc(n1,nb_subsamples,nb_tries))
+        if nb_samples is None:
             return random_mc_tuple[0]
         return random_mc_tuple
-        
-    def estimate_mc(self,n,nb_tries=None): 
-        ''' returns an Alea instance, which is an estimation of the current distribution from a sample
+
+    def estimate_mc(self,nb_samples,nb_tries=None): 
+        ''' *** deprecated method: use calc(...) instead, which provides more options
+                with algo = 'MCRS' or 'MCEC' 
+            returns an Alea instance, which is an estimation of the current distribution from a sample
             of n random values; this is a true Monte-Carlo algorithm, which does not precalculate the
             exact probability distribution (contrarily to 'random' method); 
             the method is suited for complex distributions, when calculation of exact probability
@@ -1163,7 +1199,7 @@ class Lea(object):
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
-        return Alea.vals(*self.random_mc(n,nb_tries))
+        return Alea.vals(*self.random_mc(nb_samples,nb_tries=nb_tries))
     
     def nb_cases(self,bindings=None,memoization=True):
         ''' returns the number of atomic cases evaluated to build the exact probability distribution;
@@ -1349,9 +1385,9 @@ class Lea(object):
 
     def _clone(self,clone_table):
         ''' returns a deep copy of current Lea, without any value binding;
-            all Lea instances are copied, excepting the instances k refered in (k,v) associations
-            of given clone_table dictionary, in such case the instance refered by v is used instead
-            of instance refered by k; otherwise, a new entry (k,v) is put in clone_table, where u
+            all Lea instances are copied, excepting the instances k referred in (k,v) associations
+            of given clone_table dictionary, in such case the instance referred by v is used instead
+            of instance referred by k; otherwise, a new entry (k,v) is put in clone_table, where u
             is a reference to the newly created clone of k; so, if the Lea tree contains multiple
             references to the same Lea instance, then this instance is cloned only once and its
             references are copied in the cloned DAG;
@@ -1375,26 +1411,80 @@ class Lea(object):
             * sorting allows sorting the value of the returned Alea instance (see Alea.pmf method);
             note that the present method is overloaded in Alea class, to be more efficient
         '''
-        new_alea = Alea.pmf(self._calc(),prob_type=prob_type,sorting=sorting)
+        new_alea = self.calc(prob_type=prob_type,sorting=sorting)
         if n is not None:
             return tuple(new_alea.new() for _ in range(n))
         return new_alea
 
-    def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True):
-        ''' same as Lea.new method, adding three advanced optional arguments that allow changing the
-            behavior of the probabilistic inference algorithm (the "Statues" algorithm):
-            * normalization (default:True): if True, then each probability is divided
+    EXACT = 'EXACT'
+    MCEV = 'MCEV'
+    MCEC = 'MCEC'
+    MCRS = 'MCRS'
+
+    def _check_calc_arg(self,algo,nb_samples,nb_subsamples,nb_tries,exact_vars):
+        ''' checks consistency of calc method's arguments;
+            see calc method;
+            raises an exception if arguments are inconsistent
+        '''
+        if algo == Lea.EXACT:
+            if nb_samples is not None:
+                raise Lea.Error("nb_samples argument incompatible with EXACT algorithm")        
+            if nb_subsamples is not None:
+                raise Lea.Error("nb_subsamples argument incompatible with EXACT algorithm")        
+            if nb_tries is not None:
+                raise Lea.Error("nb_tries argument incompatible with EXACT algorithm")        
+            if exact_vars is not None:
+                raise Lea.Error("exact_vars argument incompatible with EXACT algorithm")        
+            if nb_samples is not None or nb_subsamples is not None or nb_tries is not None:
+                raise Lea.Error("nb_samples, nb_subsamples and nb_tries arguments incompatible with EXACT algorithm")        
+        elif algo == Lea.MCEV:
+            if nb_samples is not None:
+                raise Lea.Error("nb_samples argument incompatible with MCEV algorithm")
+            if nb_subsamples is None:
+                raise Lea.Error("MCEV algorithm requires a nb_subsamples argument")
+            if exact_vars is None:
+                raise Lea.Error("MCEV algorithm requires an exact_vars argument")
+        elif algo == Lea.MCEC:
+            if not isinstance(self,Ilea):
+                raise Lea.Error("MCEC algorithm can only be used for expressions under condition, i.e. x.given(...) constructs")
+            if nb_samples is not None:
+                raise Lea.Error("nb_samples argument incompatible with MCEC algorithm")
+            if nb_subsamples is None:
+                raise Lea.Error("MCEC algorithm requires a nb_subsamples argument")
+            #if exact_vars is not None:
+            #    raise Lea.Error("exact_vars argument incompatible with MCEC algorithm")        
+        elif algo == Lea.MCRS:
+            if not isinstance(self,Ilea) and nb_subsamples is not None:
+                raise Lea.Error("nb_subsamples argument incompatible with MCRS algorithm, unless for expressions under condition, i.e. x.given(...) constructs")
+            if nb_samples is None:
+                raise Lea.Error("nb_samples argument is required for MCRS algorithm")
+            if exact_vars is not None:
+                raise Lea.Error("exact_vars argument incompatible with MCRS algorithm")        
+        else:
+            raise Lea.Error("algo argument shall be '%s', '%s', '%s' or '%s'"%(Lea.EXACT,Lea.MCRS,Lea.MCEC,Lea.MCEV))
+
+    def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True,
+             algo=EXACT,nb_samples=None,nb_subsamples=None,nb_tries=None,exact_vars=None):
+        ''' returns a new Alea instance representing the distribution after it has been evaluated;
+            the first three arguments allow customizing the Alea instance returned:
+            * prob_type (default: -1): if -1, then the probability type is the same as self's,
+              otherwise, the probability type is defined using prob_type (see doc of Alea.set_prob_type);
+            * sorting (default: True): allows sorting the value of the returned Alea instance (see Alea.pmf method);
+            * normalization (default: True): if True, then each probability is divided
               by the sum of all probabilities before being stored; this division is essential to
-              get exact results in case of conditional probabilities;
+              get correct results in case of conditional probabilities;
               setting normalization=False is useful,
               - to speed up if the caller guarantees that the probabilities sum is 1
               - or to get non-normalized probabilities of a subset of a given probability distribution
-            * bindings (default: None): if not None, it is a dictionary {a1:v1, a2:v2 ,... }
+            the two following arguments change the problem statement:
+            * bindings (default: None): if not None, it required to be a dictionary {a1:v1, a2:v2 ,... }
               associating some Alea instances a1, a2, ... to specific values v1, v2, ... of their
               respective domains; these Alea instances are then temporarily bound for calculating
               the resulting pmf; this offers an optimization over the self.given(a1==v1, a2==v2, ...)
-              construct, (this last gives the same result but requires browsing the whole v1, v2, ...
-              domains, evaluating the given equalities)
+              construct: this last gives the same result but requires browsing the whole v1, v2, ...
+              domains, evaluating the given equalities; specifying the bindings argument requires that
+              keys are all unbound Alea instances and that the bindings values are in the expected
+              domains of associated keys;
             * memoization (default: True): if False, then no binding is performed by the algorithm,
               hence reference consistency is no more respected; this option returns WRONG results in all
               construction referring multiple times to the same instances (e.g. conditional probability
@@ -1402,23 +1492,104 @@ class Lea(object):
               importance of memoization and referential consistency in the Statues algorithm; note that
               this option offers NO speedup when evaluating expressions not requiring referential
               consistency: such cases are already detected and optimized by the calculation preprocessing
-              (see Lea._init_calc).
-            if bindings is defined, then
-            - requires that bindings is a dictionary;
-            - requires that keys are all unbound Alea instances;
-            - requires that the bindings values are in the expected domains of associated keys
+              (see Lea._init_calc);
+            the last arguments specify the evaluation algorithm and related options: 
+            * algo (default: 'EXACT'): four algorithms are available:
+              - 'EXACT': calculates the exact probability distribution using the Statues algorithm;
+                for such choice, the remaining arguments shall not be used; 
+              - 'MCRS' (Monte-Carlo Rejection Sampling): calculates an approximate probability distribution
+                following the MC rejection sampling algorithm on nb_samples random samples;
+                if self is an Ilea instance, i.e. evaluating a conditional probability x.given(e), then the
+                algorithm may be speed up by specifying the nb_subsamples argument, which shall be a divisor
+                of nb_samples; each time the condition e is satisfied, nb_subsamples random samples are taken
+                on the conditioned part x instead of a single one; specifying nb_subsamples is especially
+                valuable if the condition has a small probability;
+              - 'MCEC' (Monte-Carlo with Exact Condition): this requires that self is an Ilea instance, i.e.
+                evaluating a conditional probability x.given(e)); this algorithm calculates an approximate
+                probability distribution by making first an exact evaluation of the condition e using the
+                Statues algorithm; then, for each binding that verifies the condition with some probability p,
+                it makes nb_subsamples random samples on the conditioned part x, assigning a weight p to these
+                samples; this algorithm is especially valuable if the condition has a small probability while
+                its evaluation is tractable;
+              - 'MCEV' (Monte-Carlo with Exact Variables): calculates an approximate probability distribution
+                by making first an exact evaluation of the variables given in exact_vars using the Statues
+                algorithm; for each binding found with some probability p, it makes nb_subsamples random
+                samples on remaining (unbound) variables, assigning a weight p to these samples;
+            * nb_samples (default: None): number of random samples made for 'MCRS' algorithm;
+            * nb_subsamples (default: None): only for 'MCRS' and 'MCEC' algorithms and if self is
+              an Ilea instance, i.e. a conditional probability x.given(e); it specifies the number of random
+              samples made on x for each binding verifying the condition e;
+              for 'MCRS', nb_subsamples is optional, if specified it shall be a divisor of nb_samples; 
+              for 'MCEC', nb_subsamples is mandatory;
+            * nb_tries (default: None): if not None, defines the maximum number of trials in case a random
+              value is incompatible with a condition; this happens only if the current Lea instance is an Ilea
+              instance x.given(e) or is referring to such instance;
+              for 'MCEC' algorithm on x.given(e), it only applies on x, should it refers to Ilea instances,
+              since e is evaluated using the exact algorithm;
+              if a condition cannot be satisfied after nb_tries tries, then an error exception is raised; 
+              WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop;
+            * exact_vars (default: None): only for 'MCEV' algorithm: an iterable giving the variables
+              referred in self that shall be evaluated by using the exact algorithm, the other ones being
+              subject to random sampling;
+            On choosing the right algorithm and options...
+            'EXACT' is the default algorithm; it is the recommended algorithm for all tractable problems;
+            it allows in particular to work with probability fractions and symbols;
+            for untractable problems, the three other algorithms offer fallback options;
+            'MCRS' algorithm with sole nb_samples argument is the easiest option; choosing the value for
+            nb_samples is a matter of trade-off between result accuracy and execution time;
+            if the evaluated expression contains conditions having low probabilities, then the 'MCRS'
+            algorithm may be inefficient: as a rejection sampling algorithm, it may use most of processing
+            time to find bindings satisfying the condition; for improving the efficiency, the nb_subsamples
+            argument can be used: this allows making multiple random samples each time the condition is met,
+            instead of a single one; the samples are generated until the condition has been satisfied n times,
+            with n = nb_samples/nb_subsamples. For a given nb_samples, increasing nb_subsamples shall speed up
+            the calculation; however, the result accuracy may tend to decrease if the condition is not visited
+            enough (e.g. choosing nb_subsamples=nb_samples will satisfy the condition with only one binding).
+            'MCEC' algorithm with mandatory nb_subsamples argument is the best choice if the evaluation
+            of the conditioned part is untractable meanwhile the condition is tractable (whatever its
+            probability); every binding verifying the condition is covered and, for each one , nb_subsamples
+            random samples are generated, weighted by the binding's probability;
+            'MCEV' algorithm is suited for untractable problems, from which a set of variables v1, ..., vn
+            can be evaluated in a reasonable time or, in other words, if joint(v1,...,vn) is tractable;
+            if this set of variables is specified in exact_vars argument, then all their value combinations are
+            browsed systematically by the exact algorithm while random sampling is done for other variables.
         '''
-        return Alea.pmf(self._calc(bindings,memoization),prob_type=prob_type,sorting=sorting,normalization=normalization)
-
-    def _calc(self,bindings=None,memoization=True):
-        ''' returns a tuple with (v,p) pairs calculated on self, according to the given arguments,
-            as required by Lea.calc method (see doc of this method)
-        '''
+        self._check_calc_arg(algo,nb_samples,nb_subsamples,nb_tries,exact_vars)
+        if algo == Lea.MCEV or (algo == Lea.MCEC and exact_vars is not None):
+            exact_vars_lea = Clea(*exact_vars)
+            lea_scope = Clea(self,exact_vars_lea)
+        else:
+            if algo == Lea.MCEC and exact_vars is None:
+                exact_vars_lea = lea.coerce(None)
+            lea_scope = self
         try:
-            self._init_calc(bindings,memoization)
-            return tuple(self.gen_vp())
+            lea_scope._init_calc(bindings,memoization)
+            if algo == Lea.EXACT:
+                vps = self.gen_vp()
+            elif algo == Lea.MCRS:
+                if nb_subsamples is None:
+                    nb_subsamples = 1
+                vps = ((v,1) for v in self.random_mc(nb_samples,nb_subsamples,nb_tries))
+            elif algo == Lea.MCEC:
+                vps = self.gen_vp_mcec(nb_subsamples,exact_vars_lea,nb_tries)
+            elif algo == Lea.MCEV:
+                vps = self.gen_vp_mcev(nb_subsamples,exact_vars_lea,nb_tries)
+            return Alea.pmf(vps,prob_type=prob_type,sorting=sorting,normalization=normalization)
         finally:
-            self._finalize_calc(bindings)
+            lea_scope._finalize_calc(bindings)
+
+    def gen_vp_mcev(self,nb_subsamples,exact_vars_lea,nb_tries=None):
+        ''' generates tuple (v,p) where v is a value of the current probability distribution
+            and p is the associated probability weight; this implements the MCEV algorithm
+            (Monte-Carlo with Exact Variables): exact inference on given exact_vars_lea,
+            then, for each binding found, nb_subsamples random samples for remaining (unbound)
+            variables; nb_tries, if not None, defines the maximum number of trials in case a random
+            value is incompatible with a condition; this happens only if the current Lea instance
+            is an Ilea instance x.given(e) or is referring to such instance;
+        '''
+        for (_,p) in exact_vars_lea.gen_vp():
+            for v in self.gen_random_mc(nb_samples=nb_subsamples,nb_tries=nb_tries):
+                yield (v,p)
 
     def cumul(self):
         ''' evaluates the distribution, then,

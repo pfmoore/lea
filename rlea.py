@@ -51,8 +51,8 @@ class Rlea(Lea):
                 yield (v,p1*p2)
 
     def _gen_one_random_mc(self):
-        for lea_arg in self._lea_of_leas._gen_one_random_mc():
-            for v in lea_arg._gen_one_random_mc():
+        for lea_arg in self._lea_of_leas.gen_one_random_mc():
+            for v in lea_arg.gen_one_random_mc():
                 yield v
 
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):

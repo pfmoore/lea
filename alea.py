@@ -979,49 +979,30 @@ class Alea(Lea):
         return frozenset((self,))        
      
     def _get_lea_children(self):
+        ''' see Lea._get_lea_children
+        '''
         # Alea instance has no children
         return ()
 
     def _clone_by_type(self,clone_table):
+        ''' see Lea._clone_by_type
+        '''
         # note that the new Alea instance shares the immutable _vs and _ps attributes of self
         return Alea(self._vs,self._ps,normalization=False,prob_type=-1)
 
     def _gen_vp(self):
-        ''' generates tuples (v,p) where v is a value of self
-            and p is the associated probability;
-            the sequence follows the order defined on values
+        ''' see Lea._gen_vp
         '''
         return zip(self._vs,self._ps)
 
     def _gen_one_random_mc(self):
-        ''' generates one random value from the current probability distribution,
-            WITHOUT precalculating the exact probability distribution (contrarily to 'random' method);
-            this obeys the "binding" mechanism, so if the same variable is referred multiple times in
-            a given expression, then same value will be yielded at each occurrence; 
-            before yielding the random value v, this value v is bound to the current instance;
-            then, if the current calculation requires to get again a random value on the current
-            instance, then the bound value is yielded;
-            the instance is rebound to a new value at each iteration, as soon as the execution
-            is resumed after the yield;
-            the instance is unbound at the end;
-            the method calls the _gen_one_random_mc method implemented in Lea subclasses;
+        ''' see Lea._gen_one_random_mc
         '''
-        if self._val is not self:
-            # distribution already bound to a value, because gen_one_random_mc has been called already on self 
-            # yield the bound value, in order to be consistent
-            yield self._val
-        else:
-            try:
-                # bind value v: this is important if an object calls gen_one_random_mc on the same 
-                # instance before resuming the present generator (see above)
-                self._val = self.random_val()
-                # yield the bound value v
-                yield self._val
-            finally:
-                # unbind value, after the random value has been bound or if an exception has been raised
-                self._val = self
-                
+        yield self.random_val()
+        
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
+        ''' see Lea._em_step
+        '''
         if cond_lea is True:
             return Alea.pmf(dict((v, sum(px * ((self==v).given(model_lea==vx))._p(True)
                                          for (vx,px) in obs_pmf_tuple))
