@@ -223,6 +223,23 @@ class Lea(object):
         return frozenset(alea_leaf for lea_child in self._get_lea_children()
                                    for alea_leaf in lea_child.get_alea_leaves_set())
 
+    def gen_lea_descendants(self):
+        ''' generates all the Lea instances in the tree having the root self,
+            including self itself; the same instance may be yieled multiple times;
+            this calls _get_lea_children() method implemented in Lea's subclasses;
+        '''
+        yield self
+        for lea_child in self._get_lea_children():
+            for lea_child_descendant in lea_child.gen_lea_descendants():
+                yield lea_child_descendant
+
+    def get_inner_lea_set(self):
+        ''' returns a set containing all the Lea instances in the tree having the root self,
+            including self itself;
+            this calls _get_lea_children() method implemented in Lea's subclasses;
+        '''
+        return frozenset(self.gen_lea_descendants())
+
     def _gen_bound_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability  (integer > 0);
@@ -1188,7 +1205,7 @@ class Lea(object):
 
     def estimate_mc(self,nb_samples,nb_tries=None): 
         ''' *** deprecated method: use calc(...) instead, which provides more options
-                with algo = 'MCRS' or 'MCEC' 
+                with algo = 'MCRS' or 'MCLW' 
             returns an Alea instance, which is an estimation of the current distribution from a sample
             of n random values; this is a true Monte-Carlo algorithm, which does not precalculate the
             exact probability distribution (contrarily to 'random' method); 
@@ -1417,9 +1434,9 @@ class Lea(object):
         return new_alea
 
     EXACT = 'EXACT'
-    MCEV = 'MCEV'
-    MCEC = 'MCEC'
     MCRS = 'MCRS'
+    MCLW = 'MCLW'
+    MCEV = 'MCEV'
 
     def _check_calc_arg(self,algo,nb_samples,nb_subsamples,nb_tries,exact_vars):
         ''' checks consistency of calc method's arguments;
@@ -1437,22 +1454,6 @@ class Lea(object):
                 raise Lea.Error("exact_vars argument incompatible with EXACT algorithm")        
             if nb_samples is not None or nb_subsamples is not None or nb_tries is not None:
                 raise Lea.Error("nb_samples, nb_subsamples and nb_tries arguments incompatible with EXACT algorithm")        
-        elif algo == Lea.MCEV:
-            if nb_samples is not None:
-                raise Lea.Error("nb_samples argument incompatible with MCEV algorithm")
-            if nb_subsamples is None:
-                raise Lea.Error("MCEV algorithm requires a nb_subsamples argument")
-            if exact_vars is None:
-                raise Lea.Error("MCEV algorithm requires an exact_vars argument")
-        elif algo == Lea.MCEC:
-            if not isinstance(self,Ilea):
-                raise Lea.Error("MCEC algorithm can only be used for expressions under condition, i.e. x.given(...) constructs")
-            if nb_samples is not None:
-                raise Lea.Error("nb_samples argument incompatible with MCEC algorithm")
-            if nb_subsamples is None:
-                raise Lea.Error("MCEC algorithm requires a nb_subsamples argument")
-            #if exact_vars is not None:
-            #    raise Lea.Error("exact_vars argument incompatible with MCEC algorithm")        
         elif algo == Lea.MCRS:
             if not isinstance(self,Ilea) and nb_subsamples is not None:
                 raise Lea.Error("nb_subsamples argument incompatible with MCRS algorithm, unless for expressions under condition, i.e. x.given(...) constructs")
@@ -1460,8 +1461,24 @@ class Lea(object):
                 raise Lea.Error("nb_samples argument is required for MCRS algorithm")
             if exact_vars is not None:
                 raise Lea.Error("exact_vars argument incompatible with MCRS algorithm")        
+        elif algo == Lea.MCLW:
+            if not isinstance(self,Ilea):
+                raise Lea.Error("MCLW algorithm can only be used for expressions under condition, i.e. x.given(...) constructs")
+            if nb_samples is not None:
+                raise Lea.Error("nb_samples argument incompatible with MCLW algorithm")
+            if nb_subsamples is None:
+                raise Lea.Error("MCLW algorithm requires a nb_subsamples argument")
+        elif algo == Lea.MCEV:
+            if any(isinstance(inner_lea,Ilea) for inner_lea in self.get_inner_lea_set()):
+                raise Lea.Error("MCEV algorithm cannot handle expressions under condition, i.e. x.given(e); use MCLW instead")
+            if nb_samples is not None:
+                raise Lea.Error("nb_samples argument incompatible with MCEV algorithm")
+            if nb_subsamples is None:
+                raise Lea.Error("MCEV algorithm requires a nb_subsamples argument")
+            if exact_vars is None:
+                raise Lea.Error("MCEV algorithm requires an exact_vars argument")
         else:
-            raise Lea.Error("algo argument shall be '%s', '%s', '%s' or '%s'"%(Lea.EXACT,Lea.MCRS,Lea.MCEC,Lea.MCEV))
+            raise Lea.Error("algo argument shall be '%s', '%s', '%s' or '%s'"%(Lea.EXACT,Lea.MCRS,Lea.MCLW,Lea.MCEV))
 
     def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True,
              algo=EXACT,nb_samples=None,nb_subsamples=None,nb_tries=None,exact_vars=None):
@@ -1494,50 +1511,54 @@ class Lea(object):
               consistency: such cases are already detected and optimized by the calculation preprocessing
               (see Lea._init_calc);
             the last arguments specify the evaluation algorithm and related options: 
-            * algo (default: 'EXACT'): four algorithms are available:
-              - 'EXACT': calculates the exact probability distribution using the Statues algorithm;
+            * algo (default: EXACT): four algorithms are available:
+              - EXACT: calculates the exact probability distribution using the Statues algorithm;
                 for such choice, the remaining arguments shall not be used; 
-              - 'MCRS' (Monte-Carlo Rejection Sampling): calculates an approximate probability distribution
+              - MCRS (Monte-Carlo Rejection Sampling): calculates an approximate probability distribution
                 following the MC rejection sampling algorithm on nb_samples random samples;
                 if self is an Ilea instance, i.e. evaluating a conditional probability x.given(e), then the
                 algorithm may be speed up by specifying the nb_subsamples argument, which shall be a divisor
                 of nb_samples; each time the condition e is satisfied, nb_subsamples random samples are taken
                 on the conditioned part x instead of a single one; specifying nb_subsamples is especially
                 valuable if the condition has a small probability;
-              - 'MCEC' (Monte-Carlo with Exact Condition): this requires that self is an Ilea instance, i.e.
-                evaluating a conditional probability x.given(e)); this algorithm calculates an approximate
+              - MCLW (Monte-Carlo Likelihood Weighting): this requires that self is an Ilea instance,
+                i.e. a conditional probability x.given(e)); this algorithm calculates an approximate
                 probability distribution by making first an exact evaluation of the condition e using the
                 Statues algorithm; then, for each binding that verifies the condition with some probability p,
                 it makes nb_subsamples random samples on the conditioned part x, assigning a weight p to these
                 samples; this algorithm is especially valuable if the condition has a small probability while
-                its evaluation is tractable;
-              - 'MCEV' (Monte-Carlo with Exact Variables): calculates an approximate probability distribution
+                its exact evaluation is tractable; this algorithm accepts also an optional exact_vars argument,
+                to include given variables in the exact evaluation, beyound these already referred in the
+                condition (see MCEV);
+              - MCEV (Monte-Carlo Exact Variables): calculates an approximate probability distribution
                 by making first an exact evaluation of the variables given in exact_vars using the Statues
                 algorithm; for each binding found with some probability p, it makes nb_subsamples random
                 samples on remaining (unbound) variables, assigning a weight p to these samples;
-            * nb_samples (default: None): number of random samples made for 'MCRS' algorithm;
-            * nb_subsamples (default: None): only for 'MCRS' and 'MCEC' algorithms and if self is
+                MCEV algorithm cannot handle expressions under condition, i.e. x.given(e); MCLW shall be
+                used instead;
+            * nb_samples (default: None): number of random samples made for MCRS algorithm;
+            * nb_subsamples (default: None): only for MCRS and MCLW algorithms and if self is
               an Ilea instance, i.e. a conditional probability x.given(e); it specifies the number of random
               samples made on x for each binding verifying the condition e;
-              for 'MCRS', nb_subsamples is optional, if specified it shall be a divisor of nb_samples; 
-              for 'MCEC', nb_subsamples is mandatory;
+              for MCRS, nb_subsamples is optional, if specified it shall be a divisor of nb_samples; 
+              for MCLW, nb_subsamples is mandatory;
             * nb_tries (default: None): if not None, defines the maximum number of trials in case a random
               value is incompatible with a condition; this happens only if the current Lea instance is an Ilea
               instance x.given(e) or is referring to such instance;
-              for 'MCEC' algorithm on x.given(e), it only applies on x, should it refers to Ilea instances,
+              for MCLW algorithm on x.given(e), it only applies on x, should it refers to Ilea instances,
               since e is evaluated using the exact algorithm;
               if a condition cannot be satisfied after nb_tries tries, then an error exception is raised; 
               WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop;
-            * exact_vars (default: None): only for 'MCEV' algorithm: an iterable giving the variables
+            * exact_vars (default: None): only for MCEV algorithm: an iterable giving the variables
               referred in self that shall be evaluated by using the exact algorithm, the other ones being
               subject to random sampling;
             On choosing the right algorithm and options...
-            'EXACT' is the default algorithm; it is the recommended algorithm for all tractable problems;
+            EXACT is the default algorithm; it is the recommended algorithm for all tractable problems;
             it allows in particular to work with probability fractions and symbols;
             for untractable problems, the three other algorithms offer fallback options;
-            'MCRS' algorithm with sole nb_samples argument is the easiest option; choosing the value for
+            MCRS algorithm with sole nb_samples argument is the easiest option; choosing the value for
             nb_samples is a matter of trade-off between result accuracy and execution time;
-            if the evaluated expression contains conditions having low probabilities, then the 'MCRS'
+            if the evaluated expression contains conditions having low probabilities, then the MCRS
             algorithm may be inefficient: as a rejection sampling algorithm, it may use most of processing
             time to find bindings satisfying the condition; for improving the efficiency, the nb_subsamples
             argument can be used: this allows making multiple random samples each time the condition is met,
@@ -1545,22 +1566,23 @@ class Lea(object):
             with n = nb_samples/nb_subsamples. For a given nb_samples, increasing nb_subsamples shall speed up
             the calculation; however, the result accuracy may tend to decrease if the condition is not visited
             enough (e.g. choosing nb_subsamples=nb_samples will satisfy the condition with only one binding).
-            'MCEC' algorithm with mandatory nb_subsamples argument is the best choice if the evaluation
+            MCLW algorithm with mandatory nb_subsamples argument is the best choice if the evaluation
             of the conditioned part is untractable meanwhile the condition is tractable (whatever its
             probability); every binding verifying the condition is covered and, for each one , nb_subsamples
             random samples are generated, weighted by the binding's probability;
-            'MCEV' algorithm is suited for untractable problems, from which a set of variables v1, ..., vn
+            MCEV algorithm is suited for untractable problems, from which a set of variables v1, ..., vn
             can be evaluated in a reasonable time or, in other words, if joint(v1,...,vn) is tractable;
             if this set of variables is specified in exact_vars argument, then all their value combinations are
             browsed systematically by the exact algorithm while random sampling is done for other variables.
         '''
         self._check_calc_arg(algo,nb_samples,nb_subsamples,nb_tries,exact_vars)
-        if algo == Lea.MCEV or (algo == Lea.MCEC and exact_vars is not None):
-            exact_vars_lea = Clea(*exact_vars)
+        if algo == Lea.MCEV or algo == Lea.MCLW:
+            if exact_vars is None:
+                exact_vars_lea = Alea.coerce(None)
+            else:
+                exact_vars_lea = Clea(*exact_vars)
             lea_scope = Clea(self,exact_vars_lea)
         else:
-            if algo == Lea.MCEC and exact_vars is None:
-                exact_vars_lea = lea.coerce(None)
             lea_scope = self
         try:
             lea_scope._init_calc(bindings,memoization)
@@ -1570,18 +1592,18 @@ class Lea(object):
                 if nb_subsamples is None:
                     nb_subsamples = 1
                 vps = ((v,1) for v in self.random_mc(nb_samples,nb_subsamples,nb_tries))
-            elif algo == Lea.MCEC:
-                vps = self.gen_vp_mcec(nb_subsamples,exact_vars_lea,nb_tries)
+            elif algo == Lea.MCLW:
+                vps = self._gen_vp_mclw(nb_subsamples,exact_vars_lea,nb_tries)
             elif algo == Lea.MCEV:
-                vps = self.gen_vp_mcev(nb_subsamples,exact_vars_lea,nb_tries)
+                vps = self._gen_vp_mcev(nb_subsamples,exact_vars_lea,nb_tries)
             return Alea.pmf(vps,prob_type=prob_type,sorting=sorting,normalization=normalization)
         finally:
             lea_scope._finalize_calc(bindings)
 
-    def gen_vp_mcev(self,nb_subsamples,exact_vars_lea,nb_tries=None):
+    def _gen_vp_mcev(self,nb_subsamples,exact_vars_lea,nb_tries=None):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability weight; this implements the MCEV algorithm
-            (Monte-Carlo with Exact Variables): exact inference on given exact_vars_lea,
+            (Monte-Carlo Exact Variables): exact inference on given exact_vars_lea,
             then, for each binding found, nb_subsamples random samples for remaining (unbound)
             variables; nb_tries, if not None, defines the maximum number of trials in case a random
             value is incompatible with a condition; this happens only if the current Lea instance

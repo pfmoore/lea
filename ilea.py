@@ -81,22 +81,16 @@ class Ilea(Lea):
             for (v,p) in self._lea1.gen_vp():
                 yield (v,cp*p)
 
-    def gen_vp_mcec(self,nb_subsamples,exact_vars_lea,nb_tries=None):
+    def _gen_vp_mclw(self,nb_subsamples,exact_vars_lea,nb_tries=None):
         ''' generates tuples (v,p) where v is a value of the current probability distribution
-            and p is the associated probability weight; this implements the MCEC algorithm
-            (Monte-Carlo with Exact Condition): exact inference on the conditon,
+            and p is the associated probability weight; this implements the MCLW algorithm
+            (Monte-Carlo Likelihood Weighting): exact inference on the conditon,
             then, for each binding found, nb_subsamples random samples for remaining unbound
             variables; nb_tries, if not None, defines the maximum number of trials in case a random
             value is incompatible with a condition; this happens only if the conditioned part
             is itself an Ilea instance x.given(e) or is referring to such instance;
-        '''
-        '''
-        for p in Ilea._gen_true_p(self._cond_leas):
-            # the AND of conditions is true, for some binding of variables
-            # perform random sampling on _lea1, given this binding and
-            # yield value-probability pairs with the probability of the binding
-            for v in self._lea1.gen_random_mc(nb_samples=nb_subsamples,nb_tries=nb_tries):
-                yield (v,p)
+            the exact_vars_lea argument may refer to other variables, which sahl be used in the
+            exact evaluation, beyound these already referred in the condition (see Lea.calc)
         '''
         for p0 in Ilea._gen_true_p(self._cond_leas):
             # the AND of conditions is true, for some binding of variables
