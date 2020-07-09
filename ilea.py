@@ -89,8 +89,8 @@ class Ilea(Lea):
             variables; nb_tries, if not None, defines the maximum number of trials in case a random
             value is incompatible with a condition; this happens only if the conditioned part
             is itself an Ilea instance x.given(e) or is referring to such instance;
-            the exact_vars_lea argument may refer to other variables, which sahl be used in the
-            exact evaluation, beyound these already referred in the condition (see Lea.calc)
+            the exact_vars_lea argument may refer to other variables, which shall be used in the
+            exact evaluation, beyond these already referred in the condition (see Lea.calc)
         '''
         for p0 in Ilea._gen_true_p(self._cond_leas):
             # the AND of conditions is true, for some binding of variables
@@ -105,7 +105,7 @@ class Ilea(Lea):
             # empty condition: evaluated as True (seed of recursion)
             yield None
         else:
-            for cv in cond_leas[0]._gen_one_random_mc():
+            for cv in cond_leas[0].gen_one_random_mc():
                 if cv == True:
                     for v in self._gen_one_random_true_cond(cond_leas[1:],with_exception):
                         yield v

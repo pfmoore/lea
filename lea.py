@@ -1137,7 +1137,7 @@ class Lea(object):
             is resumed after the yield;
             the instance is unbound at the end;
             the actual random value is yielded by _gen_one_random_mc method, which is implemented in
-            each Lea subclass
+            each Lea subclass;
             nb_subsamples is not used in present Lea.gen_one_random_mc method; it is used in the
             overloaded Ilea.gen_one_random_mc method
         '''
@@ -1165,6 +1165,9 @@ class Lea(object):
             nb_tries, if not None, defines the maximum number of trials in case a random
             value is incompatible with a condition; this happens only if the conditioned part
             is itself an Ilea instance x.given(e) or is referring to such instance;
+            nb_subsamples (default: 1) may greater than 1 only if self is an Ilea instance, i.e. a
+            conditional probability x.given(e); it specifies the number of random samples made on x
+            for each binding verifying the condition e; nb_subsamples shall be a divisor of nb_samples; 
         '''
         if nb_subsamples == 1:
             act_nb_samples = nb_samples
@@ -1173,7 +1176,7 @@ class Lea(object):
                 raise Lea.Error("nb_subsamples argument can only be specified for sampling expressions under condition, i.e. x.given(...) constructs")
             (act_nb_samples,residue) = divmod(nb_samples,nb_subsamples)
             if residue > 0:
-                raise Lea.Error("nb_samples argument (%s) shall be a multiple of nb_subsamples argument (%s)"%(nb_samples,nb_subsamples))
+                raise Lea.Error("nb_subsamples argument (%s) shall be a divisor of nb_samples argument (%s)"%(nb_subsamples,nb_samples))
         for _ in range(act_nb_samples):
             remaining_nb_tries = 1 if nb_tries is None else nb_tries
             v = self
@@ -1188,7 +1191,7 @@ class Lea(object):
             if v is self:
                 raise Lea.Error("impossible to validate given condition(s), after %d random trials"%(nb_tries,)) 
     
-    def random_mc(self,nb_samples=None,nb_subsamples=1,nb_tries=None):
+    def random_mc(self,nb_samples=None,nb_tries=None):
         ''' if nb_samples is None, returns a random value with the probability given by the distribution
             without precalculating the exact probability distribution (contrarily to 'random' method);
             otherwise, returns a tuple of nb_samples such random values;
@@ -1197,8 +1200,8 @@ class Lea(object):
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
-        n1 = 1 if nb_samples is None else nb_samples
-        random_mc_tuple = tuple(self.gen_random_mc(n1,nb_subsamples,nb_tries))
+        act_nb_samples = 1 if nb_samples is None else nb_samples
+        random_mc_tuple = tuple(self.gen_random_mc(act_nb_samples,nb_tries=nb_tries))
         if nb_samples is None:
             return random_mc_tuple[0]
         return random_mc_tuple
@@ -1216,7 +1219,7 @@ class Lea(object):
             is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
         '''
-        return Alea.vals(*self.random_mc(nb_samples,nb_tries=nb_tries))
+        return Alea.vals(*self.gen_random_mc(nb_samples,nb_tries=nb_tries))
     
     def nb_cases(self,bindings=None,memoization=True):
         ''' returns the number of atomic cases evaluated to build the exact probability distribution;
@@ -1463,7 +1466,9 @@ class Lea(object):
                 raise Lea.Error("exact_vars argument incompatible with MCRS algorithm")        
         elif algo == Lea.MCLW:
             if not isinstance(self,Ilea):
-                raise Lea.Error("MCLW algorithm can only be used for expressions under condition, i.e. x.given(...) constructs")
+                raise Lea.Error("MCLW algorithm can only be used for expressions under condition, i.e. x.given(e)")
+            if exact_vars is not None and any(isinstance(inner_lea,Ilea) for inner_lea in self._lea1.get_inner_lea_set()):
+                raise Lea.Error("MCLW algorithm with exact_vars cannot handle embedded conditions, e.g x.given(e1).given(e2); use factorized conditions insted, e.g. x.given(e1,e2)")
             if nb_samples is not None:
                 raise Lea.Error("nb_samples argument incompatible with MCLW algorithm")
             if nb_subsamples is None:
@@ -1478,7 +1483,7 @@ class Lea(object):
             if exact_vars is None:
                 raise Lea.Error("MCEV algorithm requires an exact_vars argument")
         else:
-            raise Lea.Error("algo argument shall be '%s', '%s', '%s' or '%s'"%(Lea.EXACT,Lea.MCRS,Lea.MCLW,Lea.MCEV))
+            raise Lea.Error("algo argument shall be %s, %s, %s or %s"%(Lea.EXACT,Lea.MCRS,Lea.MCLW,Lea.MCEV))
 
     def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True,
              algo=EXACT,nb_samples=None,nb_subsamples=None,nb_tries=None,exact_vars=None):
@@ -1591,7 +1596,7 @@ class Lea(object):
             elif algo == Lea.MCRS:
                 if nb_subsamples is None:
                     nb_subsamples = 1
-                vps = ((v,1) for v in self.random_mc(nb_samples,nb_subsamples,nb_tries))
+                vps = ((v,1) for v in self.gen_random_mc(nb_samples,nb_subsamples,nb_tries))
             elif algo == Lea.MCLW:
                 vps = self._gen_vp_mclw(nb_subsamples,exact_vars_lea,nb_tries)
             elif algo == Lea.MCEV:
