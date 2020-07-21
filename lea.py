@@ -1207,17 +1207,18 @@ class Lea(object):
         return random_mc_tuple
 
     def estimate_mc(self,nb_samples,nb_tries=None): 
-        ''' *** deprecated method: use calc(...) instead, which provides more options
-                with algo = 'MCRS' or 'MCLW' 
-            returns an Alea instance, which is an estimation of the current distribution from a sample
-            of n random values; this is a true Monte-Carlo algorithm, which does not precalculate the
-            exact probability distribution (contrarily to 'random' method); 
+        ''' convenience method equivalent to
+              calc(algo=MCRS,nb_samples=nb_samples,nb_tries=nb_tries)
+            returns an Alea instance, which is an approximate probability distribution
+            following the MC rejection sampling algorithm on nb_samples random samples;
             the method is suited for complex distributions, when calculation of exact probability
-            distribution is intractable; the larger the value of n, the better the returned estimation;
-            nb_tries, if not None, defines the maximum number of trials in case a random value
-            is incompatible with a condition; this happens only if the current Lea instance
-            is (referring to) an Ilea or Blea instance, i.e. 'given' or 'cpt' methods;
-            WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop
+            distribution is intractable; the larger the value of nb_samples, the better the
+            returned estimation;
+            nb_tries (default: None): if not None, defines the maximum number of trials in case a random
+            value is incompatible with a condition; this happens only if the current Lea instance is an Ilea
+            instance x.given(e) or is referring to such instance;
+            if a condition cannot be satisfied after nb_tries tries, then an error exception is raised; 
+            WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop;
         '''
         return Alea.vals(*self.gen_random_mc(nb_samples,nb_tries=nb_tries))
     
@@ -1527,13 +1528,13 @@ class Lea(object):
                 on the conditioned part x instead of a single one; specifying nb_subsamples is especially
                 valuable if the condition has a small probability;
               - MCLW (Monte-Carlo Likelihood Weighting): this requires that self is an Ilea instance,
-                i.e. a conditional probability x.given(e)); this algorithm calculates an approximate
+                i.e. a conditional probability x.given(e); this algorithm calculates an approximate
                 probability distribution by making first an exact evaluation of the condition e using the
                 Statues algorithm; then, for each binding that verifies the condition with some probability p,
                 it makes nb_subsamples random samples on the conditioned part x, assigning a weight p to these
                 samples; this algorithm is especially valuable if the condition has a small probability while
                 its exact evaluation is tractable; this algorithm accepts also an optional exact_vars argument,
-                to include given variables in the exact evaluation, beyound these already referred in the
+                to include given variables in the exact evaluation, beyond these already referred in the
                 condition (see MCEV);
               - MCEV (Monte-Carlo Exact Variables): calculates an approximate probability distribution
                 by making first an exact evaluation of the variables given in exact_vars using the Statues
@@ -1573,7 +1574,7 @@ class Lea(object):
             enough (e.g. choosing nb_subsamples=nb_samples will satisfy the condition with only one binding).
             MCLW algorithm with mandatory nb_subsamples argument is the best choice if the evaluation
             of the conditioned part is untractable meanwhile the condition is tractable (whatever its
-            probability); every binding verifying the condition is covered and, for each one , nb_subsamples
+            probability); every binding verifying the condition is covered and, for each one, nb_subsamples
             random samples are generated, weighted by the binding's probability;
             MCEV algorithm is suited for untractable problems, from which a set of variables v1, ..., vn
             can be evaluated in a reasonable time or, in other words, if joint(v1,...,vn) is tractable;
