@@ -105,6 +105,7 @@ def test_descriptive_statistics(setup):
     assert die.mean_f == 3.5
     assert die.var_f == 2.9166666666666665
     assert die.std_f == 1.707825127659933
+    assert die.cov_f(die) == 2.9166666666666665
 
 def test_mode(setup):
     die = lea.vals(1,2,3,4,5,6)

@@ -1333,30 +1333,7 @@ class Alea(Lea):
             WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._std(),True)
-
-    def _cov(self,lea1):
-        ''' same as cov method but without conversion nor simplification
-        '''
-        alea1 = Alea.coerce(lea1)
-        return ((self-self._mean())*(alea1-alea1.get_alea()._mean())).get_alea()._mean()
-
-    def cov(self,lea1):
-        ''' returns the covariance between self and given lea1 probability distributions;
-            requires that, for self and lea1,
-            1 - the requirements of the mean() method are met,
-            2 - the values can be subtracted to the mean value,
-            3 - the differences between values and the mean value can be multiplied together;
-            if any of these conditions is not met, then the result depends of the
-            value implementation (likely, raised exception)
-        '''            
-        return Alea._downcast(Alea._simplify(self._cov(lea1),False))
-
-    def cov_f(self,lea1):
-        ''' same as cov method but with conversion to float or simplification
-            of symbolic expression;
-        '''
-        return Alea._simplify(self._cov(lea1),True)
-
+   
     def mode(self):
         ''' returns a tuple with the value(s) of the probability distribution
             having the highest probability;

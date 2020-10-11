@@ -3,6 +3,7 @@ import pytest
 from lea import P
 from lea.toolbox import isclose
 from lea.prob_fraction import ProbFraction as PF
+from lea.ext_fraction import ExtFraction as EF
 
 # All tests are made using fraction representation, in order to ease comparison
 @pytest.fixture(scope="module")
@@ -112,3 +113,22 @@ def test_max_of(setup):
     assert lea.max_of(die1,fast=True).equiv(die1)
     assert lea.max_of(die1,die2,fast=True).equiv(lea.pmf({1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11}))
     assert lea.max_of(die1,die2,die3,fast=True).equiv(lea.pmf({1: 1, 2: 7, 3: 19, 4: 37, 5: 61, 6: 91}))
+
+def test_covariance_1(setup):
+    die1 = lea.interval(1, 6)
+    die2 = die1.new()
+    dice = die1 + die2
+    assert die1.cov(die2) == 0
+    assert die1.var == EF(35,12)
+    assert die1.cov(die1) == EF(35,12)
+    assert dice.cov(die1) == EF(35,12)
+    assert die1.cov(dice) == EF(35,12)
+
+def test_covariance_2(setup):
+    # see http://en.wikipedia.org/wiki/Covariance
+    a = lea.pmf({(8,5): '0/10 ', (8,6): '4/10', (8,7): '1/10',
+                 (9,5): '3/10 ', (9,6): '0/10', (9,7): '2/10'})
+    y = a[0]
+    x = a[1]
+    assert x.cov(y) == EF(-1,10)
+    assert y.cov(x) == EF(-1,10)

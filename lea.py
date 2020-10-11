@@ -1728,6 +1728,28 @@ class Lea(object):
         except:
             return ce
 
+    def _cov(self,lea1):
+        ''' same as cov method but without conversion nor simplification
+        '''
+        return ((self-self.get_alea()._mean())*(lea1-lea1.get_alea()._mean())).get_alea()._mean()
+
+    def cov(self,lea1):
+        ''' returns the covariance between self and given lea1 probability distributions;
+            requires that, for self and lea1,
+            1 - the requirements of the mean() method are met,
+            2 - the values can be subtracted to the mean value,
+            3 - the differences between values and the mean value can be multiplied together;
+            if any of these conditions is not met, then the result depends of the
+            value implementation (likely, raised exception)
+        '''            
+        return Alea._downcast(Alea._simplify(self._cov(lea1),False))
+
+    def cov_f(self,lea1):
+        ''' same as cov method but with conversion to float or simplification
+            of symbolic expression;
+        '''
+        return Alea._simplify(self._cov(lea1),True)
+    
     @staticmethod
     def mutual_information(lea1,lea2):
         ''' static method, returns the mutual information between given arguments,
@@ -1744,7 +1766,8 @@ class Lea(object):
             return mi
 
     def information_of(self,val):
-        ''' returns the information of given val, expressed in bits;
+        ''' returns, after evaluation of the probability distribution self,
+            the information of given val, expressed in bits;
             the returned type is a float or a sympy expression (see doc of
             Alea.entropy);
             raises an exception if given val has a null probability
