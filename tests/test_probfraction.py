@@ -1,5 +1,6 @@
 from lea.prob_fraction import ProbFraction as PF
-from lea.prob_number import ProbNumber
+from lea.ext_fraction import ExtFraction as GF
+from lea.number import Number
 from fractions import Fraction
 from decimal import Decimal
 import sys
@@ -84,39 +85,39 @@ def test_arithmetic():
     pf2 = PF(1,3)
     f = Fraction(1,2)
     # Basic arithmetic
-    assert pf1+pf2 == PF(5,6)
-    assert isinstance(pf1+pf2, PF)
-    assert pf1-pf2 == PF(1,6)
-    assert isinstance(pf1-pf2, PF)
-    assert pf1*pf2 == PF(1,6)
-    assert isinstance(pf1*pf2, PF)
-    assert pf1/pf2 == PF(3,2)
-    assert isinstance(pf1/pf2, PF)
+    assert pf1+pf2 == GF(5,6)
+    assert isinstance(pf1+pf2, GF)
+    assert pf1-pf2 == GF(1,6)
+    assert isinstance(pf1-pf2, GF)
+    assert pf1*pf2 == GF(1,6)
+    assert isinstance(pf1*pf2,GF)
+    assert pf1/pf2 == GF(3,2)
+    assert isinstance(pf1/pf2, GF)
     # Check reversed operators (__radd__ etc)
-    assert f+pf2 == PF(5,6)
-    assert isinstance(f+pf2, PF)
-    assert f-pf2 == PF(1,6)
-    assert isinstance(f-pf2, PF)
-    assert f*pf2 == PF(1,6)
-    assert isinstance(f*pf2, PF)
-    assert f/pf2 == PF(3,2)
-    assert isinstance(f/pf2, PF)
+    assert f+pf2 == GF(5,6)
+    assert isinstance(f+pf2, GF)
+    assert f-pf2 == GF(1,6)
+    assert isinstance(f-pf2, GF)
+    assert f*pf2 == GF(1,6)
+    assert isinstance(f*pf2,GF)
+    assert f/pf2 == GF(3,2)
+    assert isinstance(f/pf2, GF)
     # Other operators
-    assert +pf1==PF(1,2)
-    assert isinstance(+pf1, PF)
-    assert -pf1==PF(-1,2)
-    assert isinstance(-pf1, PF)
-    assert pf1**2==PF(1,4)
-    assert isinstance(pf1**2, PF)
+    assert +pf1==GF(1,2)
+    assert isinstance(+pf1,GF)
+    assert -pf1==GF(-1,2)
+    assert isinstance(-pf1, GF)
+    assert pf1**2==GF(1,4)
+    assert isinstance(pf1**2, GF)
 
 def test_check():
     """Test the check method for confirming a fraction is in [0,1]"""
     PF(1,2).check()
     PF(1,1).check()
     PF(0,1).check()
-    with pytest.raises(ProbNumber.Error):
+    with pytest.raises(Number.Error):
         PF(2,1).check()
-    with pytest.raises(ProbNumber.Error):
+    with pytest.raises(Number.Error):
         PF(-1,1).check()
 
 def test_float_str():
@@ -137,6 +138,6 @@ def test_string_rep():
     # Depends on the string representation of Fraction
     assert str(PF(1,2)) == str(Fraction(1,2))
     # Fractions outside [0,1] raise an error
-    with pytest.raises(ProbNumber.Error):
+    with pytest.raises(Number.Error):
         str(PF(3,2))
 

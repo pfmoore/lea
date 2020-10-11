@@ -24,27 +24,25 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 
-class ProbNumber(object):
+class Number(object):
 
     ''' 
-    A ProbNumber is an abstract class for representing a probability;
-    Before displaying, it checks that value is between 0 and 1
+    A Number is an abstract class for representing a number
     '''
 
     class Error(Exception):
         pass
 
     def check(self):
-        ''' raises an Exception if the decimal is not in the probability range, from 0 to 1
+        ''' raises an exception if the number is not in the probability range, from 0 to 1
         '''
         if not (0 <= self <= 1):
-            raise ProbNumber.Error("%s is not a valid probability (between 0 and 1)"%self._get_base_class().__str__(self))
+            raise Number.Error("%s is not a valid probability (between 0 and 1)"%self._get_base_class().__str__(self))
 
     def __str__(self):
         ''' returns a string representation of self
             raises an Exception if the value is not in the probability range, from 0 to 1
         '''
-        self.check()
         return self._get_base_class().__str__(self)
     
     # overwrites representation method
@@ -60,17 +58,17 @@ class ProbNumber(object):
 
     def _get_base_class(self):
         ''' returns the second parent class of self,
-            assuming that self's class inherits also from ProbNumber
+            assuming that self's class inherits also from Number
             (multiple inheritance); the returned class is then a sibling
-            class of ProbNumber
+            class of Number
         '''
         return self.__class__.__bases__[1]
 
     def as_base_class_instance(self):
         ''' returns self converted to the parent base class of self
-            assuming that self's class inherits also from ProbNumber
+            assuming that self's class inherits also from Number
             (multiple inheritance); the class of returned instance
-            is then a sibling class of ProbNumber
+            is then a sibling class of Number
         '''
         return self._get_base_class()(self)
 

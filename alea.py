@@ -24,7 +24,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
-from .prob_number import ProbNumber
+from .ext_fraction import ExtFraction
+from .ext_decimal import ExtDecimal
 from .prob_fraction import ProbFraction
 from .prob_decimal import ProbDecimal
 from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, \
@@ -88,6 +89,10 @@ class Alea(Lea):
     _symbolic_simplify_function = sympy and staticmethod(sympy.factor)
 
     # dictionary used in _downcast method
+    __downcast_class = dict( {Fraction : ExtFraction,
+                              Decimal  : ExtDecimal })
+    
+    # dictionary used in _downcast_prob method
     __downcast_prob_class = dict( {Fraction : ProbFraction,
                                    Decimal  : ProbDecimal })
 
@@ -298,12 +303,12 @@ class Alea(Lea):
                otherwise, the returned Alea instance has probability 1
                converted according to prob_type (see doc of Alea.set_prob_type)
         '''
-        if not isinstance(value,Lea):
-            # build a singleton value, with probability 1
-            ## note: do not put something else than 1, as an integer,
-            ## which is the highest arithmetic class in class hierarchy
-            return Alea((value,),(1,),normalization=False,prob_type=prob_type)
-        return value
+        if isinstance(value,Lea):
+            return value
+        # build a singleton value, with probability 1
+        ## note: do not put something else than 1, as an integer,
+        ## which is the highest arithmetic class in class hierarchy
+        return Alea((value,),(1,),normalization=False,prob_type=prob_type)
 
     def new(self,n=None,prob_type=-1,sorting=False):
         ''' returns a new Alea instance, which represents the same probability
@@ -936,7 +941,7 @@ class Alea(Lea):
             arbitrary but fixed from call to call;
             WARNING: this method is called without parentheses
         '''
-        return tuple(Alea._downcast(p) for p in self._ps)
+        return tuple(Alea._downcast_prob(p) for p in self._ps)
 
     def pmf_tuple(self):
         ''' returns, after evaluation of the probability distribution self, the probability
@@ -961,7 +966,7 @@ class Alea(Lea):
             the sequence follows the order defined on values;
             WARNING: this method is called without parentheses
         '''
-        return tuple((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
+        return tuple((v,Alea._downcast_prob(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
 
     def cdf_dict(self):
         ''' returns, after evaluation of the probability distribution self, the cumulative
@@ -970,7 +975,7 @@ class Alea(Lea):
             requires Python 2.7+;
             WARNING: this method is called without parentheses
         '''
-        return collections.OrderedDict((v,Alea._downcast(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
+        return collections.OrderedDict((v,Alea._downcast_prob(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
 
     def get_alea_leaves_set(self):
         ''' returns a set containing all the Alea leaves in the tree having the root self
@@ -1180,8 +1185,19 @@ class Alea(Lea):
                               'cdf_tuple', 'cdf_dict',)
 
     @staticmethod
-    def _downcast(p):
-        ''' static method, returns p or an object equivalent to p, more convenient
+    def _downcast(x):
+        ''' static method, returns x or an object equivalent to x, more convenient to display:
+             Fraction -> ExtFraction,
+             Decimal  -> ExtDecimal
+        '''
+        downcast_class = Alea.__downcast_class.get(x.__class__)
+        if downcast_class is not None:
+            x = downcast_class(x)
+        return x
+
+    @staticmethod
+    def _downcast_prob(p):
+        ''' static method, returns probability p or an object equivalent to p, more convenient
             to display:
              Fraction -> ProbFraction,
              Decimal  -> ProbDecimal
@@ -1204,7 +1220,7 @@ class Alea(Lea):
         '''
         ## note that the following expression is NOK for unorderable types (e.g. complex)
         ##   self.p_cumul(self._vs[-1])
-        return Alea._downcast(Alea._simplify(sum(self._ps)))
+        return Alea._downcast_prob(Alea._simplify(sum(self._ps)))
 
     def P(self):
         ''' returns the probability that self is True;
@@ -1215,7 +1231,7 @@ class Alea(Lea):
             (note that this is NOT the case with self.p(True));
             WARNING: this method is called without parentheses
         '''
-        return Alea._downcast(self._p(True,check_val_type=True))
+        return Alea._downcast_prob(self._p(True,check_val_type=True))
 
     def Pf(self):
         ''' returns the probability that self is True;
@@ -1257,7 +1273,7 @@ class Alea(Lea):
             value class implementation (likely, raised exception);
             WARNING: this method is called without parentheses
         '''
-        return Alea._simplify(self._mean(),False)
+        return Alea._downcast(Alea._simplify(self._mean(),False))
 
     def mean_f(self):
         ''' same as mean method but with conversion to float or simplification of symbolic expression;
@@ -1284,7 +1300,7 @@ class Alea(Lea):
             value implementation (likely, raised exception)
             WARNING: this method is called without parentheses
         '''
-        return Alea._simplify(self._var(),False)
+        return Alea._downcast(Alea._simplify(self._var(),False))
 
     def var_f(self):
         ''' same as var method but with conversion to float or simplification of symbolic expression;
@@ -1304,7 +1320,7 @@ class Alea(Lea):
             requires that the requirements of the var method are met;
             WARNING: this method is called without parentheses
         '''
-        return Alea._simplify(self._std(),False)
+        return Alea._downcast(Alea._simplify(self._std(),False))
 
     def std_f(self):
         ''' same as std method but with conversion to float or simplification
@@ -1328,7 +1344,7 @@ class Alea(Lea):
             if any of these conditions is not met, then the result depends of the
             value implementation (likely, raised exception)
         '''            
-        return Alea._simplify(self._cov(lea1),False)
+        return Alea._downcast(Alea._simplify(self._cov(lea1),False))
 
     def cov_f(self,lea1):
         ''' same as cov method but with conversion to float or simplification
