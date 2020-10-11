@@ -1,5 +1,5 @@
 from lea.prob_fraction import ProbFraction as PF
-from lea.ext_fraction import ExtFraction as GF
+from lea.ext_fraction import ExtFraction as EF
 from lea.number import Number
 from fractions import Fraction
 from decimal import Decimal
@@ -85,30 +85,30 @@ def test_arithmetic():
     pf2 = PF(1,3)
     f = Fraction(1,2)
     # Basic arithmetic
-    assert pf1+pf2 == GF(5,6)
-    assert isinstance(pf1+pf2, GF)
-    assert pf1-pf2 == GF(1,6)
-    assert isinstance(pf1-pf2, GF)
-    assert pf1*pf2 == GF(1,6)
-    assert isinstance(pf1*pf2,GF)
-    assert pf1/pf2 == GF(3,2)
-    assert isinstance(pf1/pf2, GF)
+    assert pf1+pf2 == EF(5,6)
+    assert isinstance(pf1+pf2, EF)
+    assert pf1-pf2 == EF(1,6)
+    assert isinstance(pf1-pf2, EF)
+    assert pf1*pf2 == EF(1,6)
+    assert isinstance(pf1*pf2,EF)
+    assert pf1/pf2 == EF(3,2)
+    assert isinstance(pf1/pf2, EF)
     # Check reversed operators (__radd__ etc)
-    assert f+pf2 == GF(5,6)
-    assert isinstance(f+pf2, GF)
-    assert f-pf2 == GF(1,6)
-    assert isinstance(f-pf2, GF)
-    assert f*pf2 == GF(1,6)
-    assert isinstance(f*pf2,GF)
-    assert f/pf2 == GF(3,2)
-    assert isinstance(f/pf2, GF)
+    assert f+pf2 == EF(5,6)
+    assert isinstance(f+pf2, EF)
+    assert f-pf2 == EF(1,6)
+    assert isinstance(f-pf2, EF)
+    assert f*pf2 == EF(1,6)
+    assert isinstance(f*pf2,EF)
+    assert f/pf2 == EF(3,2)
+    assert isinstance(f/pf2, EF)
     # Other operators
-    assert +pf1==GF(1,2)
-    assert isinstance(+pf1,GF)
-    assert -pf1==GF(-1,2)
-    assert isinstance(-pf1, GF)
-    assert pf1**2==GF(1,4)
-    assert isinstance(pf1**2, GF)
+    assert +pf1==EF(1,2)
+    assert isinstance(+pf1,EF)
+    assert -pf1==EF(-1,2)
+    assert isinstance(-pf1, EF)
+    assert pf1**2==EF(1,4)
+    assert isinstance(pf1**2, EF)
 
 def test_check():
     """Test the check method for confirming a fraction is in [0,1]"""
