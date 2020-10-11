@@ -48,16 +48,7 @@ class ExtDecimal(Number,Decimal):
             the range is verified when string representation is required
             (method str) or by explicit call to check() method 
         '''
-        is_percentage = False
-        if isinstance(val, str):
-            val = val.strip()
-            if val.endswith('%'):
-                val = Decimal(val[:-1])
-                is_percentage = True
-        decimal = Decimal(val)
-        if is_percentage:
-            decimal /= 100
-        return ExtDecimal._from_decimal(decimal)
+        return ExtDecimal._from_decimal(Decimal(val))
     
     @staticmethod         
     def _from_decimal(decimal):

@@ -116,18 +116,23 @@ class Alea(Lea):
             given arg:
             if arg is not a string, then it is returned as-is;
             if arg is a string, then it is tried to be interpreted as
-            Decimal, Fraction or sympy symbol, in that order; the object
-            of the first successful type is returned;
+            Fraction, Decimal, ProbDecimal or sympy symbol, in that order;
+            the object of the first successful type is returned;
+            note: ProbDecimal allows for '%' sufixes
         '''
         if not isinstance(arg,str):
             return arg
         # arg is a string, convert it into an object representing a number
         try:
+            return Fraction(arg)
+        except:            
+            pass
+        try:
             return Decimal(arg)
         except:            
             pass
         try:
-            return Fraction(arg)
+            return ProbDecimal(arg)
         except:            
             pass
         if sympy is None:

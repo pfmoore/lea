@@ -33,9 +33,18 @@ class ProbDecimal(ExtDecimal):
     '''    
     
     def __new__(cls, val=0):
-         new_prob_decimal = Decimal.__new__(ProbDecimal,Decimal(val))
-         new_prob_decimal.check()
-         return new_prob_decimal
+        is_percentage = False
+        if isinstance(val, str):
+            val = val.strip()
+            if val.endswith('%'):
+                val = Decimal(val[:-1])
+                is_percentage = True
+        decimal = Decimal(val)
+        if is_percentage:
+            decimal /= 100
+        new_prob_decimal = Decimal.__new__(ProbDecimal,decimal)
+        new_prob_decimal.check()
+        return new_prob_decimal
 
     def _get_base_class(self):
         return Decimal
