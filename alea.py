@@ -124,15 +124,15 @@ class Alea(Lea):
             return arg
         # arg is a string, convert it into an object representing a number
         try:
-            return Fraction(arg)
-        except:            
-            pass
-        try:
             return Decimal(arg)
         except:            
             pass
         try:
             return ProbDecimal(arg)
+        except:            
+            pass
+        try:
+            return Fraction(arg)
         except:            
             pass
         if sympy is None:
