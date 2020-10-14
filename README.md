@@ -4,6 +4,7 @@
 **New**: Check out [Lea playground](http://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Playground.ipynb) (online Jupyter notebook)!
 
 **New**: See Lea poster at forthcoming [PROBPROG2020](http://probprog.cc/posters/), hosted by the MIT. A dedicated virtual table will allow raising your questions/suggestions on Lea (Fri October 23rd, 2020). Anyone is warmly welcome!
+
 ---
 
 ## What is Lea?
