@@ -148,8 +148,8 @@ The above examples show only a very, very small subset of Lea 3 capabilities. To
 **Jupyter Notebooks** - To play with Lea online without any installation:
 
 * [Lea playground Jupyter Notebook](http://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Playground.ipynb) - full-fledged environment for your experiments with Lea 
-* [Lea Tutorial #1 Jupyter Notebook](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) - interactive tutorial #1 (see above)
-* [Lea Tutorial #2 Jupyter Notebook](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb) - interactive tutorial #2 (see above)
+* [Lea Tutorial #1 Jupyter Notebook](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_1.ipynb) - interactive tutorial 1 (see above)
+* [Lea Tutorial #2 Jupyter Notebook](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb) - interactive tutorial 2 (see above)
 * [The COVID-19 Case Jupyter Notebook](https://mybinder.org/v2/gh/piedenis/lea_mini_tutorials/master?filepath=Lea_COVID19.ipynb) - a Bayesian net linking diseases to symptoms 
 
 
