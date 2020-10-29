@@ -23,7 +23,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from .lea import Lea, Alea, P, Pf
+from .lea import Lea, Alea, Ilea, P, Pf
+from .evidence_ctx import EvidenceCtx
 from .license import VER as __version__
 
 # make convenient aliases for public static methods of Lea & Alea classes
@@ -34,6 +35,11 @@ cpt = Lea.cpt
 dist_l1 = Lea.dist_l1
 dist_l2 = Lea.dist_l2
 event = Alea.event
+evidence = EvidenceCtx
+has_evidence = EvidenceCtx.has_evidence
+add_evidence = EvidenceCtx.add_evidence
+pop_evidence = EvidenceCtx.pop_evidence
+clear_evidence = EvidenceCtx.clear_evidence
 func_wrapper = Lea.func_wrapper
 gen_em_steps = Lea.gen_em_steps
 if_ = Lea.if_

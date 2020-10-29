@@ -856,7 +856,7 @@ class Alea(Lea):
             kind = '/'
         else:
             kind = None
-        return self.as_string(kind)
+        return self.get_alea().as_string(kind)
 
     __repr__ = __str__
           
@@ -1021,6 +1021,11 @@ class Alea(Lea):
                                      for (vx,px) in obs_pmf_tuple))
                              for v in self.support))
 
+    def is_bindable(self,v):
+        ''' see Lea.is_bindable
+        '''
+        return self._val is self and v in self._vs
+
     def observe(self,v):
         ''' (re)bind self with given value v;
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
@@ -1035,7 +1040,7 @@ class Alea(Lea):
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             if check is True, then requires that self is bound
         '''
-        if check and self._val is self:
+        if check and not self.is_bound():
             raise Lea.Error("%s already unbound"%(self._id(),))
         self._val = self
 

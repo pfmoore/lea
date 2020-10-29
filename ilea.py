@@ -23,8 +23,11 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
 '''
 
-from .lea import Lea
+from .lea import Lea, Alea
+from .evidence_ctx import EvidenceCtx
+
 from operator import and_
+
 
 class Ilea(Lea):
     
@@ -32,8 +35,11 @@ class Ilea(Lea):
     Ilea is a Lea subclass, which instance represents a probability distribution obtained
     by filtering the values Vi of a given Lea instance that verify a boolean condition C,
     which is the AND of given boolean conditions Cj(Vi).
-    In the context of a conditional probability table (CPT), each Ilea instance represents
-    a given distribution <Vi,p(Vi|C)>, assuming that a given condition C is verified (see Blea class).
+    Beside the conditions carried by each Ilea instance, global conditions enforced by all
+    Ilea instances can be specified by means of "evidence contexts" (see EvidenceCtx class).
+    If used to define a conditional probability table (CPT), each Ilea instance represents
+    a given distribution <Vi,p(Vi|C)>, assuming that a given condition C is verified (see
+    Blea class).
     An Ilea instance is a "conditional pex", as defined in the paper on Statues algorithm
     (see http://arxiv.org/abs/1806.09997).
     '''
@@ -46,11 +52,14 @@ class Ilea(Lea):
         self._cond_leas = tuple(cond_leas)
 
     def _get_lea_children(self):
-        return (self._lea1,) + self._cond_leas
+        return (self._lea1,) + self._get_cond_leas()
     
     def _clone_by_type(self,clone_table):
         return Ilea(self._lea1._clone(clone_table),
-                    (cond_lea._clone(clone_table) for cond_lea in self._cond_leas))
+                    (cond_lea._clone(clone_table) for cond_lea in self._get_cond_leas()))
+
+    def _get_cond_leas(self):
+        return EvidenceCtx.get_active_conditions() + self._cond_leas
 
     @staticmethod
     def _gen_true_p(cond_leas):
@@ -61,10 +70,11 @@ class Ilea(Lea):
             # empty condition: evaluated as True (seed of recursion)
             yield 1
         else:
+            tail_cond_leas = cond_leas[1:]
             for (cv0,p0) in cond_leas[0].gen_vp():
                 if cv0 == True:
                     # the first condition is true, for some binding of variables
-                    for p1 in Ilea._gen_true_p(cond_leas[1:]):
+                    for p1 in Ilea._gen_true_p(tail_cond_leas):
                         # the full condition is true, for some binding of variables
                         yield p0*p1
                 elif cv0 == False:
@@ -75,7 +85,7 @@ class Ilea(Lea):
                     raise Lea.Error("boolean expression expected")
     
     def _gen_vp(self):
-        for cp in Ilea._gen_true_p(self._cond_leas):
+        for cp in Ilea._gen_true_p(self._get_cond_leas()):
             # the AND of conditions is true, for some binding of variables
             # yield value-probability pairs of _lea1, given this binding
             for (v,p) in self._lea1.gen_vp():
@@ -92,7 +102,7 @@ class Ilea(Lea):
             the exact_vars_lea argument may refer to other variables, which shall be used in the
             exact evaluation, beyond these already referred in the condition (see Lea.calc)
         '''
-        for p0 in Ilea._gen_true_p(self._cond_leas):
+        for p0 in Ilea._gen_true_p(self._get_cond_leas()):
             # the AND of conditions is true, for some binding of variables
             # perform random sampling on _lea1, given this binding and
             # yield value-probability pairs with the probability of the binding
@@ -137,13 +147,13 @@ class Ilea(Lea):
                 self._val = self
 
     def _gen_one_random_mc(self,nb_subsamples=1):
-        for _ in self._gen_one_random_true_cond(self._cond_leas,True):
+        for _ in self._gen_one_random_true_cond(self._get_cond_leas(),True):
             for _ in range(nb_subsamples):
                 for v in self._lea1.gen_one_random_mc():
                     yield v
 
     def _gen_one_random_mc_no_exc(self):
-        for u in self._gen_one_random_true_cond(self._cond_leas,False):
+        for u in self._gen_one_random_true_cond(self._get_cond_leas(),False):
             if u is not self: 
                 for v in self._lea1._gen_one_random_mc():
                     yield v
@@ -158,7 +168,7 @@ class Ilea(Lea):
             an exception is raised also if H is certainly true or certainly false      
         '''
         lr_n = self.P
-        lr_d = self._lea1.given(~Lea.reduce_all(and_,self._cond_leas,False)).P
+        lr_d = self._lea1.given(~Lea.reduce_all(and_,self._get_cond_leas(),False)).P
         if lr_d == 0:
             if lr_n == 0:
                 raise Lea.Error("undefined likelihood ratio")
@@ -168,4 +178,5 @@ class Ilea(Lea):
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
         return Ilea(self._lea1.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict),
                     ( cond_lea1.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict)
-                      for cond_lea1 in self._cond_leas) )
+                      for cond_lea1 in self._get_cond_leas()) )
+

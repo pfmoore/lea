@@ -364,8 +364,8 @@ class Lea(object):
             an exception is raised if the evidences contain a non-boolean or
             if they are unfeasible
         '''
-        return Ilea(self,(Alea.coerce(evidence) for evidence in evidences))    
-    
+        return Ilea(self,(Alea.coerce(evidence) for evidence in evidences))
+
     def times(self,n,op=operator.add):
         ''' returns, after evaluation of the probability distribution self, a new
             Alea instance representing the current distribution operated n times
@@ -1220,7 +1220,7 @@ class Lea(object):
             if a condition cannot be satisfied after nb_tries tries, then an error exception is raised; 
             WARNING: if nb_tries is None, any infeasible condition shall cause an infinite loop;
         '''
-        return Alea.vals(*self.gen_random_mc(nb_samples,nb_tries=nb_tries))
+        return self.calc(algo=Lea.MCRS,nb_samples=nb_samples,nb_tries=nb_tries)
     
     def nb_cases(self,bindings=None,memoization=True):
         ''' returns the number of atomic cases evaluated to build the exact probability distribution;
@@ -1355,16 +1355,19 @@ class Lea(object):
         self.get_alea().plot(title,fname,savefig_args,**bar_args)
 
     def get_alea(self,sorting=True):
-        ''' returns an Alea instance representing the distribution after it has been evaluated;
-            if self is an Alea instance, then it returns itself,
-            otherwise the newly created Alea is cached : the evaluation occurs only for the first
-            call; for successive calls, the cached Alea instance is returned, which is faster 
+        ''' returns an Alea instance representing the distribution after it has been evaluated
+            considering, if any, explicit bindings and evidence contexts;
+            the sorting argument (default True) allows sorting the value of the returned Alea
+            instance (see Alea.pmf method);
+            in most simple cases, the newly created Alea is cached: the evaluation occurs only
+            for the first call
         '''
         has_explicit_bindings = any((a._val is not a) for a in self.get_alea_leaves_set())
-        if self._alea is None or has_explicit_bindings:
+        is_not_cacheable = has_explicit_bindings or EvidenceCtx.has_evidence()
+        if self._alea is None or is_not_cacheable:
             new_alea = self.new(sorting=sorting)
-            if has_explicit_bindings:
-                self._alea = None
+            if is_not_cacheable:
+                self_alea = None
                 return new_alea
             self._alea = new_alea
         return self._alea
@@ -1375,6 +1378,13 @@ class Lea(object):
             cleanup after hacking private attributes of Lea instances assumed immutable
         ''' 
         self._alea = None
+
+    def is_bindable(self,v):
+        ''' returns True iff self is bindable to given value v,
+            i.e. self is an Alea instance (i.e. not dependent of other Lea instances);
+            and v is present in the domain of self
+        '''
+        return False
 
     def observe(self,v):
         ''' (re)binds self with given value v;
@@ -1581,31 +1591,35 @@ class Lea(object):
             if this set of variables is specified in exact_vars argument, then all their value combinations are
             browsed systematically by the exact algorithm while random sampling is done for other variables.
         '''
-        self._check_calc_arg(algo,nb_samples,nb_subsamples,nb_tries,exact_vars)
+        if EvidenceCtx.has_evidence():
+            lea1 = Ilea(self,())
+        else:
+            lea1 = self
+        lea1._check_calc_arg(algo,nb_samples,nb_subsamples,nb_tries,exact_vars)
         if algo == Lea.MCEV or algo == Lea.MCLW:
             if exact_vars is None:
                 exact_vars_lea = Alea.coerce(None)
             else:
                 exact_vars_lea = Clea(*exact_vars)
-            lea_scope = Clea(self,exact_vars_lea)
+            lea_scope = Clea(lea1,exact_vars_lea)
         else:
-            lea_scope = self
+            lea_scope = lea1
         try:
             lea_scope._init_calc(bindings,memoization)
             if algo == Lea.EXACT:
-                vps = self.gen_vp()
+                vps = lea1.gen_vp()
             elif algo == Lea.MCRS:
                 if nb_subsamples is None:
                     nb_subsamples = 1
-                vps = ((v,1) for v in self.gen_random_mc(nb_samples,nb_subsamples,nb_tries))
+                vps = ((v,1) for v in lea1.gen_random_mc(nb_samples,nb_subsamples,nb_tries))
             elif algo == Lea.MCLW:
-                vps = self._gen_vp_mclw(nb_subsamples,exact_vars_lea,nb_tries)
+                vps = lea1._gen_vp_mclw(nb_subsamples,exact_vars_lea,nb_tries)
             elif algo == Lea.MCEV:
-                vps = self._gen_vp_mcev(nb_subsamples,exact_vars_lea,nb_tries)
+                vps = lea1._gen_vp_mcev(nb_subsamples,exact_vars_lea,nb_tries)
             return Alea.pmf(vps,prob_type=prob_type,sorting=sorting,normalization=normalization)
         finally:
             lea_scope._finalize_calc(bindings)
-
+        
     def _gen_vp_mcev(self,nb_subsamples,exact_vars_lea,nb_tries=None):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability weight; this implements the MCEV algorithm
@@ -1969,6 +1983,7 @@ from .flea2a import Flea2a
 from .glea import Glea
 from .tlea import Tlea
 from .slea import Slea
+from .evidence_ctx import EvidenceCtx
 
 # init Alea class with default 'x' type code: if a probability is expressed as
 # a string, then the target type is determined from its content
