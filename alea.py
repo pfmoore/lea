@@ -86,8 +86,9 @@ class Alea(Lea):
 
     # function used to simplify symbolic probability expressions to be
     # displayed (see _simplify and Alea.__init__ methods)
-    _symbolic_simplify_function = sympy and staticmethod(sympy.factor)
-
+    # setting it to None disables any symbolic simplification
+    _symbolic_simplify_function = sympy and staticmethod(sympy.simplify)
+    
     # dictionary used in _downcast method
     __downcast_class = dict( {Fraction : ExtFraction,
                               Decimal  : ExtDecimal })
@@ -150,7 +151,7 @@ class Alea(Lea):
             otherwise,
                 returns v unchanged
         '''
-        if sympy is not None and isinstance(v,sympy.Expr):
+        if Alea._symbolic_simplify_function is not None and isinstance(v,sympy.Expr):
             return Alea._symbolic_simplify_function(v)
         if to_float:
             return float(v)
@@ -254,14 +255,14 @@ class Alea(Lea):
             if nb_none > 1:
                 raise Lea.Error("for normalization, no more than one single probability can be None")
             if nb_none == 1:
-                p_sum = sum(p for p in ps if p is not None)
+                p_sum = Alea._simplify(sum(p for p in ps if p is not None))
                 Alea._check_prob(p_sum)
                 idx_none = ps.index(None)
                 ps = ps[:idx_none] + (1-p_sum,) + ps[idx_none+1:]
             else:
-                p_sum = sum(ps)
+                p_sum = Alea._simplify(sum(ps))
                 ps = (truediv(p,p_sum) for p in ps)
-            if sympy is not None and Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
+            if Alea._symbolic_simplify_function is not None and isinstance(p_sum,sympy.Expr):
                 ps = (Alea._symbolic_simplify_function(p) for p in ps)
         self._ps = tuple(ps)
         if len(self._vs) != len(self._ps):
@@ -1066,7 +1067,7 @@ class Alea(Lea):
         if p1 is None:
             # val is absent form self: the probability is null, casted in the type of the last probability found
             p1 = 0 * p
-        return Alea._simplify(p1)
+        return p1
 
     def cumul(self):
         ''' returns a list with the probabilities p that self <= value ;
