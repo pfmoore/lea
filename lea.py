@@ -306,6 +306,7 @@ class Lea(object):
                 # self is explicitely bound - see observe(...) method or .calc(bindings=...);
                 # use the _gen_bound_vp method to yield the bound value
                 self.gen_vp = self._gen_bound_vp
+        ## note: do not replace '==' by 'is' operator below                
         elif memoization and self.gen_vp == self._gen_vp:
             # second occurrence of self in the expression: use the _gen_bound_vp method
             self.gen_vp = self._gen_bound_vp
@@ -318,19 +319,96 @@ class Lea(object):
         '''
         return self._val is not self
 
-    def _init_calc(self,bindings=None,memoization=True):
+    def _init_calc(self,bindings=None,memoization=True,optimize=True,debug=False):
         ''' prepares calculation of probability distribution by binding self.gen_vp to the most adequate method;
-            see _set_gen_vp method
+            see _set_gen_vp method;
             if bindings is not None, then it is browsed as a dictionary: each key (Alea instance) is bound
-            to the associated value - see requirements of Lea.observe.
+            to the associated value - see requirements of Lea.observe;
+            if optimize is true, then independent sub-DAG are searched in the DAG rooted by self; if such
+            independent sub-DAG are found, then their roots are evaluated and replaced by resulting Alea
+            instances; for some DAG presenting inner tree patterns, this divide-and-conquer process may save a
+            lot of calculations; this is used only in the context of EXACT algorithm (see calc method); 
+            all effects done by the present method are transient, for performing the calculation of self;
+            these are undone by _finalize_calc method
         '''
         self._reset_gen_vp()
         # set explicit bindings, if any
         if bindings is not None:
             for (x,v) in bindings.items():
                 x.observe(v)
-        # bind gen_vp method to _gen_vp or _gen_bound_vp, for self and its descendants
         self._set_gen_vp(memoization)
+        if optimize:
+            dependent_nodes = self._get_dependent_nodes()
+            # independent nodes can be evaluated one by one and replaced by an Alea instance
+            self._optimize(dependent_nodes,debug=debug)
+
+    def _optimize(self,dependent_nodes,first_level=True,debug=False):
+        """ replace in the DAG rooted by self the roots of independent sub-DAG by equivalent Alea instances;
+            these nodes are identified as non-Alea instances absent from the given dependent_nodes set,
+            provided that first_level is false;
+            the present method shall be called only in the context of EXACT algorithm (see calc method);
+            warning; it updates the dependent_nodes set by adding optimized nodes in it, in order to ensure
+            that these are optimized no more than once
+        """
+        for lea_child in self._get_lea_children():
+            lea_child._optimize(dependent_nodes,first_level=False,debug=debug)
+        if not (first_level or isinstance(self,Alea) or self in dependent_nodes):
+            alea1 = Alea.pmf(self.gen_vp(),normalization=False)
+            if debug:
+                print ("optimize %s"%(self._id()))
+            ## note: do not replace '==' by 'is' operator below
+            if self.gen_vp == self._gen_bound_vp:
+                self.gen_vp = alea1._gen_bound_vp
+            else:
+                self.gen_vp = alea1._gen_vp
+            dependent_nodes.add(self)
+
+    def _get_dependent_nodes(self):
+        """ returns the set of all "dependent" nodes in the DAG rooted by self;
+            a dependent node is, by definition, a node that cannot be evaluated individually
+            without referential consistency error on an ancestor;
+            (supporting method for _optimize)
+        """
+        ## note: do not replace '==' by 'is' operator below
+        pivotal_nodes = frozenset(x for x in self.gen_lea_descendants()
+                                    if x.gen_vp == x._gen_bound_vp)
+        dependent_nodes = set()
+        for pivotal_node in pivotal_nodes:
+            antipivotal_node = self._get_antipivotal_node(pivotal_node)
+            dependent_nodes.update(antipivotal_node._gen_dependent_nodes(pivotal_node))
+        return dependent_nodes
+  
+    def _gen_dependent_nodes(self,pivotal_node,first_level=True):
+        """ generates all "dependent" nodes in the DAG rooted by self on paths up to given pivotal_node;
+            a dependent node is, by definition, a node that cannot be evaluated individually
+            without referential consistency error on an ancestor; these are retrieved by gathering
+            all nodes between self and given pivotal_node (including); self is yielded, excepted
+            if it is the anti-pivotal node (first_level=True)
+            (supporting method for _optimize)
+        """
+        for lea_child in self._get_lea_children():
+            if lea_child is pivotal_node and not first_level:
+                yield self
+            some = False
+            for x in lea_child._gen_dependent_nodes(pivotal_node,False):
+                some = True
+                yield x
+            if some:
+                yield lea_child
+                
+    def _get_antipivotal_node(self,pivotal_node):
+        """ returns the anti-pivotal node corresponding to given pivotal_node in the DAG rooted by self,
+            a pivotal node is a node that has more than one parent, i.e. which is referred multiple times
+            in the expression under evaluation, requiring a binding mechanism to ensure referential consistency
+            for each pivotal node, there exists one and only one anti-pivotal node, which is the closest
+            ancestor node that is the origin of all paths leading to this pivotal node
+            (supporting method for _optimize)
+        """
+        children_containing_pivotal_node = tuple(lea_child for lea_child in self._get_lea_children()
+                                                 if any(y is pivotal_node for y in lea_child.gen_lea_descendants()))
+        if len(children_containing_pivotal_node) == 1:
+            return children_containing_pivotal_node[0]._get_antipivotal_node(pivotal_node)
+        return self
 
     def _finalize_calc(self,bindings=None):
         ''' makes finalization after pmf calculation, by unbinding all instances bound in
@@ -1229,7 +1307,7 @@ class Lea(object):
             * memoization argument: see Lea.calc method
         '''
         try:
-            self._init_calc(bindings,memoization)
+            self._init_calc(bindings,memoization,optimize=False)
             return sum(1 for vp in self.gen_vp())
         finally:
             self._finalize_calc(bindings)
@@ -1497,7 +1575,7 @@ class Lea(object):
             raise Lea.Error("algo argument shall be %s, %s, %s or %s"%(Lea.EXACT,Lea.MCRS,Lea.MCLW,Lea.MCEV))
 
     def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True,
-             algo=EXACT,nb_samples=None,nb_subsamples=None,nb_tries=None,exact_vars=None):
+             algo=EXACT,optimize=True,nb_samples=None,nb_subsamples=None,nb_tries=None,exact_vars=None,debug=False):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
             the first three arguments allow customizing the Alea instance returned:
             * prob_type (default: -1): if -1, then the probability type is the same as self's,
@@ -1552,6 +1630,10 @@ class Lea(object):
                 samples on remaining (unbound) variables, assigning a weight p to these samples;
                 MCEV algorithm cannot handle expressions under condition, i.e. x.given(e); MCLW shall be
                 used instead;
+            * optimize (default: true), considered only if algo=EXACT, if true then independent sub-DAG are
+               searched in the DAG rooted by self; if such independent sub-DAG are found, then their roots
+               are evaluated using EXACT algorithm and replaced by resulting Alea instances; for some DAG
+               presenting inner tree patterns, this divide-and-conquer process may save a lot of calculations; 
             * nb_samples (default: None): number of random samples made for MCRS algorithm;
             * nb_subsamples (default: None): only for MCRS and MCLW algorithms and if self is
               an Ilea instance, i.e. a conditional probability x.given(e); it specifies the number of random
@@ -1568,6 +1650,7 @@ class Lea(object):
             * exact_vars (default: None): only for MCEV algorithm: an iterable giving the variables
               referred in self that shall be evaluated by using the exact algorithm, the other ones being
               subject to random sampling;
+            * debug (default: False): displays debug trace on standard output
             On choosing the right algorithm and options...
             EXACT is the default algorithm; it is the recommended algorithm for all tractable problems;
             it allows in particular to work with probability fractions and symbols;
@@ -1605,7 +1688,9 @@ class Lea(object):
         else:
             lea_scope = lea1
         try:
-            lea_scope._init_calc(bindings,memoization)
+            if algo != Lea.EXACT:
+                optimize = False
+            lea_scope._init_calc(bindings,memoization,optimize,debug)
             if algo == Lea.EXACT:
                 vps = lea1.gen_vp()
             elif algo == Lea.MCRS:
