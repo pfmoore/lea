@@ -389,11 +389,11 @@ class Lea(object):
         for lea_child in self._get_lea_children():
             if lea_child is pivotal_node and not first_level:
                 yield self
-            some = False
+            has_found_dependent_nodes = False
             for x in lea_child._gen_dependent_nodes(pivotal_node,False):
-                some = True
+                has_found_dependent_nodes = True
                 yield x
-            if some:
+            if has_found_dependent_nodes:
                 yield lea_child
                 
     def _get_antipivotal_node(self,pivotal_node):
@@ -1633,7 +1633,9 @@ class Lea(object):
             * optimize (default: true), considered only if algo=EXACT, if true then independent sub-DAG are
                searched in the DAG rooted by self; if such independent sub-DAG are found, then their roots
                are evaluated using EXACT algorithm and replaced by resulting Alea instances; for some DAG
-               presenting inner tree patterns, this divide-and-conquer process may save a lot of calculations; 
+               presenting inner tree patterns, this divide-and-conquer process may save a lot of calculations;
+               putting optimize=False allows getting the behavior of Lea versions prior to 3.4.0. and
+               highlighting the effect of optimization
             * nb_samples (default: None): number of random samples made for MCRS algorithm;
             * nb_subsamples (default: None): only for MCRS and MCLW algorithms and if self is
               an Ilea instance, i.e. a conditional probability x.given(e); it specifies the number of random
