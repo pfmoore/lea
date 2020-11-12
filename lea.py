@@ -444,27 +444,29 @@ class Lea(object):
         '''
         return Ilea(self,(Alea.coerce(evidence) for evidence in evidences))
 
-    def times(self,n,op=operator.add):
+    def times(self,n,op=operator.add,normalization=False):
         ''' returns, after evaluation of the probability distribution self, a new
             Alea instance representing the current distribution operated n times
             with itself, through the given binary operator op;
             if n = 1, then a copy of self is returned;
             requires that n is strictly positive; otherwise, an exception is
             raised;
+            if normalization is True (default: False), then each probability is
+            divided by the sum of all probabilities
             note that the implementation uses a fast dichotomous algorithm,
             instead of a naive approach that scales up badly as n grows
         '''
-        alea1 = self.get_alea()
+        alea1 = self.new(normalization=False)
         if n <= 0:
             raise Lea.Error("times method requires a strictly positive integer")
         if n == 1:
-            return alea1.new()
+            return alea1.new(normalization=normalization)
         (n2,r) = divmod(n,2)
-        alea2 = alea1.times(n2,op)
-        res_flea2 = Flea2(op,alea2,alea2.new())
+        alea2 = alea1.times(n2,op,normalization=False)
+        res_flea2 = Flea2(op,alea2,alea2.new(normalization=False))
         if r == 1:
             res_flea2 = Flea2(op,res_flea2,alea1)
-        return res_flea2.get_alea()
+        return res_flea2.calc(normalization=normalization)
 
     def times_tuple(self,n):
         ''' returns a new Alea instance with tuples of length n, containing
@@ -1510,7 +1512,7 @@ class Lea(object):
                 cloned_lea._alea = self._alea
         return cloned_lea
 
-    def new(self,n=None,prob_type=-1,sorting=True):
+    def new(self,n=None,prob_type=-1,sorting=True,normalization=True):
         ''' returns a new Alea instance representing the distribution after it has been evaluated;
             if self is an Alea, then it returns a copy of itself representing an independent event;
             the probability type used in the returned instance depends on given prob_type:
@@ -1518,11 +1520,13 @@ class Lea(object):
             * if prob_type is -1, then the probability type is the same as self's
               otherwise, the probability type is defined using prob_type (see doc of Alea.set_prob_type);
             * sorting allows sorting the value of the returned Alea instance (see Alea.pmf method);
+            * normalization (default: True): if True, then each probability is divided by the sum of
+              all probabilities
             note that the present method is overloaded in Alea class, to be more efficient
         '''
-        new_alea = self.calc(prob_type=prob_type,sorting=sorting)
+        new_alea = self.calc(prob_type=prob_type,sorting=sorting,normalization=normalization)
         if n is not None:
-            return tuple(new_alea.new() for _ in range(n))
+            return tuple(new_alea.new(normalization=False) for _ in range(n))
         return new_alea
 
     EXACT = 'EXACT'

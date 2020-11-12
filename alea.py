@@ -316,7 +316,7 @@ class Alea(Lea):
         ## which is the highest arithmetic class in class hierarchy
         return Alea((value,),(1,),normalization=False,prob_type=prob_type)
 
-    def new(self,n=None,prob_type=-1,sorting=False):
+    def new(self,n=None,prob_type=-1,sorting=False,normalization=False):
         ''' returns a new Alea instance, which represents the same probability
             distribution as self but for another event, independent from the
             event represented by self;
@@ -330,12 +330,13 @@ class Alea(Lea):
                     (see doc of Alea.set_prob_type);
             * sorting allows sorting the value of the returned Alea instance
               (see Alea.pmf method);
+            * normalization (default: False): if True, then each probability is divided
+              by the sum of all probabilities              
             note that the present method overloads Lea.new to be more efficient;
         '''
         if sorting:
             # for sorting, relay to Lea.new, which is less efficient but handles the case correctly 
             return Lea.new(self,prob_type=prob_type,sorting=True)
-        normalization = prob_type != -1
         new_alea = Alea(self._vs,self._ps,normalization=normalization,prob_type=prob_type)
         if prob_type == -1:
             ## note that the new Alea instance shares the immutable _vs and _ps attributes of self
