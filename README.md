@@ -1,9 +1,11 @@
 # Lea - Discrete probability distributions in Python
 
 ---
+**New**: [Lea 3.4.0](http://pypi.org/project/lea) is there! Better, faster, ... by a lot! 
+
 **New**: Check out [Lea playground](http://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Playground.ipynb) (online Jupyter notebook)!
 
-**New**: See Lea poster at forthcoming [PROBPROG2020](http://probprog.cc/posters/), hosted by the MIT. A dedicated virtual table will allow raising your questions/suggestions on Lea (Fri October 23rd, 2020). Anyone is warmly welcome!
+**New**: See [Lea poster](http://probprog.cc/assets/posters/fri/69.pdf) presented at  [PROBPROG2020](http://probprog.cc/posters/), hosted by MIT.
 
 ---
 
