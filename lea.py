@@ -1009,16 +1009,16 @@ class Lea(object):
         ''' reads the file with given filenam and parses it as a BIF file (Bayesian
             Interchange Format);
             builds up a BN by creating new Alea instances for prior RV and Tlea instances
-            for CPT; all read values are defiend as strings, except "True" and "False",
-            which are tranlated to booleans;
+            for CPT; all read values are defined as strings, except "True" and "False",
+            which are translated to booleans;
             updates the given dictionary var_dict to store the created Lea instances
             with the names found in the file as keys;
-            requires that filename refers to a readable valid BIF file
+            requires that filename refers to a readable valid BIF file;
             hint: passing var_dict=globals() allows creating directly the BN variables in
                   the caller's global namespace;
             note: the BIF parsing is simplistic - it can probably parse all BIF files
                   found in http://www.bnlearn.com/bnrepository but it is not guaranteed
-                  to be able to read any valid BIF file; in particular, BIFF comments are
+                  to be able to parse any valid BIF file; in particular, BIF comments are
                   not treated; if the parsing fails, then an exception is raised
         '''
         try:
