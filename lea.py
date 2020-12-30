@@ -896,6 +896,169 @@ class Lea(object):
         # values found in self
         return NamedTuple(**vars_bn_dict)
 
+    @staticmethod
+    def __gen_bif_blocks(bif_content):
+        ''' subsidiary method for read_bif_file
+        '''
+        keyword = None
+        name = None
+        cpt_var_names = None
+        lines = None
+        for token in bif_content.split():
+            if token[-1] == ",":
+                token = token[:-1]
+            if len(token) == 0:
+                continue
+            if keyword is None:
+                keyword = token
+            elif name is None:
+                if token != "(":
+                    name = token
+            elif token == "|":
+                cpt_var_names = []
+            elif lines is None:
+                if token == ")":
+                    pass
+                elif token == "{":
+                    assert cpt_var_names is None or len(cpt_var_names) > 0
+                    lines = []
+                    line_parts = []
+                elif cpt_var_names is not None:
+                    cpt_var_names.append(token)
+                else:
+                    assert False
+            elif token == "}":
+                yield (keyword, name, cpt_var_names, lines)
+                keyword = None
+                name = None
+                cpt_var_names = None
+                lines = None               
+            else:
+                is_end_line = False
+                if token[-1] == ";":
+                    token = token[:-1]
+                    is_end_line = True
+                if len(token) > 0:
+                    line_parts.append(token)
+                if is_end_line:
+                    lines.append(" ".join(line_parts))
+                    line_parts = []
+        assert keyword is None and name is None and cpt_var_names is None and lines is None  
+
+    @staticmethod
+    def __create_lea_instance(var_name,prob_block_by_var_name,values_by_var_name,lea_instances_by_name):
+        ''' subsidiary method for read_bif_file
+        '''
+        if var_name in lea_instances_by_name:
+            return
+        (cpt_var_names, lines) = prob_block_by_var_name[var_name]
+        values = values_by_var_name[var_name]
+        if cpt_var_names is None:
+            assert len(lines) == 1
+            line_parts = lines[0].split()
+            assert line_parts[0] == "table"
+            probs = tuple(float(p) for p in " ".join(line_parts[1:]).replace(",","").split())
+            assert len(values) == len(probs)
+            values = tuple(True if v=="True" else (False if v=="False" else v)
+                           for v in values)
+            lea_instances_by_name[var_name] = Alea(values,probs)
+        else:
+            for cpt_var_name in cpt_var_names:
+                 Lea.__create_lea_instance(cpt_var_name,prob_block_by_var_name,values_by_var_name,lea_instances_by_name)
+            if len(cpt_var_names) == 1:
+                decision_lea = lea_instances_by_name[cpt_var_names[0]]
+            else:
+                decision_lea = Lea.joint(*(lea_instances_by_name[cpt_var_name]
+                                           for cpt_var_name in cpt_var_names))
+            lea_dict = dict()
+            default_lea = Lea._DUMMY_VAL
+            for line in lines:
+                if ")" in line:
+                    (values_str, probs_str) = line.split(")")
+                    decision_value = []
+                    for value in values_str.replace(","," ").split():
+                        if value[0] == "(":
+                            value = value[1:]
+                        if value == "True":
+                            value = True
+                        elif value == "False":
+                            value = False
+                        decision_value.append(value)
+                    probs = tuple(float(p) for p in probs_str.replace(","," ").split())
+                    assert len(values) == len(probs)
+                    assert len(cpt_var_names) == len(decision_value)
+                    for (cpt_var_name,value) in zip(cpt_var_names,decision_value):
+                        assert value in values_by_var_name[cpt_var_name]
+                    if len(decision_value) == 1:
+                        decision_value2 = decision_value[0]
+                    else:
+                        decision_value2 = tuple(decision_value)
+                    assert decision_value2 not in lea_dict
+                    lea_dict[decision_value2] = Alea(values,probs)
+                else:
+                    parts = line.replace(","," ").split()
+                    assert parts[0] == "default"
+                    assert default_lea is Lea._DUMMY_VAL
+                    probs = tuple(float(p) for p in parts[1:])
+                    assert len(values) == len(probs)
+                    default_lea = Alea(values,probs)
+            lea_instances_by_name[var_name] = decision_lea.switch(lea_dict,default_lea=default_lea)
+
+    @staticmethod
+    def read_bif_file(filename,var_dict):
+        ''' reads the file with given filenam and parses it as a BIF file (Bayesian
+            Interchange Format);
+            builds up a BN by creating new Alea instances for prior RV and Tlea instances
+            for CPT; all read values are defiend as strings, except "True" and "False",
+            which are tranlated to booleans;
+            updates the given dictionary var_dict to store the created Lea instances
+            with the names found in the file as keys;
+            requires that filename refers to a readable valid BIF file
+            hint: passing var_dict=globals() allows creating directly the BN variables in
+                  the caller's global namespace;
+            note: the BIF parsing is simplistic - it can probably parse all BIF files
+                  found in http://www.bnlearn.com/bnrepository but it is not guaranteed
+                  to be able to read any valid BIF file; in particular, BIFF comments are
+                  not treated; if the parsing fails, then an exception is raised
+        '''
+        try:
+            with open(filename,'r') as f:
+                bif_content = f.read()
+        except:
+            raise Lea.Error("cannot read '%s'"%filename)
+        values_by_var_name = dict()
+        prob_block_by_var_name = dict()
+        try:
+            for (keyword, name, cpt_var_names, lines) in Lea.__gen_bif_blocks(bif_content):
+                if keyword == "network":
+                    pass
+                elif keyword == "variable":
+                    assert cpt_var_names is None
+                    assert len(lines) == 1
+                    line_parts = lines[0].split()
+                    assert line_parts[0] == "type" and line_parts[1] == "discrete" \
+                           and line_parts[2] == "[" and line_parts[4] == "]" \
+                           and line_parts[5] == "{" and line_parts[-1] == "}"
+                    nb_values = int(line_parts[3])
+                    values = tuple((" ".join(line_parts[6:-1])).replace(",","").split())
+                    assert len(values) == nb_values
+                    if values == ("True", "False"):
+                        values = (True, False)
+                    elif values == ("False", "True"):
+                        values = (False, True)
+                    values_by_var_name[name] = values
+                elif keyword == 'probability':
+                    prob_block_by_var_name[name] = (cpt_var_names, lines)
+                else:
+                    assert False
+            assert frozenset(values_by_var_name) == frozenset(prob_block_by_var_name.keys())
+            lea_instances_by_name = dict()
+            for var_name in prob_block_by_var_name:
+                 Lea.__create_lea_instance(var_name,prob_block_by_var_name,values_by_var_name,lea_instances_by_name)
+            var_dict.update(lea_instances_by_name)
+        except Exception:
+            raise Lea.Error("cannot parse '%s' as a BIF file (maybe due to Lea parser's limitations)"%filename)
+
     def em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
         ''' returns a revised version of self, with parameters tuned to match a given observed
             sample; this executes one step of the Expectation-Maximization (EM) algorithm;

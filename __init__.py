@@ -54,6 +54,7 @@ max_of = Lea.max_of
 min_of = Lea.min_of
 pmf = Alea.pmf
 poisson = Lea.poisson
+read_bif_file = Lea.read_bif_file
 read_csv_file = Alea.read_csv_file
 read_pandas_df = Alea.read_pandas_df
 reduce_all = Lea.reduce_all
