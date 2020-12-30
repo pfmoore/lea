@@ -620,7 +620,7 @@ class Alea(Lea):
             to define non-uniform probability distribution, as alternative to repeating the
             same row multiple times
         '''
-        # Filter out kewords argument targeting Alea constructors (assuming no name collision csv.reader keywords) 
+        # filter out keywords argument targeting Alea constructors (assuming no name collision csv.reader keywords) 
         kwargs = dict((k,v) for (k,v) in fmtparams.items() if k in Alea.__contructor_arg_names)
         fmtparams = dict((k,v) for (k,v) in fmtparams.items() if k not in kwargs)
         if isinstance(csv_file,str):
