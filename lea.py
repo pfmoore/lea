@@ -2080,7 +2080,7 @@ class Lea(object):
                     args1[0] = '( ' + args1[0]
                     args.append(('\n'+_indent+'    ').join(args1)+'\n'+_indent+'  )')
                 elif isinstance(attr_val,dict):
-                    args1 = ["'%s': %s"%(k,v.internal(full,_indent+'    ',_refs) if isinstance(v,Lea) else v)
+                    args1 = ["%r: %s"%(k,v.internal(full,_indent+'    ',_refs) if isinstance(v,Lea) else v)
                              for (k,v) in attr_val.items()]
                     args1[0] = '{ ' + args1[0]
                     args.append(('\n'+_indent+'    ').join(args1)+'\n'+_indent+'  }')
