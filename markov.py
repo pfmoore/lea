@@ -26,6 +26,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 from .lea import Lea
 from .alea import Alea
 from .tlea import Tlea
+from .ilea import Ilea
 from .toolbox import zip, dict, defaultdict
 from itertools import islice, tee
 
@@ -49,7 +50,7 @@ class Chain(object):
               state_given or next_state_given methods
     '''
 
-    __slots__ = ('_next_state_lea_per_state','states','_state_alea_dict','state','_next_state_tlea')
+    __slots__ = ('_next_state_lea_per_state','_next_state_lea_per_state_dict','states','_state_alea_dict','state','_next_state_tlea')
     
     def __init__(self,next_state_lea_per_state):
         ''' initializes Chain instance's attributes; 
@@ -60,6 +61,9 @@ class Chain(object):
         '''
         object.__init__(self)
         self._next_state_lea_per_state = tuple(next_state_lea_per_state)
+        # dict version of next_state_lea_per_state (losing order)
+        ## we could use OrderedDict, to keep only one attribute, but this requires Python 3.1+ 
+        self._next_state_lea_per_state_dict = dict(self._next_state_lea_per_state)        
         # states of the Markov chain, without any probability
         self.states = tuple(state for (state,_) in self._next_state_lea_per_state)
         # dictionary associating each given state S to StateAlea instance where S has probability 1
@@ -68,7 +72,7 @@ class Chain(object):
         # StateAlea instance where all states are equiprobable
         self.state = StateAlea(Alea.vals(*self.states),self)
         # CPT associating each state with the probability distribution of transition to next state
-        self._next_state_tlea = Tlea(self.state,dict(self._next_state_lea_per_state))
+        self._next_state_tlea = Tlea(self.state,self._next_state_lea_per_state_dict)
 
     @staticmethod
     def from_matrix(states,*trans_probs_per_state):
@@ -137,38 +141,58 @@ class Chain(object):
         # state_lea is not Lea instance: assume that it is a certain state object
         return self._state_alea_dict[state_lea]
 
-    def next_state(self,from_state=None,n=1):
-        ''' returns the StateAlea instance obtained after n transitions from an initial
-            state defined by the given from_state, which either a given certain state
-            or a Lea instance giving the probability distribution of states;
+    def next_state(self,from_state=None,n=1,keeps_dependency=True):
+        ''' returns the StateLea instance obtained after n transitions from an initial state
+            defined by the given from_state, which is either a given certain state (coerced
+            to Lea instance) or a Lea instance giving the probability distribution of states;
             if from_state is None, then the initial state is the uniform probability
             distribution of the declared states;
-            if n = 0, then this initial state is returned
+            * if keeps_dependency is True (default) and from_state is None or a Lea instance,
+            then a StateTlea instance is returned, keeping the dependency with from_state;
+            * otherwise, a StateAlea instance is returned, losing the dependency with from_state; 
+            the returned probability distribution is the same in the two cases, but putting
+            keeps_dependency=False, can be useful to get a result if a stack overflow occurs
+            for a too big n (the StateTlea instance actually stores a DAG with depth close to n);
+            requires n >= 1
         '''
-        if n < 0:
-            raise Lea.Error("next_state method requires a positive value for argument 'n'")
+        ## TODO: keeps_dependency argument could be avoided by changing the algorithm
+        ##       to use matrix multiplication and retrurning always a small StateTlea;
+        ###      however, this would need numpy, which is not required in Lea 3
+        if n <= 0:
+            raise Lea.Error("next_state method requires a strictly positive value for argument 'n'")
+        #state_n = Alea.coerce(self.state if from_state is None else from_state)
         if from_state is None:
-            from_state = self.state
-        state_n = Alea.coerce(from_state).get_alea()
-        while n > 0:
-            n -= 1
-            state_n = self._next_state_tlea.given(self.state==state_n).get_alea()
+            state_n = self.state
+        else:
+            state_n = Alea.coerce(from_state)
+        if keeps_dependency and (from_state is None or state_n is from_state):
+            for _ in range(n):
+                alea_dict = dict((state,lea1.new())
+                                  for (state,lea1) in self._next_state_lea_per_state)
+                state_n = StateTlea(state_n,alea_dict,self)
+            return state_n
+        state_n = state_n.get_alea()
+        for _ in range(n): 
+            state_n = state_n.switch(self._next_state_lea_per_state_dict).get_alea()
         return StateAlea(state_n,self)
 
-    def state_given(self,cond_lea):
-        ''' returns the StateAlea instance verifying the given cond_lea, a Lea instance
-            expressing a condition using the 'state' instance attribute
+    def state_given(self,*cond_leas):
+        ''' returns the StateIlea instance verifying the given cond_lea, this last being
+            a Lea instance expressing a condition using the 'state' instance attribute
         '''
-        return StateAlea(self.state.given(cond_lea),self)
+        return StateIlea(self.state,cond_leas,self)
 
-    def next_state_given(self,cond_lea,n=1):
-        ''' returns the StateAlea instance obtained after n transitions from initial state
+    def next_state_given(self,cond_lea,n=1,keeps_dependency=True):
+        ''' returns the StateLea instance obtained after n transitions from initial state
             defined by the state distribution verifying the given cond_lea, a Lea instance
             expressing a condition using the 'state' instance attribute;
-            if n = 0, then this initial state is returned
+            the returned instance is either StateTlea or StateAlea depending on given
+            keeps_dependency argument -> see Chain.next_state method for the meaning of
+            this argument;
+            requires n >= 1
         '''
         from_state = self.state.given(cond_lea)
-        return self.next_state(from_state,n)
+        return self.next_state(from_state,n,keeps_dependency)
     
     def matrix(self,from_states=None,to_states=None,as_array=False):
         ''' returns the probability matrix of transition from given iterable from_states to
@@ -246,37 +270,29 @@ class Chain(object):
         return (is_absorbing,transient_states,absorbing_states,q_matrix,r_matrix,n_matrix)
 
 
-class StateAlea(Alea):
+class StateLea:
     '''
-    A StateAlea instance represents a probability distribution of states, for a given Markov chain
+    StateLea is an abstract mixin class storing a Chain instance;
+    it provides methods common for StateAlea, StateTlea and StateIlea subclasses
     '''
     
-    __slots__ = ('_chain',)
+    ## note: __slots__ = ('_chain',) causes an exception
+    ##       TypeError: multiple bases have instance lay-out conflict
+    ##       when trying to make multiple inheritance below
     
-    def __init__(self,state_lea,chain):
-        ''' initializes StateAlea instance's attributes
-            corresponding to the probability distribution given in state_lea
-            and referring to the given chain, instance of Chain
+    def __init__(self,chain):
+        ''' initializes the instance by storing chain
         '''
-        # order the states to follow the order given in chain.states, for user-friendliness
-        ## if not needed, the following statement is sufficient:
-        ## Alea.__init__(self,*zip(*state_lea.get_alea()._gen_vp()))
-        vs = []
-        ps = []
-        state_lea_pmf_dict = state_lea.pmf_dict
-        for state in chain.states:
-            p = state_lea_pmf_dict.get(state,self)
-            if p is not self:
-                vs.append(state)
-                ps.append(p)
-        Alea.__init__(self,vs,ps)
         self._chain = chain
 
-    def next_state(self,n=1):
-        ''' returns the StateAlea instance obtained after n transitions from initial state self
-            if n = 0, then self is returned
+    def next_state(self,n=1,keeps_dependency=True):
+        ''' returns the StateLea instance obtained after n transitions from initial state self;
+            the returned instance is either StateTlea or StateAlea depending on given
+            keeps_dependency argument -> see Chain.next_state method for the meaning of
+            this argument;
+            requires n >= 1
         '''
-        return self._chain.next_state(self,n)
+        return self._chain.next_state(self,n,keeps_dependency)
 
     def gen_random_seq(self):
         ''' generates an infinite sequence of random state objects,
@@ -295,6 +311,82 @@ class StateAlea(Alea):
         if n is not None:
             n = int(n)
         return tuple(islice(self.gen_random_seq(),n))
+
+
+class StateAlea(Alea,StateLea):
+    '''
+    A StateAlea instance represents a fixed probability distribution of states,
+    for a given Markov chain (see superclasses Alea and StateLea)
+    '''
+
+    __slots__ = ('_chain',)
+
+    def __init__(self,state_lea,chain):
+        ''' initializes StateAlea instance's attributes
+            corresponding to the probability distribution given in state_lea
+            and referring to the given chain, instance of Chain
+        '''
+        StateLea.__init__(self,chain)
+        # order the states to follow the order given in chain.states, for user-friendliness
+        ## if not needed, the following statement is sufficient:
+        ## Alea.__init__(self,*zip(*state_lea.get_alea()._gen_vp()))
+        vs = []
+        ps = []
+        state_lea_pmf_dict = state_lea.pmf_dict
+        for state in chain.states:
+            p = state_lea_pmf_dict.get(state,self)
+            if p is not self:
+                vs.append(state)
+                ps.append(p)
+        Alea.__init__(self,vs,ps)
+
+
+class StateTlea(Tlea,StateLea):
+    '''
+    A StateTlea instance represents a probability distribution of states,
+    defined by a conditional probablity table, for a given Markov chain
+    (see superclasses Tlea and StateLea)
+    '''
+
+    __slots__ = ('_chain',)
+
+    def __init__(self,lea_c,lea_dict,chain):
+        ''' initializes StateTlea instance's attributes
+            corresponding to the choice lea_C, the CPT lea_dict
+            and referring to the given chain, instance of Chain
+        '''
+        StateLea.__init__(self,chain)
+        Tlea.__init__(self,lea_c,lea_dict)
+
+    def get_alea(self):
+        try:
+            return StateAlea(Tlea.get_alea(self),self._chain)
+        except RecursionError:
+            pass
+        raise Lea.Error("RecursionError raised - HINT: decrease the value of n in next_state() call"
+                        " or add argument keeps_dependency=False, provided that keeping dependency"
+                        " with initial state is not required")
+
+
+class StateIlea(Ilea,StateLea):
+    '''
+    A StateIlea instance represents a probability distribution of states,
+    defined by another distibutions under a given conddition, for a given
+    Markov chain (see superclasses Ilea and StateLea)
+    '''
+
+    __slots__ = ('_chain',)
+
+    def __init__(self,lea1,cond_leas,chain):
+        ''' initializes StateIlea instance's attributes
+            corresponding to the probability distribution lea1 conditioned
+            by the sequence of condition cond_leas and referring to the
+            given chain, instance of Chain
+        '''
+        StateLea.__init__(self,chain)
+        cond_leas = tuple(Alea.coerce(cond_lea) for cond_lea in cond_leas)
+        Ilea.__init__(self,lea1,cond_leas)
+
 
 # convenience aliases
 chain_from_matrix = Chain.from_matrix
