@@ -2,6 +2,7 @@ import lea
 import pytest
 
 from lea import markov 
+from lea.toolbox import isclose
 
 @pytest.fixture(scope="module")
 def setup():
@@ -44,16 +45,21 @@ def test_markov_next_state(setup):
     """Check that markov.Chain.next_state method is correct"""
     market = create_market_mc()
     (bull_state,bear_state,stag_state) = market.get_states()
-    assert bear_state.next_state(0).equiv_f(lea.pmf({'BEAR': 1.}))
     assert bear_state.next_state().equiv_f(lea.pmf({'BULL': 0.150, 'BEAR': 0.800, 'STAG': 0.050}))
     assert bear_state.next_state(1).equiv_f(lea.pmf({'BULL': 0.150, 'BEAR': 0.800, 'STAG': 0.050}))
+    assert bear_state.next_state(1,keeps_dependency=False).equiv_f(lea.pmf({'BULL': 0.150, 'BEAR': 0.800, 'STAG': 0.050}))
     assert bear_state.next_state(3).equiv_f(lea.pmf({'BULL': 0.35750, 'BEAR': 0.56825, 'STAG': 0.07425}))
+    assert bear_state.next_state(3,keeps_dependency=False).equiv_f(lea.pmf({'BULL': 0.35750, 'BEAR': 0.56825, 'STAG': 0.07425}))
     # stationary distribution
     assert bear_state.next_state(100).equiv_f(lea.pmf({'BULL': 0.6250, 'BEAR': 0.3125, 'STAG': 0.0625}))
     fp_state = market.get_state(lea.pmf({ 'BULL': 0.6250,
                                           'BEAR': 0.3125,
                                           'STAG': 0.0625 }))
     assert fp_state.next_state().equiv_f(fp_state)
+    assert isclose(lea.mutual_information(market.state,market.state.next_state()),0.5321367231080285)
+    assert isclose(lea.mutual_information(market.state,market.state.next_state(keeps_dependency=False)),0.0)
+    with pytest.raises(lea.Lea.Error):
+        bear_state.next_state(0)
     with pytest.raises(lea.Lea.Error):
         bear_state.next_state(-1)
 
@@ -65,23 +71,23 @@ def test_markov_state_given(setup):
     assert market.state_given(market.state[0]=='B').equiv_f(lea.pmf({'BULL': 0.5, 'BEAR': 0.5}))
     assert market.state_given((market.state[0]=='B')&(market.state!='BEAR')).equiv_f(bull_state)
     with pytest.raises(lea.Lea.Error):
-        market.state_given(False)
+        market.state_given(False).calc()
     with pytest.raises(lea.Lea.Error):
-        market.state_given(market.state=='XXX')
+        market.state_given(market.state=='XXX').calc()
 
 def test_markov_next_state_given(setup):
     """Check that markov.Chain.next_state_given method is correct"""
     market = create_market_mc()
     (bull_state,bear_state,stag_state) = market.get_states()
-    assert market.next_state_given(market.state=='BEAR',0).equiv_f(bear_state)
-    assert market.next_state_given(market.state[0]=='B',0).equiv_f(lea.pmf({'BULL': 0.5, 'BEAR': 0.5}))
     assert market.next_state_given(market.state=='BEAR').equiv_f(lea.pmf({'BULL': 0.150, 'BEAR': 0.800, 'STAG': 0.050}))
     assert market.next_state_given(market.state=='BEAR',1).equiv_f(lea.pmf({'BULL': 0.150, 'BEAR': 0.800, 'STAG': 0.050}))
     assert market.next_state_given(market.state=='BEAR',3).equiv_f(lea.pmf({'BULL': 0.35750, 'BEAR': 0.56825, 'STAG': 0.07425}))
     with pytest.raises(lea.Lea.Error):
+        market.next_state_given(market.state=='BEAR',0)
+    with pytest.raises(lea.Lea.Error):
         market.next_state_given(market.state=='BEAR',-1)
     with pytest.raises(lea.Lea.Error):
-        market.next_state_given(market.state=='XXX')
+        market.next_state_given(market.state=='XXX').calc()
 
 def test_markov_matrix(setup):
     """Check that markov.Chain.matrix method is correct"""
