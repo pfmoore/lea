@@ -28,7 +28,7 @@ import sys
 from itertools import islice
 import collections
 from .prob_fraction import ProbFraction
-from .toolbox import min2, max2, read_csv_filename, read_csv_file, dict, zip, isclose, log2
+from .toolbox import min2, max2, read_csv_filename, read_csv_file, dict, zip, isclose, log2, gen_all_slots
 
 # note: see other import statements at the end of the module
 
@@ -769,7 +769,7 @@ class Lea(object):
             (unconditional) probabilities; this is used to define the Lea instance associated
             to the value(s) of self missing in lea_dict (as default_lea)
             all dictionary's values and default_lea (if defined) are coerced to Alea instances
-            requires: default_lea and prior_lea shall not defined together
+            requires: default_lea and prior_lea shall not be defined together
             requires: if prior_lea is provided, a solution shall exist for default_lea
         '''        
         return Tlea.build(self,lea_dict,default_lea,prior_lea)
@@ -793,8 +793,8 @@ class Lea(object):
             each clause is a tuple (condition,result)
             where condition is a boolean or a Lea boolean distribution
               and result is a value or Lea distribution representing the result
-                   assuming that condition is true
-            the conditions from all clauses shall be mutually exclusive
+                   assuming that condition is true;
+            the conditions from all clauses shall be mutually exclusive;
             if a clause contains None as condition, then it is considered as a 'else'
             condition;
             the method supports three optional named arguments:
@@ -2071,7 +2071,7 @@ class Lea(object):
         else:
             _refs.add(self)
             args = [self._id()]
-            for attr_name in self.__slots__:
+            for attr_name in gen_all_slots(self.__class__,Lea):
                 attr_val = getattr(self,attr_name)
                 if isinstance(attr_val,Lea):
                     args.append(attr_val.internal(full,_indent+'  ',_refs))

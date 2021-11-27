@@ -297,3 +297,17 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
     ''' returns True iff float a and b are almost equal
     '''
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+def gen_all_slots(a_class, root_class=()):
+    ''' generates all slots (strings) of a_class, including those defined in its superclasses;
+        if root_class is a class, then only slots of classes that are *strict* subclasses
+        of root_class are yielded (i.e. slots of root_class itself are *not* yielded)
+    ''' 
+    if a_class is object or a_class is root_class \
+       or not issubclass(a_class,root_class):
+        return
+    for a_superclass in a_class.__bases__:
+        for slot in gen_all_slots(a_superclass,root_class):
+            yield slot
+    for slot in a_class.__slots__:
+        yield slot
