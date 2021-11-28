@@ -1013,6 +1013,7 @@ class Lea(object):
             which are translated to booleans;
             updates the given dictionary var_dict to store the created Lea instances
             with the names found in the file as keys;
+            returns a tuple with these names; 
             requires that filename refers to a readable valid BIF file;
             hint: passing var_dict=globals() allows creating directly the BN variables in
                   the caller's global namespace;
@@ -1056,6 +1057,7 @@ class Lea(object):
             for var_name in prob_block_by_var_name:
                  Lea.__create_lea_instance(var_name,prob_block_by_var_name,values_by_var_name,lea_instances_by_name)
             var_dict.update(lea_instances_by_name)
+            return tuple(lea_instances_by_name.keys())
         except Exception:
             raise Lea.Error("cannot parse '%s' as a BIF file (maybe due to Lea parser's limitations)"%filename)
 
