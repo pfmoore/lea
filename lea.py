@@ -240,6 +240,14 @@ class Lea(object):
         '''
         return frozenset(self.gen_lea_descendants())
 
+    def is_dependent_of(self,other):
+        ''' returns True iff self and other have potentially some dependency,
+            i.e. if they share some Alea instance(s)
+        '''
+        if not isinstance(other,Lea):
+            return False 
+        return 0 < len(self.get_alea_leaves_set().intersection(other.get_alea_leaves_set()))
+        
     def _gen_bound_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
             and p is the associated probability  (integer > 0);
@@ -1992,6 +2000,8 @@ class Lea(object):
             Alea.entropy)
         '''
         other = Alea.coerce(other)
+        if not self.is_dependent_of(other):
+            return self.entropy
         ce = Clea(self,other).entropy - other.entropy
         try:
             return max(0.0,ce)
@@ -2029,6 +2039,8 @@ class Lea(object):
         '''
         lea1 = Alea.coerce(lea1)
         lea2 = Alea.coerce(lea2)
+        if not lea1.is_dependent_of(lea2):
+            return 0.0
         mi = lea1.entropy + lea2.entropy - Clea(lea1,lea2).entropy
         try:
             return max(0.0,mi)
