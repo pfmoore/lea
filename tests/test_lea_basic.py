@@ -23,11 +23,60 @@ def test_id(setup):
     assert dist1._id() != dist2._id()
     assert isinstance(dist1._id(), str)
 
-def test_get_alea_leaves(setup):
+def test_get_leaves_set(setup):
     dist1 = lea.vals(1,2,3,4)
     dist2 = lea.vals(2,4,6,8)
-    distcalc = (dist1 + dist2) * (dist1 - dist2)
-    assert distcalc.get_alea_leaves_set() == {dist1, dist2}
+    distcalc1 = (dist1 + dist2) * (dist1 - dist2)
+    assert distcalc1.get_leaves_set() == {dist1, dist2}
+    dist3 = lea.binom(4,0.2) 
+    dist4 = lea.poisson(7)
+    distcalc2 = dist3 + dist4 
+    assert distcalc2.get_leaves_set() == {dist3, dist4}
+    distcalc3 = distcalc1 - distcalc2 
+    assert distcalc3.get_leaves_set() == {dist1, dist2, dist3, dist4}
+
+def test_is_dependent_of(setup):
+    dist1 = lea.vals(1,2,3,4)
+    dist2 = lea.vals(2,4,6,8)
+    distcalc1 = (dist1 + dist2) * (dist1 - dist2)
+    assert dist1.is_dependent_of(dist1)
+    assert distcalc1.is_dependent_of(distcalc1)
+    assert distcalc1.is_dependent_of(dist1)
+    assert distcalc1.is_dependent_of(dist2)
+    assert dist1.is_dependent_of(distcalc1)
+    assert dist2.is_dependent_of(distcalc1)
+    assert dist1.is_dependent_of(dist2.given(distcalc1==0))
+    assert dist1.given(distcalc1==0).is_dependent_of(dist2)
+    assert not dist1.is_dependent_of(dist2)
+    assert not dist2.is_dependent_of(dist1)
+    dist3 = lea.binom(4,0.2)
+    dist4 = lea.poisson(7)
+    distcalc2 = dist3 + dist4 
+    assert dist3.is_dependent_of(dist3)
+    assert distcalc2.is_dependent_of(dist3)
+    assert distcalc2.is_dependent_of(dist3)
+    assert dist3.is_dependent_of(distcalc2)
+    assert dist4.is_dependent_of(distcalc2)
+    assert dist3.is_dependent_of(dist2.given(distcalc2==0))
+    assert dist3.given(distcalc2==0).is_dependent_of(dist4)
+    assert not distcalc2.is_dependent_of(distcalc1)
+    assert not distcalc1.is_dependent_of(distcalc2)
+    assert not dist3.is_dependent_of(dist4)
+    assert not dist4.is_dependent_of(dist3)
+    assert not dist3.is_dependent_of(distcalc1)
+    assert not dist4.is_dependent_of(dist1)
+    assert not distcalc1.is_dependent_of(dist4)
+    assert not distcalc1.is_dependent_of(dist3)
+    distcalc3 = distcalc1 - distcalc2 
+    assert distcalc3.is_dependent_of(distcalc3)
+    assert distcalc3.is_dependent_of(distcalc1)
+    assert distcalc3.is_dependent_of(dist1)
+    assert distcalc1.is_dependent_of(distcalc3)
+    assert dist3.is_dependent_of(distcalc3)
+    assert dist4.is_dependent_of(distcalc3)
+    assert dist3.is_dependent_of(dist2.given(distcalc3==0))
+    assert dist3.given(distcalc3==0).is_dependent_of(dist4)
+    assert dist1.given(distcalc3==0).is_dependent_of(dist4)
 
 # Constructors
 def test_fromvals(setup):
