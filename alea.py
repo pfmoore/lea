@@ -4,7 +4,7 @@
     alea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2020 Pierre Denis
+Copyright 2013-2021 Pierre Denis
 
 This file is part of Lea.
 
@@ -984,12 +984,6 @@ class Alea(Lea):
         '''
         return collections.OrderedDict((v,Alea._downcast_prob(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
 
-    def get_alea_leaves_set(self):
-        ''' returns a set containing all the Alea leaves in the tree having the root self
-            in the present case of Alea instance, it returns the singleton set with self as element
-        '''
-        return frozenset((self,))        
-     
     def _get_lea_children(self):
         ''' see Lea._get_lea_children
         '''
@@ -1398,11 +1392,11 @@ class Alea(Lea):
                     res -= p*log2(p)
             return res
         except TypeError:
+            # sympy exception assumed: no ceiling
             try:
-                log = sympy.log
                 for (v,p) in self._gen_raw_vps():
-                    res -= p*log(p)
-                return res / log(2)
+                    res -= p*sympy.log(p)
+                return res / sympy.log(2)
             except:
                 raise Lea.Error("cannot calculate logarithm on given probability types")
 
@@ -1419,11 +1413,43 @@ class Alea(Lea):
         n = len(self._vs)
         if n == 1:
             return 0.0
-        res = self.entropy / log2(n)
+        entropy = self.entropy
         try:
-            return min(1.0,res)
+            return min(1.0,entropy/log2(n))
         except TypeError:
-            return res
+            # sympy exception assumed: no ceiling
+            return entropy / sympy.log(n,2)
+
+    def cross_entropy(self,lea1):
+        ''' static method, returns the cross-entropy between self and given lea1;
+            the logarithm base is 2;
+            requires that all values of lea1's support have a non-null probability in self;
+            notes:
+            - the cross-entropy is non-commutative;
+            - the cross-entropy should always be greater than the entropy of first argument,
+              the equality being reached if both arguments have same pmf; this is guaranteed
+              by the implementation, even in case of rounding errors;
+            - if self is interpreted as frequencies of observed data having N as total number
+              of samples, then the cross-entropy is linked to (negative) log-likelihood by
+                log-likelihood = - N * cross-entropy
+              using logarithm in base 2 (for other base, use the right factor)
+        '''
+        lea1_pmf_dict = Alea.coerce(lea1).pmf_dict
+        try:
+            ce = -sum(px*log2(lea1_pmf_dict[vx]) for (vx,px) in self._gen_vps() if px > 0)
+        except KeyError as key_error:
+            raise Lea.Error("observed value '%s' is not produced by given model"%(key_error.args[0],))
+        except ValueError:
+            raise Lea.Error("some observed value has null probability in given model")
+        except:
+            # sympy exception assumed due to log function or test px > 0:
+            # retry using sympy log funtion and without test clause
+            ce = -sum(px*sympy.log(lea1_pmf_dict[vx]) for (vx,px) in self._gen_vps()) / sympy.log(2)
+        try:        
+            return max(ce,self.entropy)
+        except TypeError:
+            # sympy exception assumed: no ceiling
+            return ce
 
     def redundancy(self):
         ''' returns the redundancy of self;

@@ -4,7 +4,7 @@
     lea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2020 Pierre Denis
+Copyright 2013-2021 Pierre Denis
 
 This file is part of Lea.
 
@@ -215,14 +215,18 @@ class Lea(object):
         '''
         return '%s#%s'%(self.__class__.__name__,id(self))
 
-    def get_alea_leaves_set(self):
-        ''' returns a set containing all the Alea leaves in the tree having the root self;
+    def get_leaves_set(self):
+        ''' returns a set containing all the leaves in the tree having the root self;
             this calls _get_lea_children() method implemented in Lea's subclasses;
-            this method is overloaded in Alea subclass to stop the recursion
         '''
-        return frozenset(alea_leaf for lea_child in self._get_lea_children()
-                                   for alea_leaf in lea_child.get_alea_leaves_set())
-
+        lea_children = self._get_lea_children()
+        if len(lea_children) == 0:
+            leaves = (self,)
+        else:
+            leaves = (alea_leaf for lea_child in lea_children
+                                for alea_leaf in lea_child.get_leaves_set())
+        return frozenset(leaves)
+    
     def gen_lea_descendants(self):
         ''' generates all the Lea instances in the tree having the root self,
             including self itself; the same instance may be yieled multiple times;
@@ -246,7 +250,7 @@ class Lea(object):
         '''
         if not isinstance(other,Lea):
             return False 
-        return 0 < len(self.get_alea_leaves_set().intersection(other.get_alea_leaves_set()))
+        return 0 < len(self.get_leaves_set().intersection(other.get_leaves_set()))
         
     def _gen_bound_vp(self):
         ''' generates tuple (v,p) where v is a value of the current probability distribution
@@ -360,7 +364,7 @@ class Lea(object):
         """
         for lea_child in self._get_lea_children():
             lea_child._optimize(dependent_nodes,first_level=False,debug=debug)
-        if not (first_level or isinstance(self,Alea) or self in dependent_nodes):
+        if not (first_level or isinstance(self,_lea_leaf_classes) or self in dependent_nodes):
             alea1 = Alea.pmf(self.gen_vp(),normalization=False)
             if debug:
                 print ("optimize %s"%(self._id()))
@@ -874,7 +878,7 @@ class Lea(object):
         # all BN variables initialized as independent (maybe overwritten below, according to given relationships)
         vars_bn_dict = dict((var_name,var.get_alea(sorting=False)) for (var_name,var) in vars_dict.items())
         for (src_var_names,tgt_var_name) in bn_definition:
-            if not isinstance(vars_bn_dict[tgt_var_name],Alea):
+            if not isinstance(vars_bn_dict[tgt_var_name],_lea_leaf_classes):
                 raise Lea.Error("'%s' is defined as target in more than one BN relationship"%(tgt_var_name,))
             tgt_var = vars_dict[tgt_var_name]
             joint_src_vars = Lea.joint(*(vars_dict[src_var_name] for src_var_name in src_var_names))
@@ -1615,12 +1619,12 @@ class Lea(object):
             in most simple cases, the newly created Alea is cached: the evaluation occurs only
             for the first call
         '''
-        has_explicit_bindings = any((a._val is not a) for a in self.get_alea_leaves_set())
+        has_explicit_bindings = any((a._val is not a) for a in self.get_leaves_set())
         is_not_cacheable = has_explicit_bindings or EvidenceCtx.has_evidence()
         if self._alea is None or is_not_cacheable:
             new_alea = self.new(sorting=sorting)
             if is_not_cacheable:
-                self_alea = None
+                self._alea = None
                 return new_alea
             self._alea = new_alea
         return self._alea
@@ -1942,48 +1946,42 @@ class Lea(object):
             if sorted is True, then the returned tuple is sorted
         '''
         return self.get_alea().random_draw(n,sorted)
-  
-    def cross_entropy(self,lea1,entropy_ceiling=True):
-        ''' static method, returns the cross-entropy between self and given lea1;
+
+    def cross_entropy(self,lea1):
+        ''' evaluates the distribution, then,
+            returns the cross-entropy between self and given lea1;
             the logarithm base is 2;
             requires that all values of lea1's support have a non-null probability in self;
             notes:
             - the cross-entropy is non-commutative;
             - the cross-entropy should always be greater than the entropy of first argument,
-              the equality being reached if both arguments have same pmf; if argument
-              entropy_ceiling is True (default), then this is guaranteed by the implementation,
-              even in case of rounding errors;
+              the equality being reached if both arguments have same pmf; this is guaranteed
+              by the implementation, even in case of rounding errors;
             - if self is interpreted as frequencies of observed data having N as total number
               of samples, then the cross-entropy is linked to (negative) log-likelihood by
                 log-likelihood = - N * cross-entropy
               using logarithm in base 2 (for other base, use the right factor)
         '''
-        lea1_pmf_dict = lea1.pmf_dict
-        try:
-            ce = -sum(px*log2(lea1_pmf_dict[vx]) for (vx,px) in self._gen_vps() if px > 0)
-        except KeyError as key_error:
-            raise Lea.Error("observed value '%s' is not produced by given model"%(key_error.args[0],))
-        except ValueError:
-            raise Lea.Error("some observed value has null probability in given model")
-        if entropy_ceiling:
-            ce = max(ce,self.entropy)
-        return ce
-
-    def kl_divergence(self,lea1,zero_ceiling=True):
-        ''' returns the Kullback-Leibler divergence between self and given lea1;
+        return self.get_alea().cross_entropy(lea1)
+        
+    def kl_divergence(self,lea1):
+        ''' evaluates the distribution, then,
+            returns the Kullback-Leibler divergence between self and given lea1;
             the logarithim base is 2;
             requires that all values of lea1's support have a non-null probability in self;
             notes:
             - the KL divergence is also known as "relative entropy";
             - the KL divergence is non-commutative;
             - the KL divergence should always be positive; it is null if both arguments have
-              same pmf; if argument zero_ceiling is True (default), then this is guaranteed
-              by the implementation, even in case of rounding errors
+              same pmf; this is guaranteed by the implementation, even in case of rounding
+              errors
         '''
-        kld = self.cross_entropy(lea1,entropy_ceiling=False) - self.entropy
-        if zero_ceiling:
-            kld = max(kld,0.0)
-        return kld
+        kld = self.cross_entropy(lea1) - self.entropy
+        try:
+            return max(kld,0.0)
+        except TypeError:
+            # sympy exception assumed: no ceiling
+            return kld
 
     @staticmethod
     def joint_entropy(*args):
@@ -1997,7 +1995,9 @@ class Lea(object):
             bits; note that this value is also known as the equivocation of
             self about other;
             the returned type is a float or a sympy expression (see doc of
-            Alea.entropy)
+            Alea.entropy);
+            the conditional entropu should always be positive; this is
+            guaranteed by the implementation, even in case of rounding errors
         '''
         other = Alea.coerce(other)
         if not self.is_dependent_of(other):
@@ -2006,6 +2006,7 @@ class Lea(object):
         try:
             return max(0.0,ce)
         except:
+            # sympy exception assumed: no ceiling
             return ce
 
     def _cov(self,lea1):
@@ -2252,6 +2253,8 @@ from .glea import Glea
 from .tlea import Tlea
 from .slea import Slea
 from .evidence_ctx import EvidenceCtx
+
+_lea_leaf_classes = (Alea, Olea, Plea)
 
 # init Alea class with default 'x' type code: if a probability is expressed as
 # a string, then the target type is determined from its content
