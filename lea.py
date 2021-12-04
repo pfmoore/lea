@@ -216,13 +216,15 @@ class Lea(object):
         return '%s#%s'%(self.__class__.__name__,id(self))
 
     def get_leaves_set(self):
-        ''' returns a set containing all the leaves in the tree having the root self;
-            this calls _get_lea_children() method implemented in Lea's subclasses;
+        ''' returns a set containing all the leaves in the DAG having the root self;
+            this calls _get_lea_children() methods implemented in Lea's subclasses;
         '''
         lea_children = self._get_lea_children()
         if len(lea_children) == 0:
+            # leaf: returns singleton set with self
             leaves = (self,)
         else:
+            # non-leaf: calls recusively get_leaves_set on children
             leaves = (alea_leaf for lea_child in lea_children
                                 for alea_leaf in lea_child.get_leaves_set())
         return frozenset(leaves)
