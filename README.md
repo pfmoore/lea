@@ -5,7 +5,7 @@
 
 **New**: Check out [Lea playground](http://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Playground.ipynb) (online Jupyter notebook)!
 
-**New**: See [Lea poster](http://probprog.cc/assets/posters/fri/69.pdf) presented at  [PROBPROG2020](http://probprog.cc/posters/), hosted by MIT.
+**New**: See [Lea poster](https://probprog.cc/2020/assets/posters/fri/69.pdf) presented at  [PROBPROG2020](http://probprog.cc/posters/), hosted by MIT.
 
 ---
 
@@ -21,7 +21,7 @@ Lea is a Python library aiming at working with discrete probability distribution
   * **machine learning**: maximum likelihood & EM algorithms
   * **standard indicators** + **information theory**
   * **multiple probability representations**: float, decimal, fraction, …
-  * **symbolic computation**, using the [SymPy library](http://www.sympy.org)
+  * **symbolic computation**, i.e. producing probability formulas instead of numbers, using the [SymPy library](http://www.sympy.org)
   * **exact probabilistic inference** based on Python generators
   * **random sampling**
   * **comprehensive tutorials** (Wiki)
