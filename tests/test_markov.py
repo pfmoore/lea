@@ -147,3 +147,18 @@ def test_markov_absorbing_mc_info(setup):
     assert q_matrix3 == ()
     assert r_matrix3 == ()
     assert n_matrix3 is None
+
+def test_markov_state_dependencies(setup):
+    """ Check dependencies between Markov states (see #63) """
+    weather = markov.chain_from_matrix(('sunny','rainy'),
+                          ('sunny',(  0.95 ,  0.05 )),
+                          ('rainy',(  0.80 ,  0.20 )))
+    today = weather.next_state('sunny',1000)
+    tomorrow = today.next_state()
+    assert today.is_dependent_of(tomorrow)
+    assert tomorrow.is_dependent_of(today)
+    assert isclose(lea.mutual_information(today,tomorrow), 0.010740523089006304)
+    tomorrow2 = today.next_state(keeps_dependency=False)
+    assert not today.is_dependent_of(tomorrow2)
+    assert not tomorrow2.is_dependent_of(today)
+    assert lea.mutual_information(today,tomorrow2) == 0.0
