@@ -4,7 +4,7 @@
     flea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2020 Pierre Denis
+Copyright 2013-2021 Pierre Denis
 
 This file is part of Lea.
 
