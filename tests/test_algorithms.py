@@ -4,6 +4,8 @@ from lea.toolbox import isclose
 import pytest
 from time import time
 import random
+import os
+import tempfile
 
 # setting this flag to True dramatically speeds up the test
 EXACT_ALGO_ONLY = False
@@ -169,45 +171,102 @@ mary_calls = alarm.switch({ True  : event(0.70),
                             False : event(0.01) })
 
 def test_bn2_1(setup):
-    verify(burglary.given(mary_calls | john_calls), event(0.014814211524985793), exact_vars=(alarm,), exact_algo_only=True)
+    verify(burglary.given(mary_calls | john_calls), event(0.014814211524985793), exact_algo_only=True)
 
 def test_bn2_1b(setup):
     with evidence(mary_calls | john_calls):
-        verify(burglary, event(0.014814211524985793), exact_vars=(alarm,), exact_algo_only=True)
+        verify(burglary, event(0.014814211524985793), exact_algo_only=True)
 
 def test_bn2_2(setup):
-    verify(alarm, event(0.002516442), exact_vars=(alarm,), exact_algo_only=True)
+    verify(alarm, event(0.002516442), exact_algo_only=True)
 
 def test_bn2_3(setup):
-    verify(burglary & mary_calls, event(0.0006586138), exact_vars=(alarm,), exact_algo_only=True)
+    verify(burglary & mary_calls, event(0.0006586138), exact_algo_only=True)
 
 def test_bn2_4(setup):
-    verify(~burglary & ~earthquake & alarm & john_calls & mary_calls, event(0.00062811126), exact_vars=(alarm,), exact_algo_only=True)
+    verify(~burglary & ~earthquake & alarm & john_calls & mary_calls, event(0.00062811126), exact_algo_only=True)
 
 def test_bn2_5(setup):
-    verify(burglary.given(mary_calls&john_calls), event(0.28417183536439294), exact_vars=(alarm,), exact_algo_only=True)
+    verify(burglary.given(mary_calls&john_calls), event(0.28417183536439294), exact_algo_only=True)
 
 def test_bn2_6(setup):
-    verify(burglary.given(mary_calls,john_calls), event(0.28417183536439294), exact_vars=(alarm,), exact_algo_only=True)
+    verify(burglary.given(mary_calls,john_calls), event(0.28417183536439294), exact_algo_only=True)
 
 def test_bn2_6b(setup):
     with evidence(mary_calls,john_calls):
-        verify(burglary, event(0.28417183536439294), exact_vars=(alarm,), exact_algo_only=True)
+        verify(burglary, event(0.28417183536439294), exact_algo_only=True)
 
 def test_bn2_6c(setup):
     with evidence(mary_calls):
-        verify(burglary, event(0.05611745403891493), exact_vars=(alarm,), exact_algo_only=True)
+        verify(burglary, event(0.05611745403891493), exact_algo_only=True)
         with evidence(john_calls):
-            verify(burglary, event(0.28417183536439294), exact_vars=(alarm,), exact_algo_only=True)
-        verify(burglary, event(0.05611745403891493), exact_vars=(alarm,), exact_algo_only=True)
-    verify(burglary, event(0.001), exact_vars=(alarm,), exact_algo_only=True)
+            verify(burglary, event(0.28417183536439294), exact_algo_only=True)
+        verify(burglary, event(0.05611745403891493), exact_algo_only=True)
+    verify(burglary, event(0.001), exact_algo_only=True)
 
 def test_bn2_7(setup):
-    verify(mary_calls.given(burglary), event(0.6586138), exact_vars=(alarm,), exact_algo_only=True)
+    verify(mary_calls.given(burglary), event(0.6586138), exact_algo_only=True)
     
 def test_bn2_7b(setup):
     with evidence(bindings={burglary:True}):
         verify(mary_calls, event(0.6586138), exact_vars=(alarm,))
-    verify(mary_calls, event(0.011736344979999999), exact_vars=(alarm,), exact_algo_only=True)
-    
-                  
+    verify(mary_calls, event(0.011736344979999999), exact_algo_only=True)
+
+# BIF fil found on https://www.bnlearn.com/bnrepository/discrete-small.html#earthquake
+# changed Burglary probability to 0.001 instead of 0.01
+earthqiake_bif_content = """
+network unknown {
+}
+variable Burglary {
+  type discrete [ 2 ] { True, False };
+}
+variable Earthquake {
+  type discrete [ 2 ] { True, False };
+}
+variable Alarm {
+  type discrete [ 2 ] { True, False };
+}
+variable JohnCalls {
+  type discrete [ 2 ] { True, False };
+}
+variable MaryCalls {
+  type discrete [ 2 ] { True, False };
+}
+probability ( Burglary ) {
+  table 0.001, 0.999;
+}
+probability ( Earthquake ) {
+  table 0.002, 0.998;
+}
+probability ( Alarm | Burglary, Earthquake ) {
+  (True, True) 0.95, 0.05;
+  (False, True) 0.29, 0.71;
+  (True, False) 0.94, 0.06;
+  (False, False) 0.001, 0.999;
+}
+probability ( JohnCalls | Alarm ) {
+  (True) 0.9, 0.1;
+  (False) 0.05, 0.95;
+}
+probability ( MaryCalls | Alarm ) {
+  (True) 0.7, 0.3;
+  (False) 0.01, 0.99;
+}
+"""
+
+def test_read_bif_file(setup):
+    bif_filename = os.path.join(tempfile.mkdtemp(),"earthquake.bif")
+    with open(bif_filename,'w') as f:
+        f.write(earthqiake_bif_content)
+    var_names = read_bif_file(bif_filename,globals())
+    assert frozenset(var_names) == frozenset(('Burglary', 'Earthquake', 'Alarm', 'JohnCalls', 'MaryCalls'))
+    assert Burglary.equiv(event(0.001))
+    assert isclose(P(MaryCalls.given(Alarm)), 0.7)
+    assert isclose(P(MaryCalls.given(Burglary)), 0.6586138)
+    assert isclose(P(Burglary.given(Alarm)), 0.373551228281836)
+    assert isclose(P(Alarm.given(MaryCalls)), 0.1500901177497596)
+    assert isclose(P(Burglary.given(MaryCalls | JohnCalls)), 0.014814211524985793)
+    assert isclose(P(Burglary.given(MaryCalls & JohnCalls)), 0.28417183536439294)
+    assert isclose(P(Alarm), 0.002516442)
+    assert isclose(P(Burglary & MaryCalls), 0.0006586138000000001)
+    assert isclose(P(~Burglary & ~Earthquake & Alarm & JohnCalls & MaryCalls), 0.00062811126)
