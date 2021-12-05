@@ -1,10 +1,13 @@
 import lea
 from lea.prob_fraction import ProbFraction as PF
+from lea.toolbox import isclose
 from fractions import Fraction
 from decimal import Decimal
 import pytest
 import math
 import sys
+import os
+import tempfile
 
 # All tests are made using fraction representation, in order to ease comparison
 @pytest.fixture(scope="module")
@@ -178,10 +181,68 @@ def test_poisson(setup):
     # Result is not exact - check it is within 10 decimal places
     assert round(d.p(3)-expected, 10) == 0
 
-@pytest.mark.skip(reason="Test not written yet")
-def test_csv(setup):
-    lea.read_csv_file
-    lea.read_pandas_df
+patients_csv_data = """
+Elaine,McLaughlin,female,Ms.,12-01-1984,O+,44.9,141.0,Y
+Alan,Music,male,Mr.,30-12-1966,A-,61.3,181.0,Y
+Debra,Roberts,female,Mrs.,01-12-1927,O+,79.6,168.0,N
+Martine,Albright,female,Mrs.,05-01-1975,O+,46.0,156.0,N
+Terry,Jordan,male,Mr.,28-12-1963,A-,96.9,181.0,N
+Joshua,Spinney,male,Mr.,19-12-1952,O+,106.4,183.0,N
+Tawanna,Short,female,Ms.,02-02-2012,O+,93.4,175.0,N
+Frances,Moore,female,Ms.,07-01-1978,B+,91.6,164.0,N
+"""[1:]
+
+def test_read_csv_1(setup):
+    csv_filename = os.path.join(tempfile.mkdtemp(),"patient.csv")
+    with open(csv_filename,'w') as f:
+        f.write(patients_csv_data) 
+    patient = lea.read_csv_file(csv_filename,col_names=('given_name','surname','gender','title','birthday','blood_type','weight{f}','height{f}','smoker{b}'))
+    lea.make_vars(patient,globals())
+    assert given_name.equiv(patient.given_name)
+    assert gender.equiv(patient.gender)
+    assert gender.equiv(lea.pmf({"female": 5./8., "male": 3./8.}))
+    assert gender.given(smoker).equiv(lea.pmf({"female": 1./2., "male": 1./2.}))
+    assert title.equiv(lea.pmf({"Mr.": 3./8., "Mrs.": 2./8., "Ms.": 3./8.}))
+    assert smoker.equiv(lea.event(2./8.))
+    assert isclose(height.mean, (141.+181.+168.+156.+181.+183.+175.+164.)/8.)
+    assert isclose(height.given(gender=="male").mean, (181.+181.+183.)/3.)
+    
+def test_read_csv_2(setup):
+    csv_filename = os.path.join(tempfile.mkdtemp(),"patient2.csv")
+    with open(csv_filename,'w') as f:
+        f.write("given_name2,surname2,gender2,title2,birthday2,blood_type2,weight2{f},height2{f},smoker2\n")
+        f.write(patients_csv_data) 
+    patient2 = lea.read_csv_file(csv_filename)
+    lea.make_vars(patient2,globals())
+    assert given_name2.equiv(patient2.given_name2)
+    assert gender2.equiv(patient2.gender2)
+    assert gender2.equiv(lea.pmf({"female": 5./8., "male": 3./8.}))
+    assert gender2.given(smoker2=="Y").equiv(lea.pmf({"female": 1./2., "male": 1./2.}))
+    assert title2.equiv(lea.pmf({"Mr.": 3./8., "Mrs.": 2./8., "Ms.": 3./8.}))
+    assert smoker2.equiv(lea.pmf({"N": 6./8., "Y": 2./8.}))
+    assert isclose(height2.mean, (141.+181.+168.+156.+181.+183.+175.+164.)/8.)
+    assert isclose(height2.given(gender2=="male").mean, (181.+181.+183.)/3.)
+
+def test_read_pandas_dataframe(setup):
+    try:
+        import pandas as pd
+    except:
+        pass
+    else:
+        csv_filename = os.path.join(tempfile.mkdtemp(),"patient2.csv")
+        with open(csv_filename,'w') as f:
+            f.write("given_name3,surname3,gender3,title3,birthday2,blood_type3,weight3,height3,smoker3\n")
+            f.write(patients_csv_data) 
+        df = pd.read_csv(csv_filename)
+        patient3 = lea.read_pandas_df(df)
+        # warning: unlike Lea,pandas make an automatic conversion of float-looking fields into float
+        #          that's why we add {f} formatters below
+        assert isclose(patient3.height3.given(patient3.gender3=="male").mean, (181.+181.+183.)/3.)
+        with open(csv_filename,'w') as f:
+            f.write("given_name3,surname3,gender3,title3,birthday2,blood_type3,weight3{f},height3{f},smoker3\n")
+            f.write(patients_csv_data)         
+        expected_patient3 = lea.read_csv_file(csv_filename)
+        assert patient3.equiv(expected_patient3)
 
 def test_draw_unsorted_without_replacement(setup):
     # test an unbiased die
