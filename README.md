@@ -1,11 +1,7 @@
 # Lea - Discrete probability distributions in Python
 
 ---
-**New**: [Lea 3.4.0](http://pypi.org/project/lea) is there! Better, faster, ... by a lot! 
-
-**New**: Check out [Lea playground](http://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Playground.ipynb) (online Jupyter notebook)!
-
-**New**: See [Lea poster](https://probprog.cc/2020/assets/posters/fri/69.pdf) presented at  [PROBPROG2020](http://probprog.cc/posters/), hosted by MIT.
+**New**: [Lea 3.4.1](http://pypi.org/project/lea) is there!
 
 ---
 
@@ -139,6 +135,8 @@ print (flips_sym)
 
 # To learn more...
 
+For a short overview, see [Lea poster](https://probprog.cc/2020/assets/posters/fri/69.pdf) presented at [PROBPROG2020](https://probprog.cc/2020/), hosted by MIT.
+
 The above examples show only a very, very small subset of Lea 3 capabilities. To learn more, you can read:
 
   * [Lea Tutorial 1](http://bitbucket.org/piedenis/lea/wiki/Lea3_Tutorial_1) - basics: building/displaying pmf, arithmetic, random sampling, conditional probabilities, …
@@ -154,8 +152,7 @@ The above examples show only a very, very small subset of Lea 3 capabilities. To
 * [Lea Tutorial #2 Jupyter Notebook](https://mybinder.org/v2/gh/piedenis/lea_tutorials/master?filepath=Lea3_Tutorial_2.ipynb) - interactive tutorial 2 (see above)
 * [The COVID-19 Case Jupyter Notebook](https://mybinder.org/v2/gh/piedenis/lea_mini_tutorials/master?filepath=Lea_COVID19.ipynb) - a Bayesian net linking diseases to symptoms 
 
-
-Note: Lea 2 tutorials are still available [here](http://bitbucket.org/piedenis/lea/wiki/Home) although these are no longer maintained. You can also get Lea 2 presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
+Note: You can also get older presentation materials (note however that the syntax of Lea 3 is _not backward compatible_):
 
 * [Lea, a probability engine in Python](http://drive.google.com/open?id=0B1_ICcQCs7geUld1eE1CWGhEVEk) - presented at [FOSDEM 15/Python devroom](http://fosdem.org/2015/schedule/track/python/)
 * [Probabilistic Programming with Lea](http://drive.google.com/open?id=0B1_ICcQCs7gebF9uVGdNdG1nR0E) - presented at [PyCon Ireland 15](http://python.ie/pycon-2015/)
