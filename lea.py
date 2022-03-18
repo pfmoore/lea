@@ -28,7 +28,8 @@ import sys
 from itertools import islice
 import collections
 from .prob_fraction import ProbFraction
-from .toolbox import min2, max2, read_csv_filename, read_csv_file, dict, zip, isclose, log2, gen_all_slots
+from .toolbox import min2, max2, read_csv_filename, read_csv_file, \
+                     dict, zip, pairwise, isclose, log2, gen_all_slots
 
 # note: see other import statements at the end of the module
 
@@ -496,17 +497,25 @@ class Lea(object):
         return Clea(self,*args)
 
     @staticmethod
-    def reduce_all(op,args,absorber=None):
-        ''' static method, returns a new Flea2 instance that join the given args with
-            the given function op, from left to right;
-            requires that op is a 2-ary function, accepting self's values as arguments;
-            requires that args contains at least one element
+    def reduce_all(op,args,absorber=None,special=None):
+        ''' static method, returns a new Flea2 instance that join the given
+            iterable args with the given function op, from left to right;
+            requires that op is a 2-ary function, accepting all elements
+            of all args as arguments;
+            if args is empty, then
+            - if given special is None, an exception is raised
+            - otherwise, the given special is returned 
             if absorber is not None, then it is considered as a "left-absorber" value
             (i.e. op(absorber,x) = absorber); this activates a more efficient algorithm
             which prunes the tree search as soon as the absorber is met.
         '''
-        args_rev_iter = iter(reversed(tuple(args)))
-        res = next(args_rev_iter)
+        args_rev_iter = (Alea.coerce(v) for v in reversed(tuple(args)))
+        try:
+            res = next(args_rev_iter)
+        except StopIteration:
+            if special is None:
+                raise Lea.Error("not enough arguments provided")
+            return Alea.coerce(special)
         if absorber is None:
             for arg in args_rev_iter:
                 res = Flea2(op,arg,res)
@@ -514,6 +523,124 @@ class Lea(object):
             for arg in args_rev_iter:
                 res = Flea2a(op,arg,res,absorber)
         return res
+
+    @staticmethod
+    def all_true(*args):
+        ''' static method, returns a new Flea2 instance that yield True
+            iff all elements of args yield True or if args is empty;
+            the evaluation is done from left to right, yielding False
+            as soon as some arg yields False
+        '''
+        return Lea.reduce_all(operator.and_,args,absorber=False,special=True)
+
+    @staticmethod
+    def any_true(*args):
+        ''' static method, returns a new Flea2 instance that yield True
+            iff any element of args yields True or if args is empty;
+            the evaluation is done from left to right, yielding True
+            as soon as some arg yields True
+        '''
+        return Lea.reduce_all(operator.or_,args,absorber=True,special=True)
+
+    @staticmethod
+    def all_false(*args):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff all elements of args yield False or if args is empty;
+            the evaluation is done from left to right, yielding False
+            as soon as some arg yields True
+        '''
+        return Lea.all_true(*(~Alea.coerce(arg) for arg in args))
+
+    @staticmethod
+    def any_false(*args):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff any element of args yields False or if args is empty;
+            the evaluation is done from left to right, yielding True
+            as soon as some arg yields False
+        '''
+        return Lea.any_true(*(~Alea.coerce(arg) for arg in args))
+
+    @staticmethod 
+    def all_verify(arg1s,op,arg2):
+        ''' static method, returns a new Flea2 instance that yields True 
+            iff op(arg1,arg2) yields True for all arg1 in iterable args1
+            or if arg1s has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some op(arg1,arg2) yields False
+            requires: op is a 2-ary Boolean function 
+        '''
+        return Lea.all_true(*(Flea2(op,arg1,arg2) for arg1 in arg1s))
+
+    @staticmethod
+    def any_verify(arg1s,op,arg2):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff op(arg1,arg2) yields True for some arg1 in iterable args1;
+            or if arg1s has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some op(arg1,arg2) yields False
+            requires: op is a 2-ary Boolean function
+        '''
+        return Lea.any_true(*(Flea2(op,arg1,arg2) for arg1 in arg1s))
+
+    @staticmethod
+    def all_pairwise_verify(args,op):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff op(arg1,arg2) yields True for all pairs of subsequent values
+            (arg1,arg2) in iterable args or if argss has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some op(arg1,arg2) yields False
+            requires: op is a 2-ary Boolean function
+        '''
+        return Lea.all_true(*(Flea2(op,arg1,arg2) for (arg1,arg2) in pairwise(args)))
+
+    @staticmethod
+    def all_equal(*args):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff all arg in args are equal or if args has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some yielded arg differs
+        '''
+        return Lea.all_pairwise_verify(args, operator.eq)
+
+    @staticmethod
+    def all_increasing(*args):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff all yielded arg in args are in non-strict increasing order
+            or if args has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some yielded arg is not in increasing order
+        '''
+        return Lea.all_pairwise_verify(args, operator.le)
+
+    @staticmethod
+    def all_strict_increasing(*args):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff all yielded arg in args are in strict increasing order
+            or if args has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some yielded arg is not in increasing order
+        '''
+        return Lea.all_pairwise_verify(args, operator.lt)
+
+    @staticmethod
+    def all_decreasing(*args):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff all yielded arg in args are in non-strict decreasing order
+            or if args has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some yielded arg is not in decreasing order
+        '''
+        return Lea.all_pairwise_verify(args, operator.ge)
+
+    @staticmethod
+    def all_strict_decreasing(*args):
+        ''' static method, returns a new Flea2 instance that yields True
+            iff all yielded arg in args are in strict decreasing order
+            or if args has 0 or 1 element;
+            the evaluation is done from left to right, yielding False
+            as soon as some yielded arg is not in decreasing order
+        '''
+        return Lea.all_pairwise_verify(args, operator.gt)
 
     def merge(self,*lea_args):
         ''' returns a new Blea instance, representing the merge of self and given lea_args, i.e.
@@ -564,6 +691,16 @@ class Lea(object):
         wrapper.__doc__ = ("" if f.__doc__ is None else f.__doc__) \
                           + "\nThe present function wraps '%s' so to work with Lea instances as arguments." % (f.__name__,)
         return wrapper
+
+    @staticmethod
+    def all_different(*args):
+        ''' static method, returns a new Dlea instance that yields True
+            iff all arg in args are different each from each other
+            or if args has 0 or 1 element
+        '''
+        return Dlea.build(args)
+        ## other implementation, less efficient:
+        ## return Flea.build(lambda *vs: len(frozenset(vs))==len(vs), args)
 
     def as_joint(self,*attr_names):
         ''' returns a new Flea instance by building named tuples from self, which
@@ -2245,6 +2382,7 @@ from .olea import Olea
 from .plea import Plea
 from .clea import Clea
 from .ilea import Ilea
+from .dlea import Dlea
 from .rlea import Rlea
 from .blea import Blea
 from .flea import Flea

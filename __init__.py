@@ -28,6 +28,19 @@ from .evidence_ctx import EvidenceCtx
 from .license import VER as __version__
 
 # make convenient aliases for public static methods of Lea & Alea classes
+all_decreasing = Lea.all_decreasing
+all_different = Lea.all_different
+all_equal = Lea.all_equal
+all_false = Lea.all_false
+all_increasing = Lea.all_increasing
+all_pairwise_verify = Lea.all_pairwise_verify
+all_strict_decreasing = Lea.all_strict_decreasing
+all_strict_increasing = Lea.all_strict_increasing
+all_true = Lea.all_true
+all_verify = Lea.all_verify
+any_false = Lea.any_false
+any_true = Lea.any_true
+any_verify = Lea.any_verify
 bernoulli = Alea.bernoulli
 binom = Lea.binom
 coerce = Alea.coerce

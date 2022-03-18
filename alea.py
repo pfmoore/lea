@@ -28,7 +28,7 @@ from .ext_fraction import ExtFraction
 from .ext_decimal import ExtDecimal
 from .prob_fraction import ProbFraction
 from .prob_decimal import ProbDecimal
-from .toolbox import log2, memoize, zip, next, dict, defaultdict, make_tuple, read_csv_file, \
+from .toolbox import log2, memoize, zip, dict, defaultdict, make_tuple, read_csv_file, \
                      read_csv_filename, is_dict, indent, is_identifier
 from fractions import Fraction
 from decimal import Decimal

@@ -115,9 +115,6 @@ if sys.version_info[0] == 2:
     input = raw_input
     # zip as iterator shall be imported
     from itertools import izip as zip
-    # next method shall be accessible as function
-    def next(it):
-        return it.next()
     # the dictionary classes shall have keys, values, items methods
     # which are iterators; note that dictionaries must be created
     # with dict() instead of {}
@@ -138,11 +135,20 @@ else:
     # the following trick is needed to be able to import the names
     input = input
     zip = zip
-    next = next
     dict = dict
     # function replacing str.isidentifier method (see above)    
     def is_identifier(s):
         return s.isidentifier()
+
+if sys.version_info[0]==3 and sys.version_info[1]>=10:
+    # pairwise generator available natively since Python 3.10
+    from itertools import pairwise
+else:
+    from itertools import tee
+    def pairwise(iterable):
+       (a, b) = tee(iterable)
+       next(b, None)
+       return zip(a, b)
 
 def indent(str_func,obj,width):
     ''' returns a string representation of given object obj obtained

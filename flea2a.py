@@ -1,7 +1,7 @@
 '''
 --------------------------------------------------------------------------------
 
-    flea2.py
+    flea2a.py
 
 --------------------------------------------------------------------------------
 Copyright 2013-2021 Pierre Denis
@@ -53,7 +53,7 @@ class Flea2a(Flea2):
         f = self._f
         absorber = self._absorber
         for (v1,p1) in self._lea_arg1.gen_vp():
-            if v1 is absorber:
+            if v1 == absorber:
                 yield (absorber,p1)
             else:
                 for (v2,p2) in self._lea_arg2.gen_vp():
