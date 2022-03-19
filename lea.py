@@ -596,49 +596,49 @@ class Lea(object):
     @staticmethod
     def all_equal(*args):
         ''' static method, returns a new Flea2 instance that yields True
-            iff all arg in args are equal or if args has 0 or 1 element;
+            iff all values in args are equal or if args has 0 or 1 element;
             the evaluation is done from left to right, yielding False
-            as soon as some yielded arg differs
+            as soon as some yielded value differs
         '''
         return Lea.all_pairwise_verify(args, operator.eq)
 
     @staticmethod
     def all_increasing(*args):
         ''' static method, returns a new Flea2 instance that yields True
-            iff all yielded arg in args are in non-strict increasing order
+            iff all yielded values in args are in non-strict increasing order
             or if args has 0 or 1 element;
             the evaluation is done from left to right, yielding False
-            as soon as some yielded arg is not in increasing order
+            as soon as some yielded value is not in increasing order
         '''
         return Lea.all_pairwise_verify(args, operator.le)
 
     @staticmethod
     def all_strict_increasing(*args):
         ''' static method, returns a new Flea2 instance that yields True
-            iff all yielded arg in args are in strict increasing order
+            iff all yielded values in args are in strict increasing order
             or if args has 0 or 1 element;
             the evaluation is done from left to right, yielding False
-            as soon as some yielded arg is not in increasing order
+            as soon as some yielded value is not in increasing order
         '''
         return Lea.all_pairwise_verify(args, operator.lt)
 
     @staticmethod
     def all_decreasing(*args):
         ''' static method, returns a new Flea2 instance that yields True
-            iff all yielded arg in args are in non-strict decreasing order
+            iff all yielded values in args are in non-strict decreasing order
             or if args has 0 or 1 element;
             the evaluation is done from left to right, yielding False
-            as soon as some yielded arg is not in decreasing order
+            as soon as some yielded value is not in decreasing order
         '''
         return Lea.all_pairwise_verify(args, operator.ge)
 
     @staticmethod
     def all_strict_decreasing(*args):
         ''' static method, returns a new Flea2 instance that yields True
-            iff all yielded arg in args are in strict decreasing order
+            iff all yielded values in args are in strict decreasing order
             or if args has 0 or 1 element;
             the evaluation is done from left to right, yielding False
-            as soon as some yielded arg is not in decreasing order
+            as soon as some yielded value is not in decreasing order
         '''
         return Lea.all_pairwise_verify(args, operator.gt)
 
