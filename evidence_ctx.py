@@ -116,7 +116,6 @@ class EvidenceCtx(object):
         '''
         evidence_context = EvidenceCtx(*conditions,**kwargs)
         evidence_context.activate()
-        return evidence_context
 
     @staticmethod
     def pop_evidence():
