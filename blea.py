@@ -4,7 +4,7 @@
     blea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2021 Pierre Denis
+Copyright 2013-2022 Pierre Denis
 
 This file is part of Lea.
 
