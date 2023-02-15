@@ -93,8 +93,8 @@ def test_coins(setup):
     model_dict = coins0.learn_by_em(obs_coins,fixed_vars=(coin_type0,),nb_steps=1)
     coins_A1 = model_dict[coins_A0]
     coins_B1 = model_dict[coins_B0]
-    assert isclose(coins_A1.p, 0.71, abs_tol=1e-2)
-    assert isclose(coins_B1.p, 0.58, abs_tol=1e-2)
+    assert isclose(coins_A1.prob, 0.71, abs_tol=1e-2)
+    assert isclose(coins_B1.prob, 0.58, abs_tol=1e-2)
 
 def test_mixt_binom(setup):
     # true model (supposing unknown)
@@ -113,8 +113,8 @@ def test_mixt_binom(setup):
     # perform 50 steps of EM algorithm 
     model_dict = x0.learn_by_em(obs_x,nb_steps=50)
     (x1,a1,b1,c1) = (model_dict[var] for var in (x0,a0,b0,c0))
-    assert isclose(a1.p,a.p,abs_tol=1e-2)
-    assert isclose(b1.p,b.p,abs_tol=1e-2)
+    assert isclose(a1.prob,a.prob,abs_tol=1e-2)
+    assert isclose(b1.prob,b.prob,abs_tol=1e-2)
     assert isclose(c1.p("A"),c.p("A"),abs_tol=1e-2)
     assert x1.equiv_f(x,abs_tol=1e-2)
     assert isclose(obs_x.kl_divergence(x1),0.0,abs_tol=1e-3)
@@ -136,7 +136,7 @@ def test_mixt_binom_poisson(setup):
     # perform 50 steps of EM algorithm 
     model_dict = x0.learn_by_em(obs_x,nb_steps=50)
     (x1,a1,b1,c1) = (model_dict[var] for var in (x0,a0,b0,c0))
-    assert isclose(a1.p,a.p,abs_tol=1e-2)
+    assert isclose(a1.prob,a.prob,abs_tol=1e-2)
     assert isclose(b1._mean,b._mean,abs_tol=1e-1)
     assert isclose(c1.p("A"),c.p("A"),abs_tol=1e-2)
     assert x1.equiv_f(x,abs_tol=1e-2)

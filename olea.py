@@ -34,33 +34,31 @@ class Olea(Lea):
     each having probability p of success
     '''
     
-    __slots__ = ('n','p')
+    __slots__ = ('n','prob')
 
     def __init__(self,n,p,prob_type=None):
         Lea.__init__(self)
         self.n = n
         prob_type_func = Alea.get_prob_type(prob_type)
-        self.p = p if prob_type_func is None else prob_type_func(p)
+        self.prob = p if prob_type_func is None else prob_type_func(p)
     
     def _get_lea_children(self):
         return ()
 
     def _clone_by_type(self,clone_table):
-        return Olea(self.n,self.p,-1)
+        return Olea(self.n,self.prob,-1)
 
     def _gen_vp(self):
         n = self.n
-        try:
-            if p == 0:
-                yield (0,1)
-                return
-            if p == 1:
-                yield (n,1)
-                return
-        except:
-            pass
-        pdq = self.p / (1 - self.p)
-        pk = (1-self.p)**n
+        p = self.prob
+        if p == 0:
+            yield (0,1)
+            return
+        if p == 1:
+            yield (n,1)
+            return
+        pdq = p / (1 - p)
+        pk = (1-p)**n
         for k in range(n+1):
             yield (k,pk)
             pk *= (pdq * (n-k)) / (k+1) 

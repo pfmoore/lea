@@ -57,9 +57,25 @@ def test_times_alt_op(setup):
     explicit = die.new() * die.new() * die.new() * die.new()
     assert die.times(4, op=mul).equiv(explicit)
 
-def binom_bernoulli_equiv(setup):
-    binom = lea.binom(6,3,10)
-    bernoulli = lea.bernoulli(3,10)
+def test_bernoulli_corner_cases(setup):
+    assert lea.bernoulli(PF(0)).equiv(0)
+    assert lea.bernoulli(PF(1)).equiv(1)
+    assert lea.bernoulli(0.0).equiv(0)
+    assert lea.bernoulli(1.0).equiv(1)
+
+def test_binom_corner_cases(setup):
+    assert lea.binom(0,PF(0)).equiv(0)
+    assert lea.binom(0,PF(1)).equiv(0)
+    assert lea.binom(6,PF(0)).equiv(0)
+    assert lea.binom(6,PF(1)).equiv(6)
+    assert lea.binom(0,0.0).equiv(0)
+    assert lea.binom(0,1.0).equiv(0)
+    assert lea.binom(6,0.0).equiv(0)
+    assert lea.binom(6,1.0).equiv(6)
+
+def test_binom_bernoulli_equiv(setup):
+    binom = lea.binom(6,PF(3,10))
+    bernoulli = lea.bernoulli(PF(3,10))
     assert binom.equiv(bernoulli.times(6))
 
 def test_comparisons(setup):
