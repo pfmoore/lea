@@ -53,15 +53,14 @@ class Olea(Lea):
         p = self.prob
         if p == 0:
             yield (0,1)
-            return
-        if p == 1:
+        elif p == 1:
             yield (n,1)
-            return
-        pdq = p / (1 - p)
-        pk = (1-p)**n
-        for k in range(n+1):
-            yield (k,pk)
-            pk *= (pdq * (n-k)) / (k+1) 
+        else:
+            pdq = p / (1 - p)
+            pk = (1-p)**n
+            for k in range(n+1):
+                yield (k,pk)
+                pk *= (pdq * (n-k)) / (k+1) 
 
     def _gen_one_random_mc(self):
         for v in self.get_alea().gen_one_random_mc():
