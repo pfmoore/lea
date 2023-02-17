@@ -459,17 +459,21 @@ class Lea(object):
         '''
         return Ilea(self,(Alea.coerce(evidence) for evidence in evidences))
 
-    def times(self,n,op=operator.add,normalization=False):
+    def times(self,n,op=operator.add,normalization=True):
         ''' returns, after evaluation of the probability distribution self, a new
             Alea instance representing the current distribution operated n times
             with itself, through the given binary operator op;
             if n = 1, then a copy of self is returned;
             requires that n is strictly positive; otherwise, an exception is
             raised;
-            if normalization is True (default: False), then each probability is
+            if normalization is True (default), then each probability is
             divided by the sum of all probabilities
             note that the implementation uses a fast dichotomous algorithm,
-            instead of a naive approach that scales up badly as n grows
+            instead of a naive approach that scales up badly as n grows;
+            Warning: since the retured distribution is evaluated, there is no
+            referential consistency possible after "times" is called; in particular,
+            it is useless to have the call chain xxx.times(...).given(...),
+            meanwhile the opposite xxx.given(...).times(...) is perfectly sensible.
         '''
         alea1 = self.new(normalization=False)
         if n <= 0:
