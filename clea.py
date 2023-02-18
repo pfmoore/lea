@@ -4,7 +4,7 @@
     clea.py
 
 --------------------------------------------------------------------------------
-Copyright 2013-2022 Pierre Denis
+Copyright 2013-2023 Pierre Denis
 
 This file is part of Lea.
 
