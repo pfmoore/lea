@@ -52,6 +52,10 @@ def test_times(setup):
     diexN = sum(die1.new() for i in range(4))
     assert die1.times(4).equiv_f(diexN)
 
+def test_given_times(setup):
+    die1 = lea.interval(1, 6)    
+    assert die1.given(die1<=2).times(2).equiv(lea.pmf(((2,1), (3,2), (4,1))))
+
 def test_times_alt_op(setup):
     from operator import mul
     die = lea.interval(1, 6)

@@ -470,10 +470,11 @@ class Lea(object):
             divided by the sum of all probabilities
             note that the implementation uses a fast dichotomous algorithm,
             instead of a naive approach that scales up badly as n grows;
-            Warning: since the retured distribution is evaluated, there is no
-            referential consistency possible after "times" is called; in particular,
-            it is useless to have the call chain xxx.times(...).given(...),
-            meanwhile the opposite xxx.given(...).times(...) is perfectly sensible.
+            Warning: since the returned distribution is evaluated by repeating
+            independent events that remain hidden, there is no referential
+            consistency possible after "times" is called; in particular, it is
+            useless to have the call chain xxx.times(...).given(...), meanwhile
+            the opposite xxx.given(...).times(...) is perfectly sensible.
         '''
         alea1 = self.new(normalization=False)
         if n <= 0:
