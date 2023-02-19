@@ -62,7 +62,7 @@ print (P(flip1 == flip2))
 print (P(flip1 != flip2))
 # -> 0.375
 ```
-You can also calculate conditional probabilities, based on given information or assumptions:
+You can also calculate **conditional probabilities**, based on given information or assumptions:
 
 []()
 ```python
@@ -74,7 +74,7 @@ print (P((flips == ('Tail', 'Tail')).given(flip2 == 'Tail')))
 print (flip1.given(flips == ('Head', 'Tail')))
 # -> Head : 1.0
 ```
-With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies (this is referred in the literature as a _probabilistic graphical model_ or a _generative model_). Based on such feature, Lea can build more complex relationships between random variables and perform advanced inference like Bayesian reasoning. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is modeled in a couple of lines:
+With these examples, you can notice that Lea performs _lazy evaluation_, so that `flip1`, `flip2`, `flips` form a network of variables that "remember" their causal dependencies (this is referred in the literature as a _probabilistic graphical model_ or a _generative model_). Based on such feature, Lea can build more complex relationships between random variables and perform advanced inference like **Bayesian reasoning**. For instance, the classical ["Rain-Sprinkler-Grass" Bayesian network (Wikipedia)](http://en.wikipedia.org/wiki/Bayesian_network) is modeled in a couple of lines:
 
 []()
 ```python
@@ -100,7 +100,7 @@ print (P(grass_wet.given(sprinkler & ~rain)))
 print (P(grass_wet.given(~sprinkler & ~rain)))
 # -> 0.0
 ```
-The floating-point number type is a standard although limited way to represent probabilities. Lea 3 proposes alternative representations, which can be more expressive for some domain and which are very easy to set. For example, you could use fractions: 
+The floating-point number type is a standard although limited way to represent probabilities. Lea 3 proposes alternative representations, which can be more expressive for some domain and which are very easy to set. For example, you could use **fractions**: 
 
 []()
 ```python
@@ -113,7 +113,7 @@ print (flips_frac)
 #    ('Tail', 'Head') : 3/16
 #    ('Tail', 'Tail') : 1/16
 ```
-You could also put variable names, which enables _symbolic computation_ of probabilities (requires [the SymPy library](http://www.sympy.org)):
+You could also put variable names, which enables **_symbolic computation_** of probabilities (requires [the SymPy library](http://www.sympy.org)):
 
 []()
 ```python
@@ -167,6 +167,6 @@ The very beating heart of Lea resides in the _Statues_ algorithm, which is a new
 
 If you have enhancements to propose or if you discover bugs, you are kindly invited to [create an issue on bitbucket Lea page](http://bitbucket.org/piedenis/lea/issues). All issues will be answered!
 
-Don't hesitate to send your comments, questions, … to [pie.denis@skynet.be](mailto:pie.denis@skynet.be), in English or French. You are welcome / _bienvenus_ !
+Don't hesitate to send your comments, questions, … to [pie.denis@skynet.be](mailto:pie.denis@skynet.be), in English or French. You are most welcome / _bienvenus_ !
 
-Also, if you use Lea in your developments or researches, please tell about it! So, your experience can be shared and the project can gain recognition. Thanks!
+Also, if you use Lea in your developments, researches or business, please tell about it! So, your experience can be shared and the project can gain recognition. Thanks!
