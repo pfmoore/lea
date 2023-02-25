@@ -1931,8 +1931,8 @@ class Lea(object):
               (see Lea._init_calc);
             the last arguments specify the evaluation algorithm and related options: 
             * algo (default: EXACT): four algorithms are available:
-              - EXACT: calculates the exact probability distribution using the Statues algorithm;
-                for such choice, the remaining arguments shall not be used; 
+              - EXACT: calculates the exact probability distribution using the Statues algorithm; for such
+                choice, the arguments nb_samples, nb_subsamples, nb_tries, exact_vars shall not be used;
               - MCRS (Monte-Carlo Rejection Sampling): calculates an approximate probability distribution
                 following the MC rejection sampling algorithm on nb_samples random samples;
                 if self is an Ilea instance, i.e. evaluating a conditional probability x.given(e), then the
@@ -1956,11 +1956,11 @@ class Lea(object):
                 MCEV algorithm cannot handle expressions under condition, i.e. x.given(e); MCLW shall be
                 used instead;
             * optimize (default: true), considered only if algo=EXACT, if true then independent sub-DAG are
-               searched in the DAG rooted by self; if such independent sub-DAG are found, then their roots
-               are evaluated using EXACT algorithm and replaced by resulting Alea instances; for some DAG
-               presenting inner tree patterns, this divide-and-conquer process may save a lot of calculations;
-               putting optimize=False allows getting the behavior of Lea versions prior to 3.4.0. and
-               highlighting the effect of optimization
+              searched in the DAG rooted by self; if such independent sub-DAG are found, then their roots
+              are evaluated using EXACT algorithm and replaced by resulting Alea instances; for some DAG
+              presenting inner tree patterns, this divide-and-conquer process may save a lot of calculations;
+              putting optimize=False allows getting the behavior of Lea versions prior to 3.4.0. and
+              highlighting the effect of non-optimization;
             * nb_samples (default: None): number of random samples made for MCRS algorithm;
             * nb_subsamples (default: None): only for MCRS and MCLW algorithms and if self is
               an Ilea instance, i.e. a conditional probability x.given(e); it specifies the number of random

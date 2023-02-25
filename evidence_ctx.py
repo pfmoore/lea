@@ -34,13 +34,13 @@ class EvidenceCtx(object):
     '''
     EvidenceCtx is a class which instance represents global conditions
     that can be activated or deactivated. At any given time, all active
-    EvidenceCtx instances define implicir conditions that are enforced
+    EvidenceCtx instances define implicit conditions that are enforced
     on all calculated probabilities; these become then automatically
     conditional probabilities (see Ilea class).
     An EvidenceCtx is defined by a sequence of condtions (boolean Lea
     instances) and bindings dictionary for binding Alea instances to
     given values ("observations"). Both data are optional. Semantically,
-    these are combined together with a cunjunction (AND); the bindings
+    these are combined together with a conjunction (AND); the bindings
     {x:v) are equivalent to conditions (x==v) but these can be treated
     faster, especially if x's domain is large.
     An EvidenceCtx can be used as a Python context manager, using
