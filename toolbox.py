@@ -163,11 +163,13 @@ if sys.version_info[0] == 3:
         from math import gcd
 if lcm is None:
     if gcd is None:
-        # Python 2.7, 3.0, 3.1, 3.2, 3.4: native binary gcd function
+        # Python 2.7, 3.0, 3.1, 3.2, 3.3, 3.4: native binary gcd function
         # define multi-args gcd function
         from fractions import gcd as gcd2
         def gcd(*integers):
-            (integer1,*integers2) = integers
+            ## Python 3 syntax: (integer1,*integers2) = integers
+            integer1 = integers[0]
+            integers2 = integers[1:]
             if len(integers2) == 0:
                 return integer1
             return gcd2(integer1,gcd(*integers2))
