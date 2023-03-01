@@ -25,6 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .number import Number
 from fractions import Fraction
+from .toolbox import lcm
 
 class ExtFraction(Number,Fraction):
 
@@ -96,20 +97,6 @@ class ExtFraction(Number,Fraction):
     __div__ = __truediv__
     __rdiv__ = __rtruediv__
 
-
-    @staticmethod
-    def calc_lcm(values):
-        ''' returns the least common multiple among the given sequence of integers;
-            assumes that all values are strictly positive
-        '''
-        values0 = tuple(frozenset(values))
-        values1 = list(values0)
-        while len(set(values1)) > 1:
-            min_val = min(values1)
-            idx = values1.index(min_val)
-            values1[idx] += values0[idx]
-        return values1[0]
-
     @staticmethod
     def convert_to_same_denom(fractions):
         ''' static method, returns a tuple of integers
@@ -119,5 +106,6 @@ class ExtFraction(Number,Fraction):
         denominators = tuple(fraction.denominator for fraction in fractions)
         if len(denominators) == 0:
             raise ExtFraction.Error('get_prob_weights requires at least one fraction')
-        lcm = ExtFraction.calc_lcm(denominators)
-        return (tuple(fraction.numerator*(lcm//fraction.denominator) for fraction in fractions), lcm)
+        denominators_lcm = lcm(*denominators)
+        return (tuple(fraction.numerator*(denominators_lcm//fraction.denominator)
+                      for fraction in fractions), denominators_lcm)

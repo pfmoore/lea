@@ -140,7 +140,8 @@ else:
     def is_identifier(s):
         return s.isidentifier()
 
-if sys.version_info[0]==3 and sys.version_info[1]>=10:
+# import or define pairwise function
+if sys.version_info[0] == 3 and sys.version_info[1] >= 10:
     # pairwise generator available natively since Python 3.10
     from itertools import pairwise
 else:
@@ -149,6 +150,34 @@ else:
        (a, b) = tee(iterable)
        next(b, None)
        return zip(a, b)
+
+# import or define lcm function
+lcm = None
+gcd = None
+if sys.version_info[0] == 3:
+    if sys.version_info[1] >= 9:
+        # Python 3.9: native multi-args lcm function 
+        from math import lcm
+    elif sys.version_info[1] >= 5:
+        # Python 3.5, 3.6, 3.7, 3.8 : native multi-args gcd function 
+        from math import gcd
+if lcm is None:
+    if gcd is None:
+        # Python 2.7, 3.0, 3.1, 3.2, 3.4: native binary gcd function
+        # define multi-args gcd function
+        from fractions import gcd as gcd2
+        def gcd(*integers):
+            (integer1,*integers2) = integers
+            if len(integers2) == 0:
+                return integer1
+            return gcd2(integer1,gcd(*integers2))
+    # Python < 3.5: define multi-args lcm function, using multi-args gcd function
+    def lcm(*integers):
+        prod = 1
+        for integer in integers:
+            prod *= integer            
+        return prod // gcd(*integers)
+    del gcd
 
 def indent(str_func,obj,width):
     ''' returns a string representation of given object obj obtained
