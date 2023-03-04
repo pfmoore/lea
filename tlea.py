@@ -60,8 +60,8 @@ class Tlea(Lea):
             dummy_lea = []
             tlea = Tlea(lea_c,lea_dict,dummy_lea)
             alea1 = tlea.given(tlea!=dummy_lea).calc(normalization=False)
-            default_lea_support = set(alea1.support)
-            default_lea_support.update(prior_lea.support)
+            default_lea_support = set(alea1.support())
+            default_lea_support.update(prior_lea.support())
             vps = []
             for v in default_lea_support:
                 p = prior_lea._p(v) - alea1._p(v)

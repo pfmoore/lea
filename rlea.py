@@ -40,7 +40,7 @@ class Rlea(Lea):
         self._lea_of_leas = lea_of_leas
 
     def _get_lea_children(self):
-        return (self._lea_of_leas,) + self._lea_of_leas.support
+        return (self._lea_of_leas,) + self._lea_of_leas.support()
 
     def _clone_by_type(self,clone_table):
         return Rlea(self._lea_of_leas._clone(clone_table))
@@ -58,6 +58,6 @@ class Rlea(Lea):
     def _em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
         lea_of_leas1 = self._lea_of_leas.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict)
         lea_of_leas2 = lea.pmf(dict((v.em_step(model_lea,cond_lea,obs_pmf_tuple,conversion_dict),p)
-                                    for (v,p) in lea_of_leas1.pmf_tuple))
+                                    for (v,p) in lea_of_leas1.pmf_tuple()))
         return Rlea(lea_of_leas2)
     

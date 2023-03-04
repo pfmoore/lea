@@ -937,7 +937,6 @@ class Alea(Lea):
             the sequence follows the increasing order defined on values;
             if order is undefined (e.g. complex numbers), then the order is
             arbitrary but fixed from call to call;
-            WARNING: this method is called without parentheses
         '''
         return self._vs
 
@@ -946,7 +945,6 @@ class Alea(Lea):
             the sequence follows the increasing order defined on values;
             if order is undefined (e.g. complex numbers), then the order is
             arbitrary but fixed from call to call;
-            WARNING: this method is called without parentheses
         '''
         return tuple(Alea._downcast_prob(p) for p in self._ps)
 
@@ -954,7 +952,6 @@ class Alea(Lea):
         ''' returns, after evaluation of the probability distribution self, the probability
             mass function of self, as a tuple with tuples (v,P(v));
             the sequence follows the order defined on values;
-            WARNING: this method is called without parentheses
         '''
         return tuple(self._gen_vps())
 
@@ -963,7 +960,6 @@ class Alea(Lea):
             mass function of self, as an OrderedDict with v : P(v)) pairs;
             the sequence follows the order defined on values;
             requires Python 2.7+;
-            WARNING: this method is called without parentheses
         '''
         return collections.OrderedDict(self._gen_vps())
 
@@ -971,7 +967,6 @@ class Alea(Lea):
         ''' returns, after evaluation of the probability distribution self, the cumulative
             distribution function of self, as a tuple with tuples (v,P(x<=v));
             the sequence follows the order defined on values;
-            WARNING: this method is called without parentheses
         '''
         return tuple((v,Alea._downcast_prob(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
 
@@ -980,7 +975,6 @@ class Alea(Lea):
             distribution function of self, as an OrderedDict with v : P(x<=v)) pairs;
             the sequence follows the order defined on values;
             requires Python 2.7+;
-            WARNING: this method is called without parentheses
         '''
         return collections.OrderedDict((v,Alea._downcast_prob(p)) for (v,p) in zip(self._vs,self.cumul()[1:]))
 
@@ -1012,10 +1006,10 @@ class Alea(Lea):
         if cond_lea is True:
             return Alea.pmf(dict((v, sum(px * ((self==v).given(model_lea==vx))._p(True)
                                          for (vx,px) in obs_pmf_tuple))
-                                 for v in self.support))
+                                 for v in self.support()))
         return Alea.pmf(dict((v, sum(px * (((self==v) & cond_lea).given(model_lea==vx))._p(True)
                                      for (vx,px) in obs_pmf_tuple))
-                             for v in self.support))
+                             for v in self.support()))
 
     def is_bindable(self,v):
         ''' see Lea.is_bindable
@@ -1182,14 +1176,6 @@ class Alea(Lea):
             return Alea.pmf(pmf_dict)
         return Alea.fast_extremum(cumul_func,alea_args[0],Alea.fast_extremum(cumul_func,*alea_args[1:]))
 
-    # WARNING: the following methods are called without parentheses (see Lea.__getattr__)
-
-    indicator_method_names = ('P', 'Pf', 'mean', 'mean_f', 'var', 'var_f',
-                              'std', 'std_f', 'mode', 'entropy',
-                              'rel_entropy', 'redundancy', 'information',
-                              'support', 'ps', 'p_sum', 'pmf_tuple', 'pmf_dict',
-                              'cdf_tuple', 'cdf_dict',)
-
     @staticmethod
     def _downcast(x):
         ''' static method, returns x or an object equivalent to x, more convenient to display:
@@ -1222,7 +1208,6 @@ class Alea(Lea):
             BUT it could be different:
             - due to float rounding-errors
             - due to an explicit normalization=False argument;
-            WARNING: this method is called without parentheses
         '''
         ## note that the following expression is NOK for unorderable types (e.g. complex)
         ##   self.p_cumul(self._vs[-1])
@@ -1235,7 +1220,6 @@ class Alea(Lea):
             Decimal -> ProbDecimal);
             raises an exception if some value in the distribution is not boolean
             (note that this is NOT the case with self.p(True));
-            WARNING: this method is called without parentheses
         '''
         return Alea._downcast_prob(self._p(True,check_val_type=True))
 
@@ -1245,7 +1229,6 @@ class Alea(Lea):
             raises an exception if the probability type is no convertible to float;
             raises an exception if some value in the distribution is not boolean;
             (this is NOT the case with self.p(True));
-            WARNING: this method is called without parentheses
         '''
         return float(self._p(True,check_val_type=True))
 
@@ -1277,13 +1260,11 @@ class Alea(Lea):
                 or an integer;
             if any of these conditions is not met, then the result depends of the
             value class implementation (likely, raised exception);
-            WARNING: this method is called without parentheses
         '''
         return Alea._downcast(Alea._simplify(self._mean(),False))
 
     def mean_f(self):
         ''' same as mean method but with conversion to float or simplification of symbolic expression;
-            WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._mean(),True)
 
@@ -1304,13 +1285,11 @@ class Alea(Lea):
             3 - the differences between values and the mean value can be squared;
             if any of these conditions is not met, then the result depends of the
             value implementation (likely, raised exception)
-            WARNING: this method is called without parentheses
         '''
         return Alea._downcast(Alea._simplify(self._var(),False))
 
     def var_f(self):
         ''' same as var method but with conversion to float or simplification of symbolic expression;
-            WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._var(),True)
 
@@ -1324,21 +1303,18 @@ class Alea(Lea):
     def std(self):
         ''' returns the standard deviation of the probability distribution
             requires that the requirements of the var method are met;
-            WARNING: this method is called without parentheses
         '''
         return Alea._downcast(Alea._simplify(self._std(),False))
 
     def std_f(self):
         ''' same as std method but with conversion to float or simplification
             of symbolic expression;
-            WARNING: this method is called without parentheses
         '''
         return Alea._simplify(self._std(),True)
    
     def mode(self):
         ''' returns a tuple with the value(s) of the probability distribution
             having the highest probability;
-            WARNING: this method is called without parentheses
         '''
         max_p = max(self._ps)
         return tuple(v for (v,p) in self._gen_raw_vps() if p == max_p)
@@ -1371,7 +1347,6 @@ class Alea(Lea):
             the returned type is a float or a sympy expression (see doc of
             Alea.entropy);
             raises an exception if self is certainly false;
-            WARNING: this method is called without parentheses
         '''
         return self.information_of(True)
 
@@ -1383,7 +1358,6 @@ class Alea(Lea):
             returned as a sympy expression;
             raises an exception if some probabilities are neither convertible
             to float nor a sympy expression;
-            WARNING: this method is called without parentheses
         '''
         res = 0
         try:
@@ -1408,12 +1382,11 @@ class Alea(Lea):
             is returned as a sympy expression;
             raises an exception if some probabilities are neither convertible
             to float nor a sympy expression;
-            WARNING: this method is called without parentheses
         '''
         n = len(self._vs)
         if n == 1:
             return 0.0
-        entropy = self.entropy
+        entropy = self.entropy()
         try:
             return min(1.0,entropy/log2(n))
         except TypeError:
@@ -1434,7 +1407,7 @@ class Alea(Lea):
                 log-likelihood = - N * cross-entropy
               using logarithm in base 2 (for other base, use the right factor)
         '''
-        lea1_pmf_dict = Alea.coerce(lea1).pmf_dict
+        lea1_pmf_dict = Alea.coerce(lea1).pmf_dict()
         try:
             ce = -sum(px*log2(lea1_pmf_dict[vx]) for (vx,px) in self._gen_vps() if px > 0)
         except KeyError as key_error:
@@ -1446,7 +1419,7 @@ class Alea(Lea):
             # retry using sympy log funtion and without test clause
             ce = -sum(px*sympy.log(lea1_pmf_dict[vx]) for (vx,px) in self._gen_vps()) / sympy.log(2)
         try:        
-            return max(ce,self.entropy)
+            return max(ce,self.entropy())
         except TypeError:
             # sympy exception assumed: no ceiling
             return ce
@@ -1459,9 +1432,8 @@ class Alea(Lea):
             is returned as a sympy expression;
             raises an exception if some probabilities are neither convertible
             to float nor a sympy expression;
-            WARNING: this method is called without parentheses
         '''
-        return 1.0 - self.rel_entropy
+        return 1.0 - self.rel_entropy()
 
     def internal(self,full=False,_indent='',_refs=None):
         ''' returns a string representing the inner definition of self;

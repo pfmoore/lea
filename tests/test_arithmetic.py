@@ -12,11 +12,11 @@ def setup():
     
 def test_arith_with_constant(setup):
     die = lea.interval(1, 6)
-    assert (die + 3).support == (4, 5, 6, 7, 8, 9)
-    assert (die - 3).support == (-2, -1, 0, 1, 2, 3)
-    assert (die * 2).support == (2, 4, 6, 8, 10, 12)
-    assert (die / 2).support == (0.5, 1.0, 1.5, 2.0, 2.5, 3.0)
-    assert (die // 2).support == (0, 1, 2, 3)
+    assert (die + 3).support()== (4, 5, 6, 7, 8, 9)
+    assert (die - 3).support()== (-2, -1, 0, 1, 2, 3)
+    assert (die * 2).support()== (2, 4, 6, 8, 10, 12)
+    assert (die / 2).support()== (0.5, 1.0, 1.5, 2.0, 2.5, 3.0)
+    assert (die // 2).support()== (0, 1, 2, 3)
     assert (die // 3).equiv(lea.vals(0, 0, 1, 1, 1, 2))
     assert (die % 2).equiv(lea.vals(0, 1))
 
@@ -139,7 +139,7 @@ def test_covariance_1(setup):
     die2 = die1.new()
     dice = die1 + die2
     assert die1.cov(die2) == 0
-    assert die1.var == EF(35,12)
+    assert die1.var() == EF(35,12)
     assert die1.cov(die1) == EF(35,12)
     assert dice.cov(die1) == EF(35,12)
     assert die1.cov(dice) == EF(35,12)

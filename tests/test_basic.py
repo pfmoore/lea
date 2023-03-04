@@ -11,15 +11,15 @@ def setup():
 
 def test_equiprobable(setup):
     flip = lea.vals('Head','Tail')
-    assert set(flip.pmf_tuple) == {("Head", PF(1,2)), ("Tail", PF(1,2))}
+    assert set(flip.pmf_tuple()) == {("Head", PF(1,2)), ("Tail", PF(1,2))}
 
 def test_biased(setup):
     biasedFlip = lea.vals('Head','Tail','Tail')
-    assert set(biasedFlip.pmf_tuple) == {("Head", PF(1,3)), ("Tail", PF(2,3))}
+    assert set(biasedFlip.pmf_tuple()) == {("Head", PF(1,3)), ("Tail", PF(2,3))}
 
 def test_simplest_form(setup):
     flip = lea.vals("H", "H", "T", "T")
-    assert set(flip.pmf_tuple) == {("H", PF(1,2)), ("T", PF(1,2))}
+    assert set(flip.pmf_tuple()) == {("H", PF(1,2)), ("T", PF(1,2))}
 
 def test_fromseq(setup):
     seq = lea.vals(*range(1, 7))
@@ -89,12 +89,12 @@ def test_binom_bernoulli(setup):
 def test_distribution_data(setup):
     # Examples from the wiki
     heights = lea.pmf(((0.5,1),(1.0,2),(1.5,4),(2.0,5),(2.5,5),(3.0,2),(3.5,1)))
-    assert heights.pmf_tuple == ((0.5, PF(1,20)), (1.0, PF(2,20)), (1.5, PF(4,20)), (2.0, PF(5,20)), (2.5, PF(5,20)), (3.0, PF(2,20)), (3.5, PF(1,20)))
-    assert heights.pmf_dict == {0.5: PF(1,20), 1.0: PF(2,20), 2.0: PF(5,20), 3.0: PF(2,20), 3.5: PF(1,20), 1.5: PF(4,20), 2.5: PF(5,20)}
-    assert heights.support == (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5)
-    assert heights.ps == (PF(1,20), PF(2,20), PF(4,20), PF(5,20), PF(5,20), PF(2,20), PF(1,20))
-    assert heights.cdf_tuple == ((0.5, PF(1,20)), (1.0, PF(3,20)), (1.5, PF(7,20)), (2.0, PF(12,20)), (2.5, PF(17,20)), (3.0, PF(19,20)), (3.5, PF(20,20)))
-    assert heights.cdf_dict == {0.5: PF(1,20), 1.0: PF(3,20), 2.0: PF(12,20), 3.0: PF(19,20), 3.5: PF(20,20), 1.5: PF(7,20), 2.5: PF(17,20)}
+    assert heights.pmf_tuple() == ((0.5, PF(1,20)), (1.0, PF(2,20)), (1.5, PF(4,20)), (2.0, PF(5,20)), (2.5, PF(5,20)), (3.0, PF(2,20)), (3.5, PF(1,20)))
+    assert heights.pmf_dict() == {0.5: PF(1,20), 1.0: PF(2,20), 2.0: PF(5,20), 3.0: PF(2,20), 3.5: PF(1,20), 1.5: PF(4,20), 2.5: PF(5,20)}
+    assert heights.support()== (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5)
+    assert heights.ps() == (PF(1,20), PF(2,20), PF(4,20), PF(5,20), PF(5,20), PF(2,20), PF(1,20))
+    assert heights.cdf_tuple() == ((0.5, PF(1,20)), (1.0, PF(3,20)), (1.5, PF(7,20)), (2.0, PF(12,20)), (2.5, PF(17,20)), (3.0, PF(19,20)), (3.5, PF(20,20)))
+    assert heights.cdf_dict() == {0.5: PF(1,20), 1.0: PF(3,20), 2.0: PF(12,20), 3.0: PF(19,20), 3.5: PF(20,20), 1.5: PF(7,20), 2.5: PF(17,20)}
 
 def test_get_prob(setup):
     flip = lea.vals(*"HT")
@@ -102,27 +102,27 @@ def test_get_prob(setup):
 
 def test_descriptive_statistics(setup):
     die = lea.vals(1,2,3,4,5,6)
-    assert die.mean_f == 3.5
-    assert die.var_f == 2.9166666666666665
-    assert die.std_f == 1.707825127659933
+    assert die.mean_f() == 3.5
+    assert die.var_f() == 2.9166666666666665
+    assert die.std_f() == 1.707825127659933
     assert die.cov_f(die) == 2.9166666666666665
 
 def test_mode(setup):
     die = lea.vals(1,2,3,4,5,6)
-    assert die.mode == (1, 2, 3, 4, 5, 6)
+    assert die.mode() == (1, 2, 3, 4, 5, 6)
     heights = lea.pmf(((0.5,1),(1.0,2),(1.5,4),(2.0,5),(2.5,5),(3.0,2),(3.5,1)))
-    assert heights.mode == (2.0, 2.5)
+    assert heights.mode() == (2.0, 2.5)
 
 def test_entropy(setup):
-    assert lea.event('1/2').entropy == 1.0
-    assert lea.vals(1,2,3,4,5,6).entropy == 2.584962500721156
+    assert lea.event('1/2').entropy() == 1.0
+    assert lea.vals(1,2,3,4,5,6).entropy() == 2.584962500721156
     # note accurracy difference between Python 2 and 3
-    assert abs(lea.vals(1,2,3,4,5,6,6).entropy - 2.521640636343318) < 1e-14
+    assert abs(lea.vals(1,2,3,4,5,6,6).entropy() - 2.521640636343318) < 1e-14
 
 def test_zero_entropy(setup):
-    assert lea.event(1).entropy == 0
-    assert lea.event(0).entropy == 0
-    assert lea.vals('X').entropy == 0
+    assert lea.event(1).entropy() == 0
+    assert lea.event(0).entropy() == 0
+    assert lea.vals('X').entropy() == 0
 
 def test_random_samples(setup):
     die = lea.interval(1, 6)

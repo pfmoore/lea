@@ -87,8 +87,8 @@ def test_coins(setup):
     assert coin_type1 is coin_type0
     # check indirectly parameters of new model, without accessing binomial parameters,
     # knowing that p = mean/n in a binomial  
-    assert isclose(coins1.given(coin_type1=='A').mean/10, 0.71, abs_tol=1e-2)
-    assert isclose(coins1.given(coin_type1=='B').mean/10, 0.58, abs_tol=1e-2)
+    assert isclose(coins1.given(coin_type1=='A').mean()/10, 0.71, abs_tol=1e-2)
+    assert isclose(coins1.given(coin_type1=='B').mean()/10, 0.58, abs_tol=1e-2)
     # perform one single step of EM algorithm, getting the new binomial variables 
     model_dict = coins0.learn_by_em(obs_coins,fixed_vars=(coin_type0,),nb_steps=1)
     coins_A1 = model_dict[coins_A0]

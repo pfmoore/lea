@@ -80,7 +80,7 @@ class Blea(Lea):
             if prior_lea is not None:
                 raise Lea.Error("impossible to define together prior probabilities and auto_else=True")
             # take uniform distribution on all values found in clause's results (principle of indifference)
-            else_clause_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in Alea.coerce(result).support))
+            else_clause_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in Alea.coerce(result).support()))
         else:
             else_clause_result = None
         # get clause conditions and results, excepting 'else' clause, after coercion to Lea instances

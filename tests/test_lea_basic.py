@@ -104,17 +104,17 @@ def test_fromvals_errors(setup):
 
 def test_fromvals_ordered(setup):
     d = lea.vals(2,1,3, ordered=True)
-    assert d.support == (2,1,3)
+    assert d.support()== (2,1,3)
     d = lea.pmf(((2,9),(1,7),(3,5)), ordered=True)
-    assert d.support == (2,1,3)
+    assert d.support()== (2,1,3)
 
 def test_fromvals_sorting(setup):
     d = lea.vals(2,1,3,2, sorting=True)
-    assert d.support == (1,2,3)
+    assert d.support()== (1,2,3)
 
 def test_from_dict(setup):
     d = lea.pmf({'a': 5, 'b': 6})
-    assert set(d.pmf_tuple) == {('a', PF(5,11)), ('b', PF(6,11))}
+    assert set(d.pmf_tuple()) == {('a', PF(5,11)), ('b', PF(6,11))}
 
 def test_event(setup):
     d = lea.event(0)
@@ -198,14 +198,14 @@ def test_read_csv_1(setup):
         f.write(patients_csv_data) 
     patient = lea.read_csv_file(csv_filename,col_names=('given_name','surname','gender','title','birthday','blood_type','weight{f}','height{f}','smoker{b}'))
     lea.make_vars(patient,globals())
-    assert given_name.equiv(patient.given_name)
-    assert gender.equiv(patient.gender)
+    assert given_name.equiv(patient.get_attribute("given_name"))
+    assert gender.equiv(patient.get_attribute("gender"))
     assert gender.equiv(lea.pmf({"female": 5./8., "male": 3./8.}))
     assert gender.given(smoker).equiv(lea.pmf({"female": 1./2., "male": 1./2.}))
     assert title.equiv(lea.pmf({"Mr.": 3./8., "Mrs.": 2./8., "Ms.": 3./8.}))
     assert smoker.equiv(lea.event(2./8.))
-    assert isclose(height.mean, (141.+181.+168.+156.+181.+183.+175.+164.)/8.)
-    assert isclose(height.given(gender=="male").mean, (181.+181.+183.)/3.)
+    assert isclose(height.mean(), (141.+181.+168.+156.+181.+183.+175.+164.)/8.)
+    assert isclose(height.given(gender=="male").mean(), (181.+181.+183.)/3.)
     
 def test_read_csv_2(setup):
     csv_filename = os.path.join(tempfile.mkdtemp(),"patient2.csv")
@@ -214,14 +214,14 @@ def test_read_csv_2(setup):
         f.write(patients_csv_data) 
     patient2 = lea.read_csv_file(csv_filename)
     lea.make_vars(patient2,globals())
-    assert given_name2.equiv(patient2.given_name2)
-    assert gender2.equiv(patient2.gender2)
+    assert given_name2.equiv(patient2.get_attribute("given_name2"))
+    assert gender2.equiv(patient2.get_attribute("gender2"))
     assert gender2.equiv(lea.pmf({"female": 5./8., "male": 3./8.}))
     assert gender2.given(smoker2=="Y").equiv(lea.pmf({"female": 1./2., "male": 1./2.}))
     assert title2.equiv(lea.pmf({"Mr.": 3./8., "Mrs.": 2./8., "Ms.": 3./8.}))
     assert smoker2.equiv(lea.pmf({"N": 6./8., "Y": 2./8.}))
-    assert isclose(height2.mean, (141.+181.+168.+156.+181.+183.+175.+164.)/8.)
-    assert isclose(height2.given(gender2=="male").mean, (181.+181.+183.)/3.)
+    assert isclose(height2.mean(), (141.+181.+168.+156.+181.+183.+175.+164.)/8.)
+    assert isclose(height2.given(gender2=="male").mean(), (181.+181.+183.)/3.)
 
 def test_read_pandas_dataframe(setup):
     try:
@@ -237,12 +237,27 @@ def test_read_pandas_dataframe(setup):
         patient3 = lea.read_pandas_df(df)
         # warning: unlike Lea,pandas make an automatic conversion of float-looking fields into float
         #          that's why we add {f} formatters below
-        assert isclose(patient3.height3.given(patient3.gender3=="male").mean, (181.+181.+183.)/3.)
+        height3 = patient3.get_attribute("height3")
+        gender3 = patient3.get_attribute("gender3")
+        assert isclose(height3.given(gender3=="male").mean(), (181.+181.+183.)/3.)
         with open(csv_filename,'w') as f:
             f.write("given_name3,surname3,gender3,title3,birthday2,blood_type3,weight3{f},height3{f},smoker3\n")
             f.write(patients_csv_data)         
         expected_patient3 = lea.read_csv_file(csv_filename)
         assert patient3.equiv(expected_patient3)
+
+def test_bn_from_joint(setup):
+    csv_filename = os.path.join(tempfile.mkdtemp(),"patient.csv")
+    with open(csv_filename,'w') as f:
+        f.write("given_name,surname,gender,title,birthday,blood_type,weight{f},height{f},smoker\n")
+        f.write(patients_csv_data)
+    patient = lea.read_csv_file(csv_filename)
+    bn = patient.build_bn_from_joint(
+           ( ('gender','blood_type')     , 'smoker' ),
+           ( ('gender','height','smoker'), 'weight' ))
+    assert bn.gender.equiv(lea.pmf({"female": 5./8., "male": 3./8.}))
+    assert bn.gender.given(80 <= bn.weight, bn.weight < 100).equiv_f(lea.pmf({"female": 0.603011437671927,
+                                                                             "male"  : 0.39698856232807295}))
 
 def test_draw_unsorted_without_replacement(setup):
     # test an unbiased die

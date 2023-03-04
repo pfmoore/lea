@@ -29,7 +29,7 @@ from .lea import Lea, Alea, Clea
 class Dlea(Lea):
     
     '''
-    Dlea is a Lea subclass, which instance represents the probablity distribution
+    Dlea is a Lea subclass, which instance represents the probability distribution
     that all arguments have different values. The arguments are coerced to Lea instances.
     A Dlea instance is a special case of "functional pex", as defined in the paper on
     Statues algorithm (see http://arxiv.org/abs/1806.09997).

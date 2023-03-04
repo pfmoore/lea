@@ -131,11 +131,6 @@ class Lea(object):
     concept since it stores the table in a dictionary. Slea allows to define CPT by means of a
     function, which could be more compact to store than an explicit table; it may be useful in
     particular for noisy-or and noisy-max models.  
-    
-    WARNING: The following methods are called without parentheses (for the sake of ease of use):
-      P, Pf, mean, mean_f, var, var_f, std, std_f, mode, entropy, rel_entropy, redundancy, information,
-      support, ps, pmf_tuple, pmf_dict, cdf_tuple, cdf_dict, p_sum
-    These are applicable on any Lea instance; these are implemented and documented in the Alea class.
 
     Short design notes:
     
@@ -815,7 +810,7 @@ class Lea(object):
         '''
         lea1 = Alea.coerce(lea1)
         lea2 = Alea.coerce(lea2)        
-        return sum(abs(lea1._p(v)-lea2._p(v)) for v in frozenset(lea1.support+lea2.support))
+        return sum(abs(lea1._p(v)-lea2._p(v)) for v in frozenset(lea1.support()+lea2.support()))
 
     @staticmethod
     def dist_l2(lea1,lea2):
@@ -827,7 +822,7 @@ class Lea(object):
         '''
         lea1 = Alea.coerce(lea1)
         lea2 = Alea.coerce(lea2)        
-        return (sum((lea1._p(v)-lea2._p(v))**2 for v in frozenset(lea1.support+lea2.support))) ** 0.5
+        return (sum((lea1._p(v)-lea2._p(v))**2 for v in frozenset(lea1.support()+lea2.support()))) ** 0.5
 
     def p(self,val):
         ''' returns the probability of given value val
@@ -1018,7 +1013,7 @@ class Lea(object):
         joint_alea = self.get_alea()
         # retrieve the named tuple class from the first value of the joint distribution,
         NamedTuple = joint_alea._vs[0].__class__
-        vars_dict = dict((var_name,self.__getattribute__(var_name)) for var_name in NamedTuple._fields)
+        vars_dict = dict((var_name,self.get_attribute(var_name)) for var_name in NamedTuple._fields)
         # all BN variables initialized as independent (maybe overwritten below, according to given relationships)
         vars_bn_dict = dict((var_name,var.get_alea(sorting=False)) for (var_name,var) in vars_dict.items())
         for (src_var_names,tgt_var_name) in bn_definition:
@@ -1028,17 +1023,17 @@ class Lea(object):
             joint_src_vars = Lea.joint(*(vars_dict[src_var_name] for src_var_name in src_var_names))
             joint_src_vars_bn = Lea.joint(*(vars_bn_dict[src_var_name] for src_var_name in src_var_names))
             # build CPT clauses (condition,result) from the joint probability distribution
-            joint_src_vals = joint_src_vars.support
+            joint_src_vals = joint_src_vars.support()
             clauses = tuple((joint_src_val,tgt_var.given(joint_src_vars==joint_src_val).get_alea(sorting=False)) \
                              for joint_src_val in joint_src_vals)
             # determine missing conditions in the CPT, if any
-            all_vals = Lea.joint(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).support
+            all_vals = Lea.joint(*(vars_dict[src_var_name].get_alea(sorting=False) for src_var_name in src_var_names)).support()
             missing_vals = frozenset(all_vals) - frozenset(joint_src_vals)
             if len(missing_vals) > 0:
                 # there are missing conditions: add clauses with each of these conditions associating
                 # them with a uniform distribution built on the values found in results of other clauses
                 # (principle of indifference)
-                else_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in result.support))
+                else_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in result.support()))
                 clauses += tuple((missing_val,else_result) for missing_val in missing_vals)
             # overwrite the target BN variable (currently independent Alea instance), with a CPT built
             # up from the clauses determined from the joint probability distribution
@@ -1287,7 +1282,7 @@ class Lea(object):
             the likelihood of obs_lea; the caller is expected to stop iterations when some criteria
             are satisfied (see Lea.learn_by_em method for an example)
         '''
-        obs_pmf_tuple = obs_lea.pmf_tuple
+        obs_pmf_tuple = obs_lea.pmf_tuple()
         new_model_lea = self
         conversion_dict = None
         while True:
@@ -1332,7 +1327,7 @@ class Lea(object):
         if nb_steps is None and max_kld is None and max_delta_kld is None:
             raise Lea.Error("learn_by_em method requires providing at least one halt condition (nb_steps,"
                             " max_delta_kld or max_kld argument)")
-        obs_lea_entropy = obs_lea.entropy
+        obs_lea_entropy = obs_lea.entropy()
         nb_steps_done = 0
         learn_by_em_generator = self.gen_em_steps(obs_lea,fixed_vars)
         new_model_lea = self
@@ -1341,7 +1336,7 @@ class Lea(object):
             # calculation of cross_entropy will raise an exception if some value of obs_lea
             # support is absent from model_lea
             ## kl_divergence method is not used here, to avoid multiple calculation
-            ## of obs_lea.entropy, which is constant
+            ## of obs_lea.entropy(), which is constant
             kld = obs_lea.cross_entropy(new_model_lea) - obs_lea_entropy
             if nb_steps is not None and nb_steps_done > nb_steps:
                 break
@@ -1378,8 +1373,9 @@ class Lea(object):
         else:
             # case (a)
             NamedTuple = obj.__class__
-        tgt_dict.update((prefix+var_name+suffix,obj.__getattribute__(var_name)) for var_name in NamedTuple._fields)       
-    
+        tgt_dict.update((prefix + var_name + suffix, obj.get_attribute(var_name))
+                        for var_name in NamedTuple._fields)
+
     def __call__(self,*args):
         ''' returns a new Glea instance representing the probability distribution
             of values returned by invoking functions of current distribution on 
@@ -1396,31 +1392,11 @@ class Lea(object):
         '''
         raise Lea.Error("cannot iterate on a Lea instance")
 
-    def __getattribute__(self,attr_name):
-        ''' returns the attribute with the given name in the current Lea instance;
-            if the attribute name is a distribution indicator, then the distribution
-            is evaluated and the indicator method is called; 
-            if the attribute name is unknown as a Lea instance's attribute,
-            then returns a Flea instance that shall retrieve the attribute in the
-            values of current distribution; 
-            called on evaluation of "self.attr_name"
-            WARNING: the following methods are called without parentheses:
-                         P, Pf, mean, mean_f, var, var_f, std, std_f, mode,
-                         entropy, rel_entropy, redundancy, information,
-                         support, p_sum, ps, pmf_tuple, pmf_dict, cdf_tuple,
-                         cdf_dict
-                     these are applicable on any Lea instance
-                     and these are documented in the Alea class
+    def get_attribute(self,attr_name):
+        ''' returns a Flea2 instance that retrieves the attribute
+            names attr_name in the values of self distribution
         '''
-        try:
-            if attr_name in Alea.indicator_method_names:
-                # indicator methods are called implicitely
-                return object.__getattribute__(self.get_alea(),attr_name)()
-            # return Lea's instance attribute
-            return object.__getattribute__(self,attr_name)
-        except AttributeError:
-            # return new Lea made up of attributes of inner values
-            return Flea2(getattr,self,attr_name)
+        return Flea2(getattr, self, attr_name)
 
     ## in PY3, could use
     ## def max_of(*args,fast=False):
@@ -2120,7 +2096,7 @@ class Lea(object):
               same pmf; this is guaranteed by the implementation, even in case of rounding
               errors
         '''
-        kld = self.cross_entropy(lea1) - self.entropy
+        kld = self.cross_entropy(lea1) - self.entropy()
         try:
             return max(kld,0.0)
         except TypeError:
@@ -2132,7 +2108,7 @@ class Lea(object):
         ''' static method, returns the joint entropy of arguments, expressed in bits;
             the returned type is a float or a sympy expression (see doc of Alea.entropy)
         '''
-        return Clea(*args).entropy
+        return Clea(*args).entropy()
 
     def cond_entropy(self,other):
         ''' returns the conditional entropy of self given other, expressed in
@@ -2145,8 +2121,8 @@ class Lea(object):
         '''
         other = Alea.coerce(other)
         if not self.is_dependent_of(other):
-            return self.entropy
-        ce = Clea(self,other).entropy - other.entropy
+            return self.entropy()
+        ce = Clea(self,other).entropy() - other.entropy()
         try:
             return max(0.0,ce)
         except:
@@ -2186,7 +2162,7 @@ class Lea(object):
         lea2 = Alea.coerce(lea2)
         if not lea1.is_dependent_of(lea2):
             return 0.0
-        mi = lea1.entropy + lea2.entropy - Clea(lea1,lea2).entropy
+        mi = lea1.entropy() + lea2.entropy() - Clea(lea1,lea2).entropy()
         try:
             return max(0.0,mi)
         except:
@@ -2307,6 +2283,7 @@ class Lea(object):
         '''
         def func(self):            
             return Flea1(f,self)
+        func.__name__ = f.__name__
         func.__doc__ = "returns Flea1 instance applying %s function on (self), for function/operator overloading" % (f.__name__,)
         return func
 
@@ -2318,6 +2295,7 @@ class Lea(object):
         '''
         def func(self,other):
             return Flea2(f,self,other)
+        func.__name__ = f.__name__
         func.__doc__ = "returns Flea2 instance applying %s function on (self,other), for function/operator overloading" % (f.__name__,)
         return func
 
@@ -2329,6 +2307,7 @@ class Lea(object):
         '''
         def func(self,other):            
             return Flea2(f,other,self)
+        func.__name__ = f.__name__
         func.__doc__ = "returns Flea2 instance applying %s function on (other,self), for function/operator overloading" % (f.__name__,)
         return func
   
@@ -2401,6 +2380,42 @@ from .evidence_ctx import EvidenceCtx
 
 _lea_leaf_classes = (Alea, Olea, Plea)
 
+# The goal of the private helper function and assignments below is to transfer indicator methods
+# of Alea class (i.e. prob. distribution defined by a pmf) towards Lea, inserting the evaluation
+#  to get Alea instance before calling the Alea's method, e.g.
+#    lea_instance.mean()  ->  lea_instance.get_alea().mean()
+# TODO This is tricky... all this preferably to be improved (removed?) in the context of Paul Moore's ticket #71
+def __add_evaluation(f):
+    ''' returns a method m with one Lea instance argument (self), where self.m() returns self.get_alea().f()
+        (helper function used internally)
+    '''
+    def func(self):
+        return f(self.get_alea())
+    func.__name__ = f.__name__
+    func.__doc__ = "evaluates the probability distribution self, then%s" % (f.__doc__,)
+    return func
+Lea.P = __add_evaluation(Alea.P)
+Lea.Pf = __add_evaluation(Alea.Pf)
+Lea.mean = __add_evaluation(Alea.mean)
+Lea.mean_f = __add_evaluation(Alea.mean_f)
+Lea.var = __add_evaluation(Alea.var)
+Lea.var_f = __add_evaluation(Alea.var_f)
+Lea.std = __add_evaluation(Alea.std)
+Lea.std_f = __add_evaluation(Alea.std_f)
+Lea.mode = __add_evaluation(Alea.mode)
+Lea.entropy = __add_evaluation(Alea.entropy)
+Lea.rel_entropy = __add_evaluation(Alea.rel_entropy)
+Lea.redundancy = __add_evaluation(Alea.redundancy)
+Lea.information = __add_evaluation(Alea.information)
+Lea.support = __add_evaluation(Alea.support)
+Lea.p_sum = __add_evaluation(Alea.p_sum)
+Lea.pmf_tuple = __add_evaluation(Alea.pmf_tuple)
+Lea.pmf_dict = __add_evaluation(Alea.pmf_dict)
+Lea.cdf_tuple = __add_evaluation(Alea.cdf_tuple)
+Lea.cdf_dict = __add_evaluation(Alea.cdf_dict)
+# delete helper functions (used only at class creation)
+del __add_evaluation
+
 # init Alea class with default 'x' type code: if a probability is expressed as
 # a string, then the target type is determined from its content
 # - see Alea.prob_any method
@@ -2415,9 +2430,9 @@ def P(lea1):
         Decimal -> ProbDecimal);
         raises an exception if some value in the distribution is not boolean
         (note that this is NOT the case with lea1.p(True));
-        this is a convenience function equivalent to lea1.P
+        this is a convenience function equivalent to lea1.P()
     '''
-    return lea1.P
+    return lea1.P()
 
 def Pf(lea1):
     ''' returns the probability that given lea1 is True;
@@ -2425,6 +2440,6 @@ def Pf(lea1):
         raises an exception if the probability type is no convertible to float
         raises an exception if some value in the distribution is not boolean
         (note this is NOT the case with lea1.p(True));
-        this is a convenience function equivalent to lea1.Pf
+        this is a convenience function equivalent to lea1.Pf()
     '''
-    return lea1.Pf
+    return lea1.Pf()

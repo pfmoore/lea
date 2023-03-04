@@ -332,7 +332,7 @@ class StateAlea(Alea,StateLea):
         ## Alea.__init__(self,*zip(*state_lea.get_alea()._gen_vp()))
         vs = []
         ps = []
-        state_lea_pmf_dict = state_lea.pmf_dict
+        state_lea_pmf_dict = state_lea.pmf_dict()
         for state in chain.states:
             p = state_lea_pmf_dict.get(state,self)
             if p is not self:

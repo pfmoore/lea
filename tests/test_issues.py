@@ -83,9 +83,9 @@ def test_check_bool():
     with pytest.raises(lea.Lea.Error):
         mixed.is_feasible()
     with pytest.raises(lea.Lea.Error):
-        mixed.P
+        mixed.P()
     with pytest.raises(lea.Lea.Error):
-        mixed.Pf
+        mixed.Pf()
 
 def test_given_times(setup):
     """See issue #28 on bitbucket"""

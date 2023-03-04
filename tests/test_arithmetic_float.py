@@ -13,11 +13,11 @@ def PF(a,b):
 
 def test_arith_with_constant(setup):
     die = lea.interval(1, 6)
-    assert (die + 3).support == (4, 5, 6, 7, 8, 9)
-    assert (die - 3).support == (-2, -1, 0, 1, 2, 3)
-    assert (die * 2).support == (2, 4, 6, 8, 10, 12)
-    assert (die / 2).support == (0.5, 1.0, 1.5, 2.0, 2.5, 3.0)
-    assert (die // 2).support == (0, 1, 2, 3)
+    assert (die + 3).support()== (4, 5, 6, 7, 8, 9)
+    assert (die - 3).support()== (-2, -1, 0, 1, 2, 3)
+    assert (die * 2).support()== (2, 4, 6, 8, 10, 12)
+    assert (die / 2).support()== (0.5, 1.0, 1.5, 2.0, 2.5, 3.0)
+    assert (die // 2).support()== (0, 1, 2, 3)
     assert (die // 3).equiv_f(lea.vals(0, 0, 1, 1, 1, 2))
     assert (die % 2).equiv_f(lea.vals(0, 1))
 
