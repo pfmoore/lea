@@ -1,0 +1,4 @@
+include COPYING
+include COPYING.LESSER
+include MANIFEST.in
+recursive-exclude tests *
