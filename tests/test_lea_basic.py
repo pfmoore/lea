@@ -1,4 +1,5 @@
 import lea
+from lea.exceptions import LeaError
 from lea.prob_fraction import ProbFraction as PF
 from lea.toolbox import isclose
 from fractions import Fraction
@@ -87,19 +88,19 @@ def test_fromvals(setup):
 
 def test_fromvals_errors(setup):
     # Must be at least one value
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d = lea.vals()
     # No invalid keyword args
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d = lea.vals(1,2, foo=3)
     # Cannot have both ordered and sorting
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d = lea.vals(1,2, ordered=True, sorting=True)
     # Cannot have duplicates with ordered
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d = lea.vals(1,1, ordered=True)
     # Cannot have ordered with dictionary
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d = lea.pmf({1: 2, 2: 5}, ordered=True)
 
 def test_fromvals_ordered(setup):
@@ -267,7 +268,7 @@ def test_draw_unsorted_without_replacement(setup):
     assert d3.p((2,3,1)) == PF(1,6) * PF(1,5) * PF(1,4)
     assert d3.p((2,3,4)) == PF(1,6) * PF(1,5) * PF(1,4)
     assert d3.equiv(d.draw(3,sorted=False,replacement=False))
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d7 = d.draw(7)
     # test a biased die, with P(d==1) = 2/7
     d = lea.pmf({1: 2, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1})
@@ -291,7 +292,7 @@ def test_draw_unsorted_without_replacement(setup):
     assert d3.p((2,3,1)) == PF(1,7) * PF(1,6) * PF(2,5)
     assert d3.p((2,3,4)) == PF(1,7) * PF(1,6) * PF(1,5)
     assert d3.equiv(d.draw(3,sorted=False,replacement=False))
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d7 = d.draw(7)
 
 # TODO LOOP
@@ -370,7 +371,7 @@ def test_draw_sorted_without_replacement(setup):
     assert d3.p((2,3,4)) == 6 * PF(1,6) * PF(1,5) * PF(1,4)
     assert d3.equiv(d.draw(3,sorted=True,replacement=False))
     assert d3.equiv(d.draw(3).map(lambda vs: tuple(sorted(vs))).get_alea())
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d7 = d.draw(7,sorted=True)
     # test a biased die, with P(d==1) = 2/7
     d = lea.pmf({1: 2, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1})
@@ -396,7 +397,7 @@ def test_draw_sorted_without_replacement(setup):
     assert d3.p((2,3,4)) == 6 * PF(1,7) * PF(1,6) * PF(1,5)
     assert d3.equiv(d.draw(3,sorted=True,replacement=False))
     assert d3.equiv(d.draw(3).map(lambda vs: tuple(sorted(vs))).get_alea())
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d7 = d.draw(7,sorted=True)
 
 def test_draw_sorted_with_replacement(setup):

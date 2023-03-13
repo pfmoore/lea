@@ -25,6 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .lea import Lea
 from .alea import Alea
+from .exceptions import LeaError
 from .toolbox import dict, defaultdict
 
 class Slea(Lea):
@@ -56,7 +57,7 @@ class Slea(Lea):
         for (vc,pc) in self._lea_c.gen_vp():
             lea_v = Alea.coerce(f(vc))
             if not isinstance(lea_v,Alea):
-                raise Lea.Error("the function passed to switch_func shall return Alea instances only, e.g. lea.pmf(...) or lea.vals(...)")
+                raise LeaError("the function passed to switch_func shall return Alea instances only, e.g. lea.pmf(...) or lea.vals(...)")
             for (vd,pd) in lea_v._gen_vp():
                 yield (vd,pc*pd)
 
@@ -65,7 +66,7 @@ class Slea(Lea):
         for vc in self._lea_c.gen_one_random_mc():
             lea_v = Alea.coerce(f(vc))
             if not isinstance(lea_v,Alea):
-                raise Lea.Error("the function passed to switch_func shall return Alea instances only, e.g. lea.pmf(...) or lea.vals(...)")
+                raise LeaError("the function passed to switch_func shall return Alea instances only, e.g. lea.pmf(...) or lea.vals(...)")
             for vd in lea_v.gen_one_random_mc():
                 yield vd
 

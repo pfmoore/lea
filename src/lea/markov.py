@@ -27,6 +27,7 @@ from .lea import Lea
 from .alea import Alea
 from .tlea import Tlea
 from .ilea import Ilea
+from .exceptions import LeaError
 from .toolbox import zip, dict, defaultdict
 from itertools import islice, tee
 
@@ -159,7 +160,7 @@ class Chain(object):
         ##       to use matrix multiplication and retrurning always a small StateTlea;
         ###      however, this would need numpy, which is not required in Lea 3
         if n <= 0:
-            raise Lea.Error("next_state method requires a strictly positive value for argument 'n'")
+            raise LeaError("next_state method requires a strictly positive value for argument 'n'")
         #state_n = Alea.coerce(self.state if from_state is None else from_state)
         if from_state is None:
             state_n = self.state
@@ -212,7 +213,7 @@ class Chain(object):
                      if state in from_states)
         if as_array:
             if np is None:
-                raise Lea.Error("the matrix() method requires the numpy package")
+                raise LeaError("the matrix() method requires the numpy package")
             res_matrix = np.array(res_matrix)
         return res_matrix
     
@@ -363,7 +364,7 @@ class StateTlea(Tlea,StateLea):
             return StateAlea(Tlea.get_alea(self),self._chain)
         except RecursionError:
             pass
-        raise Lea.Error("RecursionError raised - HINT: decrease the value of n in next_state() call"
+        raise LeaError("RecursionError raised - HINT: decrease the value of n in next_state() call"
                         " or add argument keeps_dependency=False, provided that keeping dependency"
                         " with initial state is not required")
 

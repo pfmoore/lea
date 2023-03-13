@@ -25,6 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .lea import Lea
 from .alea import Alea
+from .exceptions import LeaError
 from .toolbox import dict, defaultdict
 
 class Tlea(Lea):
@@ -41,7 +42,7 @@ class Tlea(Lea):
 
     def __init__(self,lea_c,lea_dict,default_lea=Lea._DUMMY_VAL):
         if isinstance(lea_dict,defaultdict):
-            raise Lea.Error('defaultdict not supported for Tlea, use default_lea argument instead')
+            raise LeaError('defaultdict not supported for Tlea, use default_lea argument instead')
         Lea.__init__(self)
         self._lea_c = Alea.coerce(lea_c)
         self._lea_dict = dict((c,Alea.coerce(lea1)) for (c,lea1) in lea_dict.items())
@@ -54,7 +55,7 @@ class Tlea(Lea):
     @staticmethod
     def build(lea_c,lea_dict,default_lea=Lea._DUMMY_VAL,prior_lea=Lea._DUMMY_VAL):
         if default_lea is not Lea._DUMMY_VAL and prior_lea is not Lea._DUMMY_VAL:
-            raise Lea.Error('default_lea and prior_lea arguments cannot be defined together')
+            raise LeaError('default_lea and prior_lea arguments cannot be defined together')
         if prior_lea is not Lea._DUMMY_VAL:
             # determine default_lea from prior_lea
             dummy_lea = []
@@ -72,7 +73,7 @@ class Tlea(Lea):
                     # no probability check possible
                     is_valid = True
                 if not is_valid:
-                    raise Lea.Error('impossible to calculate probabilities from input data')
+                    raise LeaError('impossible to calculate probabilities from input data')
                 vps.append((v,p))
             default_lea = Alea.pmf(vps)
         return Tlea(lea_c,lea_dict,default_lea)
@@ -99,7 +100,7 @@ class Tlea(Lea):
             try:
                 lea_v = lea_dict[vc]
             except KeyError:
-                raise Lea.Error("missing value '%s' in CPT"%(vc,))
+                raise LeaError("missing value '%s' in CPT"%(vc,))
             for (vd,pd) in lea_v.gen_vp():
                 yield (vd,pc*pd)
 
@@ -109,7 +110,7 @@ class Tlea(Lea):
             try:
                 lea_v = lea_dict[vc]
             except KeyError:
-                raise Lea.Error("missing value '%s' in CPT"%(vc,))
+                raise LeaError("missing value '%s' in CPT"%(vc,))
             for vd in lea_v.gen_one_random_mc():
                 yield vd
 

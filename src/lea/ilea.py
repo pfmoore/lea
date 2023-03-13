@@ -25,6 +25,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 
 from .lea import Lea, Alea
 from .evidence_ctx import EvidenceCtx
+from .exceptions import LeaError, _FailedRandomMC
 
 from operator import and_
 
@@ -82,7 +83,7 @@ class Ilea(Lea):
                     pass
                 else:
                     # neither True, nor False -> error
-                    raise Lea.Error("boolean expression expected")
+                    raise LeaError("boolean expression expected")
     
     def _gen_vp(self):
         for cp in Ilea._gen_true_p(self._get_cond_leas()):
@@ -121,10 +122,10 @@ class Ilea(Lea):
                         yield v
                 elif cv == False:
                     if with_exception:
-                        raise Lea._FailedRandomMC()
+                        raise _FailedRandomMC()
                     yield self
                 else:
-                    raise Lea.Error("boolean expression expected")
+                    raise LeaError("boolean expression expected")
 
     def gen_one_random_mc(self,nb_subsamples=1):
         if self._val is not self:
@@ -171,7 +172,7 @@ class Ilea(Lea):
         lr_d = self._lea1.given(~Lea.reduce_all(and_,self._get_cond_leas(),False)).P
         if lr_d == 0:
             if lr_n == 0:
-                raise Lea.Error("undefined likelihood ratio")
+                raise LeaError("undefined likelihood ratio")
             return float('inf') 
         return lr_n / lr_d
 

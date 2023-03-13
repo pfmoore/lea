@@ -1,4 +1,5 @@
 import lea
+from lea.exceptions import LeaError
 import pytest
 
 # All tests are made using fraction representation, in order to ease comparison
@@ -104,9 +105,9 @@ def test_abs(setup):
     assert abs(d1).equiv(dabs)
 
 def test_bool(setup):
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         bool(lea.vals(True))
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         bool(lea.vals(False))
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         bool(lea.vals(1,2,3))

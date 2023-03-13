@@ -1,5 +1,6 @@
 import lea
 from lea.prob_fraction import ProbFraction as PF
+from lea.exceptions import LeaError
 from lea.leaf import D6
 import pytest
 
@@ -78,13 +79,13 @@ def test_joint(setup):
 def test_check_bool():
     """See issue #24 on bitbucket"""
     mixed = lea.vals(True,False,12)
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         mixed.is_true()
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         mixed.is_feasible()
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         mixed.P
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         mixed.Pf
 
 def test_given_times(setup):

@@ -27,6 +27,7 @@ import operator
 import sys
 from itertools import islice
 import collections
+from .exceptions import LeaError, _FailedRandomMC
 from .prob_fraction import ProbFraction
 from .toolbox import min2, max2, read_csv_filename, read_csv_file, \
                      dict, zip, pairwise, isclose, log2, gen_all_slots
@@ -152,17 +153,6 @@ class Lea(object):
     subclasses (aka GENATOMSBYTYPE in the paper); the final collection and condensation is done by
     Lea.calc method (aka MARG in the paper), which uses Alea.pmf method.
     '''
-
-    class Error(Exception):
-        ''' exception representing any violation of requirements of Lea methods  
-        '''
-        pass
-        
-    class _FailedRandomMC(Exception):
-        ''' internal exception representing a failure to get a set of random values that
-            satisfy a given condition in a given number of trials (see methods having '..._mc' suffix) 
-        '''
-        pass
 
     # Lea attributes
     __slots__ = ('_alea', '_val', 'gen_vp')
@@ -478,7 +468,7 @@ class Lea(object):
         '''
         alea1 = self.new(normalization=False)
         if n <= 0:
-            raise Lea.Error("times method requires a strictly positive integer")
+            raise LeaError("times method requires a strictly positive integer")
         if n == 1:
             return alea1.new(normalization=normalization)
         (n2,r) = divmod(n,2)
@@ -519,7 +509,7 @@ class Lea(object):
             res = next(args_rev_iter)
         except StopIteration:
             if special is None:
-                raise Lea.Error("not enough arguments provided")
+                raise LeaError("not enough arguments provided")
             return Alea.coerce(special)
         if absorber is None:
             for arg in args_rev_iter:
@@ -747,7 +737,7 @@ class Lea(object):
             requires Python 2.7+ for the case replacement = sorted = True
         '''
         if n < 0:
-            raise Lea.Error("draw method requires a positive integer")
+            raise LeaError("draw method requires a positive integer")
         alea1 = self.get_alea()
         if replacement:
             if sorted:
@@ -758,7 +748,7 @@ class Lea(object):
                 return alea1.draw_with_replacement(n)
         else:
             if len(alea1._vs) < n:
-                raise Lea.Error("number of values to draw without replacement (%d) exceeds the number of possible values (%d)"%(n,len(alea1._vs)))
+                raise LeaError("number of values to draw without replacement (%d) exceeds the number of possible values (%d)"%(n,len(alea1._vs)))
             if sorted:
                 # draw sorted without replacement
                 return alea1.draw_sorted_without_replacement(n)
@@ -909,7 +899,7 @@ class Lea(object):
         '''
         if (else_lea is Lea._DUMMY_VAL and prior_lea is Lea._DUMMY_VAL) \
            or (else_lea is not Lea._DUMMY_VAL and prior_lea is not Lea._DUMMY_VAL):
-            raise Lea.Error("if_ method requires either else_lea or prior_lea argument")
+            raise LeaError("if_ method requires either else_lea or prior_lea argument")
         lea_dict = dict(((True,then_lea),))
         if else_lea is not Lea._DUMMY_VAL:
             lea_dict[False] = else_lea
@@ -1023,7 +1013,7 @@ class Lea(object):
         vars_bn_dict = dict((var_name,var.get_alea(sorting=False)) for (var_name,var) in vars_dict.items())
         for (src_var_names,tgt_var_name) in bn_definition:
             if not isinstance(vars_bn_dict[tgt_var_name],_lea_leaf_classes):
-                raise Lea.Error("'%s' is defined as target in more than one BN relationship"%(tgt_var_name,))
+                raise LeaError("'%s' is defined as target in more than one BN relationship"%(tgt_var_name,))
             tgt_var = vars_dict[tgt_var_name]
             joint_src_vars = Lea.joint(*(vars_dict[src_var_name] for src_var_name in src_var_names))
             joint_src_vars_bn = Lea.joint(*(vars_bn_dict[src_var_name] for src_var_name in src_var_names))
@@ -1182,7 +1172,7 @@ class Lea(object):
             with open(filename,'r') as f:
                 bif_content = f.read()
         except:
-            raise Lea.Error("cannot read '%s'"%filename)
+            raise LeaError("cannot read '%s'"%filename)
         values_by_var_name = dict()
         prob_block_by_var_name = dict()
         try:
@@ -1215,7 +1205,7 @@ class Lea(object):
             var_dict.update(lea_instances_by_name)
             return tuple(lea_instances_by_name.keys())
         except Exception:
-            raise Lea.Error("cannot parse '%s' as a BIF file (maybe due to Lea parser's limitations)"%filename)
+            raise LeaError("cannot parse '%s' as a BIF file (maybe due to Lea parser's limitations)"%filename)
 
     def em_step(self,model_lea,cond_lea,obs_pmf_tuple,conversion_dict):
         ''' returns a revised version of self, with parameters tuned to match a given observed
@@ -1330,7 +1320,7 @@ class Lea(object):
             the EM algorithm halts
         '''
         if nb_steps is None and max_kld is None and max_delta_kld is None:
-            raise Lea.Error("learn_by_em method requires providing at least one halt condition (nb_steps,"
+            raise LeaError("learn_by_em method requires providing at least one halt condition (nb_steps,"
                             " max_delta_kld or max_kld argument)")
         obs_lea_entropy = obs_lea.entropy
         nb_steps_done = 0
@@ -1394,7 +1384,7 @@ class Lea(object):
             called on evaluation of "iter(self)", "tuple(self)", "list(self)"
                 or on "for x in self"
         '''
-        raise Lea.Error("cannot iterate on a Lea instance")
+        raise LeaError("cannot iterate on a Lea instance")
 
     def __getattribute__(self,attr_name):
         ''' returns the attribute with the given name in the current Lea instance;
@@ -1574,10 +1564,10 @@ class Lea(object):
             act_nb_samples = nb_samples
         else:
             if not isinstance(self,Ilea):
-                raise Lea.Error("nb_subsamples argument can only be specified for sampling expressions under condition, i.e. x.given(...) constructs")
+                raise LeaError("nb_subsamples argument can only be specified for sampling expressions under condition, i.e. x.given(...) constructs")
             (act_nb_samples,residue) = divmod(nb_samples,nb_subsamples)
             if residue > 0:
-                raise Lea.Error("nb_subsamples argument (%s) shall be a divisor of nb_samples argument (%s)"%(nb_subsamples,nb_samples))
+                raise LeaError("nb_subsamples argument (%s) shall be a divisor of nb_samples argument (%s)"%(nb_subsamples,nb_samples))
         for _ in range(act_nb_samples):
             remaining_nb_tries = 1 if nb_tries is None else nb_tries
             v = self
@@ -1586,11 +1576,11 @@ class Lea(object):
                     for v in self.gen_one_random_mc(nb_subsamples):
                         yield v
                     remaining_nb_tries = 0
-                except Lea._FailedRandomMC:
+                except _FailedRandomMC:
                     if nb_tries is not None:
                         remaining_nb_tries -= 1        
             if v is self:
-                raise Lea.Error("impossible to validate given condition(s), after %d random trials"%(nb_tries,)) 
+                raise LeaError("impossible to validate given condition(s), after %d random trials"%(nb_tries,)) 
     
     def random_mc(self,nb_samples=None,nb_tries=None):
         ''' if nb_samples is None, returns a random value with the probability given by the distribution
@@ -1647,7 +1637,7 @@ class Lea(object):
         '''
         vs = tuple(v for (v,p) in self._gen_raw_vps() if p > 0)
         if len(vs) != 1:
-            raise Lea.Error("multiple values have a non-null probability")
+            raise LeaError("multiple values have a non-null probability")
         return vs[0]
 
     def is_true(self):
@@ -1792,7 +1782,7 @@ class Lea(object):
             requires that self is an Alea instance (i.e. not dependent of other Lea instances);
             requires that v is present in the domain of self
         '''
-        raise Lea.Error("impossible to bind %s because it depends of other instances"%(self._id(),))
+        raise LeaError("impossible to bind %s because it depends of other instances"%(self._id(),))
 
     def free(self,check=True):
         ''' unbinds self;
@@ -1800,7 +1790,7 @@ class Lea(object):
             if check is True, then requires that self is bound
         '''
         if check:
-            raise Lea.Error("impossible to unbind %s because it depends of other instances"%(self._id(),))
+            raise LeaError("impossible to unbind %s because it depends of other instances"%(self._id(),))
 
     def clone(self,shared=(),n=None):
         ''' returns a deep copy of current Lea, without any value binding;
@@ -1862,42 +1852,42 @@ class Lea(object):
         '''
         if algo == Lea.EXACT:
             if nb_samples is not None:
-                raise Lea.Error("nb_samples argument incompatible with EXACT algorithm")        
+                raise LeaError("nb_samples argument incompatible with EXACT algorithm")        
             if nb_subsamples is not None:
-                raise Lea.Error("nb_subsamples argument incompatible with EXACT algorithm")        
+                raise LeaError("nb_subsamples argument incompatible with EXACT algorithm")        
             if nb_tries is not None:
-                raise Lea.Error("nb_tries argument incompatible with EXACT algorithm")        
+                raise LeaError("nb_tries argument incompatible with EXACT algorithm")        
             if exact_vars is not None:
-                raise Lea.Error("exact_vars argument incompatible with EXACT algorithm")        
+                raise LeaError("exact_vars argument incompatible with EXACT algorithm")        
             if nb_samples is not None or nb_subsamples is not None or nb_tries is not None:
-                raise Lea.Error("nb_samples, nb_subsamples and nb_tries arguments incompatible with EXACT algorithm")        
+                raise LeaError("nb_samples, nb_subsamples and nb_tries arguments incompatible with EXACT algorithm")        
         elif algo == Lea.MCRS:
             if not isinstance(self,Ilea) and nb_subsamples is not None:
-                raise Lea.Error("nb_subsamples argument incompatible with MCRS algorithm, unless for expressions under condition, i.e. x.given(...) constructs")
+                raise LeaError("nb_subsamples argument incompatible with MCRS algorithm, unless for expressions under condition, i.e. x.given(...) constructs")
             if nb_samples is None:
-                raise Lea.Error("nb_samples argument is required for MCRS algorithm")
+                raise LeaError("nb_samples argument is required for MCRS algorithm")
             if exact_vars is not None:
-                raise Lea.Error("exact_vars argument incompatible with MCRS algorithm")        
+                raise LeaError("exact_vars argument incompatible with MCRS algorithm")        
         elif algo == Lea.MCLW:
             if not isinstance(self,Ilea):
-                raise Lea.Error("MCLW algorithm can only be used for expressions under condition, i.e. x.given(e)")
+                raise LeaError("MCLW algorithm can only be used for expressions under condition, i.e. x.given(e)")
             if exact_vars is not None and any(isinstance(inner_lea,Ilea) for inner_lea in self._lea1.get_inner_lea_set()):
-                raise Lea.Error("MCLW algorithm with exact_vars cannot handle embedded conditions, e.g x.given(e1).given(e2); use factorized conditions insted, e.g. x.given(e1,e2)")
+                raise LeaError("MCLW algorithm with exact_vars cannot handle embedded conditions, e.g x.given(e1).given(e2); use factorized conditions insted, e.g. x.given(e1,e2)")
             if nb_samples is not None:
-                raise Lea.Error("nb_samples argument incompatible with MCLW algorithm")
+                raise LeaError("nb_samples argument incompatible with MCLW algorithm")
             if nb_subsamples is None:
-                raise Lea.Error("MCLW algorithm requires a nb_subsamples argument")
+                raise LeaError("MCLW algorithm requires a nb_subsamples argument")
         elif algo == Lea.MCEV:
             if any(isinstance(inner_lea,Ilea) for inner_lea in self.get_inner_lea_set()):
-                raise Lea.Error("MCEV algorithm cannot handle expressions under condition, i.e. x.given(e); use MCLW instead")
+                raise LeaError("MCEV algorithm cannot handle expressions under condition, i.e. x.given(e); use MCLW instead")
             if nb_samples is not None:
-                raise Lea.Error("nb_samples argument incompatible with MCEV algorithm")
+                raise LeaError("nb_samples argument incompatible with MCEV algorithm")
             if nb_subsamples is None:
-                raise Lea.Error("MCEV algorithm requires a nb_subsamples argument")
+                raise LeaError("MCEV algorithm requires a nb_subsamples argument")
             if exact_vars is None:
-                raise Lea.Error("MCEV algorithm requires an exact_vars argument")
+                raise LeaError("MCEV algorithm requires an exact_vars argument")
         else:
-            raise Lea.Error("algo argument shall be %s, %s, %s or %s"%(Lea.EXACT,Lea.MCRS,Lea.MCLW,Lea.MCEV))
+            raise LeaError("algo argument shall be %s, %s, %s or %s"%(Lea.EXACT,Lea.MCRS,Lea.MCLW,Lea.MCEV))
 
     def calc(self,prob_type=-1,sorting=True,normalization=True,bindings=None,memoization=True,
              algo=EXACT,optimize=True,nb_samples=None,nb_subsamples=None,nb_tries=None,exact_vars=None,debug=False):
@@ -2254,7 +2244,7 @@ class Lea(object):
         ''' raises an exception telling that Lea instance cannot be evaluated as a boolean
             called on evaluation of "bool(self)", "if self:", "while self:", etc
         '''
-        raise Lea.Error("Lea instance cannot be evaluated as a boolean")
+        raise LeaError("Lea instance cannot be evaluated as a boolean")
 
     # Python 2 compatibility
     __nonzero__ = __bool__
@@ -2266,7 +2256,7 @@ class Lea(object):
         '''
         for val in vals:
             if val != True and val != False:
-                raise Lea.Error("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%(op_msg,)) 
+                raise LeaError("non-boolean object involved in %s logical operation (maybe due to a lack of parentheses)"%(op_msg,)) 
 
     # create helper functions for defining magic methods,
     # these are used only at class creation; these are unbound below

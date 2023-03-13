@@ -27,6 +27,7 @@ from .lea import Lea
 from .alea import Alea
 from .clea import Clea
 from .ilea import Ilea
+from .exceptions import LeaError
 from .prob_fraction import ProbFraction
 from .toolbox import dict, zip
 from operator import or_
@@ -63,22 +64,22 @@ class Blea(Lea):
         arg_names = frozenset(kwargs.keys())
         unknown_arg_names = arg_names - Blea.__arg_names_of_build_meth
         if len(unknown_arg_names) > 0:
-            raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknown_arg_names)),tuple(Blea._arg_names_of_build_meth)))
+            raise LeaError("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknown_arg_names)),tuple(Blea._arg_names_of_build_meth)))
         prior_lea = kwargs.get('prior_lea',None)
         auto_else = kwargs.get('auto_else',False)
         check = kwargs.get('check',True)
         else_clause_results = tuple(result for (cond,result) in clauses if cond is None)
         if len(else_clause_results) > 1:
-            raise Lea.Error("impossible to define more than one 'else' clause")
+            raise LeaError("impossible to define more than one 'else' clause")
         if len(else_clause_results) == 1:
             if prior_lea is not None:
-                raise Lea.Error("impossible to define together prior probabilities and 'else' clause")
+                raise LeaError("impossible to define together prior probabilities and 'else' clause")
             if auto_else:
-                raise Lea.Error("impossible to have auto_else=True and 'else' clause")                
+                raise LeaError("impossible to have auto_else=True and 'else' clause")                
             else_clause_result = else_clause_results[0]
         elif auto_else:
             if prior_lea is not None:
-                raise Lea.Error("impossible to define together prior probabilities and auto_else=True")
+                raise LeaError("impossible to define together prior probabilities and auto_else=True")
             # take uniform distribution on all values found in clause's results (principle of indifference)
             else_clause_result = Alea.vals(*frozenset(val for (cond,result) in clauses for val in Alea.coerce(result).support))
         else:
@@ -91,14 +92,14 @@ class Blea(Lea):
             clea_ = Clea(*cond_leas)
             clea_._init_calc()
             if any(v.count(True) > 1 for (v,_) in clea_.gen_vp()):
-                raise Lea.Error("clause conditions are not disjoint")
+                raise LeaError("clause conditions are not disjoint")
         # build the OR of all given conditions, excepting 'else'
         or_conds_lea = Lea.reduce_all(or_,cond_leas,True)
         if prior_lea is not None:
             # prior distribution: determine else_clause_result
             if check and or_conds_lea.is_true():
                 # TODO check prior_lea equivalent to self
-                raise Lea.Error("forbidden to define prior probabilities for complete clause set")
+                raise LeaError("forbidden to define prior probabilities for complete clause set")
             p_true = or_conds_lea._p(True)
             p_false = 1 - p_true
             prior_alea_dict = dict(prior_lea.get_alea()._gen_vp())
@@ -113,13 +114,13 @@ class Blea(Lea):
                      # Infeasible : probability represented by p goes outside range from 0 to 1
                      lower_p = cond_p * p_true
                      upper_p = cond_p*p_true + p_false
-                     raise Lea.Error("prior probability of '%s' is %s, outside the range [ %s , %s ]"%(value,prior_p,lower_p,upper_p))
+                     raise LeaError("prior probability of '%s' is %s, outside the range [ %s , %s ]"%(value,prior_p,lower_p,upper_p))
                  vps.append((value,p))
             else_clause_result = Alea.pmf(vps)
         elif else_clause_result is None:
             # no 'else' clause: check that clause set is complete
             if check and not or_conds_lea.is_true():
-                raise Lea.Error("incomplete clause set requires 'else' clause or auto_else=True or prior_lea=...")
+                raise LeaError("incomplete clause set requires 'else' clause or auto_else=True or prior_lea=...")
         if else_clause_result is not None:
             # add the else clause
             else_cond_lea = ~or_conds_lea

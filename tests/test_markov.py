@@ -2,6 +2,7 @@ import lea
 import pytest
 
 from lea import markov 
+from lea.exceptions import LeaError
 from lea.toolbox import isclose
 
 @pytest.fixture(scope="module")
@@ -58,9 +59,9 @@ def test_markov_next_state(setup):
     assert fp_state.next_state().equiv_f(fp_state)
     assert isclose(lea.mutual_information(market.state,market.state.next_state()),0.5321367231080285)
     assert isclose(lea.mutual_information(market.state,market.state.next_state(keeps_dependency=False)),0.0)
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         bear_state.next_state(0)
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         bear_state.next_state(-1)
 
 def test_markov_state_given(setup):
@@ -70,9 +71,9 @@ def test_markov_state_given(setup):
     assert market.state_given(market.state=='BULL').equiv_f(bull_state)
     assert market.state_given(market.state[0]=='B').equiv_f(lea.pmf({'BULL': 0.5, 'BEAR': 0.5}))
     assert market.state_given((market.state[0]=='B')&(market.state!='BEAR')).equiv_f(bull_state)
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         market.state_given(False).calc()
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         market.state_given(market.state=='XXX').calc()
 
 def test_markov_next_state_given(setup):
@@ -82,11 +83,11 @@ def test_markov_next_state_given(setup):
     assert market.next_state_given(market.state=='BEAR').equiv_f(lea.pmf({'BULL': 0.150, 'BEAR': 0.800, 'STAG': 0.050}))
     assert market.next_state_given(market.state=='BEAR',1).equiv_f(lea.pmf({'BULL': 0.150, 'BEAR': 0.800, 'STAG': 0.050}))
     assert market.next_state_given(market.state=='BEAR',3).equiv_f(lea.pmf({'BULL': 0.35750, 'BEAR': 0.56825, 'STAG': 0.07425}))
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         market.next_state_given(market.state=='BEAR',0)
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         market.next_state_given(market.state=='BEAR',-1)
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         market.next_state_given(market.state=='XXX').calc()
 
 def test_markov_matrix(setup):

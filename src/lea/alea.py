@@ -24,6 +24,7 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from .lea import Lea
+from .exceptions import LeaError
 from .ext_fraction import ExtFraction
 from .ext_decimal import ExtDecimal
 from .prob_fraction import ProbFraction
@@ -137,7 +138,7 @@ class Alea(Lea):
         except:            
             pass
         if sympy is None:
-            raise Lea.Error("probability expression '%s' requires the sympy module, which does not seem to be installed"%(arg,))
+            raise LeaError("probability expression '%s' requires the sympy module, which does not seem to be installed"%(arg,))
         return Alea.prob_symbol(arg)
    
     @staticmethod
@@ -186,7 +187,7 @@ class Alea(Lea):
             return None
         if not isinstance(prob_type,str):
             if not callable(prob_type):
-                raise Lea.Error("given prob_type '%s' is not a probability type code and it is not callable"%(prob_type,))
+                raise LeaError("given prob_type '%s' is not a probability type code and it is not callable"%(prob_type,))
             return prob_type
         if prob_type == 'f':
             return float
@@ -196,11 +197,11 @@ class Alea(Lea):
             return Decimal
         if prob_type == 's':
             if sympy is None:
-                raise Lea.Error("prob_type 's' requires the installation of SymPy module")
+                raise LeaError("prob_type 's' requires the installation of SymPy module")
             return Alea.prob_symbol
         if prob_type == 'x':
             return Alea.prob_any
-        raise Lea.Error("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%(prob_type,))
+        raise LeaError("unknown probability type code '%s', should be 'f', 'd', 'r', 's' or 'x'"%(prob_type,))
 
     @staticmethod
     def set_prob_type(prob_type):
@@ -223,7 +224,7 @@ class Alea(Lea):
             given above
         '''
         if prob_type is None or prob_type == -1:
-            raise Lea.Error("Alea.set_prob_type does not allow %s as argument"%(prob_type,))
+            raise LeaError("Alea.set_prob_type does not allow %s as argument"%(prob_type,))
         Alea._prob_type[0] = Alea.get_prob_type(prob_type)
 
     def __init__(self,vs,ps,normalization=True,prob_type=-1):
@@ -253,7 +254,7 @@ class Alea(Lea):
             ps = tuple(ps)
             nb_none = ps.count(None)
             if nb_none > 1:
-                raise Lea.Error("for normalization, no more than one single probability can be None")
+                raise LeaError("for normalization, no more than one single probability can be None")
             if nb_none == 1:
                 p_sum = Alea._simplify(sum(p for p in ps if p is not None))
                 Alea._check_prob(p_sum)
@@ -266,7 +267,7 @@ class Alea(Lea):
                 ps = (Alea._symbolic_simplify_function(p) for p in ps)
         self._ps = tuple(ps)
         if len(self._vs) != len(self._ps):
-            raise Lea.Error("number of values (%d) different from number of probabilities (%d)"%(len(self._vs),len(self._ps)))
+            raise LeaError("number of values (%d) different from number of probabilities (%d)"%(len(self._vs),len(self._ps)))
         self._cumul = [0]
         self._inv_cumul = []
         self._random_iter = self._create_random_iter()
@@ -364,7 +365,7 @@ class Alea(Lea):
         arg_names = frozenset(kwargs.keys())
         unknown_arg_names = arg_names - Alea.__contructor_arg_names
         if len(unknown_arg_names) > 0:
-            raise Lea.Error("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknown_arg_names)),tuple(Alea.__contructor_arg_names)))
+            raise LeaError("unknown argument keyword '%s'; shall be only among %s"%(next(iter(unknown_arg_names)),tuple(Alea.__contructor_arg_names)))
         ordered = kwargs.get('ordered',False)
         normalization = kwargs.get('normalization',True)
         check = kwargs.get('check',True)
@@ -374,7 +375,7 @@ class Alea(Lea):
         else:
             sorting = kwargs.get('sorting',True)
             if ordered and sorting:
-                raise Lea.Error("ordered and sorting arguments cannot be set to True together")
+                raise LeaError("ordered and sorting arguments cannot be set to True together")
         return (ordered,sorting,normalization,check,prob_type)
 
     @staticmethod
@@ -383,7 +384,7 @@ class Alea(Lea):
             otherwise, raises an exception
         '''
         if len(arg) == 0:
-            raise Lea.Error("cannot build a probability distribution with no value - maybe due to impossible evidence")        
+            raise LeaError("cannot build a probability distribution with no value - maybe due to impossible evidence")        
 
     @staticmethod
     def _zip_vps(vps):
@@ -400,7 +401,7 @@ class Alea(Lea):
             return (vs,ps)
         except ValueError:
             pass
-        raise Lea.Error("argument shall be a dictionary or shall contain pairs (v,P(v))")
+        raise LeaError("argument shall be a dictionary or shall contain pairs (v,P(v))")
     
     @staticmethod
     def pmf(arg,prob_type=None,**kwargs):
@@ -439,7 +440,7 @@ class Alea(Lea):
         if is_dict(arg):
             prob_dict = arg
             if ordered and not isinstance(prob_dict,collections.OrderedDict):
-                raise Lea.Error("ordered=True requires to provide a collections.OrderedDict")
+                raise LeaError("ordered=True requires to provide a collections.OrderedDict")
             Alea._check_not_empty(prob_dict)
         else:
             if ordered:
@@ -502,7 +503,7 @@ class Alea(Lea):
         (vs,ps) = Alea._zip_vps(vps)
         # check duplicates
         if check and len(frozenset(vs)) < len(vs):
-            raise Lea.Error("duplicate values are not allowed for ordered=True")
+            raise LeaError("duplicate values are not allowed for ordered=True")
         return Alea(vs,ps,normalization=normalization,prob_type=prob_type)
    
     @staticmethod
@@ -511,7 +512,7 @@ class Alea(Lea):
             i.e. in the range [0,1];
             if comparisons are infeasible on p, then p is assumed to be a
             symbolic probability and is considered valid;
-            raises Lea.Error exception if invalid
+            raises LeaError exception if invalid
         '''
         try:
             is_valid = 0 <= p <= 1
@@ -520,7 +521,7 @@ class Alea(Lea):
             # probability, the range check cannot be enforced
             is_valid = True
         if not is_valid:
-            raise Lea.Error("invalid probability value %s"%(p,))
+            raise LeaError("invalid probability value %s"%(p,))
 
     @staticmethod
     def _binary_distribution(v1,v2,p2,prob_type=None):
@@ -756,7 +757,7 @@ class Alea(Lea):
             return Alea.coerce((),prob_type=self._ps[0].__class__)
         if len(self._vs) == 1:
             if n > 1:
-                raise Lea.Error("number of values to draw exceeds the number of possible values")
+                raise LeaError("number of values to draw exceeds the number of possible values")
             return Alea.coerce((self._vs[0],),prob_type=self._ps[0].__class__)
         alea2s = tuple(Alea._pmf_ordered(tuple((v0, p0) for (v0, p0) in self._gen_raw_vps() if v0 != v), check=False).draw_without_replacement(n - 1) for v in self._vs)
         vps = []
@@ -790,7 +791,7 @@ class Alea(Lea):
             specific cases of named tuple, a header line is prepended with the field names
         '''
         if kind not in Alea.__DISPLAY_KINDS:
-            raise Lea.Error("invalid display format '%s'; should be among %s"%(kind,Alea.__DISPLAY_KINDS))
+            raise LeaError("invalid display format '%s'; should be among %s"%(kind,Alea.__DISPLAY_KINDS))
         if self._val is self:
             # self is not bound (default)
             vs = self._vs
@@ -910,7 +911,7 @@ class Alea(Lea):
         '''
         # try to import matplotlib package, required by plot() method
         if plt is None:
-            raise Lea.Error("the plot() method requires the matplotlib package")
+            raise LeaError("the plot() method requires the matplotlib package")
         # switch on interactive mode, so the control is back to console as soon as a chart is displayed
         plt.ion()
         if fname is None:
@@ -1028,7 +1029,7 @@ class Alea(Lea):
             requires that v is present in the domain of self
         '''
         if v not in self._vs:
-            raise Lea.Error("impossible to bind %s with '%s' because it is out of domain"%(self._id(),v))
+            raise LeaError("impossible to bind %s with '%s' because it is out of domain"%(self._id(),v))
         self._val = v
 
     def free(self,check=True):
@@ -1037,7 +1038,7 @@ class Alea(Lea):
             if check is True, then requires that self is bound
         '''
         if check and not self.is_bound():
-            raise Lea.Error("%s already unbound"%(self._id(),))
+            raise LeaError("%s already unbound"%(self._id(),))
         self._val = self
 
     def _p(self,val,check_val_type=False):
@@ -1058,7 +1059,7 @@ class Alea(Lea):
             if p1 is None and v == val:
                 p1 = p
         if check_val_type and err_val is not self:
-            raise Lea.Error("found <%s> value although <%s> is expected"%(type(err_val).__name__,type_to_check.__name__))
+            raise LeaError("found <%s> value although <%s> is expected"%(type(err_val).__name__,type_to_check.__name__))
         if p1 is None:
             # val is absent form self: the probability is null, casted in the type of the last probability found
             p1 = 0 * p
@@ -1109,7 +1110,7 @@ class Alea(Lea):
         try:
             probs = tuple(map(float,self.cumul()[1:]))
         except:
-            raise Lea.Error("random sampling impossible because given probabilities cannot be converted to float")
+            raise LeaError("random sampling impossible because given probabilities cannot be converted to float")
         vals = self._vs
         while True:
             yield vals[bisect_right(probs,random())]
@@ -1125,7 +1126,7 @@ class Alea(Lea):
         if n is None:
            n = len(self._vs)
         elif n < 0:
-            raise Lea.Error("random_draw method requires a positive integer")    
+            raise LeaError("random_draw method requires a positive integer")    
         if n == 0:
             return ()
         lea1 = self
@@ -1357,13 +1358,13 @@ class Alea(Lea):
         p = self._p(val)
         try:
             if p == 0:
-                raise Lea.Error("no information from impossible value")
+                raise LeaError("no information from impossible value")
             return -log2(p)
         except TypeError:
             try:
                 return -sympy.log(p,2)
             except:
-                raise Lea.Error("cannot calculate logarithm of %s"%(p,))
+                raise LeaError("cannot calculate logarithm of %s"%(p,))
 
     def information(self):
         ''' returns the information of self being true, expressed in bits
@@ -1398,7 +1399,7 @@ class Alea(Lea):
                     res -= p*sympy.log(p)
                 return res / sympy.log(2)
             except:
-                raise Lea.Error("cannot calculate logarithm on given probability types")
+                raise LeaError("cannot calculate logarithm on given probability types")
 
     def rel_entropy(self):
         ''' returns the relative entropy of self;
@@ -1438,9 +1439,9 @@ class Alea(Lea):
         try:
             ce = -sum(px*log2(lea1_pmf_dict[vx]) for (vx,px) in self._gen_vps() if px > 0)
         except KeyError as key_error:
-            raise Lea.Error("observed value '%s' is not produced by given model"%(key_error.args[0],))
+            raise LeaError("observed value '%s' is not produced by given model"%(key_error.args[0],))
         except ValueError:
-            raise Lea.Error("some observed value has null probability in given model")
+            raise LeaError("some observed value has null probability in given model")
         except:
             # sympy exception assumed due to log function or test px > 0:
             # retry using sympy log funtion and without test clause

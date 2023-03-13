@@ -1,5 +1,6 @@
 import lea
 import pytest
+from lea.exceptions import LeaError
 from lea.toolbox import isclose, log2
 
 # All tests are made using float representation
@@ -30,7 +31,7 @@ def test_information_2(setup):
     d = lea.pmf({"A": 0.5, "B": 0.25, "C": 0.25})
     assert isclose(d.information_of("A"), 1.0)   
     assert isclose(d.information_of("B"), 2.0)
-    with pytest.raises(lea.Lea.Error):
+    with pytest.raises(LeaError):
         d.information_of("D")
 
 def test_entropy_1(setup):

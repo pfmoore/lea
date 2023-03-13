@@ -24,8 +24,8 @@ along with Lea.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 
-from .lea import Lea, Alea
-
+from .lea import Alea
+from .exceptions import LeaError
 from .toolbox import dict
 
 
@@ -63,7 +63,7 @@ class EvidenceCtx(object):
             Alea instances to given values ("observations")
         '''
         if len(kwargs)>0 and tuple(kwargs.keys()) != ("bindings",):
-            raise Lea.Error("cannot have keyword arguments other than 'bindings'")
+            raise LeaError("cannot have keyword arguments other than 'bindings'")
         bindings = kwargs.get("bindings")
         self._conditions = tuple(Alea.coerce(condition) for condition in conditions)
         self._bindings = None if bindings is None else dict(bindings)
@@ -89,7 +89,7 @@ class EvidenceCtx(object):
         if self._bindings is not None:
             for (x,v) in self._bindings.items():
                 if not x.is_bindable(v):
-                    raise Lea.Error("cannot bind %s because dependent or already bound"%(x._id(),))
+                    raise LeaError("cannot bind %s because dependent or already bound"%(x._id(),))
             for (x,v) in self._bindings.items():
                 x.observe(v)
         EvidenceCtx._active_evidence_contexts.append(self)
@@ -123,7 +123,7 @@ class EvidenceCtx(object):
             requires that there is at least one evidence context
         '''        
         if len(EvidenceCtx._active_evidence_contexts) == 0:
-            raise Lea.Error("no evidence context")
+            raise LeaError("no evidence context")
         return EvidenceCtx._active_evidence_contexts.pop()
 
     @staticmethod
